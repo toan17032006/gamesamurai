@@ -20,6 +20,7 @@ export class SaveSystem {
       },
       player: {
         ...g.progression.serialize(),
+        character: g.player.serializeCharacter(),
         inventory: g.inventory.serialize(),
         hp: Math.max(1, Math.round(g.player.hp)),
         pos: {

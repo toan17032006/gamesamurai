@@ -69,12 +69,13 @@ export class Game {
     this.applySettings();
 
     this.input.onEscape = () => this.handleEscape();
+    this.input.onPanelKey = (action, e) => this.handlePanelAction(action, e);
     // any key/click skips a running cinematic (boss intro)
     const skipCin = () => { if (this.cameraRig.skipCinematic()) this.ui.setLetterbox(false); };
     window.addEventListener('keydown', skipCin);
     window.addEventListener('mousedown', skipCin);
     this.cameraRig.onCinematicEnd = () => this.ui.setLetterbox(false);
-    window.addEventListener('keydown', (e) => this.handlePanelKeys(e));
+    this.elementalVision = false;
   }
 
   // ---- lifecycle ----------------------------------------------------------
@@ -108,8 +109,10 @@ export class Game {
     this.delayed.length = 0;
     this.player.combat.dead = false;
     this.player.combat.iframes = 0;
+    this.player.applyCharacter({ index: 0 });
     this.progression.applyToPlayer();
     this.player.hp = this.player.maxHp;
+    this.player.stamina = this.player.maxStamina;
     this.inventory.addItem('bandage', 2);
     this.audio.ensure();
   }
@@ -193,6 +196,7 @@ export class Game {
       this.infinite.onCellChange = (def) => this.onInfiniteCellChange(def);
       this.infinite.seedSource = data.world.seedSource || null;
       this.infinite.apply(data.world);
+      this.player.applyCharacter(data.player.character);
       this.progression.applyToPlayer();
       this.inventory.applyToRig();
       this.player.hp = Math.max(1, data.player.hp || this.player.maxHp);
@@ -218,6 +222,7 @@ export class Game {
     this.quests.apply(data.progress?.quests);
     this.levelManager.apply(data.progress?.levels);
     this.player.combat.dead = false;
+    this.player.applyCharacter(data.player.character);
     this.progression.applyToPlayer();
     this.player.hp = Math.max(1, data.player.hp || this.player.maxHp);
     this.inventory.applyToRig();
@@ -304,22 +309,36 @@ export class Game {
   }
 
   handleEscape() {
-    if (this.ui.panels.isOpen()) { this.ui.panels.closeAll(); if (this.state === 'playing') this.input.requestPointer(); return; }
+    if (this.ui?.chatOpen) { this.ui.closeChat(); return; }
+    if (this.ui?.panels.isOpen()) { this.ui.panels.closeAll(); if (this.state === 'playing') this.input.requestPointer(); return; }
     if (this.state === 'playing') this.pause();
     else if (this.state === 'paused') this.resume();
   }
 
-  handlePanelKeys(e) {
-    const bindToAction = Object.entries(this.input.binds).find(([a, code]) => code === e.code);
-    if (!bindToAction) return;
-    const action = bindToAction[0];
-    const panelActions = { inventory: 'inventory', skillTree: 'skills', questLog: 'quests', map: 'map' };
-    if (!panelActions[action]) return;
-    if (this.state === 'playing') {
-      this.ui.panels.toggle(panelActions[action]);
-    } else if (this.ui.panels.isOpen()) {
-      this.ui.panels.toggle(panelActions[action]);
+  handlePanelAction(action, e) {
+    if (!action) return;
+    if (this.ui?.chatOpen) return; // đang gõ chat: phím thuộc về ô nhập
+    if (action === 'chat') {
+      if (this.state === 'playing') { e.preventDefault(); this.ui.openChat(); }
+      return;
     }
+    const panelActions = {
+      inventory: 'inventory', character: 'character', quests: 'quests', map: 'map',
+      handbook: 'handbook', multiplayer: 'multiplayer', formation: 'formation', quickwheel: 'quickwheel',
+    };
+    const id = panelActions[action];
+    if (!id) return;
+    if (this.state === 'playing' || this.ui.panels.isOpen()) {
+      e.preventDefault();
+      this.ui.panels.toggle(id);
+    }
+  }
+
+  switchCharacter(index) {
+    if (!this.player || this.state !== 'playing') return false;
+    const ok = this.player.switchCharacter(index);
+    if (ok) this.saveSystem.save(this.currentSlot, { silent: true });
+    return ok;
   }
 
   onPlayerDeath() {
@@ -426,7 +445,14 @@ export class Game {
       const firstPerson = this.cameraRig.mode === 'first';
       if (this.player.rig.group.visible === firstPerson) this.player.rig.setVisible(!firstPerson);
       this.updateInteractPrompt();
+      // thị giác nguyên tố (giữ chuột giữa)
+      const vision = this.input.isDown('vision') && !this.ui.chatOpen;
+      if (vision !== this.elementalVision) {
+        this.elementalVision = vision;
+        this.ui.hud.setVision(vision);
+      }
     } else {
+      if (this.elementalVision) { this.elementalVision = false; this.ui.hud.setVision(false); }
       // menus: keep world visuals alive subtly
       this.cameraRig.update(rawDt, this.player ? this.player.pos : { x: 0, y: 0, z: 0 }, this.world, false);
     }

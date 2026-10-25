@@ -8,6 +8,22 @@ function cachedColor(hex) {
   return c;
 }
 
+let _dotTex = null;
+function dotTexture() {
+  if (_dotTex) return _dotTex;
+  const cv = document.createElement('canvas');
+  cv.width = cv.height = 64;
+  const ctx = cv.getContext('2d');
+  const grd = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+  grd.addColorStop(0, 'rgba(255,255,255,1)');
+  grd.addColorStop(0.4, 'rgba(255,255,255,0.65)');
+  grd.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = grd;
+  ctx.fillRect(0, 0, 64, 64);
+  _dotTex = new THREE.CanvasTexture(cv);
+  return _dotTex;
+}
+
 export class ParticleSystem {
   constructor(scene, max = 900) {
     this.max = max;
@@ -23,7 +39,7 @@ export class ParticleSystem {
     const geo = new THREE.BufferGeometry();
     geo.setAttribute('position', new THREE.BufferAttribute(this.pos, 3).setUsage(THREE.DynamicDrawUsage));
     geo.setAttribute('color', new THREE.BufferAttribute(this.col, 3).setUsage(THREE.DynamicDrawUsage));
-    const mat = new THREE.PointsMaterial({ size: 0.14, vertexColors: true, transparent: true, opacity: 0.95, blending: THREE.AdditiveBlending, depthWrite: false, sizeAttenuation: true });
+    const mat = new THREE.PointsMaterial({ size: 0.14, map: dotTexture(), alphaTest: 0.02, vertexColors: true, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false, sizeAttenuation: true });
     this.points = new THREE.Points(geo, mat);
     this.points.frustumCulled = false;
     for (let i = 0; i < max; i++) this.pos[i * 3 + 1] = -9999;

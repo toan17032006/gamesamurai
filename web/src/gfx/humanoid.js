@@ -180,10 +180,10 @@ export function buildHumanoid(opts = {}) {
   // mọi tư thế (đứng/đánh/chạy) đều đọc đúng như đang cầm chuôi thật
   weaponAnchor.rotation.set(0.65, 0, 0);
   joints.armR_hand.add(weaponAnchor);
-  // saya (scabbard) hanging on the left hip
+  // saya (scabbard) worn along the left hip, pointing back instead of over the shoulder
   const saya = new THREE.Group();
-  saya.position.set(-0.16, 0.06, -0.1);
-  saya.rotation.set(0.12, 0, -0.5);
+  saya.position.set(-0.16, 0.02, -0.04);
+  saya.rotation.set(1.5, 0, -0.35);
   hips.add(saya);
   const trailBase = new THREE.Group(), trailTip = new THREE.Group();
   weaponAnchor.add(trailBase, trailTip);
@@ -209,6 +209,12 @@ export function buildHumanoid(opts = {}) {
     saya.children.length = 0;
     if (!model) { weaponAnchor.add(weaponGroup); return; }
     weaponGroup.userData.style = model.style;
+    // Góc chuôi theo từng loại vũ khí: lưỡi kiếm hướng ra trước thay vì dựng đứng.
+    const grip = {
+      katana: [1.15, 0, 0.05], nodachi: [1.2, 0, 0.05], club: [1.15, 0, 0],
+      spear: [1.5, 0, 0], bow: [0, 0, 0.1], claw: [1.3, 0, 0],
+    }[model.style] || [1.25, 0, 0];
+    weaponAnchor.rotation.set(grip[0], grip[1], grip[2]);
     const metal = new THREE.MeshPhysicalMaterial({ color: model.color, metalness: 0.95, roughness: 0.18, envMapIntensity: 1.6, clearcoat: 0.6, clearcoatRoughness: 0.2 });
     const edgeMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
     const hamonMat = new THREE.MeshStandardMaterial({ color: 0xdfe8f2, metalness: 0.7, roughness: 0.3, emissive: 0x2a3038, emissiveIntensity: 0.2 });
@@ -245,10 +251,10 @@ export function buildHumanoid(opts = {}) {
         // kissaki tip
         const tip = mesh(weaponGroup, G('cone', 0.016 * wide, 0.12, 4), metal, 0, 0.05 + bladeLen + 0.02, 0);
         tip.scale.set(1.3, 1, 0.6);
-        trailBase.position.set(0, 0.02, 0);
+        trailBase.position.set(0, 0.03 + bladeLen * 0.42, 0);
         trailTip.position.set(0, 0.05 + bladeLen, 0);
-        // saya on the hip
-        const sm = M(model.color, { rough: 0.25, metal: 0.2, extra: { envMapIntensity: 1 } });
+        // saya on the hip: dark lacquer, never the bright blade steel
+        const sm = M(0x2a1d16, { rough: 0.24, metal: 0.25, extra: { envMapIntensity: 1 } });
         mesh(saya, G('box', 0.034 * wide, len + 0.1, 0.02 * wide), sm, 0, (len + 0.1) / 2 - 0.15, 0);
         mesh(saya, G('box', 0.036 * wide, 0.03, 0.024 * wide), guardMat, 0, len - 0.13, 0);
         break;
@@ -363,7 +369,7 @@ export function buildHumanoid(opts = {}) {
 
   return {
     group, body, joints, weaponAnchor, trailBase, trailTip, mats, extra, saya, hairSway,
-    sayaBase: [0.12, 0, -0.5],
+    sayaBase: [1.5, 0, -0.35],
     hasWeapon() { return (weaponGroup && weaponGroup.userData.style) || null; },
     height: 1.72 * (opts.scale || 1),
     setWeapon, setArmor, setHelmet,

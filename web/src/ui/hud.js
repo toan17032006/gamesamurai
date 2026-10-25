@@ -1,7 +1,13 @@
-// HUD: bars, objectives, boss bar, prompt, toasts feed, FPS.
-import { esc, formatTime } from '../core/utils.js';
-import { ALL_SKILLS } from '../data/skills.js';
-import { CURRENCY } from '../data/items.js';
+// HUD: thanh máu/khí, đội 4 người, kỹ năng E/Q, vật phẩm Z, ngắm, thị giác nguyên tố.
+import * as THREE from 'three';
+import { esc } from '../core/utils.js';
+import { CURRENCY, itemDef } from '../data/items.js';
+import { PARTY } from '../data/characters.js';
+
+const PREDICT = {
+  samurai_ally: '#7ac8ff', villager: '#9ae08a', bandit: '#ff9a7a', ashura: '#ff6a3a',
+  oni: '#c08aff', undead: '#b8c8d8', wildlife: '#e0c27a', shadow: '#8a9ad8',
+};
 
 export class HUD {
   constructor(game) {
@@ -29,19 +35,49 @@ export class HUD {
         <div class="boss-pips" id="hud-bosspips"></div>
       </div>
       <div class="hud-bl">
-        <div class="hp-wrap">
+        <div class="party-bar" id="hud-party"></div>
+        <div class="vitals">
           <div class="level-badge" id="hud-levelbadge">1</div>
-          <div class="bar hpbar"><div class="hpfill" id="hud-hp"></div><span class="bartext" id="hud-hptext"></span></div>
+          <div class="bars">
+            <div class="bar hpbar"><div class="hpfill" id="hud-hp"></div><span class="bartext" id="hud-hptext"></span></div>
+            <div class="bar stabar"><div class="stafill" id="hud-sta"></div></div>
+          </div>
         </div>
-        <div class="bar stabar"><div class="stafill" id="hud-sta"></div></div>
-        <div class="skill-slot" id="hud-skill" title="Kỹ năng (U)">
-          <span class="skill-key">U</span>
-          <span class="skill-name" id="hud-skillname">—</span>
-          <div class="skill-cd" id="hud-skillcd"></div>
+        <div class="ability-bar">
+          <div class="ability" id="hud-skill" title="Kỹ năng nguyên tố (E)">
+            <span class="ability-key">E</span>
+            <span class="ability-glyph" id="hud-skillglyph">P</span>
+            <span class="ability-name" id="hud-skillname">—</span>
+            <div class="ability-cd" id="hud-skillcd"></div>
+            <span class="ability-cdtext" id="hud-skillcdtext"></span>
+          </div>
+          <div class="ability ult" id="hud-ult" title="Kỹ năng nộ (Q)">
+            <span class="ability-key">Q</span>
+            <span class="ability-glyph" id="hud-ultglyph">B</span>
+            <span class="ability-name" id="hud-ultname">—</span>
+            <div class="ability-cd" id="hud-ultcd"></div>
+            <span class="ability-cdtext" id="hud-ultcdtext"></span>
+          </div>
+          <div class="ability item" id="hud-item" title="Vật phẩm nhanh (Z)">
+            <span class="ability-key">Z</span>
+            <span class="ability-glyph">✚</span>
+            <span class="ability-name" id="hud-itemname">Vật phẩm</span>
+            <b class="item-count" id="hud-itemcount">0</b>
+          </div>
+        </div>
+        <div class="hint-row">
+          <span><b>R</b> ngắm</span><span><b>Chuột giữa</b> thị giác</span><span><b>T</b> thiền</span><span><b>F</b> tương tác</span>
         </div>
       </div>
-      <div class="hud-bc"><div class="prompt" id="hud-prompt"></div></div>
+      <div class="hud-bc">
+        <div class="prompt" id="hud-prompt"></div>
+        <div class="chat-hint" id="hud-chathint">Enter để chat</div>
+      </div>
       <div class="hud-br"><span id="hud-fps"></span></div>
+      <div class="aim-reticle" id="hud-reticle"><i></i><i></i><i></i><i></i><b></b></div>
+      <div class="vision-banner" id="hud-visionbanner">THỊ GIÁC NGUYÊN TỐ</div>
+      <div class="vision-markers" id="hud-markers"></div>
+      <div class="meditate-badge" id="hud-meditate">THIỀN ĐỊNH</div>
       <div class="hp-vignette" id="hud-vignette"></div>
     `;
     document.getElementById('ui').appendChild(this.root);
@@ -49,6 +85,11 @@ export class HUD {
     this.boss = null;
     this._prompt = '';
     this._fpsT = 0;
+    this._markT = 0;
+    this._partyT = 0;
+    this.vision = false;
+    this._v = new THREE.Vector3();
+    this.refreshParty();
   }
 
   show() { this.root.style.display = 'block'; this.dirty = true; }
@@ -92,11 +133,75 @@ export class HUD {
     el.classList.toggle('supernatural', !!supernatural);
   }
 
+  setVision(on) {
+    this.vision = !!on;
+    this.root.classList.toggle('vision', this.vision);
+    document.body.classList.toggle('vision-on', this.vision);
+    const m = this.root.querySelector('#hud-markers');
+    m.style.display = this.vision ? 'block' : 'none';
+    if (!this.vision) m.innerHTML = '';
+  }
+
+  refreshParty() {
+    const host = this.root.querySelector('#hud-party');
+    if (!host) return;
+    const active = this.game.player?.characterIndex ?? 0;
+    host.innerHTML = PARTY.map((c, i) => `
+      <button class="party-card ${i === active ? 'active' : ''}" data-char="${i}" style="--pc:${c.css}" title="${esc(c.name)} — ${esc(c.title)}">
+        <span class="party-key">${i + 1}</span>
+        <span class="party-portrait">${c.portrait}</span>
+        <span class="party-name">${esc(c.name)}</span>
+        <span class="party-el">${esc(c.element)}</span>
+      </button>`).join('');
+    host.querySelectorAll('[data-char]').forEach((b) => b.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.game.switchCharacter(Number(b.dataset.char));
+    }));
+  }
+
   flashHp() {
     const v = this.root.querySelector('#hud-vignette');
     v.classList.remove('flash');
     void v.offsetWidth;
     v.classList.add('flash');
+  }
+
+  _skillState(key, def, player) {
+    if (!def) return;
+    const cdEl = this.root.querySelector(`#hud-${key}cd`);
+    const txtEl = this.root.querySelector(`#hud-${key}cdtext`);
+    const nameEl = this.root.querySelector(`#hud-${key}name`);
+    const glyphEl = this.root.querySelector(`#hud-${key}glyph`);
+    if (nameEl && nameEl.textContent !== def.name) nameEl.textContent = def.name;
+    if (glyphEl && glyphEl.textContent !== (def.element ? def.element[0] : '•')) glyphEl.textContent = def.element ? def.element[0] : '•';
+    const cd = player.skillCd[def.id] || 0;
+    const pct = cd > 0 ? Math.min(1, cd / def.cooldown) : 0;
+    cdEl.style.height = `${pct * 100}%`;
+    txtEl.textContent = cd > 0.05 ? cd.toFixed(1) : '';
+  }
+
+  _visionMarkers(dt) {
+    if (!this.vision) return;
+    this._markT -= dt;
+    if (this._markT > 0) return;
+    this._markT = 0.09;
+    const g = this.game, cam = g.engine.camera;
+    const targets = [...g.npcs, ...(g.creatures || [])].filter((n) => !n.combat?.dead && !n.disposed);
+    let html = '';
+    for (const n of targets) {
+      const dx = n.pos.x - g.player.pos.x, dz = n.pos.z - g.player.pos.z;
+      const d = Math.hypot(dx, dz);
+      if (d > 48) continue;
+      this._v.set(n.pos.x, n.pos.y + (n.isBoss ? 1.7 : 1.25), n.pos.z).project(cam);
+      if (this._v.z > 1 || Math.abs(this._v.x) > 1.15 || Math.abs(this._v.y) > 1.15) continue;
+      const x = (this._v.x * 0.5 + 0.5) * 100, y = (-this._v.y * 0.5 + 0.5) * 100;
+      const col = n.faction === 'player' ? '#8ad8ff' : (PREDICT[n.faction] || '#ffb057');
+      const hostile = n.faction !== 'samurai_ally' && n.faction !== 'villager';
+      html += `<div class="vision-marker ${hostile ? 'hostile' : 'friendly'}" style="left:${x.toFixed(2)}%;top:${y.toFixed(2)}%;--mc:${col}">
+        <span class="vm-dot"></span><span class="vm-name">${esc(n.name || '?')}</span><span class="vm-dist">${Math.round(d)}m</span></div>`;
+    }
+    const box = this.root.querySelector('#hud-markers');
+    if (box.dataset.html !== html) { box.innerHTML = html; box.dataset.html = html; }
   }
 
   frame(dt) {
@@ -110,14 +215,21 @@ export class HUD {
     this.root.querySelector('#hud-sta').style.width = `${Math.max(0, p.stamina / p.maxStamina) * 100}%`;
     const xp = g.progression.xpProgress();
     this.root.querySelector('#hud-xp').style.width = `${Math.min(100, (xp.cur / xp.need) * 100)}%`;
-    const active = g.progression.activeSkill();
-    const nameEl = this.root.querySelector('#hud-skillname');
-    const nm = active ? active.name : 'Chưa học (T)';
-    if (nameEl.textContent !== nm) nameEl.textContent = nm;
-    const cdEl = this.root.querySelector('#hud-skillcd');
-    const cd = active ? (g.player.skillCd[active.skill] || 0) : 0;
-    const cdMax = active ? active.cooldown : 1;
-    cdEl.style.height = `${Math.min(100, (cd / cdMax) * 100)}%`;
+    this._skillState('skill', p.character?.skills?.elemental, p);
+    this._skillState('ult', p.character?.skills?.ultimate, p);
+    // Z item count
+    let itemCount = 0, itemName = '';
+    for (const e of g.inventory.entries()) {
+      if (itemDef(e.id).type === 'consumable') {
+        itemCount += e.qty;
+        if (!itemName) itemName = itemDef(e.id).name;
+      }
+    }
+    const ic = this.root.querySelector('#hud-itemcount');
+    if (ic.textContent !== String(itemCount)) ic.textContent = String(itemCount);
+    const inm = this.root.querySelector('#hud-itemname');
+    const itemLabel = itemName || 'Vật phẩm';
+    if (inm.textContent !== itemLabel) inm.textContent = itemLabel;
     // chips
     const coins = `${CURRENCY.icon} ${g.inventory.coins}`;
     const cEl = this.root.querySelector('#hud-coins');
@@ -144,6 +256,16 @@ export class HUD {
     }).join('');
     const bEl = this.root.querySelector('#hud-buffs');
     if (bEl.innerHTML !== buffs) bEl.innerHTML = buffs;
+    // aim / meditate
+    this.root.querySelector('#hud-reticle').classList.toggle('on', !!p.aimMode);
+    this.root.querySelector('#hud-meditate').classList.toggle('on', !!p.meditating);
+    this.root.querySelector('#hud-chathint').style.opacity = p.moving ? '0' : '0.7';
+    // party highlight
+    this._partyT -= dt;
+    if (this._partyT <= 0) {
+      this._partyT = 0.5;
+      this.root.querySelectorAll('.party-card').forEach((el, i) => el.classList.toggle('active', i === (p.characterIndex ?? 0)));
+    }
     // boss bar
     if (this.boss) {
       if (this.boss.combat.dead || this.boss.disposed) this.setBoss(null);
@@ -156,6 +278,7 @@ export class HUD {
         }
       }
     }
+    this._visionMarkers(dt);
     // fps
     this._fpsT += dt;
     if (this._fpsT > 0.5) {

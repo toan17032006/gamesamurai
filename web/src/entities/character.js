@@ -16,13 +16,25 @@ const SWAY_STIFF = 85, SWAY_DAMP = 10.5, SWAY_MAX = 0.45;
 // Combat clips are never modified — the stance fades out during attacks/blocks/hit reactions.
 const WEAPON_STANCE = {
   idle: {
-    armR_sh: [-0.24, -0.08, -0.22], armR_el: [-0.5, 0, 0], armR_hand: [0.05, 0, 0.06],
-    armL_sh: [-0.05, 0.1, 0.3], armL_el: [-0.35, 0, 0],
-    torso: [null, 0.1, null], hips: [null, -0.06, null],
+    armR_sh: [-0.16, 0.16, -0.5], armR_el: [-0.45, 0, 0], armR_hand: [0.05, 0, -0.35],
+    armL_sh: [-0.3, 0.2, 0.5], armL_el: [-0.65, 0, 0], armL_hand: [0.02, 0, -0.15],
+    torso: [null, 0.04, null],
   },
   move: {
-    armR_sh: [-0.4, -0.05, -0.3], armR_el: [-0.7, 0, 0], armR_hand: [0.05, 0, -0.05],
-    moveBlend: 0.72, // hold the blade steadier than the walk/run swing would
+    armR_sh: [-0.2, 0.12, -0.45], armR_el: [-0.5, 0, 0], armR_hand: [0.05, 0, -0.3],
+    armL_sh: [0.05, 0.1, 0.3], armL_el: [-0.5, 0, 0],
+    torso: [null, 0.05, null],
+    moveBlend: 0.85, // giữ lưỡi kiếm ổn định hơn nhịp vung tay khi chạy
+  },
+  bowIdle: {
+    armR_sh: [-0.92, 0.02, -0.32], armR_el: [-0.45, 0, 0], armR_hand: [0.1, 0, 0],
+    armL_sh: [-0.82, -0.08, 0.5], armL_el: [-0.75, 0, 0],
+    torso: [null, -0.14, null],
+  },
+  bowMove: {
+    armR_sh: [-0.62, 0, -0.26], armR_el: [-0.4, 0, 0],
+    armL_sh: [-0.3, 0.05, 0.3], armL_el: [-0.5, 0, 0],
+    moveBlend: 0.75,
   },
 };
 if (typeof window !== 'undefined') window.__stance = WEAPON_STANCE; // live-tuning hook
@@ -62,7 +74,7 @@ export class Character extends Entity {
     this.hitFlash = 0;
 
     this.rig = buildHumanoid({
-      colors: cfg.colors, ghost: this.ghost, scale: cfg.scale || 1,
+      colors: cfg.colors, ghost: this.ghost, scale: cfg.scale || 1, topknot: cfg.topknot !== false,
       weapon: cfg.weaponModel || null, armor: cfg.armorModel || null, helmet: cfg.helmetModel || null,
     });
     game.engine.scene.add(this.rig.group);
@@ -86,6 +98,26 @@ export class Character extends Entity {
     if (this.isPlayer || cfg.isBoss) {
       this._trail = new Trail(game.engine.scene, cfg.trailColor ?? (this.isPlayer ? 0xbfd8ff : 0x9fb0e8));
     }
+  }
+
+  // Dựng lại tạo hình (đổi nhân vật 1-4) mà giữ nguyên vị trí/trạng thái.
+  rebuildAppearance(game, cfg) {
+    if (this.rig) {
+      game.engine.scene.remove(this.rig.group);
+      this.rig.dispose();
+    }
+    this.rig = buildHumanoid({
+      colors: cfg.colors, ghost: this.ghost, scale: this.scale, topknot: cfg.topknot !== false,
+      weapon: cfg.weaponModel || null, armor: cfg.armorModel || null, helmet: cfg.helmetModel || null,
+    });
+    this.rig.group.position.copy(this.pos);
+    this.rig.group.rotation.y = this.yaw;
+    game.engine.scene.add(this.rig.group);
+    this.anim = new Animator(this.rig, CLIPS);
+    this.anim.play('idle');
+    this._sway = new SwayState();
+    this._stanceW = 0;
+    this._gripW = 0;
   }
 
   dispose(game) {
@@ -122,23 +154,27 @@ export class Character extends Entity {
     }
   }
 
-  // katana/nodachi stance: blends the sword arm(s) toward a low guard while idle/locomoting
+  // Tư thế vũ khí: kiếm/thương hai tay thấp, cung giương sẵn. Tắt dần khi ra đòn.
   _weaponStance(dt) {
     const style = this.rig.hasWeapon ? this.rig.hasWeapon() : null;
-    const eligible = style === 'katana' || style === 'nodachi';
+    const melee = style === 'katana' || style === 'nodachi' || style === 'club' || style === 'spear';
+    const bow = style === 'bow';
+    const eligible = melee || bow;
     const c = this.combat;
     const busy = !!c.attack || c.blocking || c.staggered > 0 || c.parried > 0 || c.dead;
     const clip = this.anim.name;
-    const moving = clip === 'walk' || clip === 'run' || clip === 'sprint';
+    const moving = clip === 'walk' || clip === 'run' || clip === 'sprint' || clip === 'walkSlow';
     const inStance = eligible && !busy && (clip === 'idle' || moving);
     if (!this._stanceW) this._stanceW = 0;
-    this._stanceW += ((inStance ? 1 : 0) - this._stanceW) * Math.min(1, dt * 7);
+    this._stanceW += ((inStance ? 1 : 0) - this._stanceW) * Math.min(1, dt * 8);
     if (this._stanceW < 0.003 || dt <= 0) return;
     const w = this._stanceW;
-    const set = moving ? WEAPON_STANCE.move : WEAPON_STANCE.idle;
-    const k = (moving ? set.moveBlend : 1) * w;
+    const set = bow
+      ? (moving ? WEAPON_STANCE.bowMove : WEAPON_STANCE.bowIdle)
+      : (moving ? WEAPON_STANCE.move : WEAPON_STANCE.idle);
+    const k = (moving ? (set.moveBlend ?? 0.8) : 1) * w;
     const J = this.rig.joints;
-    for (const name of ['armR_sh', 'armR_el', 'armR_hand', 'armL_sh', 'armL_el', 'torso', 'hips']) {
+    for (const name of ['armR_sh', 'armR_el', 'armR_hand', 'armL_sh', 'armL_el', 'armL_hand', 'torso', 'hips']) {
       const target = set[name];
       if (!target) continue;
       const j = J[name];
@@ -146,6 +182,29 @@ export class Character extends Entity {
       if (target[0] !== null && target[0] !== undefined) j.rotation.x += (target[0] - j.rotation.x) * k;
       if (target[1] !== null && target[1] !== undefined) j.rotation.y += (target[1] - j.rotation.y) * k;
       if (target[2] !== null && target[2] !== undefined) j.rotation.z += (target[2] - j.rotation.z) * k;
+    }
+  }
+
+  // Hai tay nắm chuôi khi chém/đỡ (tránh cảnh tay trái buông lơ lửng).
+  _twoHandGrip(dt) {
+    const style = this.rig.hasWeapon ? this.rig.hasWeapon() : null;
+    const twoHanded = style === 'katana' || style === 'nodachi' || style === 'club' || style === 'spear';
+    const c = this.combat;
+    const active = twoHanded && (!!c.attack || c.blocking || c.parried > 0);
+    if (!this._gripW) this._gripW = 0;
+    this._gripW += ((active ? 1 : 0) - this._gripW) * Math.min(1, dt * 12);
+    if (this._gripW < 0.01) return;
+    const J = this.rig.joints;
+    const k = this._gripW * 0.92;
+    const targets = {
+      armL_sh: [-1.08, 0.06, 0.4], armL_el: [-1.2, 0, 0.08], armL_hand: [0.12, 0, 0],
+    };
+    for (const name in targets) {
+      const j = J[name], t = targets[name];
+      if (!j) continue;
+      j.rotation.x += (t[0] - j.rotation.x) * k;
+      j.rotation.y += (t[1] - j.rotation.y) * k;
+      j.rotation.z += (t[2] - j.rotation.z) * k;
     }
   }
 
@@ -505,6 +564,7 @@ export class Character extends Entity {
     this.anim.update(dt);
     this._animOverlay(dt);
     this._weaponStance(dt);
+    this._twoHandGrip(dt);
     this._updateSway(dt);
     this._updateTrail(dt);
     this.syncRig();

@@ -14,6 +14,7 @@ export class CameraRig {
     this.trauma = 0;               // shake energy 0..1
     this._shakeT = 0;
     this.baseFov = 66;
+    this.aimMode = false;
     this._kick = 0;
     this._firstPersonWeapon = null; // optional overlay rig
     this.cinematic = null;         // {t, dur, from, to, boss} — boss intro dolly
@@ -22,6 +23,10 @@ export class CameraRig {
   }
 
   setLockTarget(t) { this.lockTarget = t; }
+  setAim(on) {
+    this.aimMode = !!on;
+    if (this.aimMode) { this.mode = 'third'; this.pitch = clamp(this.pitch, -0.2, 0.55); }
+  }
   toggleMode() {
     this.mode = this.mode === 'third' ? 'first' : 'third';
     return this.mode;
@@ -114,13 +119,14 @@ export class CameraRig {
     // third person orbit
     const cp = Math.cos(this.pitch), sp = Math.sin(this.pitch);
     const dirX = Math.sin(this.yaw) * cp, dirY = sp, dirZ = Math.cos(this.yaw) * cp;
-    let dist = this.dist;
+    let dist = this.aimMode ? 2.45 : this.dist;
     // pivot shifts toward lock target to frame both
     let px = targetPos.x, pz = targetPos.z;
     if (this._cinPivot) { px = this._cinPivot.x; pz = this._cinPivot.z; }
     else if (this.lockTarget && !this.lockTarget.dead) {
-      px = targetPos.x + (this.lockTarget.pos.x - targetPos.x) * 0.22;
-      pz = targetPos.z + (this.lockTarget.pos.z - targetPos.z) * 0.22;
+      const bias = this.aimMode ? 0.1 : 0.22;
+      px = targetPos.x + (this.lockTarget.pos.x - targetPos.x) * bias;
+      pz = targetPos.z + (this.lockTarget.pos.z - targetPos.z) * bias;
     }
     // collision: shorten distance if terrain/colliders block
     for (let step = 0; step < 6; step++) {
@@ -131,7 +137,10 @@ export class CameraRig {
       dist *= 0.72;
       if (dist < 1.1) break;
     }
-    const camX = px + dirX * dist, camY = pivotY + dirY * dist, camZ = pz + dirZ * dist;
+    // over-the-shoulder offset when aiming
+    const shoulder = this.aimMode ? 0.55 : 0;
+    const sideX = Math.cos(this.yaw) * shoulder, sideZ = -Math.sin(this.yaw) * shoulder;
+    const camX = px + dirX * dist + sideX, camY = pivotY + dirY * dist + (this.aimMode ? 0.18 : 0), camZ = pz + dirZ * dist + sideZ;
     this.camera.position.set(camX, Math.max(camY, (world ? world.groundAt(camX, camZ) : -100) + 0.3), camZ);
     this.camera.rotation.set(0, 0, 0);
     this.camera.rotateY(this.yaw);
@@ -154,7 +163,7 @@ export class CameraRig {
 
   _fov(dt, sprinting) {
     this._kick = damp(this._kick, 0, 4, dt);
-    const target = this.baseFov + (sprinting ? 6 : 0) + this._kick;
+    const target = (this.aimMode ? 53 : this.baseFov) + (sprinting && !this.aimMode ? 6 : 0) + this._kick;
     this.camera.fov = damp(this.camera.fov, target, 6, dt);
     this.camera.updateProjectionMatrix();
   }

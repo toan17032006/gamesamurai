@@ -1,9 +1,10 @@
 // UI manager: screens (menu/loading/pause/death/level-complete/victory), toasts, hud & panels wiring.
 import { HUD } from './hud.js';
 import { Panels } from './panels.js';
+import { ChatOverlay } from './components/chat.js';
 import { esc, formatTime } from '../core/utils.js';
 import { LEVEL_MAP } from '../data/levels.js';
-import { ACTIONS } from '../data/keys.js';
+import { actionsByGroup } from '../data/keys.js';
 
 function el(tag, cls, html) {
   const e = document.createElement(tag);
@@ -19,6 +20,8 @@ export class UIManager {
     this.root = document.getElementById('ui');
     this.hud = new HUD(game);
     this.panels = new Panels(game);
+    this.chat = new ChatOverlay(game);
+    this.overlay = null;
     this.screens = {};
     this.toasts = el('div', 'toasts');
     this.root.appendChild(this.toasts);
@@ -35,7 +38,7 @@ export class UIManager {
     menu.innerHTML = `
       <div class="menu-inner">
         <div class="title-block">
-          <div class="title-kanji">侍</div>
+          <div class="title-emblem" aria-hidden="true"><span class="te-ring"></span><span class="te-blade a"></span><span class="te-blade b"></span><span class="te-dot"></span></div>
           <h1>ĐẠO CỦA KẺ VÔ DANH</h1>
           <p class="subtitle">Samurai 3D Action RPG · 15 chương · 15 bản đồ nền · Thế Giới Vô Cực</p>
         </div>
@@ -65,7 +68,7 @@ export class UIManager {
 
     // loading
     const loading = el('div', 'screen loading-screen');
-    loading.innerHTML = `<div class="loading-inner"><div class="loading-kanji">道</div><h2 id="loading-title">Đang tải...</h2><div class="loading-bar"><div class="loading-fill" id="loading-fill"></div></div><p id="loading-step">Chuẩn bị</p></div>`;
+    loading.innerHTML = `<div class="loading-inner"><div class="loading-kanji">S</div><h2 id="loading-title">Đang tải...</h2><div class="loading-bar"><div class="loading-fill" id="loading-fill"></div></div><p id="loading-step">Chuẩn bị</p></div>`;
     r.appendChild(loading);
     this.screens.loading = loading;
 
@@ -99,7 +102,7 @@ export class UIManager {
     const death = el('div', 'screen death-screen');
     death.innerHTML = `
       <div class="modal">
-        <div class="death-kanji">死</div>
+        <div class="death-kanji">✕</div>
         <h2>NGƯƠI ĐÃ NGÃ</h2>
         <p class="dim">"Cái chết không phải kết thúc - đó là một bài học."</p>
         <div class="menu-buttons">
@@ -127,7 +130,7 @@ export class UIManager {
     const vic = el('div', 'screen victory-screen');
     vic.innerHTML = `
       <div class="modal">
-        <div class="title-kanji small">終</div>
+        <div class="title-emblem small" aria-hidden="true"><span class="te-ring"></span><span class="te-blade a"></span><span class="te-blade b"></span><span class="te-dot"></span></div>
         <h2>CÂU CHUYỆN KHÉP LẠI</h2>
         <p>Yamikage tan thành tro. Ánh sáng trở lại những vùng đất bóng tối.<br>
         Nhưng thanh kiếm của ngươi... vẫn còn đó những chuyện phải làm.</p>
@@ -236,6 +239,24 @@ export class UIManager {
 
   setLetterbox(on) { this.letterbox.classList.toggle('on', !!on); }
 
+  get chatOpen() { return this.chat.isOpen; }
+  openChat() { if (this.game.state === 'playing') this.chat.open(); }
+  closeChat() { this.chat.close(); }
+
+  openOverlay(html, cls = '') {
+    this.closeOverlay();
+    const ov = el('div', 'ui-overlay');
+    ov.innerHTML = `<div class="modal overlay-modal ${cls}"><button class="overlay-close" data-overlay-close>✕</button>${html}</div>`;
+    this.root.appendChild(ov);
+    ov.querySelectorAll('[data-overlay-close]').forEach((b) => b.addEventListener('click', () => this.closeOverlay()));
+    this.overlay = ov;
+    return ov;
+  }
+
+  closeOverlay() {
+    if (this.overlay) { this.overlay.remove(); this.overlay = null; }
+  }
+
   showPause() {
     this.screens.pause.style.display = 'flex';
     const sub = this.screens.pause.querySelector('#pause-sub');
@@ -277,11 +298,10 @@ export class UIManager {
     this.screens.victory.style.display = 'flex';
   }
 
-  showSettings(parent) {
+  showSettings() {
     const g = this.game;
     const s = g.settings;
-    const host = parent === 'menu' ? this.screens.menu.querySelector('.menu-inner') : this.screens.pause.querySelector('#pause-sub');
-    host.innerHTML = `
+    const host = this.openOverlay(`
       <div class="settings-box">
         <h3>Cài đặt</h3>
         <label>Chất lượng đồ họa
@@ -324,7 +344,7 @@ export class UIManager {
         <label><input id="set-amb-on" type="checkbox"> Âm thanh môi trường</label>
         <label>Môi trường <input id="set-va" type="range" min="0" max="1" step="0.05"></label>
         <div class="menu-buttons"><button id="set-back">Quay lại</button></div>
-      </div>`;
+      </div>`, 'wide');
     const q = host.querySelector('#set-quality');
     q.value = s.quality;
     host.querySelector('#set-res').value = String(s.resolutionScale);
@@ -367,24 +387,27 @@ export class UIManager {
       }); // onChanged → applySettings + persist tự động
     };
     host.querySelectorAll('input, select').forEach((i) => i.addEventListener('change', apply));
-    host.querySelector('#set-back').addEventListener('click', () => {
-      if (parent === 'menu') { host.querySelector('.settings-box').remove(); }
-      else host.innerHTML = '';
-    });
+    host.querySelector('#set-back').addEventListener('click', () => this.closeOverlay());
   }
 
-  showHelp(parent) {
-    const host = parent === 'menu' ? this.screens.menu.querySelector('.menu-inner') : this.screens.pause.querySelector('#pause-sub');
-    const rows = Object.values(ACTIONS).map((a) => `<tr><td><b>${esc(a.default.replace('Key', '').replace('Left', 'L-Shift'))}</b></td><td>${esc(a.label)}</td></tr>`).join('');
-    host.innerHTML = `
-      <div class="settings-box">
-        <h3>Điều khiển</h3>
-        <table class="keys-table">${rows}</table>
-        <p class="dim">Chuột: nhìn quanh (nhấp vào màn hình để khóa con trỏ) · Lăn chuột: zoom camera<br>
-        Giữ L đúng thời điểm nhát đánh chạm người = <b>Parry</b> → kẻ địch mất thăng bằng.</p>
+  showHelp() {
+    const groups = actionsByGroup();
+    const host = this.openOverlay(`
+      <div class="help-box">
+        <h2>Điều Khiển</h2>
+        <p class="dim">Chuột nhìn quanh · lăn chuột zoom · nhấp vào màn hình để khoá con trỏ.</p>
+        <div class="help-groups">
+          ${[...groups.entries()].map(([group, list]) => `
+            <div class="help-group">
+              <h3>${esc(group)}</h3>
+              ${list.map((a) => `<div class="help-row"><kbd>${esc(a.key)}</kbd><span>${esc(a.label)}</span></div>`).join('')}
+            </div>`).join('')}
+        </div>
+        <p class="dim">Giữ <b>chuột phải</b> đúng lúc đòn địch chạm người = <b>Parry</b> → kẻ địch mất thăng bằng.<br>
+        Gõ nhanh <b>Shift</b> để né · giữ <b>Shift</b> để chạy · <b>Alt</b> hiện con trỏ chuột.</p>
         <div class="menu-buttons"><button id="help-back">Quay lại</button></div>
-      </div>`;
-    host.querySelector('#help-back').addEventListener('click', () => { const b = host.querySelector('.settings-box'); if (b) b.remove(); });
+      </div>`, 'wide');
+    host.querySelector('#help-back').addEventListener('click', () => this.closeOverlay());
   }
 
   hideAll() {

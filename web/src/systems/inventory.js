@@ -120,12 +120,34 @@ export class Inventory {
   applyToRig() {
     const player = this.game.player;
     if (!player) return;
+    const asp = player.character;
+    // Nhân vật 1-4 có vũ khí/trang phục nhận diện riêng; trang bị vẫn cộng chỉ số.
     const wId = this.equipped.weapon;
-    if (wId) player.rig.setWeapon(ALL_ITEMS[wId].model);
-    const aId = this.equipped.armor;
-    player.rig.setArmor(aId ? ALL_ITEMS[aId] : null);
-    const hId = this.equipped.helmet;
-    player.rig.setHelmet(hId ? ALL_ITEMS[hId] : null);
+    if (asp?.weapon) player.rig.setWeapon(asp.weapon);
+    else if (wId) player.rig.setWeapon(ALL_ITEMS[wId].model);
+    if (asp?.armor) player.rig.setArmor(asp.armor);
+    else {
+      const aId = this.equipped.armor;
+      player.rig.setArmor(aId ? ALL_ITEMS[aId] : null);
+    }
+    if (asp?.helmet) player.rig.setHelmet(asp.helmet);
+    else {
+      const hId = this.equipped.helmet;
+      player.rig.setHelmet(hId ? ALL_ITEMS[hId] : null);
+    }
+  }
+
+  // Z: ưu tiên hồi máu khi thấp máu, sau đó hồi khí lực / vật phẩm đầu tiên.
+  quickUse() {
+    const p = this.game.player;
+    if (!p || p.combat.dead) return false;
+    const consumables = this.entries().filter((e) => ALL_ITEMS[e.id]?.type === 'consumable');
+    if (!consumables.length) { this.game.ui.notify('info', 'Không có vật phẩm sử dụng nhanh'); return false; }
+    const lowHp = p.hp / p.maxHp < 0.6;
+    const pick = lowHp
+      ? (consumables.find((e) => ALL_ITEMS[e.id].use?.heal) || consumables[0])
+      : (consumables.find((e) => ALL_ITEMS[e.id].use?.stamina) || consumables.find((e) => ALL_ITEMS[e.id].use?.heal) || consumables[0]);
+    return this.useConsumable(pick.id);
   }
 
   useConsumable(id) {

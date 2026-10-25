@@ -111,10 +111,11 @@ export class Progression {
     const w = this.game.inventory.equippedStats().weapon;
     const armorDef = this.game.inventory.equippedStats().defense;
     const a = this.attrs;
-    player.stats.maxHp = Math.round(80 + a.vit * 12 + (this.level - 1) * 5 + this._passives.maxHp);
-    player.stats.attack = Math.round(w.damage + a.str * 2 + (this.level - 1) * 1.2 + this._passives.attackFlat);
-    player.stats.defense = Math.round(armorDef + a.vit * 0.5 + this._passives.defense);
-    player.maxStamina = Math.round(90 + a.end * 8 + (this.level - 1) * 3 + this._passives.maxStamina);
+    const mods = player.character?.mods || {};
+    player.stats.maxHp = Math.round((80 + a.vit * 12 + (this.level - 1) * 5 + this._passives.maxHp) * (mods.hp || 1));
+    player.stats.attack = Math.round((w.damage + a.str * 2 + (this.level - 1) * 1.2 + this._passives.attackFlat) * (mods.atk || 1));
+    player.stats.defense = Math.round((armorDef + a.vit * 0.5 + this._passives.defense) * (mods.def || 1));
+    player.maxStamina = Math.round((90 + a.end * 8 + (this.level - 1) * 3 + this._passives.maxStamina) * (mods.stamina || 1));
     player.hp = Math.min(player.hp, player.stats.maxHp);
     player.stamina = Math.min(player.stamina, player.maxStamina);
   }
