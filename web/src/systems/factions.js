@@ -10,10 +10,12 @@ export const FACTIONS = {
   shade: { name: 'Bóng tối', color: '#9a9aff' },
   oni: { name: 'Quỷ', color: '#c86aff' },
   castle: { name: 'Vệ thành', color: '#ff5a7a' },
+  wild: { name: 'Sinh vật rừng', color: '#b8a878' },
+  dragon: { name: 'Rồng', color: '#ff7a3a' },
 };
 
 const HOSTILE = {
-  player: ['bandit', 'ashigaru', 'ashura', 'shade', 'oni', 'castle'],
+  player: ['bandit', 'ashigaru', 'ashura', 'shade', 'oni', 'castle', 'wild', 'dragon'],
   samurai_ally: ['bandit', 'ashigaru', 'ashura', 'shade', 'oni', 'castle'],
   bandit: ['player', 'samurai_ally', 'villager'],
   ashigaru: ['player', 'samurai_ally', 'villager'],
@@ -23,6 +25,8 @@ const HOSTILE = {
   oni: ['player', 'samurai_ally'],
   castle: ['player', 'samurai_ally'],
   villager: [],
+  wild: [],               // thú không tự đánh ai — sói/lợn dùng AI riêng của Creature
+  dragon: ['player', 'samurai_ally'],
 };
 
 export function isHostile(a, b) {

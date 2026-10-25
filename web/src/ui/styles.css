@@ -183,3 +183,16 @@ h1, h2, h3, h4 { font-family: Georgia, 'Times New Roman', serif; letter-spacing:
 .boss-pips { display: none; gap: 6px; justify-content: center; margin-top: 4px; }
 .boss-pips .pip { width: 10px; height: 10px; transform: rotate(45deg); border: 1px solid rgba(255, 210, 87, 0.55); background: rgba(0, 0, 0, 0.4); transition: background 0.3s; }
 .boss-pips .pip.lit { background: #ffd257; box-shadow: 0 0 6px rgba(255, 210, 87, 0.8); }
+
+/* ---- Thế Giới Vô Cực & thời tiết động ---- */
+.seed-row { display: flex; gap: 10px; align-items: center; justify-content: center; margin-top: 10px; }
+.seed-row label { font-size: 14px; color: #b0aa9a; }
+.seed-row input { background: #1c1a17; color: #e8e4d8; border: 1px solid #4a4438; padding: 7px 12px; width: 320px; font-size: 14px; }
+.seed-row button { background: #4a3420; border: 1px solid #6a5232; color: #ffd8a0; padding: 8px 18px; cursor: pointer; }
+.seed-row button:hover { background: #5e4428; }
+
+.weather-chip { display: inline-block; font-size: 12px; color: #b8c8d0; background: rgba(10, 14, 18, 0.65); border: 1px solid rgba(140, 170, 190, 0.25); padding: 3px 10px; margin-top: 5px; letter-spacing: 0.4px; }
+.weather-chip.supernatural { color: #d0b8ff; border-color: rgba(180, 140, 255, 0.5); text-shadow: 0 0 8px rgba(160, 100, 255, 0.6); }
+
+.world-map { border: 1px solid #3a4046; cursor: grab; image-rendering: pixelated; }
+.world-map:active { cursor: grabbing; }

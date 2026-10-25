@@ -68,25 +68,28 @@ export const ACCESSORIES = {
     stats: { attackPct: 0.1 }, desc: 'Tăng 10% công kích khi máu dưới 30%.' },
 };
 
+export const MATERIALS = {
+  bamboo: { name: 'Tre già', type: 'material', rarity: 0, icon: '🎍', value: 4, desc: 'Thân tre thẳng, dùng rèn và dựng.' },
+  iron_ore: { name: 'Quặng sắt', type: 'material', rarity: 0, icon: '⛏', value: 8, desc: 'Đá đỏ thấm sắt.' },
+  herb: { name: 'Cỏ linh chi', type: 'material', rarity: 0, icon: '🌿', value: 5, desc: 'Thảo dược chữa thương.' },
+  leather: { name: 'Da thú', type: 'material', rarity: 0, icon: '🟫', value: 6, desc: 'Da thuộc từ sói rừng.' },
+  meat: { name: 'Thịt rừng', type: 'material', rarity: 0, icon: '🥩', value: 7, desc: 'Thịt từ thú săn được - phơi khô thành lương hành.' },
+  silk: { name: 'Lụa', type: 'material', rarity: 1, icon: '🧵', value: 14, desc: 'Lụa mềm, lớp đệm giáp.' },
+  demon_fang: { name: 'Nanh quỷ', type: 'material', rarity: 2, icon: '🦷', value: 40, desc: 'Rơi từ quỷ và Tu La.' },
+  shade_ash: { name: 'Tro Bóng Tối', type: 'material', rarity: 2, icon: '🌑', value: 45, desc: 'Cặn của bóng tối - cần rèn vũ khí cuối.' },
+};
+
 export const CONSUMABLES = {
   bandage: { name: 'Băng gạc', type: 'consumable', rarity: 0, icon: '🩹', value: 8,
     use: { heal: 35 }, desc: 'Hồi 35 máu, không tốn thời gian lâu.' },
+  jerky: { name: 'Thịt khô', type: 'consumable', rarity: 0, icon: '🍖', value: 14,
+    use: { heal: 40, stamina: 25 }, desc: 'Lương hành của kẻ lang thang - hồi 40 máu + 25 khí lực.' },
   healing_draught: { name: 'Thuốc hồi phục', type: 'consumable', rarity: 1, icon: '🍶', value: 30,
     use: { heal: 80 }, desc: 'Rượu thuốc - hồi 80 máu.' },
   focus_tonic: { name: 'Tinh khí tán', type: 'consumable', rarity: 1, icon: '🍵', value: 26,
     use: { stamina: 60 }, desc: 'Phục hồi ngay 60 khí lực.' },
   war_bell: { name: 'Chuông chiến', type: 'consumable', rarity: 2, icon: '🔔', value: 60,
     use: { buff: { stat: 'attackPct', amount: 0.15, duration: 60 } }, desc: '60s công kích +15%.' },
-};
-
-export const MATERIALS = {
-  bamboo: { name: 'Tre già', type: 'material', rarity: 0, icon: '🎍', value: 4, desc: 'Thân tre thẳng, dùng rèn và dựng.' },
-  iron_ore: { name: 'Quặng sắt', type: 'material', rarity: 0, icon: '⛏', value: 8, desc: 'Đá đỏ thấm sắt.' },
-  herb: { name: 'Cỏ linh chi', type: 'material', rarity: 0, icon: '🌿', value: 5, desc: 'Thảo dược chữa thương.' },
-  leather: { name: 'Da thú', type: 'material', rarity: 0, icon: '🟫', value: 6, desc: 'Da thuộc từ sói rừng.' },
-  silk: { name: 'Lụa', type: 'material', rarity: 1, icon: '🧵', value: 14, desc: 'Lụa mềm, lớp đệm giáp.' },
-  demon_fang: { name: 'Nanh quỷ', type: 'material', rarity: 2, icon: '🦷', value: 40, desc: 'Rơi từ quỷ và Tu La.' },
-  shade_ash: { name: 'Tro Bóng Tối', type: 'material', rarity: 2, icon: '🌑', value: 45, desc: 'Cặn của bóng tối - cần rèn vũ khí cuối.' },
 };
 
 export const ALL_ITEMS = { ...WEAPONS, ...ARMORS, ...HELMETS, ...ACCESSORIES, ...CONSUMABLES, ...MATERIALS };

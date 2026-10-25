@@ -1,8 +1,12 @@
 # Đạo Của Kẻ Vô Danh — Samurai 3D Action RPG
 
 Game samurai 3D Action RPG (Action RPG + Soulslike + Hack-and-slash + Survival) chạy trên web,
-xây bằng **Three.js** (frontend) và **FastAPI + SQLite** (backend). 15 màn chơi, 5 boss nhiều pha,
-chiến đấu soulslike (stamina, né, đỡ, parry), AI NPC theo phe phái, chế tạo, kỹ năng, save/load.
+xây bằng **Three.js** (frontend) và **FastAPI + SQLite** (backend). 15 chương campaign trên
+**15 bản đồ nền** phủ đủ các nhóm môi trường (làng, rừng tre, rừng ôn đới, đồi, núi, tuyết,
+sông/thác, hồ/lầy, đền, chiến trường/thành, hang, hẻm núi, núi lửa, siêu nhiên), **Thế Giới Vô Cực**
+ghép các bản đồ nền theo seed vô hạn, chiến đấu soulslike (stamina, né, đỡ, parry), AI NPC theo
+phe phái, sinh vật hoang dã + rồng, thời tiết động (bão sét, tuyết, lũ, sương ma, mưa linh khí),
+cấp độ 1–25 với phần thưởng theo cấp, chế tạo, kỹ năng, save/load.
 
 > Toàn bộ mô hình, hoạt ảnh, âm thanh và hiệu ứng đều là **procedural** (sinh bằng mã) —
 > dự án không cần tải asset ngoài nào và không kèm tài nguyên có bản quyền.
@@ -34,6 +38,10 @@ Biến thể lệnh:
 | `samurai serve --reload` | Dev: tự nạp lại backend khi sửa Python |
 | `python -m server serve` | Tương đương `samurai serve` khi chưa cài `pip install -e .` |
 | `npm run build:watch` | Dev: bundle lại tự động khi sửa JS |
+| `npm run serve:dev` | Dev thay thế khi máy không có Python: server tĩnh Node + save API (JSON file) |
+| `npm test` | Test unit (node --test): framework + worldgen/progression/save |
+| `npm run test:levels` | E2E: vào lần lượt 15 chương trong Chromium headless |
+| `npm run test:e2e` | E2E: kịch bản đầy đủ (campaign, thời tiết, vô cực, save/continue) |
 
 Nếu `web/dist` chưa được build, server vẫn phục vụ `web/index.html` (báo lỗi thiếu bundle) —
 hãy chạy `npm run build` trước. Database SQLite (`samurai.db`) **tự tạo lần đầu chạy**.
@@ -41,45 +49,70 @@ hãy chạy `npm run build` trước. Database SQLite (`samurai.db`) **tự tạ
 ## 2. Kiến trúc
 
 ```
-game3dconbo/
-├── server/                 # Backend FastAPI
+gamesamurai/
+├── server/                 # Backend FastAPI (không đổi so với bản đã nghiệm thu)
 │   ├── main.py             # App: static client + REST save API
-│   ├── db.py               # SQLite (tự tạo schema, validate payload, WAL)
-│   └── cli.py              # CLI `samurai serve` (dò cổng, mở browser)
+│   ├── db.py               # SQLite (schema versioned, validate payload, WAL)
+│   └── cli.py              # CLI `samurai serve`
+├── scripts/dev-server.mjs  # Dev thay thế (Node): tĩnh + save API giống server/main.py
 ├── web/
 │   ├── index.html
 │   ├── dist/               # Kết quả build (bundle.js/css + index.html)
 │   └── src/
 │       ├── main.js         # Entry
-│       ├── game.js         # Orchestrator: hệ thống, state, vòng lặp chính
-│       ├── core/           # engine (renderer/loop/quality), input (rebindable,
-│       │                   #  chặn key-repeat), cameraRig (1st/3rd, lock-on,
-│       │                   #  collision clamp, shake), utils (noise fbm, rng seed)
-│       ├── data/           # Dữ liệu tách khỏi mã: items, skills, enemies,
-│       │                   # bosses, recipes, quests, levels (15), regions, keys
-│       ├── gfx/            # humanoid (rig procedural), animator + clips
-│       │                   # (state machine pose-clip có blending & events),
-│       │                   # terrain, props (instancing), particles/weather,
-│       │                   # vfx (slash arc, telegraph, damage popup), sky, audio
-│       ├── entities/       # player, npc (FSM AI), boss (pha/telegraph/summon),
-│       │                   # interactable (node/đài/rương/cổng/thương nhân)
-│       ├── systems/        # combat (hit-detection arc/AoE, parry, projectiles),
-│       │                   # world (builder 8 kiểu địa hình + colliders),
-│       │                   # levelManager (15 màn: spawn/wave/objective/reward),
-│       │                   # progression, inventory, crafting, quests,
-│       │                   # factions, saveSystem
-│       └── ui/             # HUD, panels (túi đồ/kỹ năng/chế tạo/nhiệm vụ/bản đồ/
-│                           # shop), screens (menu/loading/pause/death/...), styles
+│       ├── game.js         # Orchestrator: 2 chế độ (campaign/infinite), state, vòng lặp
+│       ├── core/           # engine (renderer/loop/quality/shadow), input (rebindable),
+│       │                   #  cameraRig (1st/3rd, lock-on), utils
+│       ├── data/           # Dữ liệu tách khỏi mã: items, skills, enemies, bosses,
+│       │                   #  recipes, quests, levels (15), regions (15 bản đồ nền +
+│       │                   #  biến thể), wildlife, keys
+│       ├── gfx/            # humanoid + animator + clips, terrain, props (instancing),
+│       │                   #  water (mặt nước sóng + lũ + thác + dung nham), particles/
+│       │                   #  weather, vfx, sky (PMREM), audio (WebAudio procedural)
+│       ├── entities/       # player, npc (FSM AI), boss (pha/telegraph), creature
+│       │                   #  (chim/cá/hươu/lợn/sói), dragon (world-boss bay), interactable
+│       ├── systems/        # combat, world (builder 14 kiểu địa hình + nước/mercury mối
+│       │                   #  nguy), levelManager (15 chương), weather (thời tiết động +
+│       │                   #  siêu nhiên + lũ), infiniteWorld (streaming ô vô cực),
+│       │                   #  worldgen (seed/biome thuần, test được), progression
+│       │                   #  (cấp 1–25 + thưởng), inventory, crafting, quests,
+│       │                   #  factions, saveSystem (schema v2)
+│       └── ui/             # HUD (thời tiết/waypoint), panels (túi đồ/kỹ năng/chế tạo/
+│                           #  nhiệm vụ/shop), worldMap (bản đồ vô cực canvas), screens, styles
+├── tests/
+│   ├── framework/          # 37 test framework (node --test)
+│   ├── world/              # 19 test: worldgen seed/biome, liên tục địa hình vô cực,
+│   │                       #  thời tiết, cấp 25 + thưởng, save v2 migration
+│   ├── e2e.mjs             # E2E trình duyệt (Playwright + SwiftShader)
+│   └── e2e-levels.mjs      # E2E 15 chương
 ├── pyproject.toml          # console script: samurai
 ├── requirements.txt        # fastapi, uvicorn
 └── build.mjs               # esbuild bundler
 ```
 
 Nguyên tắc: gameplay/rendering/AI/dữ liệu/UI tách module; dữ liệu cân bằng nằm ở `web/src/data/*`;
-không phụ thuộc vòng (mỗi tầng chỉ import xuống dưới); vật lý đơn giản tự viết
+tách logic thuần (`systems/worldgen.js`) khỏi three.js để test headless; vật lý đơn giản tự viết
 (heightfield + collider tròn) thay vì kéo engine vật lý ngoài.
 
-## 3. Điều khiển
+## 3. Hai chế độ chơi
+
+**Chiến dịch (Campaign)** — 15 chương, mỗi chương một bản đồ nền: L01 Bờ Rào Sương Mù (đồi cỏ) →
+L02 Làng Hạc Bạch → L03 Rừng Tre Mật → L04 Rừng Thông Đen (thú rừng) → L05 Khúc Sông Ngân (sông,
+cầu, thác) → L06 Đèo Gió Lạnh (núi cao) → L07 Đền Hoang (boss Kurogane) → L08 Hồ Vong Hồn (hồ/lầy
+đêm) → L09 Chiến Trường → L10 Sân Đấu Ronin (hẻm núi) → L11 Núi Lửa Tu La (dung nham, boss Hi no
+Ou) → L12 Mỏ Cốc Tro (hang) → L13 Băng Nguyên Vĩnh Đông (tuyết) → L14 Thành Bóng Đêm (thành trì
+đêm mưa) → L15 Ngự Sảnh Bóng Tối (siêu nhiên, Yamikage). Hoàn thành mở chương kế.
+
+**Thế Giới Vô Cực (Infinite World)** — menu → "Thế Giới Vô Cực" → nhập seed bất kỳ (cùng seed =
+cùng thế giới, tái tạo được). Thế giới ghép các ô 168m sinh từ **15 bản đồ nền** theo trường
+noise xác định (độ cao/độ ẩm/nhiệt độ → biome), địa hình liên tục xuyên ranh giới ô (có test tự
+động), sông chảy xuyên ô, hồ/núi lửa/hang ở nơi đủ điều kiện. Streaming: 3×3 ô đầy đủ quanh người
+chơi, ring 5×5 LOD terrain, dỡ xa hơn (ngân sách ~12ms/frame). Mức nguy hiểm tăng theo khoảng cách
+tính từ ô xuất phát; ô nguy hiểm ≥5 có boss trấn giữ (dùng 5 boss sẵn có hoặc **Rồng** bay 3 pha);
+mỗi ô có đài hồi sinh, tài nguyên, sinh vật. Bản đồ (M) tự sinh theo dữ liệu worldgen: ô đã khám
+phá đầy màu, ô kề bên mờ, ☠ = mức nguy hiểm, click đặt điểm hẹn (🚩 + khoảng cách trên HUD).
+
+## 4. Điều khiển
 
 | Phím | Hành động |
 |---|---|
@@ -88,54 +121,79 @@ không phụ thuộc vòng (mỗi tầng chỉ import xuống dưới); vật l�
 | Space | Nhảy |
 | J | Đòn nhanh (combo đến 3–4 nhánh theo vũ khí) |
 | K | Đòn mạnh (sát thương lớn, phá đỡ) |
-| L (giữ) | Đỡ đòn; **nhấn đúng thời điểm** = Parry → địch mất thăng bằng, đòn kế x2 |
+| L (giữ) | Đỡ đòn; **nhấn đúng thời điểm** = Parry → đòn kế x2 |
 | I | Né / lăn (bất khả xâm phạm ngắn, tối đa 2 lần liên tiếp) |
-| U | Kỹ năng đặc biệt (gán ở cây kỹ năng — mặc định Nhất Đao Trảm) |
-| C | Khóa / mở khóa mục tiêu |
+| U | Kỹ năng đặc biệt (gán ở cây kỹ năng) |
+| C | Khóa mục tiêu (khóa được cả thú để săn) |
 | V | Đổi góc nhìn thứ nhất ↔ thứ ba |
-| E | Tương tác (tài nguyên, đài hồi sinh, rương, thương nhân) |
-| Tab / T / Q / M | Túi đồ / Kỹ năng / Nhiệm vụ / Bản đồ |
+| E | Tương tác (tài nguyên, đài hồi sinh, rương, thương nhân, nhặt loot săn) |
+| Tab / T / G / Q / M | Túi đồ / Kỹ năng / Chế tạo / Nhiệm vụ / Bản đồ |
 | Esc | Tạm dừng · đóng panel |
 | Chuột | Nhìn quanh (khóa con trỏ) · lăn = zoom |
 
-Khi mở panel hoặc tạm dừng, mô phỏng game tạm dừng và input không còn tác động lên nhân vật.
-Phím có thể rebind qua `web/src/data/keys.js` (Input.rebind hỗ trợ runtime).
+Lội nước chậm lại; dung nham gây thương theo nhịp; lũ dâng khi bão làm ngập lối thấp.
 
-## 4. Save & backend
+## 5. Cấp độ & sinh vật
 
-- Save schema versioned (v1) gồm: meta, player (level/xp/attrs/skills/equip/inventory), progress (màn, nhiệm vụ).
-- Lưu **cục bộ (localStorage)** + đồng bộ lên server `POST /api/saves/{slot}` vào SQLite.
-- Server validate: tên slot, kích thước ≤2MB, kiểu dữ liệu, key bắt buộc — dữ liệu client
-  **không được tin tưởng tuyệt đối** (game đơn người nên client là nguồn sự thật; server chỉ chặn payload rác).
+- **Cấp 1–25** (chặn cứng): mỗi cấp +1 điểm thuộc tính; cấp chẵn +1 điểm kỹ năng; cột mốc
+  4/8/14/18/22/25 tặng trang bị/vàng; cấp 10/15/20/25 thưởng lớn — cấp 25 tặng **Triệt Nguyệt**
+  và danh hiệu *Kiếm Thánh*. Bảng đầy đủ: `web/src/systems/progression.js` (LEVEL_REWARDS).
+- **Sinh vật hoang dã** (`data/wildlife.js`): chim (bay, đậu, né người), cá (bơi trong vùng nước,
+  né), hươu (gặm ở, bỏ chạy), lợn rừng (hoành động khi lại gần), **sói rừng** (săn theo bầy).
+  Săn được thịt/da → chế tạo **thịt khô**. AI phân tầng: sinh vật xa người chơi dừng mô phỏng.
+- **Thời tiết động** (`systems/weather.js`): chu kỳ theo pool từng vùng (nắng/mây/sương/mưa/bão/
+  tuyết/bão tuyết/tro/bão cát...), chuyển mượt fog–mây–ánh sáng; mưa làm **ướt bề mặt** (bóng,
+  phản chiếu); **bão có sấm sét** (chớp + sấm trễ theo khoảng cách); mưa lớn ở vùng sông/hồ làm
+  **lũ dâng** ngập lối thấp rồi rút; **siêu nhiên**: Sương Ma (gọi vong linh), Mưa Linh Khí
+  (+15% XP), Bão Ma Thuật (sét tím, địch cường hóa) — đều thông báo rõ cho người chơi.
+
+## 6. Save & backend
+
+- Save schema **v2**: meta (mode/seed), player, progress, `world` (campaign hoặc infinite:
+  seed, toạ độ, các ô đã khám phá/trinh sát, vùng an toàn, boss đã hạ, waypoint — chặn ≤600 ô),
+  `weather`. Migration v1→v2 tự động; schema tương lai bị từ chối (không đoán mò).
+- Lưu **cục bộ (localStorage)** + đồng bộ server `POST /api/saves/{slot}` vào SQLite.
+- Server validate: tên slot, kích thước ≤2MB, schema — dữ liệu client không được tin tưởng tuyệt đối
+  (game đơn người nên client là nguồn sự thật).
 - API: `GET /api/health` · `GET/POST/DELETE /api/saves/{slot}` · `GET /api/saves`.
-- Đài hồi sinh trong game (nhấn E) = hồi đầy + lưu ngay.
+- Đài hồi sinh (E) = hồi đầy + lưu ngay. Trong Thế Giới Vô Cực, điểm hồi sinh là ô gần nhất.
 
-## 5. Build production & triển khai
+## 7. Build production & triển khai
 
 ```bash
 npm run build              # minify -> web/dist/
-# chạy server production (ví dụ):
 uvicorn server.main:app --host 0.0.0.0 --port 8000
 ```
 
-Khuyến nghị deploy:
-- Đặt nginx/Caddy phía trước,终止 HTTPS, proxy về uvicorn (socket unix), cache
-  `web/dist/*` dài hạn (bundle có tên cố định — bump version khi release).
-- Rollback: giữ lại bản `web/dist` + image/code trước đó; backend không stateful ngoài
-  `samurai.db` — backup file `samurai.db` (SQLite) định kỳ là đủ.
-- Không có bí mật nào trong frontend (không key, không token); API save không yêu cầu auth
-  vì game đơn người cục bộ — nếu mở public, thêm rate-limit ở reverse proxy.
+Khuyến nghị deploy: nginx/Caddy phía trước, HTTPS, cache `web/dist/*` dài hạn; backup định kỳ
+`samurai.db` (SQLite) — backend không stateful khác. Không có bí mật trong frontend.
 
-## 6. Tài nguyên & giấy phép
+## 8. Kiểm thử
+
+| Bộ | Lệnh | Phạm vi |
+|---|---|---|
+| Unit (framework) | `npm test` (tests/framework) | 37 test: events, fsm, entity, registry, pool, ticker, cache, settings, math… |
+| Unit (world) | `npm test` (tests/world) | 19 test: seed/biome xác định, **liên tục địa hình vô cực qua mép ô**, trường noise, thời tiết, cấp 25 + bảng thưởng, save v2 migration |
+| E2E 15 chương | `npm run test:levels` | Chromium headless: mỗi chương build, region/water/boss đúng, 0 lỗi runtime |
+| E2E tổng | `npm run test:e2e` | Boot, WASD, nhảy, wildlife, bão (mưa/sét/ướt), save v2, vô cực seed/streaming/bản đồ, save vô cực + continue |
+
+E2E dùng SwiftShader (WebGL phần mềm, ~3–6 FPS) — số FPS không đại diện; dùng máy có GPU để đo
+hiệu năng thật. Ảnh xác minh: `docs/screenshots/`.
+
+## 9. Tài nguyên & giấy phép
 
 - Mã nguồn dự án: viết mới trong repo này.
-- `three` (MIT), `esbuild` (MIT), FastAPI/uvicorn (MIT/BSD) — npm/pip tự tải theo license riêng.
+- `three` (MIT), `esbuild` (MIT), `playwright` (Apache-2.0, chỉ dev/test), FastAPI/uvicorn (MIT/BSD).
 - Mọi mesh/animation/texture canvas/âm thanh WebAudio: **procedural, tự tạo**, không bản quyền ngoài.
 
-## 7. Giới hạn đã biết
+## 10. Giới hạn đã biết
 
-- Nhân vật/cảnh là low-poly cách điệu (procedural), không thay thế được asset AAA.
-- Camera góc thứ nhất ẩn thân nhân vật (chuẩn web game nhỏ).
-- Vật lý: heightfield + collider tròn (không có ragdoll/dịch chuyển vật lý phức tạp).
-- Server không chống gian lận (client-authoritative) — phù hợp game đơn người.
-- Âm nhạc nền là koto procedural đơn giản; không có voice/dialogue.
+- Nhân vật/cảnh low-poly cách điệu (procedural), không thay thế asset AAA.
+- Vật lý: heightfield + collider tròn (không ragdoll); lội nước sâu tối đa ngực (không bơi lặn).
+- Cá/chim không có hệ thống câu/thả lưới — chỉ sinh thái + săn thú cạn.
+- Không chu kỳ ngày–đêm liên tục (ngày/đêm theo vùng; thời tiết động thay đổi ánh sáng trong phiên).
+- Thế Giới Vô Cực: nội dung ô sinh từ 15 template + biến thể procedural (không phải nội dung
+  thiết kế tay vô hạn); ô đã "an toàn" không respawn địch cho tới khi tải lại save.
+- Server không chống gian lận (client-authoritative, game đơn người); xác thực v2 chưa chạy trên
+  FastAPI thật trong máy phát triển này (không có Python) — đã xác minh qua dev-server Node cùng
+  API surface; code `server/` không đổi so với bản đã nghiệm thu trước đó.

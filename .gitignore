@@ -6,3 +6,6 @@ samurai.db-wal
 node_modules/
 web/dist/
 .DS_Store
+*.png
+
+.dev-saves.json

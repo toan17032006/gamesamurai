@@ -1,14 +1,102 @@
-// World: region construction (terrain, props, colliders, interactables) + queries.
+// World: xây dựng vùng chơi (địa hình, props, nước, mối nguy) + truy vấn vật lý.
+// Hai chế độ: campaign (1 region) và infinite (Ô sinh thế giới vô cực - delegate InfiniteWorld).
 import * as THREE from 'three';
 import { makeNoise2D, mulberry32, clamp } from '../core/utils.js';
 import { buildTerrain } from '../gfx/terrain.js';
 import { makeTree, makeBambooField, makeRock, makeLantern, makeHouse, makeTorii, makeBanner,
   makeShrineHall, makeGrave, makeStatue, makeWallSegment, makeKeepTower, makeCastleGate, makeCampfire,
-  makeMountain } from '../gfx/props.js';
+  makeMountain, makeBridge, makeDeadTree, makeReeds, makeSnowPine, makeLilyPad, makeMushroom,
+  makeLavaRock } from '../gfx/props.js';
 import { buildGrass } from '../gfx/grass.js';
 import { mergeStaticProps } from '../gfx/merge.js';
 import { WIND, disposeSwayMaterials } from '../gfx/wind.js';
+import { WaterSurface, makeWaterfallStrip, waterfallFoam, WATER_TIME } from '../gfx/water.js';
 import { Interactable } from '../entities/interactable.js';
+import { InfiniteWorld, CELL as CELL_SIZE_REF } from './infiniteWorld.js';
+import { hashSeed } from './worldgen.js';
+
+// ---- trường địa hình theo builder (dùng chung campaign + tham chiếu infinite) ----
+// Trả về { heightFn, water: {level, color}|null }
+export function makeHeightField(def, noise) {
+  const b = def.builder;
+  const size = def.size, half = size / 2;
+  const roadX = 0;
+  let amp = 2.2, freq = 0.02, wallAmp = 0;
+  if (b === 'village' || b === 'shrine' || b === 'arena' || b === 'throne') { amp = 0.9; freq = 0.015; }
+  if (b === 'meadow') { amp = 2.6; freq = 0.02; }
+  if (b === 'bamboo') { amp = 1.6; freq = 0.025; }
+  if (b === 'battlefield') { amp = 1.9; freq = 0.018; }
+  if (b === 'mountain') { amp = 3.2; freq = 0.02; wallAmp = 7; }
+  if (b === 'cave') { amp = 2.0; freq = 0.03; wallAmp = 10; }
+  if (b === 'castle') { amp = 1.2; freq = 0.02; }
+  if (b === 'forest') { amp = 1.8; freq = 0.022; }
+  if (b === 'snow') { amp = 3.6; freq = 0.02; wallAmp = 8; }
+  if (b === 'badlands') { amp = 2.8; freq = 0.024; }
+  if (b === 'river') { amp = 2.0; freq = 0.02; wallAmp = 6; }
+  if (b === 'wetland') { amp = 1.1; freq = 0.018; }
+  if (b === 'volcano') { amp = 1.6; freq = 0.02; }
+
+  const spawnPoint = [0, half - 14];
+  const goalPos = [0, -half + 10];
+
+  const heightFn = (x, z) => {
+    let h = noise.fbm(x * freq + 10, z * freq + 10, 4) * amp;
+    // mesa/terrace cho badlands: bậc thang tạo vách dựng
+    if (b === 'badlands') {
+      const step = 2.4;
+      const q = Math.floor(h / step) * step;
+      const f = (h - q) / step;
+      h = q + (f * f * (3 - 2 * f)) * step * 0.6; // cong nhẹ cho bề mặt bậc
+      // hẻm núi dọc hai bên đường
+      const lat = Math.abs(x - roadX) / half;
+      h += clamp((lat - 0.22) * 3.0, 0, 1) * clamp((lat - 0.22) * 3.0, 0, 1) * 9;
+    }
+    if (b === 'river') {
+      // lòng sông uốn quanh trục z, cắt sâu qua bản đồ + suối phụ
+      const rx = Math.sin(z * 0.045 + def.seed) * 6 + noise.fbm(z * 0.02, 7.7, 2) * 5;
+      const d = Math.abs(x - rx);
+      const carve = clamp(1 - d / 8.5, 0, 1);
+      h -= carve * carve * 2.3;
+      // vách dọc hai bên thung lũng sông
+      const lat = Math.abs(x - roadX) / half;
+      h += clamp((lat - 0.3) * 2.6, 0, 1) * clamp((lat - 0.3) * 2.6, 0, 1) * 6;
+    }
+    if (b === 'wetland') {
+      // hồ lớn ở giữa + các vũng lầy rải
+      const lake = clamp(1 - Math.hypot(x, z) / (half * 0.62), 0, 1);
+      h -= lake * lake * 2.4;
+      const pond = noise.fbm(x * 0.05 + 40, z * 0.05 - 12, 2);
+      if (pond > 0.24) h -= (pond - 0.24) * 6;
+    }
+    if (b === 'volcano') {
+      // núi hình nón giữa bản đồ + miệng crater lõm
+      const dz = -6; // tâm hơi lệch về phía goal
+      const d = Math.hypot(x, z - dz) / (half * 0.78);
+      const cone = Math.max(0, 1 - d);
+      h += cone * cone * 13;
+      const crater = clamp(1 - Math.hypot(x, z - dz) / 7.5, 0, 1);
+      h -= crater * crater * 5.5;
+    }
+    if (wallAmp > 0) {
+      const lat = Math.abs(x - roadX) / half;
+      const dip = clamp((lat - 0.18) * 3.2, 0, 1);
+      h += dip * dip * wallAmp;
+    }
+    // làm phẳng quanh spawn/goal cho combat & landmark
+    const cd = Math.hypot(x, z);
+    if (cd < 16) h *= 0.4;
+    const gd = Math.hypot(x - goalPos[0], z - goalPos[2]);
+    if (gd < 14) h *= 0.35;
+    return h;
+  };
+
+  let water = null;
+  if (b === 'river') water = { level: -0.95, color: 0x3a6a7a, flood: true };
+  if (b === 'wetland') water = { level: -0.75, color: 0x4a6a58, flood: true };
+  if (b === 'volcano') water = { lava: true, level: 4.6 }; // mặt dung nham trong crater
+  if (b === 'snow') water = { level: -1.4, color: 0x5a7a92 }; // hồ băng nhỏ nơi trũng
+  return { heightFn, water, spawnPoint, goalPos, roadX };
+}
 
 export class World {
   constructor(game) {
@@ -16,73 +104,165 @@ export class World {
     this.group = new THREE.Group();
     game.engine.scene.add(this.group);
     this.def = null;
-    this.colliders = [];       // {x, z, r, h}
+    this.mode = 'campaign';
+    this.infinite = null;
+    this.colliders = [];       // {x, z, r, h, cell?}
     this.interactables = [];
-    this.owned = [];           // geometries/materials to dispose on unload
+    this.owned = [];           // geometries/materials cần dispose khi dỡ
     this.heightFn = (x, z) => 0;
     this.baseY = 0;
     this.roadX = 0;
     this.spawnPoint = [0, 60];
     this.goalPos = [0, -60];
     this.regionGroup = null;
+    this.waterSurface = null;
+    this.lavaSurface = null;
+    this.waterfalls = [];
+    this.hazards = [];         // {type:'lava', level, x, z, r}
+    this.foamT = 0;
+    this.cellTags = new Map(); // cellKey -> {group, ownedIdx...} cho infinite
   }
 
+  // ---- water/hazard queries -------------------------------------------------
+  get waterLevel() { return this.waterSurface && this.waterSurface.enabled ? this.waterSurface.level : -Infinity; }
+
+  waterLevelAt(_x, _z) { return this.waterLevel; }
+
+  hazardAt(x, z) {
+    for (const h of this.hazards) {
+      if (h.r === undefined || Math.hypot(x - h.x, z - h.z) < h.r) return h;
+    }
+    return null;
+  }
+
+  get boundLimit() {
+    if (this.mode === 'infinite') return Infinity;
+    return this.def ? this.def.size / 2 - 2 : 60;
+  }
+
+  groundAt(x, z) {
+    if (this.mode === 'infinite') return this.infinite.heightAt(x, z);
+    if (!this.def) return 0;
+    return this.heightFn(x, z);
+  }
+
+  // ---- campaign region --------------------------------------------------------
   loadRegion(def) {
-    this.clear();
+    this.clearAll();
+    this.mode = 'campaign';
     this.def = def;
     const rng = mulberry32(def.seed);
     const noise = makeNoise2D(def.seed);
     const size = def.size;
-    this.roadX = 0;
-    this.spawnPoint = [0, size / 2 - 14];
-    this.goalPos = [0, -size / 2 + 10];
-
-    // terrain height function per builder
-    const b = def.builder;
-    let amp = 2.2, freq = 0.02, wallAmp = 0;
-    if (b === 'village' || b === 'shrine' || b === 'arena' || b === 'throne') { amp = 0.9; freq = 0.015; }
-    if (b === 'meadow') { amp = 2.6; freq = 0.02; }
-    if (b === 'bamboo') { amp = 1.6; freq = 0.025; }
-    if (b === 'battlefield') { amp = 1.9; freq = 0.018; }
-    if (b === 'mountain') { amp = 3.2; freq = 0.02; wallAmp = 7; }
-    if (b === 'cave') { amp = 2.0; freq = 0.03; wallAmp = 10; }
-    if (b === 'castle') { amp = 1.2; freq = 0.02; }
+    const field = makeHeightField(def, noise);
+    this.heightFn = field.heightFn;
+    this.roadX = field.roadX;
+    this.spawnPoint = field.spawnPoint;
+    this.goalPos = field.goalPos;
     this.baseY = 0;
-    const half = size / 2;
-    this.heightFn = (x, z) => {
-      let h = noise.fbm(x * freq + 10, z * freq + 10, 4) * amp;
-      if (wallAmp > 0) {
-        // raise sides, keep a valley around the road
-        const lat = Math.abs(x - this.roadX) / half;
-        const dip = clamp((lat - 0.18) * 3.2, 0, 1);
-        h += dip * dip * wallAmp;
-      }
-      // flatten near center/goal for combat & landmarks
-      const cd = Math.hypot(x, z);
-      if (cd < 16) h *= 0.4;
-      const gd = Math.hypot(x - this.goalPos[0], z - this.goalPos[2]);
-      if (gd < 14) h *= 0.35;
-      return h;
-    };
 
     const qk = game.engine.qualityKey;
     const ter = buildTerrain(this, def, qk);
     this.group.add(ter.mesh);
     this.owned.push(ter);
-    this.terrain = ter; // material tweakable at runtime (e.g. wet ground in rain)
+    this.terrain = ter;
     this.regionGroup = new THREE.Group();
     this.group.add(this.regionGroup);
 
     this.buildProps(def, rng, noise);
     this.buildLandmarks(def, rng);
     this.buildBackdrop(def, rng);
-    this.grass = buildGrass(this, def, rng, noise, qk);
+    this.grass = buildGrass(this, def, rng, noise, qk, this.vegDensity());
     if (this.grass) this.regionGroup.add(this.grass.mesh);
-    // cut draw calls: batch static props per material per map chunk (sway meshes keep their draws)
     for (const m of mergeStaticProps(this.regionGroup, Math.max(24, size / 5))) this.owned.push({ mesh: m, geo: m.geometry });
+
+    this.setupWater(def, rng);
     return true;
   }
 
+  vegDensity() {
+    const s = this.game.settings || {};
+    return { low: 0.5, normal: 1, high: 1.5 }[s.vegDensity] ?? 1;
+  }
+
+  // nước: mặt phẳng lớn + mực nước theo def; lava là bề mặt riêng
+  setupWater(def, rng) {
+    const size = def.size;
+    if (!def.water) {
+      if (this.waterSurface) this.waterSurface.snap(-9999);
+      if (this.lavaSurface) this.lavaSurface.snap(-9999);
+      this.hazards = [];
+      this.waterfalls = [];
+      return;
+    }
+    if (!this.waterSurface) {
+      this.waterSurface = new WaterSurface(this.group.parent, { size: 640 });
+      this.waterSurface.floodMax = 0.95;
+    }
+    if (def.water.lava) {
+      this.waterSurface.snap(-9999);
+      if (!this.lavaSurface) this.lavaSurface = new WaterSurface(this.group.parent, { size: 64, lava: true, segments: 20 });
+      this.lavaSurface.snap(def.water.level);
+      const [gx, gz] = this.goalPos;
+      // miệng crater quanh goal (trùng tâm núi lửa)
+      this.hazards = [{ type: 'lava', level: def.water.level, x: gx, z: gz + 6, r: 6.4 }];
+      // nham thạch tràn: vệt sáng quanh crater
+      this.waterfalls = [];
+    } else {
+      if (this.lavaSurface) this.lavaSurface.snap(-9999);
+      this.hazards = [];
+      this.waterSurface.snap(def.water.level);
+      this.waterSurface.mat.color.setHex(def.water.color ?? 0x3a6a7a);
+      if (def.builder === 'river') {
+        // thác nước ở mép bắc (từ vách đổ xuống lòng sông)
+        this.waterfalls = [];
+        const wfz = -size / 2 + 6;
+        for (const wx of [-14, 14]) {
+          const strip = makeWaterfallStrip(5, 9);
+          strip.position.set(wx, 2.6, wfz);
+          this.regionGroup.add(strip);
+          this.owned.push({ mesh: strip, geo: strip.geometry });
+          this.waterfalls.push({ x: wx, y: this.waterSurface.level + 0.1, z: wfz + 1, w: 4 });
+        }
+        // cầu gỗ bắc qua sông giữa bản đồ
+        const bridge = makeBridge(16, 3.4);
+        const rx = Math.sin(0 * 0.045 + def.seed) * 6;
+        bridge.position.set(rx, 0.1, 0);
+        this.regionGroup.add(bridge);
+        for (const px of [-6.4, 6.4]) this.colliders.push({ x: rx + px, z: 0, r: 0.5, h: 1.4 });
+        // bùn/đá bờ sông
+        for (let i = 0; i < 10; i++) {
+          const bx = rx + (rng() < 0.5 ? -1 : 1) * (9 + rng() * 5);
+          const bz = (rng() - 0.5) * size * 0.7;
+          this.addProp(makeRock(rng, 0.5 + rng() * 0.8), bx, bz, 0.6, 1);
+        }
+      }
+      if (def.builder === 'wetland') {
+        // súng + lau sậy quanh hồ
+        for (let i = 0; i < 14; i++) {
+          const a = rng() * Math.PI * 2, r = 18 + rng() * 34;
+          const lx = Math.cos(a) * r, lz = Math.sin(a) * r;
+          const lp = makeLilyPad(rng);
+          lp.position.set(lx, def.water.level + 0.02, lz);
+          this.regionGroup.add(lp);
+        }
+        for (let i = 0; i < 26; i++) {
+          const a = rng() * Math.PI * 2, r = 30 + rng() * 30;
+          this.addProp(makeReeds(rng), Math.cos(a) * r, Math.sin(a) * r, 0, 0);
+        }
+        for (let i = 0; i < 8; i++) {
+          const a = rng() * Math.PI * 2, r = 36 + rng() * 26;
+          this.addProp(makeDeadTree(rng), Math.cos(a) * r, Math.sin(a) * r, 0.4, 3);
+        }
+      }
+    }
+  }
+
+  setFlood(t) {
+    if (this.waterSurface && this.waterSurface.enabled) this.waterSurface.setFlood(t);
+  }
+
+  // ---- props (dùng chung) ------------------------------------------------------
   addProp(obj, x, z, r = 0, h = 3) {
     const y = this.heightFn(x, z);
     obj.position.set(x, y, z);
@@ -94,33 +274,51 @@ export class World {
   buildProps(def, rng, noise) {
     const d = def.decor;
     const size = def.size, half = size / 2;
+    const vd = this.vegDensity();
+    const cnt = (n) => Math.max(n > 0 ? 1 : 0, Math.round(n * vd));
     const scatter = (count, fn, minRoad = 3.5) => {
       let placed = 0, tries = 0;
       while (placed < count && tries < count * 12) {
         tries++;
         const x = (rng() - 0.5) * size * 0.92;
         const z = (rng() - 0.5) * size * 0.92;
-        if (Math.abs(x - this.roadX) < minRoad && Math.abs(z) < half * 0.7) continue; // keep road clear
+        if (Math.abs(x - this.roadX) < minRoad && Math.abs(z) < half * 0.7) continue;
         if (Math.hypot(x - this.spawnPoint[0], z - this.spawnPoint[1]) < 8) continue;
+        // tránh placed vào nước
+        if (def.water && !def.water.lava && this.heightFn(x, z) < (def.water.level || 0) + 0.15) continue;
         fn(x, z);
         placed++;
       }
     };
 
-    if (d.trees > 0) scatter(d.trees, (x, z) => {
+    if (d.trees > 0) scatter(cnt(d.trees), (x, z) => {
       const t = makeTree(rng, rng() < 0.7 ? 'pine' : 'maple');
       const s = 0.8 + rng() * 0.7;
       t.scale.setScalar(s);
       this.addProp(t, x, z, 0.55 * s, 4);
     });
-    if (d.rocks > 0) scatter(d.rocks, (x, z) => {
+    if (d.snowPines > 0) scatter(cnt(d.snowPines), (x, z) => {
+      const t = makeSnowPine(rng);
+      const s = 0.8 + rng() * 0.7;
+      t.scale.setScalar(s);
+      this.addProp(t, x, z, 0.55 * s, 4);
+    });
+    if (d.deadTrees > 0) scatter(cnt(d.deadTrees), (x, z) => {
+      this.addProp(makeDeadTree(rng), x, z, 0.3, 3);
+    });
+    if (d.mushrooms > 0) scatter(cnt(d.mushrooms), (x, z) => {
+      this.addProp(makeMushroom(rng), x, z, 0, 0);
+    });
+    if (d.lavaRocks > 0) scatter(cnt(d.lavaRocks), (x, z) => {
+      this.addProp(makeLavaRock(rng), x, z, 0.8, 1.5);
+    });
+    if (d.rocks > 0) scatter(cnt(d.rocks), (x, z) => {
       const s = 0.6 + rng() * 1.6;
       this.addProp(makeRock(rng, s), x, z, s * 0.8, s * 1.2);
     });
     if (d.bamboo > 0) {
-      const count = d.bamboo;
+      const count = cnt(d.bamboo);
       const field = makeBambooField(count, rng);
-      // spread instances over region avoiding road
       const m4 = new THREE.Matrix4(), p = new THREE.Vector3(), q = new THREE.Quaternion(), e = new THREE.Euler(), s = new THREE.Vector3(1, 1, 1);
       const stems = field.children[0], leaves = field.children[1];
       let placed = 0, tries = 0;
@@ -142,7 +340,6 @@ export class World {
       this.regionGroup.add(field);
     }
     if (d.houses > 0) {
-      // rows flanking the road
       const rows = Math.ceil(d.houses / 2);
       for (let i = 0; i < rows; i++) {
         for (const side of [-1, 1]) {
@@ -156,7 +353,6 @@ export class World {
       }
     }
     if (d.lanterns > 0) {
-      // lantern rows along the road + scattered
       const roadLanterns = Math.min(d.lanterns, Math.ceil(d.lanterns * 0.7));
       for (let i = 0; i < roadLanterns; i++) {
         const z = half * 0.6 - (i / roadLanterns) * size * 1.1;
@@ -190,7 +386,6 @@ export class World {
     const [gx, gz] = this.goalPos;
     switch (b) {
       case 'meadow':
-        // bandit camp mid-map
         this.addProp(makeCampfire(), 0, 8, 0.6, 1);
         for (let i = 0; i < 3; i++) {
           const a = (i / 3) * Math.PI * 2;
@@ -203,7 +398,6 @@ export class World {
         this.addProp(makeTorii(1.2), gx, gz, 0.6, 5);
         break;
       case 'village': {
-        // village shrine at goal + well at center
         const shrine = makeShrineHall();
         shrine.position.set(gx, this.heightFn(gx, gz), gz);
         this.regionGroup.add(shrine);
@@ -213,7 +407,6 @@ export class World {
         break;
       }
       case 'bamboo': {
-        // clearing with statue at goal
         this.addProp(makeStatue(), gx, gz, 1.0, 3);
         for (let i = 0; i < 4; i++) {
           const a = (i / 4) * Math.PI * 2 + 0.4;
@@ -234,7 +427,6 @@ export class World {
         break;
       }
       case 'battlefield': {
-        // center banner (defend objective)
         const pole = new THREE.Group();
         const p = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.12, 5, 6), new THREE.MeshStandardMaterial({ color: 0x3e2c1c }));
         p.position.y = 2.5; p.castShadow = true;
@@ -246,7 +438,6 @@ export class World {
         break;
       }
       case 'cave': {
-        // mine arch at goal
         const arch = new THREE.Group();
         const rockMat = new THREE.MeshStandardMaterial({ color: 0x5c5650, roughness: 0.95 });
         for (let i = 0; i < 5; i++) {
@@ -263,7 +454,6 @@ export class World {
         break;
       }
       case 'arena': {
-        // stone ring of low walls
         const R = 22;
         for (let i = 0; i < 26; i++) {
           const a = (i / 26) * Math.PI * 2;
@@ -279,7 +469,6 @@ export class World {
         break;
       }
       case 'castle': {
-        // keep tower at goal + wall rows
         const keep = makeKeepTower();
         keep.position.set(gx, this.heightFn(gx, gz) - 0.5, gz);
         this.regionGroup.add(keep);
@@ -297,7 +486,6 @@ export class World {
         break;
       }
       case 'throne': {
-        // pillars rows + throne
         for (const x of [-9, -4.5, 4.5, 9]) {
           for (const z of [-24, -10, 4, 18]) {
             const pil = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.85, 9, 10), new THREE.MeshStandardMaterial({ color: 0x4a4450, roughness: 0.9 }));
@@ -321,12 +509,64 @@ export class World {
         this.throneGem = gem;
         break;
       }
+      case 'forest': {
+        // bãi trũng giữa rừng: đá tế + đống củi
+        this.addProp(makeStatue(), gx, gz, 1.0, 3);
+        this.addProp(makeCampfire(), 0, 12, 0.6, 1);
+        for (let i = 0; i < 4; i++) this.addProp(makeMushroom(rng), (rng() - 0.5) * 8, 12 + (rng() - 0.5) * 8, 0, 0);
+        break;
+      }
+      case 'river': {
+        // đền cổ nhỏ bên kia cầu (goal)
+        this.addProp(makeTorii(1.2), gx, gz, 0.6, 5);
+        this.addProp(makeLantern(true), gx + 3, gz + 2, 0.45, 2);
+        break;
+      }
+      case 'snow': {
+        // đài đèn giữa băng nguyên + đá tuyết phủ
+        this.addProp(makeLantern(true), gx, gz, 0.45, 2);
+        this.addProp(makeCampfire(), 0, 14, 0.6, 1);
+        break;
+      }
+      case 'wetland': {
+        // đền chìm nửa chìm giữa hồ (goal)
+        const hall = makeShrineHall();
+        hall.position.set(gx, this.heightFn(gx, gz) - 0.6, gz);
+        this.regionGroup.add(hall);
+        this.colliders.push({ x: gx, z: gz, r: 4.6, h: 4 });
+        break;
+      }
+      case 'badlands': {
+        // arena đá giữa hẻm núi (sân đấu ronin)
+        const R = 18;
+        for (let i = 0; i < 22; i++) {
+          const a = (i / 22) * Math.PI * 2;
+          const x = Math.cos(a) * R, z = Math.sin(a) * R;
+          const w = makeWallSegment(3.6, 1.4);
+          w.position.set(x, this.heightFn(x, z), z);
+          w.rotation.y = -a + Math.PI / 2;
+          this.regionGroup.add(w);
+          this.colliders.push({ x, z, r: 1.8, h: 2 });
+        }
+        for (let i = 0; i < 6; i++) {
+          const a = (i / 6) * Math.PI * 2;
+          this.addProp(makeBanner([0x8a2a2a, 0x2a2a2a][(i % 2)]), Math.cos(a) * (R - 2), Math.sin(a) * (R - 2), 0.15, 2.5);
+        }
+        break;
+      }
+      case 'volcano': {
+        // giàn đèn lửa dẫn lên crater
+        for (let i = 0; i < 5; i++) {
+          const z = 26 - i * 10;
+          this.addProp(makeLantern(true), i % 2 === 0 ? -4 : 4, z, 0.45, 2);
+        }
+        break;
+      }
     }
   }
 
-  // distant mountain ring so the horizon never shows a flat edge
   buildBackdrop(def, rng) {
-    if (def.builder === 'cave' || def.builder === 'throne') return;
+    if (def.builder === 'cave' || def.builder === 'throne' || def.builder === 'volcano') return;
     const size = def.size;
     const count = def.builder === 'mountain' ? 5 : 11;
     const fog = new THREE.Color(def.sky.bottom);
@@ -341,12 +581,64 @@ export class World {
     }
   }
 
-  // ---- queries ------------------------------------------------------------
-  groundAt(x, z) {
-    if (!this.def) return 0;
-    return this.heightFn(x, z);
+  // ---- Infinite World ----------------------------------------------------------
+  // seedInput: chuỗi bất kỳ (hash FNV) hoặc số (restore từ save — dùng trực tiếp)
+  enterInfinite(seedInput) {
+    this.clearAll();
+    this.mode = 'infinite';
+    this.def = null;
+    const seed = typeof seedInput === 'number' ? (seedInput >>> 0) : hashSeed(seedInput);
+    this.infinite = new InfiniteWorld(this, seed);
+    this.heightFn = (x, z) => this.infinite.heightAt(x, z);
+    this.roadX = 0;
+    if (!this.waterSurface) {
+      this.waterSurface = new WaterSurface(this.group.parent, { size: 640 });
+      this.waterSurface.floodMax = 0.95;
+    }
+    this.waterSurface.mat.color.setHex(0x3a6a7a);
+    this.infinite.ensureInitial();
+    return this.infinite;
   }
 
+  // dựng props/landmark cho một ô vô cực: hoán đổi ngữ cảnh rồi trả lại
+  buildCellContent(cell, def, rng, noise) {
+    const saved = { group: this.regionGroup, colliders: this.colliders, spawn: this.spawnPoint, goal: this.goalPos };
+    this.regionGroup = cell.group;
+    this.colliders = cell.colliders;
+    this.spawnPoint = [cell.cx * CELL_SIZE_REF, cell.cz * CELL_SIZE_REF + CELL_SIZE_REF / 2 - 14];
+    this.goalPos = [cell.cx * CELL_SIZE_REF, cell.cz * CELL_SIZE_REF - CELL_SIZE_REF / 2 + 10];
+    this.buildProps(def, rng, noise);
+    this.buildLandmarks(def, rng);
+    // gắn tag thác nước sinh ra trong ô
+    for (const wf of this.waterfalls) if (wf.cell === undefined) wf.cell = cell.key;
+    this.regionGroup = saved.group;
+    this.colliders = saved.colliders;
+    this.spawnPoint = saved.spawn;
+    this.goalPos = saved.goal;
+  }
+
+  updateStreaming(pos) {
+    if (this.infinite) this.infinite.update(pos);
+  }
+
+  spawnWildlife(cfg, area, seed) {
+    const rng = mulberry32(seed);
+    const size = area || (this.def ? this.def.size : 150);
+    const spawnOne = (kind) => {
+      for (let t = 0; t < 24; t++) {
+        const x = (rng() - 0.5) * size * 0.85;
+        const z = (rng() - 0.5) * size * 0.85;
+        if (Math.hypot(x, z) < 12) continue;
+        this.game.spawnCreature({ kind, x, z, seed: seed + t * 13 });
+        return;
+      }
+    };
+    for (const [kind, count] of Object.entries(cfg || {})) {
+      for (let i = 0; i < count; i++) spawnOne(kind);
+    }
+  }
+
+  // ---- queries ------------------------------------------------------------
   collideCircle(pos, r) {
     for (const c of this.colliders) {
       const dx = pos.x - c.x, dz = pos.z - c.z;
@@ -379,7 +671,6 @@ export class World {
   }
 
   separate(npc, dt) {
-    // cheap separation from nearby NPCs
     const npcs = this.game.npcs;
     for (const o of npcs) {
       if (o === npc || o.disposed || o.combat.dead) continue;
@@ -398,6 +689,7 @@ export class World {
   // ---- interactables ------------------------------------------------------
   addInteractable(cfg) {
     const it = new Interactable(this.game, cfg);
+    if (this.infinite) it.cell = this.infinite.cellKeyAt(cfg.x, cfg.z);
     this.interactables.push(it);
     return it;
   }
@@ -414,9 +706,9 @@ export class World {
 
   useInteractable(it, player) { it.use(player); }
 
-  spawnResourceNodes(counts) {
-    const rng = mulberry32(this.def.seed + 7);
-    const size = this.def.size, half = size / 2;
+  spawnResourceNodes(counts, area) {
+    const rng = mulberry32((this.def ? this.def.seed : 7) + 7);
+    const size = area || (this.def ? this.def.size : 150), half = size / 2;
     for (const [type, count] of Object.entries(counts || {})) {
       for (let i = 0; i < count; i++) {
         let x, z, tries = 0;
@@ -430,17 +722,40 @@ export class World {
     }
   }
 
+  // ---- frame update ---------------------------------------------------------
   update(dt) {
     WIND.uTime.value = this.game.time;
     for (const it of this.interactables) it.update(dt);
+    // nước: nhịp sóng + lũ + bám player
+    WATER_TIME.value = this.game.time;
+    if (this.waterSurface) {
+      this.waterSurface.update(dt);
+      const p = this.game.player ? this.game.player.pos : { x: 0, z: 0 };
+      this.waterSurface.recenter(p.x, p.z);
+    }
+    if (this.lavaSurface) {
+      this.lavaSurface.update(dt);
+      const p = this.game.player ? this.game.player.pos : { x: 0, z: 0 };
+      this.lavaSurface.recenter(p.x, p.z);
+    }
+    // bọt thác nước
+    if (this.waterfalls.length) {
+      this.foamT -= dt;
+      if (this.foamT <= 0) {
+        this.foamT = 0.12;
+        for (const wf of this.waterfalls) waterfallFoam(this.game, wf);
+      }
+    }
+    if (this.infinite) this.infinite.update(this.game.player ? this.game.player.pos : { x: 0, z: 0 });
   }
 
-  clear() {
+  // dỡ toàn bộ (đổi region / vào menu / sang infinite)
+  clearAll() {
     if (this.regionGroup) {
       this.group.remove(this.regionGroup);
-      this.regionGroup.traverse(() => {});
       this.regionGroup = null;
     }
+    if (this.infinite) { this.infinite.dispose(); this.infinite = null; }
     for (const o of this.owned) {
       if (o.mesh) this.group.remove(o.mesh);
       if (o.geo) o.geo.dispose();
@@ -456,6 +771,14 @@ export class World {
     for (const it of this.interactables) it.dispose(this.game);
     this.interactables = [];
     this.colliders = [];
+    this.hazards = [];
+    this.waterfalls = [];
+    if (this.waterSurface) this.waterSurface.snap(-9999);
+    if (this.lavaSurface) this.lavaSurface.snap(-9999);
     this.def = null;
+    this.mode = 'campaign';
   }
+
+  // tương thích tên cũ
+  clear() { this.clearAll(); }
 }

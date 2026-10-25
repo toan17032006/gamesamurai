@@ -82,12 +82,14 @@ export class ParticleSystem {
   dispose() { this.geo.dispose(); this.mat.dispose(); this.points.parent?.remove(this.points); }
 }
 
-// Ambient weather: rain, petals, leaves, embers, ash — wraps around the player.
+// Ambient weather: rain, petals, leaves, embers, ash, snow, dust, spirit — wraps around the player.
+// countMul giảm/gia mật độ theo cài đặt Weather FX (off/basic/full).
 export class Weather {
-  constructor(scene, type, area = 90) {
+  constructor(scene, type, area = 90, countMul = 1) {
     this.type = type;
     this.area = area;
-    const count = type === 'rain' ? 700 : type === 'none' ? 0 : 220;
+    const baseCount = type === 'rain' ? 700 : type === 'snowstorm' ? 420 : type === 'none' ? 0 : 220;
+    const count = Math.round(baseCount * countMul);
     this.count = count;
     this.active = count > 0;
     if (!this.active) return;
@@ -100,7 +102,9 @@ export class Weather {
     if (type === 'leaves') { colorA = [0.9, 0.6, 0.25]; speed = [0.5, -1.1, 0.3]; }
     if (type === 'embers') { colorA = [1.0, 0.45, 0.12]; speed = [0.2, 1.1, 0.15]; }
     if (type === 'ash') { colorA = [0.6, 0.55, 0.5]; speed = [0.3, -0.8, 0.2]; }
-    if (type === 'snow') { colorA = [0.9, 0.95, 1.0]; speed = [0.3, -1.6, 0.2]; }
+    if (type === 'snow' || type === 'snowstorm') { colorA = [0.9, 0.95, 1.0]; speed = [0.3, -1.6, 0.2]; }
+    if (type === 'dust') { colorA = [0.85, 0.72, 0.55]; speed = [3.5, -0.15, 0.8]; }
+    if (type === 'spirit') { colorA = [0.45, 0.85, 1.0]; speed = [0.15, -2.6, 0.1]; }
     this.color = new THREE.Color(...colorA);
     this.baseSpeed = speed;
     if (type === 'rain') {
@@ -111,9 +115,11 @@ export class Weather {
       this.points = new THREE.LineSegments(geo, mat);
       this.streak = 0.055;
     } else {
+      const additive = type === 'embers' || type === 'spirit';
+      const size = type === 'dust' ? 0.14 : type === 'spirit' ? 0.11 : 0.09;
       const mat = new THREE.PointsMaterial({
-        size: 0.09, color: this.color, transparent: true, opacity: 0.8,
-        depthWrite: false, blending: type === 'embers' ? THREE.AdditiveBlending : THREE.NormalBlending,
+        size, color: this.color, transparent: true, opacity: 0.8,
+        depthWrite: false, blending: additive ? THREE.AdditiveBlending : THREE.NormalBlending,
       });
       this.points = new THREE.Points(geo, mat);
       geo.setAttribute('position', new THREE.BufferAttribute(this.p, 3).setUsage(THREE.DynamicDrawUsage));

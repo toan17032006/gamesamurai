@@ -16,9 +16,10 @@ export class HUD {
       </div>
       <div class="hud-tr">
         <div class="char-chip">
-          <span id="hud-clevel">Cấp 1</span>
+          <span id="hud-clevel">Cấp 1/25</span>
           <span id="hud-coins">${CURRENCY.icon} 0</span>
         </div>
+        <div class="weather-chip" id="hud-weather" style="display:none"></div>
         <div class="xpbar"><div class="xpfill" id="hud-xp"></div></div>
         <div class="buffs" id="hud-buffs"></div>
       </div>
@@ -83,6 +84,14 @@ export class HUD {
     }
   }
 
+  setWeather(name, supernatural = false) {
+    const el = this.root.querySelector('#hud-weather');
+    el.style.display = 'block';
+    el.textContent = name;
+    this._weatherName = name;
+    el.classList.toggle('supernatural', !!supernatural);
+  }
+
   flashHp() {
     const v = this.root.querySelector('#hud-vignette');
     v.classList.remove('flash');
@@ -113,9 +122,17 @@ export class HUD {
     const coins = `${CURRENCY.icon} ${g.inventory.coins}`;
     const cEl = this.root.querySelector('#hud-coins');
     if (cEl.textContent !== coins) cEl.textContent = coins;
-    const lv = `Cấp ${g.progression.level}`;
+    const lv = `Cấp ${g.progression.level}/25`;
     const lEl = this.root.querySelector('#hud-clevel');
     if (lEl.textContent !== lv) lEl.textContent = lv;
+    // waypoint (thế giới vô cực)
+    const wpEl = this.root.querySelector('#hud-weather');
+    if (g.mode === 'infinite' && g.infinite?.waypoint && this._weatherName) {
+      const wp = g.infinite.waypoint;
+      const d = Math.hypot(wp.x - p.pos.x, wp.z - p.pos.z);
+      const txt = `${this._weatherName} · 🚩 ${Math.round(d)}m`;
+      if (wpEl.textContent !== txt) wpEl.textContent = txt;
+    }
     const badge = this.root.querySelector('#hud-levelbadge');
     const bn = String(g.progression.level);
     if (badge.textContent !== bn) badge.textContent = bn;

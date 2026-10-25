@@ -359,6 +359,129 @@ export function makeArrow(ang = 0) {
   return g;
 }
 
+// ---- props môi trường mới (river/wetland/snow/forest/badlands) --------------
+
+// Cầu gỗ vòm nhẹ qua sông: mặt cầu, lan can, trụ đá.
+export function makeBridge(len = 14, width = 3.2) {
+  const g = new THREE.Group();
+  const deckMat = WOOD();
+  const slats = 9;
+  for (let i = 0; i < slats; i++) {
+    const t = i / (slats - 1);
+    const z = -len / 2 + t * len;
+    // vòm nhẹ: nâng giữa cầu
+    const y = Math.sin(t * Math.PI) * 0.6;
+    mesh(g, G('box', width, 0.14, len / slats + 0.06), deckMat, 0, y, z);
+  }
+  for (const side of [-1, 1]) {
+    for (let i = 0; i <= 4; i++) {
+      const t = i / 4, z = -len / 2 + t * len, y = Math.sin(t * Math.PI) * 0.6;
+      mesh(g, G('box', 0.12, 1.0, 0.12), DARKWOOD(), side * (width / 2 - 0.15), y + 0.5, z);
+    }
+    const rail = mesh(g, G('box', 0.1, 0.1, len * 1.02), DARKWOOD(), side * (width / 2 - 0.15), 1.05, 0);
+    rail.rotation.x = Math.atan2(1.2, len) * 0; // lan can theo vòm: đơn giản là thẳng
+  }
+  for (const [px, pz] of [[-1, -len / 2 + 1.5], [1, -len / 2 + 1.5], [-1, len / 2 - 1.5], [1, len / 2 - 1.5]]) {
+    mesh(g, G('box', 0.5, 1.6, 0.5), STONE(), px * (width / 2 - 0.4), -0.5, pz);
+  }
+  return g;
+}
+
+// Cây chết (đầm lầy/badlands): thân xoắn + cành trụi.
+export function makeDeadTree(rng) {
+  const g = new THREE.Group();
+  const h = 2.6 + rng() * 2.4;
+  const mat = M(0x4a4038, { rough: 0.95 });
+  const trunk = mesh(g, G('cyl', 0.09, 0.22, h, 6), mat, 0, h / 2, 0);
+  trunk.rotation.z = (rng() - 0.5) * 0.2;
+  const branches = 2 + (rng() * 3 | 0);
+  for (let i = 0; i < branches; i++) {
+    const bh = h * (0.4 + rng() * 0.5);
+    const br = mesh(g, G('cyl', 0.03, 0.06, 0.8 + rng() * 0.9, 4), mat,
+      (rng() - 0.5) * 0.4, bh, (rng() - 0.5) * 0.4);
+    br.rotation.set((rng() - 0.5) * 1.4, rng() * 6.28, 0.6 + rng() * 0.7);
+  }
+  return g;
+}
+
+// Khóm lau sậy (đầm lầy/bờ hồ), lắc theo gió.
+export function makeReeds(rng) {
+  const g = new THREE.Group();
+  const stemMat = makeSwayMaterial({ color: 0x8a9a58, roughness: 0.8, side: THREE.DoubleSide }, { amp: 0.1, freq: 2.0, heightRef: 1.4 });
+  const count = 5 + (rng() * 5 | 0);
+  for (let i = 0; i < count; i++) {
+    const h = 0.9 + rng() * 0.9;
+    const st = mesh(g, G('cyl', 0.018, 0.03, h, 4), stemMat, (rng() - 0.5) * 0.7, h / 2, (rng() - 0.5) * 0.7);
+    st.rotation.z = (rng() - 0.5) * 0.25;
+    if (rng() < 0.6) {
+      const tip = mesh(g, G('cyl', 0.035, 0.035, 0.22, 4), M(0x6a5a38, { rough: 0.9 }), st.position.x, h + 0.1, st.position.z);
+      tip.rotation.z = st.rotation.z;
+    }
+  }
+  return g;
+}
+
+// Thông tuyết: tán thông với lớp trắng trên mỗi tầng.
+export function makeSnowPine(rng) {
+  const g = new THREE.Group();
+  const h = 2.8 + rng() * 2.6;
+  const trunk = mesh(g, G('cyl', 0.13, 0.24, h, 6), M(0x4a3c30, { rough: 0.95 }), 0, h / 2, 0);
+  trunk.rotation.z = (rng() - 0.5) * 0.06;
+  const greenMat = M(0x2a4a38, { rough: 0.9, extra: { flatShading: true } });
+  const snowMat = M(0xe8ecf2, { rough: 0.85, extra: { flatShading: true } });
+  let y = h * 0.4, r = 1.3 + rng() * 0.7;
+  const tiers = 4 + (rng() * 2 | 0);
+  for (let i = 0; i < tiers; i++) {
+    const cone = mesh(g, G('cone', r, 1.6, 8), greenMat, 0, y + 0.8, 0);
+    cone.rotation.z = (rng() - 0.5) * 0.05;
+    const cap = mesh(g, G('cone', r * 0.82, 0.5, 8), snowMat, 0, y + 1.42, 0);
+    y += h * 0.14; r *= 0.7;
+  }
+  return g;
+}
+
+// Súng (lily pad) nổi trên mặt nước.
+export function makeLilyPad(rng) {
+  const g = new THREE.Group();
+  const pad = new THREE.Mesh(G('circle', 0.28 + rng() * 0.3, 9),
+    M(0x3e6a3a, { rough: 0.7, extra: { side: THREE.DoubleSide } }));
+  pad.rotation.x = -Math.PI / 2;
+  g.add(pad);
+  if (rng() < 0.4) {
+    const flower = new THREE.Mesh(G('sph', 0.07, 6, 5),
+      new THREE.MeshStandardMaterial({ color: 0xf0b0c8, emissive: 0x703048, emissiveIntensity: 0.3, roughness: 0.6 }));
+    flower.position.y = 0.05;
+    g.add(flower);
+  }
+  return g;
+}
+
+// Nấm (rừng ôn đới) — điểm nhấn nhỏ dưới tán cây.
+export function makeMushroom(rng) {
+  const g = new THREE.Group();
+  const h = 0.14 + rng() * 0.12;
+  mesh(g, G('cyl', 0.03, 0.045, h, 5), M(0xd8ccb0, { rough: 0.9 }), 0, h / 2, 0);
+  const cap = mesh(g, G('sph', 0.09 + rng() * 0.05, 7, 5),
+    M(rng() < 0.5 ? 0xa04a2e : 0x8a6a3a, { rough: 0.75 }), 0, h, 0);
+  cap.scale.y = 0.55;
+  return g;
+}
+
+// Đá nham lng (volcano): đá tối với vết nứt phát sáng.
+export function makeLavaRock(rng) {
+  const g = new THREE.Group();
+  const rock = mesh(g, displacedIco(0.7 + rng() * 0.6, 1, 0.35, (rng() * 1000) | 0),
+    M(0x241c1a, { rough: 0.95, extra: { flatShading: true } }), 0, 0.5, 0);
+  const glowMat = new THREE.MeshStandardMaterial({ color: 0xff5a20, emissive: 0xff3a00, emissiveIntensity: 1.6, roughness: 0.5 });
+  const cracks = 2 + (rng() * 3 | 0);
+  for (let i = 0; i < cracks; i++) {
+    const c = mesh(g, G('box', 0.06, 0.02, 0.3 + rng() * 0.3), glowMat,
+      (rng() - 0.5) * 0.7, 0.2 + rng() * 0.6, (rng() - 0.5) * 0.7);
+    c.rotation.y = rng() * 3.14;
+  }
+  return g;
+}
+
 export function makeFireball() {
   const core = new THREE.Mesh(G('sph', 0.2, 10, 8), new THREE.MeshStandardMaterial({ color: 0xffd257, emissive: 0xff8a10, emissiveIntensity: 3.5, roughness: 0.3 }));
   const outer = new THREE.Mesh(G('sph', 0.3, 10, 8), new THREE.MeshStandardMaterial({ color: 0xff5a20, emissive: 0xff3a00, emissiveIntensity: 1.6, roughness: 0.5, transparent: true, opacity: 0.55 }));

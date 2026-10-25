@@ -85,7 +85,28 @@ export class Engine {
     const rs = this.options.resolutionScale;
     if (rs !== 'auto') this.renderScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, parseFloat(rs) || 1));
     this.gradingPass.uniforms.uGrain.value = this.options.grain ? 0.05 : 0;
+    if (opts.shadowQuality !== undefined) this._applyShadowQuality();
     this._applyResolution();
+  }
+
+  // chất lượng bóng đổ: tắt/thấp/cao/siêu — đổi resolution map + khoảng cách camera bóng thật sự
+  _applyShadowQuality() {
+    const q = this.options.shadowQuality || 'high';
+    const r = this.renderer;
+    if (q === 'off') { r.shadowMap.enabled = false; return; }
+    if (this.quality !== 'low') r.shadowMap.enabled = true;
+    const res = { low: 1024, high: 2048, ultra: 3072 }[q] || 2048;
+    const span = { low: 26, high: 40, ultra: 56 }[q] || 40;
+    this.scene.traverse((o) => {
+      if (o.isDirectionalLight && o.shadow) {
+        o.shadow.mapSize.setScalar(res);
+        o.shadow.camera.left = -span; o.shadow.camera.right = span;
+        o.shadow.camera.top = span; o.shadow.camera.bottom = -span;
+        o.shadow.camera.far = 140 + span * 2;
+        o.shadow.camera.updateProjectionMatrix();
+        if (o.shadow.map) { o.shadow.map.dispose(); o.shadow.map = null; }
+      }
+    });
   }
 
   setQuality(q) {

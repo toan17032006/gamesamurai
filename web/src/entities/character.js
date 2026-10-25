@@ -77,6 +77,7 @@ export class Character extends Entity {
     };
     this.grounded = true;
     this.airTime = 0;
+    this.inWater = false;
     this.lastStrikeId = 0;
     this._sway = new SwayState();
     this._prevVel = new THREE.Vector3();
@@ -220,6 +221,8 @@ export class Character extends Entity {
 
   // ---- movement -----------------------------------------------------------
   moveGrounded(dt, game, wishX, wishZ, speed) {
+    // lội nước chậm lại
+    if (this.inWater) speed *= 0.55;
     const accel = 26;
     this.vel.x += (wishX * speed - this.vel.x) * Math.min(accel * dt / Math.max(speed, 0.1), 1);
     this.vel.z += (wishZ * speed - this.vel.z) * Math.min(accel * dt / Math.max(speed, 0.1), 1);
@@ -247,14 +250,42 @@ export class Character extends Entity {
       this.pos.y = ground; this.vel.y = 0; this.grounded = true;
     } else this.grounded = false;
 
+    // nước: lội (chậm) + ngập ngực không chìm sâu thêm
+    const wl = game.world.waterLevelAt ? game.world.waterLevelAt(this.pos.x, this.pos.z) : -Infinity;
+    const wasInWater = this.inWater;
+    this.inWater = Number.isFinite(wl) && wl > this.pos.y + 0.06;
+    if (this.inWater && wl - this.pos.y > 1.0) {
+      this.pos.y = wl - 1.0;
+      if (this.vel.y < 0) this.vel.y = 0;
+      this.grounded = true;
+    }
+    if (this.isPlayer && this.inWater && !wasInWater && Math.abs(this.vel.x) + Math.abs(this.vel.z) > 2) {
+      game.audio.sfx('splash');
+      game.particles.spawn({ x: this.pos.x, y: wl + 0.1, z: this.pos.z },
+        { count: 12, color: [0xbfd8e8, 0xffffff], speed: 2.5, life: 0.5, gravity: -4, spread: 0.5 });
+    }
+
+    // mối nguy (dung nham): thiêu đốt theo nhịp
+    const hz = game.world.hazardAt ? game.world.hazardAt(this.pos.x, this.pos.z) : null;
+    if (hz && this.pos.y <= hz.level + 0.12 && !this.combat.dead) {
+      this._hazardT = (this._hazardT || 0) - dt;
+      if (this._hazardT <= 0) {
+        this._hazardT = 0.5;
+        this.takeDamage(14, { pure: true, guardBreak: true });
+        this.game.vfx.popup(this.pos, 'DUNG NHAM!', '#ff7a3a');
+        this.game.particles.spawn({ x: this.pos.x, y: this.pos.y + 0.4, z: this.pos.z },
+          { count: 14, color: [0xff5a20, 0xffd257], speed: 4, life: 0.5, gravity: 2, spread: 0.6 });
+      }
+    }
+
     // horizontal
     this.pos.x += this.vel.x * dt;
     this.pos.z += this.vel.z * dt;
     // obstacles & bounds
     game.world.collideCircle(this.pos, this.radius);
-    const lim = game.world.def.size / 2 - 2;
-    this.pos.x = clamp(this.pos.x, -lim, lim);
-    this.pos.z = clamp(this.pos.z, -lim, lim);
+    const lim = game.world.boundLimit;
+    if (Number.isFinite(lim)) this.pos.x = clamp(this.pos.x, -lim, lim);
+    if (Number.isFinite(lim)) this.pos.z = clamp(this.pos.z, -lim, lim);
   }
 
   faceToward(x, z, dt, rate = 12) {

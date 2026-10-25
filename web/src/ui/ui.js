@@ -37,19 +37,28 @@ export class UIManager {
         <div class="title-block">
           <div class="title-kanji">侍</div>
           <h1>ĐẠO CỦA KẺ VÔ DANH</h1>
-          <p class="subtitle">Samurai 3D Action RPG · 15 chương · Three.js</p>
+          <p class="subtitle">Samurai 3D Action RPG · 15 chương · 15 bản đồ nền · Thế Giới Vô Cực</p>
         </div>
         <div class="menu-buttons">
           <button data-act="continue">Tiếp Tục</button>
-          <button data-act="new">Chơi Mới</button>
+          <button data-act="new">Chơi Mới (Chiến Dịch)</button>
+          <button data-act="infinite">Thế Giới Vô Cực</button>
           <button data-act="help">Hướng Dẫn</button>
           <button data-act="settings">Cài Đặt</button>
+        </div>
+        <div class="seed-row" id="seed-row" style="display:none">
+          <label>Seed: <input id="seed-input" placeholder="gõ gì cũng được — trống = ngẫu nhiên" maxlength="32"></label>
+          <button data-act="infinite-go">Vào Thế Giới</button>
         </div>
         <div class="save-slots" id="save-slots"></div>
         <div class="menu-footer" id="menu-footer"></div>
       </div>`;
     menu.querySelectorAll('.menu-buttons button').forEach((b) => {
       b.addEventListener('click', () => { this.game.audio.ensure(); this.menuAction(b.dataset.act); });
+    });
+    // nút "Vào Thế Giới" nằm ngoài .menu-buttons (trong seed-row)
+    menu.querySelectorAll('.seed-row [data-act="infinite-go"]').forEach((b) => {
+      b.addEventListener('click', () => { this.game.audio.ensure(); this.menuAction('infinite-go'); });
     });
     r.appendChild(menu);
     this.screens.menu = menu;
@@ -132,10 +141,30 @@ export class UIManager {
     this.screens.victory = vic;
   }
 
-  menuAction(a) {
+  async menuAction(a) {
     this.game.audio.sfx('ui');
     if (a === 'new') {
       this.game.newGame('slot1');
+    } else if (a === 'infinite') {
+      // hiện/ẩn ô nhập seed
+      const row = this.screens.menu.querySelector('#seed-row');
+      row.style.display = row.style.display === 'none' ? 'flex' : 'none';
+      if (row.style.display === 'flex') {
+        const inp = row.querySelector('#seed-input');
+        inp.value = `mùa thu ${1000 + ((Math.random() * 9000) | 0)}`;
+        inp.focus();
+      }
+    } else if (a === 'infinite-go') {
+      const seed = this.screens.menu.querySelector('#seed-input').value.trim()
+        || `seed-${(Math.random() * 1e9) | 0}`;
+      // màn hình tải trước khi build 3×3 ô đầu (đồng bộ, nặng)
+      this.hideAll();
+      const loading = this.screens.loading;
+      loading.querySelector('#loading-title').textContent = 'Thế Giới Vô Cực';
+      loading.querySelector('#loading-step').textContent = `Đang dệt thế giới từ seed "${seed}"...`;
+      loading.style.display = 'flex';
+      await new Promise((r) => setTimeout(r, 80));
+      this.game.startInfinite('slot1', seed);
     } else if (a === 'continue') {
       this.refreshSaveSlots(true);
     } else if (a === 'help') {
@@ -152,7 +181,8 @@ export class UIManager {
     box.innerHTML = slots.length
       ? slots.map((s) => {
         const meta = s.meta || {};
-        const info = meta.slotName ? `${esc(meta.slotName)} · C.${meta.levelId || '?'} · ${formatTime(meta.playtime || 0)}` : `Lưu trên server · C.${meta.level ?? '?'}`;
+        const mode = meta.mode === 'infinite' ? '∞ Vô Cực' : 'Chiến Dịch';
+        const info = meta.slotName ? `${esc(meta.slotName)} · ${mode} · ${meta.mode === 'infinite' ? `seed ${esc(meta.seed || '?')}` : `C.${meta.levelId || '?'}`} · ${formatTime(meta.playtime || 0)}` : `Lưu trên server · C.${meta.level ?? '?'}`;
         return `<div class="save-row" data-slot="${esc(s.slot)}">
           <span>${esc(s.slot)} — ${info} <i class="dim">(${s.source})</i></span>
           <span class="save-actions"><button data-play="${esc(s.slot)}">Chơi</button><button class="danger" data-del="${esc(s.slot)}">Xóa</button></span>
@@ -264,15 +294,34 @@ export class UIManager {
           </select></label>
         <label>FPS mục tiêu (tự động)
           <select id="set-fps">
-            <option value="60">60</option><option value="120">120</option><option value="144">144</option><option value="240">240</option>
+            <option value="60">60</option><option value="120">120</option><option value="144">144</option><option value="240">240</option><option value="300">300 (max)</option>
+          </select></label>
+        <label>Bóng đổ
+          <select id="set-shadow">
+            <option value="off">Tắt</option><option value="low">Thấp (1024, gần)</option><option value="high">Cao (2048)</option><option value="ultra">Siêu (3072, xa)</option>
+          </select></label>
+        <label>Mật độ thực vật
+          <select id="set-veg">
+            <option value="low">Thưa (nhanh)</option><option value="normal">Vừa</option><option value="high">Rậm (đẹp)</option>
+          </select></label>
+        <label>Chất lượng nước
+          <select id="set-water">
+            <option value="off">Tắt</option><option value="basic">Cơ bản</option><option value="high">Cao (phản chiếu)</option>
+          </select></label>
+        <label>Hiệu ứng thời tiết
+          <select id="set-wfx">
+            <option value="off">Tắt</option><option value="basic">Cơ bản (ít hạt)</option><option value="full">Đầy đủ</option>
           </select></label>
         <label><input id="set-ao" type="checkbox"> Ambient Occlusion (GTAO)</label>
         <label><input id="set-grain" type="checkbox"> Film grain</label>
         <label>Độ nhạy chuột <input id="set-sens" type="range" min="0.4" max="2" step="0.1"></label>
         <label><input id="set-invert" type="checkbox"> Đảo trục Y</label>
         <label>Âm lượng tổng <input id="set-vm" type="range" min="0" max="1" step="0.05"></label>
+        <label><input id="set-sfx-on" type="checkbox"> Hiệu ứng âm thanh (SFX)</label>
         <label>Hiệu ứng <input id="set-vs" type="range" min="0" max="1" step="0.05"></label>
+        <label><input id="set-music-on" type="checkbox"> Nhạc nền</label>
         <label>Nhạc <input id="set-vu" type="range" min="0" max="1" step="0.05"></label>
+        <label><input id="set-amb-on" type="checkbox"> Âm thanh môi trường</label>
         <label>Môi trường <input id="set-va" type="range" min="0" max="1" step="0.05"></label>
         <div class="menu-buttons"><button id="set-back">Quay lại</button></div>
       </div>`;
@@ -280,6 +329,10 @@ export class UIManager {
     q.value = s.quality;
     host.querySelector('#set-res').value = String(s.resolutionScale);
     host.querySelector('#set-fps').value = String(s.targetFps || 60);
+    host.querySelector('#set-shadow').value = s.shadowQuality || 'high';
+    host.querySelector('#set-veg').value = s.vegDensity || 'normal';
+    host.querySelector('#set-water').value = s.waterQuality || 'high';
+    host.querySelector('#set-wfx').value = s.weatherFx || 'full';
     host.querySelector('#set-ao').checked = s.ao !== false;
     host.querySelector('#set-grain').checked = !!s.grain;
     host.querySelector('#set-sens').value = s.sensitivity;
@@ -288,11 +341,18 @@ export class UIManager {
     host.querySelector('#set-vs').value = s.volSfx;
     host.querySelector('#set-vu').value = s.volMusic;
     host.querySelector('#set-va').value = s.volAmbient;
+    host.querySelector('#set-sfx-on').checked = s.sfxOn !== false;
+    host.querySelector('#set-music-on').checked = s.musicOn !== false;
+    host.querySelector('#set-amb-on').checked = s.ambOn !== false;
     const apply = () => {
       g.settingsStore.set({
         quality: q.value,
         resolutionScale: host.querySelector('#set-res').value,
         targetFps: parseInt(host.querySelector('#set-fps').value, 10) || 60,
+        shadowQuality: host.querySelector('#set-shadow').value,
+        vegDensity: host.querySelector('#set-veg').value,
+        waterQuality: host.querySelector('#set-water').value,
+        weatherFx: host.querySelector('#set-wfx').value,
         ao: host.querySelector('#set-ao').checked,
         grain: host.querySelector('#set-grain').checked,
         sensitivity: parseFloat(host.querySelector('#set-sens').value),
@@ -301,6 +361,9 @@ export class UIManager {
         volSfx: parseFloat(host.querySelector('#set-vs').value),
         volMusic: parseFloat(host.querySelector('#set-vu').value),
         volAmbient: parseFloat(host.querySelector('#set-va').value),
+        sfxOn: host.querySelector('#set-sfx-on').checked,
+        musicOn: host.querySelector('#set-music-on').checked,
+        ambOn: host.querySelector('#set-amb-on').checked,
       }); // onChanged → applySettings + persist tự động
     };
     host.querySelectorAll('input, select').forEach((i) => i.addEventListener('change', apply));

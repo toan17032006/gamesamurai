@@ -240,15 +240,21 @@ export class Player extends Character {
         if (!this.moving && this.anim.name === 'sprint') this.anim.play('idle');
       }
 
-      // footsteps + dust
+      // footsteps + dust (or splash in water)
       if (this.moving && this.grounded) {
         this.stepT -= dt * (sprint ? 2.6 : 1.6);
         if (this.stepT <= 0) {
           this.stepT = 0.4;
-          game.audio.sfx('step');
-          const dust = game.world.def ? game.world.def.palette.dirt : 0x9a8a6a;
-          game.particles.spawn({ x: this.pos.x, y: this.pos.y + 0.08, z: this.pos.z },
-            { count: sprint ? 5 : 2, color: [dust, 0xbcae94], speed: 1.3, life: 0.45, gravity: -1.5, spread: 0.35 });
+          game.audio.sfx(this.inWater ? 'splash' : 'step');
+          if (this.inWater) {
+            const wl = game.world.waterLevelAt ? game.world.waterLevelAt(this.pos.x, this.pos.z) : this.pos.y;
+            game.particles.spawn({ x: this.pos.x, y: (Number.isFinite(wl) ? wl : this.pos.y) + 0.06, z: this.pos.z },
+              { count: 3, color: [0xbfd8e8, 0xffffff], speed: 1.4, life: 0.4, gravity: -3, spread: 0.4 });
+          } else {
+            const dust = game.world.def ? game.world.def.palette.dirt : 0x9a8a6a;
+            game.particles.spawn({ x: this.pos.x, y: this.pos.y + 0.08, z: this.pos.z },
+              { count: sprint ? 5 : 2, color: [dust, 0xbcae94], speed: 1.3, life: 0.45, gravity: -1.5, spread: 0.35 });
+          }
         }
       }
       this.moveMode = sprint ? 'sprint' : this.moving ? 'run' : 'idle';

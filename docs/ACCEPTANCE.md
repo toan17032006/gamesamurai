@@ -143,3 +143,60 @@ lưỡi thật qua trailBase→trailTip), chỉnh live trên trang rồi bake v�
 Sự cố kiểm thử (không ảnh hưởng game): harness pose đầu tiên truyền sai tham số → `NaN` lan vào joints
 qua `_apply` khi `enabled=false` (blendT=0 + prev nhiễm); đã cô lập cơ chế và làm harness v2 tự kiểm
 NaN. Pane trình duyệt đôi khi bị throttle rAF giữa chừng (fps 0 tạm thời, tự hồi) — nhớ khi đo số liệu.
+
+---
+
+# Đợt 6 — Triển khai sát master prompt: Infinite World, 15 bản đồ nền, thời tiết động, sinh vật, cấp 25 (2026-10-25)
+
+Mục tiêu: lấp các khoảng thiếu so với master prompt (§3 level 25, §6 15 bản đồ nền, §7 vô cực +
+streaming, §8 nước/thác, §9 hệ sinh thái, §10 thời tiết động/siêu nhiên/lũ, §12–13 UI âm thanh/đồ
+họa, §15 save thế giới, §16 bản đồ vô cực). Kiểm chứng: **57 test unit (node --test, 0 fail)**,
+**E2E Chromium headless (SwiftShader) 21/21 bước đạt, 0 lỗi runtime — chạy xanh 2 lần liên tiếp**, **15/15 chương build đạt**,
+kịch bản cơ chế (lũ/dung nham/siêu nhiên/rồng) đo trực tiếp trong trình duyệt.
+
+| # | Hạng mục (§ đề bài) | Trạng thái | Bằng chứng |
+|---|---|---|---|
+| 1 | 15 bản đồ nền phủ đủ nhóm môi trường (§6) | **Đạt** | `data/regions.js`: 15 REGIONS (outskirts/đồi cỏ, village/làng, bamboo/tre, forest/rừng ôn đới, mountain/núi, snow/tuyết, river/sông-thác, lake/hồ-lầy, shrine/đền, battlefield/chiến trường, castle/thành, cave/hang, badlands/hẻm núi, volcano/núi lửa, throne/siêu nhiên) + 2 biến thể (lake_haught đêm, arena_duel). 15/15 chương ánh xạ 1:1 — `npm run test:levels`: 15/15 ĐẠT (region/builder/water/boss đúng, 0 lỗi) |
+| 2 | Nước: sông, hồ, thác, lội nước (§8) | **Đạt** | `gfx/water.js`: mặt nước shader sóng (theo world pos, bám player), thác strip scroll + bọt hạt; carve lòng sông/hồ trong heightFn; lội nước ×0.55 tốc độ + bõm; đo: L05 water −0.95, L08 −0.75, L13 −1.4; ảnh `campaign-l05-river.png` |
+| 3 | Dung nham + mối nguy (§8) | **Đạt** | Bề mặt lava emissive trong crater; hazard theo vùng: đo thật hp 92→1 sau 4 game-giây đứng trong lava (L11), popup "DUNG NHAM!"; ảnh `campaign-l11-volcano.png` (boss bar + pips pha) |
+| 4 | Thời tiết động: chu kỳ, mây, fog, ướt (§10) | **Đạt** | `systems/weather.js` state machine theo pool từng vùng, chuyển mượt dt-based; đo trong trình duyệt: setType('storm') → fog 0.011→0.017, cloudCover 0.49→0.61, roughness 0.96→0.86 (bề mặt bóng), hạt mưa active, HUD chip "Bão tố" |
+| 5 | Sấm sét (§10) | **Đạt** | Bão: strike mỗi 4–15s — chớp (sun/hemi spike), cột sáng hạt, sấm trễ 0.15–1.5s theo khoảng cách; sfx 'thunder' mới; đo `info().lightning === true` trong storm |
+| 6 | Lũ (§10) | **Đạt** | Vùng sông/hồ (floodCapable): storm 15 game-giây → flood 0→0.70, thông báo "NƯỚC DÂNG", waterSurface dâng `base + flood*floodMax(0.95)`; rút khi hết mưa |
+| 7 | Thời tiết siêu nhiên (§10) | **Đạt** | Sương Ma (fog ×2.5 tím + spawn 3 vong linh — đo npcs 7→10, HUD "Sương ma"), Mưa Linh Khí (+15% XP qua weatherSys.xpMul — có test), Bão Ma Thuật (sét tím + buff attackPct địch). Pool siêu nhiên gắn vùng (đền/hồ/núi lửa/ngự sảnh) |
+| 8 | Sinh vật hoang dã + săn bắn (§9) | **Đạt** | `entities/creature.js` + `data/wildlife.js`: chim (bay vòng/đậu/né), cá (bơi trong nước/né), hươu (gặm ở/flee), lợn (aggro gần), sói (săn bầy, tháo chạy khi yếu); loot thịt/da → recipe thịt khô; đo trong vùng: 8–25 creatures; E2E "creatures>0" đạt. AI LOD: >90m dừng mô phỏng |
+| 9 | Rồng (§9) | **Đạt** | `entities/dragon.js`: world-boss bay 3 pha (hover→dive AoE→đáp đất), phun Hỏa Long Tán, rig riêng (cánh vẫy, đuôi); spawn ở ô danger≥6; đo thật: teleport ô (−6,−6) danger 7 → "Tatsu no Ou - Rồng Vực Lửa" hp 3300 spawn, state grounded, 0 lỗi |
+| 10 | Infinite World: seed + biome (§7) | **Đạt** | `systems/worldgen.js` (thuần, test được): hashSeed FNV, trường elevation/moisture/temperature/river liên tục; biomeForCell quy tắc → 15 biome; **19 test mới đạt**: cùng seed cùng thế giới, seed khác khác >50% ô, (0,0) luôn village, danger ≥ khoảng cách |
+| 11 | Địa hình vô cực liên tục (§7 "không đứt gãy") | **Đạt** | Test: quét mép ô ±0.05m × 25 ô → delta < 0.5m (phát hiện+vá bug hang động ring vô hạn gây seam 8.0m); không NaN trên lưới ±1200m |
+| 12 | Streaming + LOD + giải phóng (§7) | **Đạt** | 3×3 đầy đủ, ring 5×5 LOD (terrain+đá), dỡ >2.4 ô (dispose geo/mat, lọc collider/interactable/NPC/creature theo tag ô); ngân sách build 12ms/frame; E2E: 16 ô đầu → teleport 4 ô → unload cũ + build mới (explored tăng), continue sau reload vẫn streaming (cells 8 sau 9s) |
+| 13 | Bản đồ vô cực tự sinh (§16) | **Đạt** | `ui/worldMap.js`: canvas vẽ theo worldgen — explored đậm màu biome, ô kề mờ (scouted), ☠ danger, viền xanh vùng an toàn, boss đã hạ, player mũi tên + hướng camera; zoom (lăn) pan (kéo), click đặt waypoint → HUD "🚩 khoảng cách"; không tạo DOM node per-object; ảnh `infinite-worldmap.png` |
+| 14 | Level 1–25 + thưởng ý nghĩa (§3/§5) | **Đạt** | MAX_LEVEL=25 chặn cứng (test: grantXp(1e9) → dừng 25, không cộng dồn); bảng LEVEL_REWARDS 2–25 (mỗi cấp có thưởng: attr/skill/vàng/vật phẩm, cấp 25 = Triệt Nguyệt + danh hiệu); test phủ cả 24 cấp; HUD "Cấp n/25" |
+| 15 | Save schema v2 + thế giới (§15) | **Đạt** | version 2: `world` (mode/seed/pos/states ô/waypoint, chặn 600 ô) + `weather`; migration v1→v2 (test), schema >2 bị từ chối (test); E2E: save vô cực có seed + states, reload → Tiếp Tục → trở lại đúng thế giới, vùng khám phá khôi phục; save API (dev-server cùng surface FastAPI) nhận v2, danh sách slot hiện "∞ Vô Cực · seed" |
+| 16 | Cấu hình đồ họa tác động thật (§13) | **Đạt** | Thêm: Bóng đổ (Tắt/1024 gần/2048/3072 xa — đổi mapSize + span camera shadow thật), Mật độ thực vật (thay số cỏ/props khi build), Chất lượng nước (Tắt ẩn mặt nước), Hiệu ứng thời tiết (đếm hạt 0/0.5×/1×), FPS mục tiêu thêm 300; toggle Nhạc/SFX/Môi trường (audio.setToggles dừng/bật thật) |
+| 17 | Đa dạng âm thanh môi trường (§12) | **Đạt** | sfx mới: thunder, splash; ambient 'water' (thác/sông, lowpass 850Hz); mỗi vùng chọn ambient theo builder; toàn bộ vẫn WebAudio procedural |
+| 18 | 15 chương không hồi quy (§19) | **Đạt** | `npm run test:levels`: 15/15 ĐẠT — region/builder/water/boss đúng từng chương, wildlife spawn, 0 pageerror; framework test 37/37 giữ nguyên |
+| 19 | Performance không hồi quy (§14) | **Đạt** | Build 921KB (từ 838KB, +10% cho 4 hệ thống mới); streaming ngân sách 12ms/frame; creature LOD; grass density theo settings; không đo GPU thật trong máy này (không có GPU WebGL — SwiftShader) — ghi minh bạch |
+| 20 | Tài liệu + cách chạy (§20) | **Đạt** | README mục 2/3/5/6/8/10 viết lại (2 chế độ, 15 bản đồ, thời tiết, save v2, bảng lệnh test); script npm: test / test:e2e / test:levels / serve:dev |
+
+## Sửa lỗi phát hiện khi kiểm thử đợt này
+
+- **Seam địa hình vô cực 8m tại mép ô** (test bắt ngay): vách hang động (cave bowl) có tầm ảnh
+  hưởng vô hạn — khi ô rơi khỏi vùng 3×3, đóng góp 8m biến mất đột ngột. Vá: ring fade về 0 trước
+  mép ảnh hưởng. Test liên tục giờ là bảo chứng thường trực.
+- **"Vào Thế Giới" không phản hồi**: nút nằm ngoài `.menu-buttons` nên không được gắn listener.
+- **`size is not defined` khi vào L05**: thiếu `const size` trong `setupWater` nhánh sông.
+- **Rồng crash `faceToward is not a function`**: thiếu method trên Dragon (Creature có, Dragon quên).
+- **Lerp thời tiết lệch theo FPS**: đổi mọi blend của weather sang dt-based (độc lập frame rate).
+- **Rồng chết crash pipeline kill**: Dragon thiếu def cho combat.onNpcKilled — đã gắn def = DRAGON_DEF.
+- **Restore save vô cực sai thế giới**: save lưu seed số nhưng continue hash lại chuỗi số → thế giới khác; sửa enterInfinite nhận số trực tiếp + lưu seedSource (chuỗi gốc); có test bảo chứng seed fidelity.
+
+## Giới hạn minh bạch còn lại (đợt này)
+
+- **Không đo được hiệu năng GPU thật**: máy phát triển này không có WebGL (IAB lẫn headless đều chạy
+  SwiftShader ~3–6 FPS). Tất cả số FPS/frame-time trong E2E không đại diện; các mốc 300 FPS mục tiêu
+  vẫn giữ trạng thái "chưa thể kiểm chứng" như các đợt trước.
+- **Backend FastAPI không chạy được trong máy này** (không có Python/pip). Code `server/` không đổi
+  so với bản đã nghiệm thu; validate v2 tương thích sẵn (chỉ yêu cầu 3 key gốc, version int ≤999).
+  Đã thay thế bằng `scripts/dev-server.mjs` (Node, cùng API surface) cho toàn bộ E2E save/list/continue.
+- Cell vô cực chỉ spawn lại địch khi ô chưa "cleared" và phải rời/vào lại ô; tài nguyên respawn 90s.
+- Waypoint chưa có chỉ đường trên minimap 3D (chỉ khoảng cách + điểm trên bản đồ M).
+- Chu kỳ ngày–đêm liên tục trong phiên chưa làm (ngày/đêm theo vùng + thời tiết động).

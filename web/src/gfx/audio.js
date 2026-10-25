@@ -10,6 +10,7 @@ export class AudioMgr {
     this.musicTimer = null;
     this.ambientSource = null;
     this.enabled = true;
+    this.musicOn = true; this.sfxOn = true; this.ambOn = true;
     this.volumes = { master: 0.8, sfx: 0.9, ambient: 0.5, music: 0.5 };
   }
 
@@ -44,6 +45,13 @@ export class AudioMgr {
 
   setVolume(key, v) { this.volumes[key] = v; this.applyVolumes(); }
 
+  // toggle nhạc/sfx/môi trường (settings) — tắt nhạc thì dừng hẳn; bật lại cần startMusic
+  setToggles(t) {
+    if (t.musicOn !== undefined) { this.musicOn = !!t.musicOn; if (!this.musicOn) this.stopMusic(); }
+    if (t.sfxOn !== undefined) this.sfxOn = !!t.sfxOn;
+    if (t.ambOn !== undefined) { this.ambOn = !!t.ambOn; if (!this.ambOn) this.stopAmbient(); }
+  }
+
   _noise(dur, { freq = 1200, q = 1, type = 'bandpass', vol = 0.5, sweepTo = null, when = 0 } = {}) {
     if (!this.ctx) return;
     const t = this.ctx.currentTime + when;
@@ -75,7 +83,7 @@ export class AudioMgr {
   }
 
   sfx(name) {
-    if (!this.enabled || !this.ctx) return;
+    if (!this.enabled || !this.ctx || !this.sfxOn) return;
     switch (name) {
       case 'swing': this._noise(0.18, { freq: 900, sweepTo: 3800, q: 2, vol: 0.25 }); break;
       case 'swingHeavy': this._noise(0.3, { freq: 500, sweepTo: 2400, q: 2.5, vol: 0.35 }); this._tone(160, 60, 0.25, { type: 'sine', vol: 0.12 }); break;
@@ -100,19 +108,22 @@ export class AudioMgr {
       case 'ui': this._tone(880, 940, 0.05, { type: 'triangle', vol: 0.1 }); break;
       case 'craft': this._tone(440, 330, 0.12, { type: 'square', vol: 0.16 }); this._noise(0.14, { freq: 3000, q: 3, vol: 0.16, when: 0.04 }); this._tone(550, 660, 0.16, { type: 'triangle', vol: 0.16, when: 0.16 }); break;
       case 'unlock': this._tone(523, 523, 0.15, { type: 'triangle', vol: 0.2 }); this._tone(784, 784, 0.2, { type: 'triangle', vol: 0.2, when: 0.12 }); this._tone(1047, 1047, 0.3, { type: 'triangle', vol: 0.2, when: 0.24 }); break;
+      case 'thunder': this._noise(1.6, { freq: 220, sweepTo: 45, q: 0.6, vol: 0.5 }); this._tone(70, 28, 1.4, { type: 'sawtooth', vol: 0.3 }); break;
+      case 'splash': this._noise(0.25, { freq: 900, sweepTo: 300, q: 0.8, vol: 0.25 }); break;
     }
   }
 
   startAmbient(type = 'wind') {
-    if (!this.ctx || this.ambientSource) return;
+    if (!this.ctx || this.ambientSource || !this.ambOn) return;
+    // nước chảy/thác: dùng noise lọc riêng
     const src = this.ctx.createBufferSource();
     src.buffer = this.noiseBuf;
     src.loop = true;
     const f = this.ctx.createBiquadFilter();
     f.type = 'lowpass';
-    f.frequency.value = type === 'rain' ? 1400 : 380;
+    f.frequency.value = type === 'rain' ? 1400 : type === 'water' ? 850 : 380;
     const g = this.ctx.createGain();
-    g.gain.value = type === 'rain' ? 0.16 : 0.05;
+    g.gain.value = type === 'rain' ? 0.16 : type === 'water' ? 0.1 : 0.05;
     // slow LFO on gain for wind gusts
     const lfo = this.ctx.createOscillator();
     lfo.frequency.value = 0.13;
@@ -132,7 +143,7 @@ export class AudioMgr {
   }
 
   startMusic() {
-    if (!this.ctx || this.musicTimer) return;
+    if (!this.ctx || this.musicTimer || !this.musicOn) return;
     const scale = [220, 247.5, 293.33, 329.63, 392, 440, 493.88]; // pentatonic-ish D
     let last = 3;
     const pluck = (freq, when, vol) => {

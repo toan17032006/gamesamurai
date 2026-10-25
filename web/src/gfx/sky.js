@@ -120,6 +120,8 @@ export class Sky {
     scene.add(this.sun);
     scene.add(this.sun.target);
     this.sunDir = new THREE.Vector3(0.5, 0.7, 0.5).normalize(); // before set() runs (menu state)
+    this.baseSunIntensity = this.sun.intensity;
+    this.baseHemiIntensity = this.hemi.intensity;
   }
 
   set(def) {
@@ -137,6 +139,9 @@ export class Sky {
     this.hemi.groundColor.setHex(def.palette.dirt);
     this.sun.color.setHex(def.light.sun);
     this.sun.intensity = def.light.sunIntensity * (def.light.night ? 1.4 : 1);
+    // lưu nền để thời tiết động (weather.js) điều biến quanh các giá trị gốc này
+    this.baseSunIntensity = this.sun.intensity;
+    this.baseHemiIntensity = this.hemi.intensity;
     this.engine.renderer.toneMappingExposure = def.light.night ? 0.92 : 1.06;
 
     const [az, el] = def.light.sunAngle;

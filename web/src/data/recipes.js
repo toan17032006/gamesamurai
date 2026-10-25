@@ -1,6 +1,7 @@
 // Crafting recipes. Upgrades (weapon/armor "+N") use UPGRADE_COSTS.
 export const RECIPES = [
   { id: 'r_bandage', out: { id: 'bandage', qty: 2 }, coins: 4, cost: [{ id: 'herb', qty: 2 }] },
+  { id: 'r_jerky', out: { id: 'jerky', qty: 2 }, coins: 2, cost: [{ id: 'meat', qty: 2 }] },
   { id: 'r_draught', out: { id: 'healing_draught', qty: 1 }, coins: 10, cost: [{ id: 'herb', qty: 3 }, { id: 'silk', qty: 1 }] },
   { id: 'r_tonic', out: { id: 'focus_tonic', qty: 1 }, coins: 6, cost: [{ id: 'herb', qty: 2 }, { id: 'bamboo', qty: 1 }] },
   { id: 'r_bell', out: { id: 'war_bell', qty: 1 }, coins: 20, cost: [{ id: 'demon_fang', qty: 1 }, { id: 'silk', qty: 1 }] },

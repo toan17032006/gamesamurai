@@ -4,6 +4,7 @@ import { SKILL_TREE, ALL_SKILLS } from '../data/skills.js';
 import { RECIPES, upgradeStats, MAX_PLUS } from '../data/recipes.js';
 import { esc } from '../core/utils.js';
 import { factionColor } from '../systems/factions.js';
+import { WorldMap } from './worldMap.js';
 
 const TABS = [
   { id: 'inventory', label: 'Túi đồ', key: 'Tab' },
@@ -224,6 +225,19 @@ export class Panels {
 
   renderMap(body) {
     const g = this.game;
+    // Thế Giới Vô Cực: bản đồ tự sinh theo dữ liệu worldgen (canvas, zoom/pan, waypoint)
+    if (g.mode === 'infinite' && g.infinite) {
+      if (!this.worldMap) this.worldMap = new WorldMap(g);
+      body.innerHTML = `
+        <div class="map-layout">
+          <h3>Bản Đồ Thế Giới Vô Cực</h3>
+          <canvas id="world-map-canvas" width="640" height="470" class="world-map"></canvas>
+          <p class="dim">Ô màu = đã khám phá · ☠ n = mức nguy hiểm · ☑ viền xanh = vùng an toàn · 🚩 điểm hẹn</p>
+        </div>`;
+      this.worldMap.attach(body.querySelector('#world-map-canvas'));
+      this.worldMap.draw();
+      return;
+    }
     const def = g.world.def;
     if (!def) { body.innerHTML = '<p class="dim">Chưa vào khu vực nào.</p>'; return; }
     body.innerHTML = `
@@ -258,6 +272,12 @@ export class Panels {
       ctx.fillStyle = n.faction === 'samurai_ally' ? '#7ac8ff' : n.faction === 'villager' ? '#9ae08a' : factionColor(n.faction);
       ctx.beginPath(); ctx.arc(cx, cz, n.isBoss ? 8 : 5, 0, 7); ctx.fill();
       if (n.isBoss) { ctx.strokeStyle = '#fff'; ctx.stroke(); }
+    }
+    for (const c of g.creatures || []) {
+      if (c.combat.dead) continue;
+      const [cx, cz] = toCv(c.pos.x, c.pos.z);
+      ctx.fillStyle = '#b8a878';
+      ctx.beginPath(); ctx.arc(cx, cz, 3.5, 0, 7); ctx.fill();
     }
     const [px, pz] = toCv(g.player.pos.x, g.player.pos.z);
     ctx.fillStyle = '#c8a0ff';

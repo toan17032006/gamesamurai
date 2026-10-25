@@ -1,10 +1,9 @@
 // Level runtime: spawns, waves, objectives, completion, unlock chain.
 import { LEVEL_MAP, LEVELS, nextLevelId } from '../data/levels.js';
-import { REGIONS } from '../data/regions.js';
+import { REGIONS, VARIANTS } from '../data/regions.js';
 import { BOSSES } from '../data/bosses.js';
 import { Npc } from '../entities/npc.js';
 import { Boss } from '../entities/boss.js';
-import { Weather } from '../gfx/particles.js';
 
 export class LevelManager {
   constructor(game) {
@@ -41,7 +40,7 @@ export class LevelManager {
     const g = this.game;
     const def = LEVEL_MAP[levelId];
     if (!def) return false;
-    const region = REGIONS[def.region];
+    const region = REGIONS[def.region] || VARIANTS[def.region];
     this.currentId = levelId;
     this.completed = false;
     this.levelTime = 0;
@@ -52,25 +51,13 @@ export class LevelManager {
 
     // clear previous actors
     for (const n of [...g.npcs]) g.removeNpc(n, true);
+    for (const c of [...g.creatures]) g.removeCreature(c, true);
     g.combat.clearProjectiles();
-    g.weather?.dispose();
+    g.combat.clearDelayed();
 
     g.world.loadRegion(region);
     g.sky.set(region);
-    g.weather?.dispose();
-    const weatherType = region.weather === 'fog' ? 'none' : region.weather === 'wind' ? 'leaves' : region.weather;
-    g.weather = new Weather(g.engine.scene, weatherType);
-    if (region.weather === 'fog') {
-      g.engine.scene.fog.density = region.sky.fogDensity * 1.6;
-    }
-    g.engine.scene.fog.color.setHex(region.sky.bottom);
-    // wet ground in rain: glossier, more reflective terrain
-    const tm = g.world.terrain?.mat;
-    if (tm) {
-      const wet = region.weather === 'rain';
-      tm.roughness = wet ? 0.55 : 0.96;
-      tm.envMapIntensity = wet ? 0.9 : 0.25;
-    }
+    g.weatherSys.configure(region);
 
     // player placement
     const [sx, sz] = g.world.spawnPoint;
@@ -126,11 +113,14 @@ export class LevelManager {
     }
     // resource nodes
     g.world.spawnResourceNodes(def.resourceNodes);
+    // wildlife: config của region + boost riêng của level (săn bắn)
+    g.world.spawnWildlife(region.wildlife, null, region.seed);
+    if (def.wildlifeBoost) g.world.spawnWildlife(def.wildlifeBoost, null, region.seed + 99);
     // shrine at spawn (respawn point)
     g.world.addInteractable({ type: 'shrine', x: sx + 3, z: sz - 2 });
     g.progression.respawnPoint = { x: sx, z: sz };
     // merchant in friendly levels
-    if (['village', 'battlefield', 'village_siege', 'castle_approach', 'shrine', 'outskirts'].includes(def.region)) {
+    if (['village', 'battlefield', 'village_siege', 'castle', 'shrine', 'outskirts', 'river'].includes(def.region)) {
       g.world.addInteractable({ type: 'merchant', x: sx - 4, z: sz - 4 });
     }
     // chest with loot
@@ -153,13 +143,13 @@ export class LevelManager {
     g.ui.hud.setObjectives(this.objectives);
     g.ui.hud.setLevel(def, this.waveTotal);
     if (def.tip) g.ui.notify('info', def.tip);
-    g.audio.startAmbient(region.weather === 'rain' ? 'rain' : 'wind');
+    g.audio.startAmbient(region.builder === 'river' ? 'water' : 'wind');
     g.audio.startMusic();
     return true;
   }
 
   objectiveText(o) {
-    const enemyNames = { bandit_grunt: 'sơn tặc', bandit_archer: 'cung thủ', bandit_brute: 'bạo đồ', ashigaru_spear: 'lính mác', ronin_duelist: 'ronin', elite_samurai: 'vệ sĩ', ashura_adept: 'tín đồ Tu La', wraith: 'vong linh', shadow_blade: 'bóng kiếm', oni_shield: 'quỷ khiên thủ' };
+    const enemyNames = { bandit_grunt: 'sơn tặc', bandit_archer: 'cung thủ', bandit_brute: 'bạo đồ', ashigaru_spear: 'lính mác', ronin_duelist: 'ronin', elite_samurai: 'vệ sĩ', ashura_adept: 'tín đồ Tu La', wraith: 'vong linh', shadow_blade: 'bóng kiếm', oni_shield: 'quỷ khiên thủ', wolf: 'sói rừng', boar: 'lợn rừng', deer: 'hươu' };
     const names = { kill: 'Hạ ', collect: 'Thu ', reach: 'Đến điểm mục tiêu', waves: 'Chặn đợt tấn công', defend: 'Giữ vị trí', boss: 'Hạ BOSS' };
     const targetName = enemyNames[o.target] || (o.target ? String(o.target).replace('_', ' ') : '');
     let text = (names[o.type] || o.type) + (o.type === 'kill' ? targetName : '');

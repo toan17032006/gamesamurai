@@ -1,5 +1,6 @@
-// XP/levels, attributes, skill tree state, derived stats.
+// XP/levels (tối đa 25), thuộc tính, skill tree, phần thưởng theo cấp.
 import { aggregatePassives, ALL_SKILLS, SKILL_TREE } from '../data/skills.js';
+import { itemDef } from '../data/items.js';
 
 export const ATTRS = [
   { id: 'str', name: 'Lực', desc: '+2 công kích mỗi điểm' },
@@ -7,6 +8,39 @@ export const ATTRS = [
   { id: 'vit', name: 'Thể', desc: '+12 máu, +0.5 phòng thủ mỗi điểm' },
   { id: 'end', name: 'Nội', desc: '+8 khí lực mỗi điểm' },
 ];
+
+export const MAX_LEVEL = 25;
+
+// Phần thưởng theo cấp — mỗi cấp đều có ý nghĩa gameplay, không chỉ đổi con số:
+// mọi cấp +1 điểm thuộc tính; cấp chẵn +1 điểm kỹ năng; cột mốc tặng vật phẩm/vàng/điểm cộng thêm.
+export const LEVEL_REWARDS = {
+  2:  { skill: 1 },
+  3:  { coins: 100 },
+  4:  { skill: 1, items: [{ id: 'war_bell', qty: 1 }] },
+  5:  { coins: 150, items: [{ id: 'healing_draught', qty: 2 }] },
+  6:  { skill: 1 },
+  7:  { coins: 200, items: [{ id: 'focus_tonic', qty: 2 }] },
+  8:  { skill: 1, items: [{ id: 'iron_talisman', qty: 1 }] },
+  9:  { coins: 250 },
+  10: { skill: 2, attr: 1, coins: 300 },
+  11: { coins: 300 },
+  12: { skill: 1, items: [{ id: 'healing_draught', qty: 3 }] },
+  13: { coins: 350 },
+  14: { skill: 1, items: [{ id: 'fox_bead', qty: 1 }] },
+  15: { skill: 2, attr: 1, coins: 400 },
+  16: { coins: 450 },
+  17: { skill: 1 },
+  18: { coins: 500, items: [{ id: 'war_drum', qty: 1 }] },
+  19: { skill: 1 },
+  20: { skill: 2, attr: 1, coins: 600 },
+  21: { coins: 700 },
+  22: { skill: 1, items: [{ id: 'kabuto', qty: 1 }] },
+  23: { skill: 1 },
+  24: { attr: 1, coins: 900 },
+  25: { skill: 2, attr: 1, items: [{ id: 'moon_sever', qty: 1 }], title: 'Kiếm Thánh' },
+};
+
+export function rewardsForLevel(n) { return LEVEL_REWARDS[n] || { attr: 0 }; }
 
 export class Progression {
   constructor(game) {
@@ -24,24 +58,27 @@ export class Progression {
   }
 
   xpForLevel(n) { return Math.round(60 * Math.pow(n, 1.55)); }
-  xpProgress() { return { cur: this.xp, need: this.xpForLevel(this.level) }; }
+  xpProgress() { return { cur: this.level >= MAX_LEVEL ? 0 : this.xp, need: this.xpForLevel(this.level) }; }
 
   p() { return this._passives; }
 
   grantXp(amount) {
-    const gain = Math.round(amount * (1 + this._passives.xpGain));
+    if (this.level >= MAX_LEVEL) return; // đã max cấp
+    const weatherMul = this.game.weatherSys ? this.game.weatherSys.xpMul() : 1;
+    const gain = Math.round(amount * (1 + this._passives.xpGain) * weatherMul);
     this.xp += gain;
     this.game.ui.notify('xp', `+${gain} kinh nghiệm`);
     let leveled = false;
-    while (this.xp >= this.xpForLevel(this.level)) {
+    while (this.level < MAX_LEVEL && this.xp >= this.xpForLevel(this.level)) {
       this.xp -= this.xpForLevel(this.level);
       this.level++;
       this.pointsAttr++;
       this.pointsSkill++;
+      this.grantLevelRewards(this.level);
       leveled = true;
     }
+    if (this.level >= MAX_LEVEL) this.xp = 0; // max: không cộng dồn
     if (leveled) {
-      this.game.ui.notify('level', `LÊN CẤP ${this.level}! +1 điểm thuộc tính, +1 điểm kỹ năng`);
       this.game.audio.sfx('levelup');
       this.game.particles.spawn({ x: this.game.player.pos.x, y: this.game.player.pos.y + 0.5, z: this.game.player.pos.z },
         { count: 30, color: [0xffd257, 0xfff0b0, 0x7ae0ff], speed: 4, life: 0.9, gravity: 2, spread: 0.8 });
@@ -49,6 +86,22 @@ export class Progression {
       this.game.player.hp = this.game.player.maxHp;
     }
     this.game.ui.hud.dirty = true;
+  }
+
+  // phần thưởng lên cấp: +1 attr mỗi cấp (đã cộng ở grantXp), cộng thêm theo bảng
+  grantLevelRewards(level) {
+    const g = this.game;
+    const r = rewardsForLevel(level);
+    const lines = [`LÊN CẤP ${level}/${MAX_LEVEL}! +1 điểm thuộc tính`];
+    if (r.skill) { this.pointsSkill += r.skill; lines.push(`+${r.skill} điểm kỹ năng`); }
+    if (r.attr) { this.pointsAttr += r.attr; lines.push(`+${r.attr} điểm thuộc tính thêm`); }
+    if (r.coins) { g.inventory.addCoins(r.coins); lines.push(`+${r.coins} vàng`); }
+    for (const it of r.items || []) {
+      g.inventory.addItem(it.id, it.qty);
+      lines.push(`${it.qty}x ${itemDef(it.id)?.name || it.id}`);
+    }
+    if (r.title) lines.push(`Danh hiệu mới: ${r.title}`);
+    g.ui.notify('level', lines.join(' · '));
   }
 
   applyToPlayer() {
@@ -114,7 +167,7 @@ export class Progression {
 
   apply(data) {
     if (!data) return;
-    this.level = data.level || 1;
+    this.level = Math.min(MAX_LEVEL, data.level || 1);
     this.xp = data.xp || 0;
     this.attrs = { str: 1, agi: 1, vit: 1, end: 1, ...(data.attrs || {}) };
     this.pointsAttr = data.pointsAttr || 0;

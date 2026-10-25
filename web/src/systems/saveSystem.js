@@ -1,34 +1,57 @@
 // Persistence: versioned save data in localStorage + FastAPI/SQLite server sync.
-const SCHEMA_VERSION = 1;
+// v2: thêm world (mode/seed/ô explored/trạng thái ô/waypoint) + weather + pos.y.
+const SCHEMA_VERSION = 2;
 const LS_PREFIX = 'samurai_save_';
+const MAX_EXPLORED_CELLS = 600; // chặn payload phình vô hạn
 
 export class SaveSystem {
   constructor(game) { this.game = game; this.lastServerOk = null; }
 
   buildSaveData(slotName) {
     const g = this.game;
-    return {
-      version: SCHEMA_VERSION,
-      data: {
-        meta: {
-          slotName: slotName || 'Chưa đặt tên',
-          savedAt: Date.now(),
-          playtime: Math.round(g.progression.stats.playtime),
-          levelId: g.levelManager.currentId || 'L01',
-          regionName: g.world.def ? g.world.def.name : '',
-        },
-        player: {
-          ...g.progression.serialize(),
-          inventory: g.inventory.serialize(),
-          hp: Math.max(1, Math.round(g.player.hp)),
-          pos: { x: Math.round(g.player.pos.x * 10) / 10, z: Math.round(g.player.pos.z * 10) / 10 },
-        },
-        progress: {
-          levels: g.levelManager.serialize(),
-          quests: g.quests.serialize(),
+    const data = {
+      meta: {
+        slotName: slotName || 'Chưa đặt tên',
+        savedAt: Date.now(),
+        playtime: Math.round(g.progression.stats.playtime),
+        levelId: g.levelManager.currentId || 'L01',
+        regionName: g.world.def ? g.world.def.name : '',
+        mode: g.mode,
+      },
+      player: {
+        ...g.progression.serialize(),
+        inventory: g.inventory.serialize(),
+        hp: Math.max(1, Math.round(g.player.hp)),
+        pos: {
+          x: Math.round(g.player.pos.x * 10) / 10,
+          y: Math.round(g.player.pos.y * 10) / 10,
+          z: Math.round(g.player.pos.z * 10) / 10,
         },
       },
+      progress: {
+        levels: g.levelManager.serialize(),
+        quests: g.quests.serialize(),
+      },
+      world: { mode: g.mode },
+      weather: null,
     };
+    if (g.mode === 'infinite' && g.infinite) {
+      const ser = g.infinite.serialize();
+      data.world = {
+        mode: 'infinite',
+        seed: ser.seed,
+        seedSource: g.infinite.seedSource || null, // chuỗi seed gốc (tái tạo + hiển thị)
+        pos: { x: data.player.pos.x, z: data.player.pos.z },
+        cell: ser.cell,
+        waypoint: ser.waypoint || null,
+        // fog-of-war: chỉ lưu ô có dữ liệu; chặn số lượng để payload có giới hạn
+        states: Object.fromEntries(Object.entries(ser.states).slice(0, MAX_EXPLORED_CELLS)),
+      };
+      data.meta.seed = g.infinite.seedSource || ser.seed;
+      data.meta.levelId = 'INFINITE';
+    }
+    if (g.weatherSys) data.weather = g.weatherSys.serialize();
+    return { version: SCHEMA_VERSION, data };
   }
 
   save(slot, { silent = false } = {}) {
@@ -66,17 +89,11 @@ export class SaveSystem {
     if (!payload) return null;
     // schema versioning / migration
     if (payload.version !== SCHEMA_VERSION) {
-      const migrated = this.migrate(payload);
+      const migrated = migrateSave(payload);
       if (!migrated) return null;
       payload = migrated;
     }
     return payload.data;
-  }
-
-  migrate(payload) {
-    // v1 is the first schema; future versions add migration steps here.
-    if (payload.version < SCHEMA_VERSION) return null;
-    return payload;
   }
 
   async listSlots() {
@@ -114,4 +131,23 @@ export class SaveSystem {
     this.deleteLocal(slot);
     try { await fetch(`/api/saves/${encodeURIComponent(slot)}`, { method: 'DELETE' }); } catch {}
   }
+}
+
+// Migration schema thuần (test được bằng node): v1 -> v2
+export function migrateSave(payload) {
+  if (!payload || typeof payload !== 'object') return null;
+  const v = payload.version;
+  if (v === SCHEMA_VERSION) return payload;
+  if (v === 1) {
+    return {
+      ...payload,
+      version: 2,
+      data: {
+        ...payload.data,
+        world: { mode: 'campaign' },
+        weather: null,
+      },
+    };
+  }
+  return null; // schema tương lai: bỏ qua (không đoán mò)
 }

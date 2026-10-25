@@ -45,8 +45,8 @@ function bladeGeometry() {
   return geo;
 }
 
-export function buildGrass(world, def, rng, noise, quality = 'high') {
-  const count = GRASS_COUNTS[quality] ?? 0;
+export function buildGrass(world, def, rng, noise, quality = 'high', density = 1) {
+  const count = Math.round((GRASS_COUNTS[quality] ?? 0) * density);
   if (count <= 0) return null;
   const geo = bladeGeometry();
   const mat = makeSwayMaterial(

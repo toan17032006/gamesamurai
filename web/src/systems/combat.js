@@ -11,7 +11,7 @@ export class CombatSystem {
 
   candidatesFor(attacker) {
     // everything that can be hit, filtered by hostility at hit time
-    const list = [this.game.player, ...this.game.npcs];
+    const list = [this.game.player, ...this.game.npcs, ...(this.game.creatures || [])];
     return list.filter((t) => t && !t.disposed && !t.combat.dead && t !== attacker);
   }
 
@@ -168,9 +168,12 @@ export class CombatSystem {
       }
       let hit = false;
       // targets hostile to owner
-      const targets = [game.player, ...game.npcs].filter((t) => t && !t.disposed && !t.combat.dead && isHostile(p.owner.faction, t.faction));
+      const targets = [game.player, ...game.npcs, ...(game.creatures || [])]
+        .filter((t) => t && !t.disposed && !t.combat.dead && isHostile(p.owner.faction, t.faction));
       for (const t of targets) {
-        const dx = t.pos.x - p.pos.x, dy = (t.pos.y + 1.1) - p.pos.y, dz = t.pos.z - p.pos.z;
+        // tâm trúng: humanoid ~1.1m; creature thấp hơn
+        const centerY = (t.isPlayer || (t.rig && t.rig.joints && t.rig.joints.head)) ? 1.1 : 0.4;
+        const dx = t.pos.x - p.pos.x, dy = (t.pos.y + centerY) - p.pos.y, dz = t.pos.z - p.pos.z;
         if (dx * dx + dy * dy + dz * dz < 0.65) {
           if (t === game.player && t.combat.iframes > 0) continue;
           t.takeDamage(p.dmg, { from: p.owner, knockback: 2, projectile: true, staminaCost: 8 });
@@ -192,12 +195,15 @@ export class CombatSystem {
     this.projectiles = [];
   }
 
+  // hủy mọi hẹn giờ gameplay (đổi level/ô)
+  clearDelayed() { this.game.delayed.length = 0; }
+
   // ---- lock on ------------------------------------------------------------
   findLockTarget(player, current, dirHint) {
     const game = this.game;
     const cam = game.cameraRig;
     let best = null, bestScore = Infinity;
-    for (const n of game.npcs) {
+    for (const n of [...game.npcs, ...(game.creatures || [])]) {
       if (n.disposed || n.combat.dead || !isHostile('player', n.faction)) continue;
       const dx = n.pos.x - player.pos.x, dz = n.pos.z - player.pos.z;
       const d = Math.hypot(dx, dz);
