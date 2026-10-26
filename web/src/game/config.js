@@ -36,4 +36,15 @@ export const CONFIG = {
     yaw: Math.PI, pitch: 0.35, pitchMin: 0.05, pitchMax: 1.1,
     mouseYaw: 0.0025, mousePitch: 0.002,
   },
+  world: {
+    size: 120,
+    terrainSegments: 96,
+    skyColor: 0x87b5d6,
+    timeOfDay: 0.35,
+    crater: { center: { x: -18, y: 0, z: -14 }, radius: 6, depth: 1.8 },
+    fissure: { start: { x: 12, y: 0, z: -20 }, end: { x: 22, y: 0, z: 18 }, width: 2, depth: 1.2 },
+    lake: { id: 'lake', level: -0.6, x: -18, z: -14, size: 40, segments: 32, waveAmplitude: 0.15, waveFrequency: 1.2, color: 0x2a6da8 },
+    wind: { direction: { x: 1, y: 0, z: 0.2 }, speed: 5 },
+    trees: { count: 60, seed: 42, margin: 16, minHeight: -0.2 },
+  },
 };

@@ -1,9 +1,8 @@
-// Game — chỉ điều phối các hệ đã tách riêng, không còn ôm combat,
-// camera, HUD hay hiệu ứng trong một file:
+// Game — chỉ điều phối các hệ đã tách riêng:
 //  - Vòng lặp + FPS: engine Ticker. Vật lý: GravityEngine.
-//  - Map: World (Terrain/Water/Foliage/Atmosphere của engine).
-//  - Nhân vật: Player, quái: Monster, vật phẩm: Pickup.
+//  - Map: World. Nhân vật: Player, quái: Monster, vật phẩm: Pickup.
 //  - Combat: combat.js, camera: camera.js, HUD: hud.js, hạt: effects.js.
+//  - Renderer: renderer.js, spawn: spawner.js.
 // Lưu ý trung thực: không dùng GameEngine facade làm vòng lặp chính, vì
 // ticker của facade không có hook cho update của game; các subsystem của
 // nó (Ticker, Physics, Particles, Input...) thì dùng trực tiếp 100%.
@@ -11,28 +10,25 @@
 import * as THREE from 'three';
 import {
   EngineTicker as Ticker, EngineInputMap as InputMap, EngineParticleSystem as ParticleSystem,
-  AudioBus, GravityEngine, getGraphicsPreset,
+  AudioBus, GravityEngine,
 } from '../assets/engine-lib.js';
 import { CONFIG } from './config.js';
 import { World } from './world.js';
 import { Player } from './player.js';
-import { Monster } from './monster.js';
 import { Pickup } from './items.js';
 import { findAttackHits } from './combat.js';
 import { ThirdPersonCamera } from './camera.js';
 import { renderHud } from './hud.js';
 import { Effects } from './effects.js';
+import { createRenderer } from './renderer.js';
+import { spawnMonsters, spawnPickups } from './spawner.js';
 
 export class Game {
   constructor(canvas) {
     this.canvas = canvas;
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(60, 16 / 9, 0.1, 500);
-    this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
-    const preset = getGraphicsPreset('ultra');
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, preset.quality.pixelRatioCap));
-    this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.renderer = createRenderer(canvas);
 
     this.input = new InputMap();
     this.input.bind('sheath', { keys: ['KeyX'] });
@@ -45,12 +41,8 @@ export class Game {
     this.world = new World(this.scene);
     this.player = new Player(this.scene);
     this.player.pos.y = this.world.heightAt(this.player.pos.x, this.player.pos.z);
-    this.monsters = CONFIG.monsterSpawns.map(
-      ([x, z, seed]) => new Monster(this.scene, x, z, this.world.heightAt(x, z), { seed }),
-    );
-    this.pickups = CONFIG.pickupSpawns.map(
-      ([x, z, kind]) => new Pickup(this.scene, x, z, this.world.heightAt(x, z), kind),
-    );
+    this.monsters = spawnMonsters(this.scene, this.world);
+    this.pickups = spawnPickups(this.scene, this.world);
     this.cameraRig = new ThirdPersonCamera();
     this.time = 0;
     this.hud = null;
