@@ -1,4 +1,6 @@
 // smoothMotion: trọng lực + vị trí + render mượt cho game.
+// Trọng lực ĐÃ QUA ENGINE: applyGravity() gọi GravityEngine.applyVelocity
+// của @aetheria/engine (g=18, terminalVelocity=50, khớp hằng số cũ).
 // Thuần JS, KHÔNG phụ thuộc three.js nên test được bằng node.
 // Vấn đề nó giải quyết:
 //  - Trước đây Character.applyPhysics dùng dt biến thiên trực tiếp
@@ -13,8 +15,9 @@
 //   prevPos: {x,y,z} | null }
 // pos/vel có thể là THREE.Vector3 hoặc object {x,y,z} thuần.
 
-export const GRAVITY = -18;          // khớp hằng số cũ trong character.js
-export const TERMINAL_VELOCITY = -50; // chặn rơi tự do: tránh xuyên đất khi lag
+import { gravityEngine } from '../assets/engineAssets.js';
+export const GRAVITY = -gravityEngine.g;          // -18, từ engine GravityEngine
+export const TERMINAL_VELOCITY = -gravityEngine.terminalVelocity; // -50, từ engine
 export const MAX_SUBSTEP = 1 / 120;   // bước vật lý tối đa ~8.33ms
 export const FIXED_DT = 1 / 60;       // bước cố định cho FixedStepper
 
@@ -33,6 +36,12 @@ export function snapshotPosition(body) {
  */
 export function applyGravity(body, dt, { gravity = GRAVITY, terminalVelocity = TERMINAL_VELOCITY } = {}) {
   if (dt <= 0) return body.vel.y;
+  // Engine GravityEngine: vel.y -= g*dt, kẹp ở -terminalVelocity.
+  // Adapter body: engine cần {velocity, position, gravityScale, force, mass, drag}
+  if (gravity === GRAVITY && terminalVelocity === TERMINAL_VELOCITY) {
+    gravityEngine.applyVelocity({ velocity: body.vel, position: body.pos, gravityScale: 1 }, dt);
+    return body.vel.y;
+  }
   body.vel.y = Math.max(terminalVelocity, body.vel.y + gravity * dt);
   return body.vel.y;
 }

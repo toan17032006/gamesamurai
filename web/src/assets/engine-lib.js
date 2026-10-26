@@ -1267,6 +1267,21 @@ function createBoxMesh(opts = {}) {
   const mat2 = new THREE3.MeshStandardMaterial({ color: opts.color ?? 8947848, roughness: opts.roughness ?? 0.5 });
   return new THREE3.Mesh(geo, mat2);
 }
+var PRIMITIVES = {
+  blob,
+  spike,
+  tentacle,
+  eyeball,
+  limbBone,
+  cubeBox,
+  cylinder,
+  displace,
+  seededRandom,
+  createConeMesh,
+  createCylinderMesh,
+  createBoxMesh
+};
+var PrimitiveFactory = PRIMITIVES;
 
 // engine/src/procedural/character-factory.ts
 import * as THREE4 from "three";
@@ -13060,11 +13075,20 @@ export {
   AudioBus,
   DecalProjector,
   Easings,
+  AssetFactory as EngineAssetFactory,
   buildComposer as EngineBuildComposer,
   GradingShader as EngineGradingShader,
   GrainShader as EngineGrainShader,
+  InputMap as EngineInputMap,
+  MemoryDisposer as EngineMemoryDisposer,
   ParticleSystem as EngineParticleSystem,
+  PhysicsWorld as EnginePhysicsWorld,
+  PivotAdjuster as EnginePivotAdjuster,
   PostProcessing as EnginePostProcessing,
+  PrimitiveFactory as EnginePrimitiveFactory,
+  Scaler as EngineScaler,
+  SocketBinder as EngineSocketBinder,
+  Ticker as EngineTicker,
   EventBus,
   FoliageSystem,
   GameEngine,
@@ -13089,6 +13113,11 @@ export {
   cubeBox,
   cylinder,
   displace,
+  applyPivot as engineApplyPivot,
+  applyScale as engineApplyScale,
+  bakeScaleIntoGeometry as engineBakeScale,
+  findBone as engineFindBone,
+  listSockets as engineListSockets,
   eyeball,
   getGraphicsPreset,
   limbBone,

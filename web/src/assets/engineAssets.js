@@ -100,6 +100,13 @@ export function createEngineMonster(spec = {}) {
 }
 
 export { PALETTES as MONSTER_PALETTES };
+// Re-export các helper engine dùng chung cho rig/quái/môi trường (bước 3)
+export {
+  EngineTicker, EnginePhysicsWorld, EngineScaler, engineApplyScale, engineBakeScale,
+  EnginePivotAdjuster, engineApplyPivot, EngineSocketBinder, engineFindBone, engineListSockets,
+  EngineMemoryDisposer, EngineInputMap, EnginePrimitiveFactory, EngineAssetFactory,
+  setMaterialParams, convertToStandard,
+} from './engine-lib.js';
 
 // ---- catalog prop đầy đủ bằng AssetFactory ---------------------------------
 // Mỗi prop là 1 spec part (box/sphere/cylinder/cone/capsule/plane/torus)

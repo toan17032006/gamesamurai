@@ -111,12 +111,14 @@ export class Animator {
     for (const name of ['hips', 'torso', 'head', 'armR_sh', 'armR_el', 'armR_hand', 'armL_sh', 'armL_el', 'armL_hand',
       'legR_hip', 'legR_knee', 'legR_foot', 'legL_hip', 'legL_knee', 'legL_foot']) setJoint(name);
 
-    // hips position
+    // hips position — engine rig: hipsBaseY = height*0.52 (chân chạm đất),
+    // rig cũ: 0.98. Dùng giá trị của rig nếu có, không ép hằng số cũ.
+    const hipsBaseY = this.rig.hipsBaseY ?? HIPS_BASE_Y;
     const posCur = cur._pos || [0, 0, 0];
     const posPrev = (prevPose && prevPose._pos) || [0, 0, 0];
     this.joints.hips.position.set(
       lerp(posPrev[0], posCur[0], w),
-      HIPS_BASE_Y + lerp(posPrev[1], posCur[1], w),
+      hipsBaseY + lerp(posPrev[1], posCur[1], w),
       lerp(posPrev[2], posCur[2], w));
     // root rotation (inner body wrapper; group carries yaw+position)
     const rCur = cur._root || [0, 0];

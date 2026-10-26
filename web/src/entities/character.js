@@ -8,7 +8,7 @@ import { angleWrap, clamp } from '../core/utils.js';
 import { stepWithSubsteps } from '../core/smoothMotion.js';
 import { Trail } from '../gfx/trail.js';
 
-const GRAVITY = -18;
+// Trọng lực: qua engine GravityEngine (g=18) trong core/smoothMotion.js, không còn hằng số riêng ở đây.
 const SWAY_STIFF = 85, SWAY_DAMP = 10.5, SWAY_MAX = 0.45;
 
 // Katana stance overlay (blended on top of idle/walk/run clips while out of combat).

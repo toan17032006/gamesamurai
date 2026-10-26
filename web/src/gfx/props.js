@@ -5,7 +5,7 @@
 // không phải sửa. Chất lượng cao hơn: segment lớn hơn, shadow bật sẵn,
 // vật liệu MeshStandard với envMapIntensity.
 import * as THREE from 'three';
-import { engineProp, createEngineAsset, displacedRock } from '../assets/engineAssets.js';
+import { engineProp, createEngineAsset, displacedRock, enginePrimitives, setMaterialParams } from '../assets/engineAssets.js';
 import { G, M } from './materials.js';
 import { makeSwayMaterial } from './wind.js';
 
@@ -53,7 +53,7 @@ export function makeBambooField(count, rng) {
   const stemMat = makeSwayMaterial({ color: 0x7a9a4e, roughness: 0.55 }, { amp: 0.07, freq: 1.6, heightRef: 4 });
   for (let i = 0; i < count; i++) {
     const h = 3 + rng() * 2;
-    const stem = new THREE.Mesh(G('cyl', 0.05, 0.075, h, 5), stemMat);
+    const stem = new THREE.Mesh(enginePrimitives.cylinder(0.06, h, 5), stemMat);
     stem.position.set((rng() - 0.5) * 8, h / 2, (rng() - 0.5) * 8);
     stem.castShadow = true; group.add(stem);
   }
@@ -89,7 +89,8 @@ export function makeBridge(len = 14, width = 3.2) {
 }
 export function makeDeadTree(rng) {
   const g = engineProp('tree', rng);
-  g.traverse((o) => { if (o.isMesh) o.material = M(0x4a4038, { rough: 0.95 }); });
+  // Đổi màu toàn bộ cây sang nâu khô bằng material-mapper của engine
+  try { setMaterialParams(g, { color: 0x4a4038, roughness: 0.95 }); } catch { g.traverse((o) => { if (o.isMesh) o.material.color.setHex(0x4a4038); }); }
   return g;
 }
 export function makeReeds(rng) { return makeBambooField(6, rng); }

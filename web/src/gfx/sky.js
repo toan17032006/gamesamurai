@@ -1,131 +1,69 @@
-// Sky v2 — PHIÊN BẢN ENGINE: shader bầu trời giữ nguyên (engine không có
-// shader này), nhưng gió/mây giờ lấy từ AtmosphereSystem của engine:
-// set() đặt tốc độ gió theo thời tiết, update() chạy atmosphereSystem.update
-// và trôi mây nhanh hơn khi gió mạnh. Ánh sáng mặt trời/hemi vẫn do Sky quản,
-// vì configureLights của engine sẽ tạo thêm đèn trùng tên.
+// Sky — 100% ENGINE (bước 3): shader bầu trời tự viết (gradient + mây fbm +
+// sao + mặt trăng bằng GLSL) ĐÃ XÓA. Thay bằng:
+//   - scene.background = màu bầu trời của engine (top/bottom từ region def)
+//   - ánh sáng: configureLights() của engine (__engine_hemi / __engine_sun,
+//     không còn HemisphereLight/DirectionalLight tự tạo trùng)
+//   - mây: 8 plane do AssetFactory của engine tạo, trôi theo gió của
+//     AtmosphereSystem (tốc độ mây = 0.7 + wind.speed*0.08 như cũ)
+//   - môi trường phản chiếu: PMREM từ 1 dome màu đơn giản (không shader)
+// API giữ nguyên cho Weather/Game/LevelManager: mat.uniforms (top/bottom/
+// sunColor/sunDir/cloudCover/night/time), sun, hemi, baseSunIntensity,
+// baseHemiIntensity, sunDir, set(def), update(playerPos), dispose().
+// Đánh đổi ghi rõ: sao/mặt trăng/mây fbm bằng shader không còn — engine
+// không có shader bầu trời tương đương; mây giờ là plane engine.
 import * as THREE from 'three';
-import { atmosphereSystem } from '../assets/engineAssets.js';
-
-const SKY_VERT = `
-varying vec3 vDir;
-void main() {
-  vDir = normalize(position);
-  vec4 mv = modelViewMatrix * vec4(position, 1.0);
-  gl_Position = projectionMatrix * mv;
-}`;
-
-const SKY_FRAG = `
-uniform vec3 top;
-uniform vec3 bottom;
-uniform vec3 sunDir;
-uniform vec3 sunColor;
-uniform float cloudCover;   // 0..1
-uniform float night;        // 0..1
-uniform float time;
-varying vec3 vDir;
-
-float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
-float vnoise(vec2 p){
-  vec2 i = floor(p), f = fract(p);
-  vec2 u = f * f * (3.0 - 2.0 * f);
-  return mix(mix(hash(i), hash(i + vec2(1,0)), u.x),
-             mix(hash(i + vec2(0,1)), hash(i + vec2(1,1)), u.x), u.y);
-}
-float fbm(vec2 p){
-  float v = 0.0, a = 0.5;
-  for (int i = 0; i < 5; i++) { v += vnoise(p) * a; p = p * 2.13 + 17.3; a *= 0.5; }
-  return v;
-}
-float starLayer(vec2 p){
-  vec2 i = floor(p), f = fract(p);
-  float h = hash(i);
-  if (h < 0.978) return 0.0;
-  vec2 c = vec2(hash(i + 3.1), hash(i + 7.7));
-  float d = length(f - c);
-  return smoothstep(0.10, 0.0, d) * (0.4 + 0.6 * hash(i + 11.0));
-}
-
-void main() {
-  vec3 dir = normalize(vDir);
-  float h = clamp(dir.y * 0.5 + 0.5, 0.0, 1.0);
-  vec3 sky = mix(bottom, top, pow(h, 0.72));
-
-  float sd = max(dot(dir, normalize(sunDir)), 0.0);
-  // sun disc + tight glow + wide halo
-  float disc = smoothstep(0.9993, 0.9997, sd);
-  float glow = pow(sd, 900.0) * 0.9 + pow(sd, 40.0) * 0.22 + pow(sd, 6.0) * 0.10;
-  sky += sunColor * (disc * 3.2 + glow) * (1.0 - night * 0.85);
-
-  // clouds (projected on a virtual plane above, fade at horizon)
-  vec2 cp = dir.xz / max(dir.y + 0.18, 0.06) * 0.30 + vec2(time * 0.006, time * 0.0023);
-  float cf = fbm(cp * 1.6);
-  float cd = fbm(cp * 3.7 + 40.0);
-  float cover = smoothstep(1.0 - cloudCover, 1.0 - cloudCover + 0.42, cf * 0.72 + cd * 0.38);
-  cover *= smoothstep(0.015, 0.16, dir.y);
-  vec3 cloudLit = mix(vec3(1.0), sunColor, 0.35) * (0.62 + 0.5 * cd);
-  vec3 cloudDark = mix(top, bottom, 0.5) * 0.55;
-  vec3 cloud = mix(cloudDark, cloudLit, smoothstep(0.35, 0.75, cf));
-  cloud = mix(cloud * 0.22, cloud, 1.0 - night * 0.75);
-  sky = mix(sky, cloud, cover * 0.9);
-
-  // stars at night, masked by clouds
-  float st = 0.0;
-  if (night > 0.05 && dir.y > 0.0) {
-    vec2 sp = dir.xz / (dir.y + 0.35) * 34.0;
-    st = (starLayer(sp) + starLayer(sp * 1.7 + 91.0) * 0.6) * night * (1.0 - cover) * smoothstep(0.02, 0.2, dir.y);
-    st *= 0.75 + 0.25 * sin(time * 2.0 + hash(floor(sp)) * 40.0);
-  }
-  sky += vec3(0.85, 0.9, 1.0) * st;
-
-  // moon at night (opposite-ish the sun)
-  vec3 moonDir = normalize(vec3(-sunDir.x, max(sunDir.y, 0.35), -sunDir.z));
-  float md = max(dot(dir, moonDir), 0.0);
-  sky += vec3(0.75, 0.8, 0.95) * (smoothstep(0.9995, 0.9998, md) * 1.6 + pow(md, 300.0) * 0.35) * night;
-
-  gl_FragColor = vec4(sky, 1.0);
-}`;
+import { atmosphereSystem, createEngineAsset, ENGINE_PRESET } from '../assets/engineAssets.js';
+import { configureLights } from '../assets/engine-lib.js';
 
 export class Sky {
   constructor(engine) {
     this.engine = engine;
     const scene = engine.scene;
-    this.mat = new THREE.ShaderMaterial({
-      vertexShader: SKY_VERT, fragmentShader: SKY_FRAG,
+    this.scene = scene;
+    // Uniform-like object để Weather vẫn đọc/ghi cloudCover như cũ
+    this.mat = {
       uniforms: {
         top: { value: new THREE.Color(0x8fb8d8) }, bottom: { value: new THREE.Color(0xe8e0cc) },
         sunDir: { value: new THREE.Vector3(0.5, 0.7, 0.5) }, sunColor: { value: new THREE.Color(0xfff0d0) },
         cloudCover: { value: 0.45 }, night: { value: 0 }, time: { value: 0 },
       },
-      side: THREE.BackSide, depthWrite: false, fog: false,
+    };
+    // Đèn engine (tái dùng theo tên, không tạo trùng)
+    const rig = configureLights(scene, {
+      sunAngle: Math.PI / 3, intensity: 1.5,
+      shadowMapSize: ENGINE_PRESET.quality.shadowMapSize ?? 2048,
+      skyColor: 0xbfd7ff, groundColor: 0x3a2f22, sunColor: 0xfff2df,
     });
-    this.dome = new THREE.Mesh(new THREE.SphereGeometry(420, 28, 16), this.mat);
-    this.dome.renderOrder = -999;
-    scene.add(this.dome);
-
-    // separate tiny scene (same material) rendered into a PMREM cubemap for env lighting
-    this.envScene = new THREE.Scene();
-    this.envDome = new THREE.Mesh(new THREE.SphereGeometry(50, 24, 14), this.mat);
-    this.envScene.add(this.envDome);
-    this.pmrem = new THREE.PMREMGenerator(engine.renderer);
-    this._envRT = null;
-
-    this.hemi = new THREE.HemisphereLight(0xffffff, 0x404040, 1.0);
-    scene.add(this.hemi);
-    this.sun = new THREE.DirectionalLight(0xffffff, 1.5);
-    this.sun.castShadow = true;
-    this.sun.shadow.mapSize.set(2048, 2048);
-    this.sun.shadow.camera.near = 1;
-    this.sun.shadow.camera.far = 140;
-    this.sun.shadow.camera.left = -40; this.sun.shadow.camera.right = 40;
-    this.sun.shadow.camera.top = 40; this.sun.shadow.camera.bottom = -40;
-    this.sun.shadow.bias = -0.0008;
-    this.sun.shadow.normalBias = 0.02;
-    this.sun.shadow.radius = 4;
-    scene.add(this.sun);
-    scene.add(this.sun.target);
-    this.sunDir = new THREE.Vector3(0.5, 0.7, 0.5).normalize(); // before set() runs (menu state)
+    this.lightRig = rig;
+    this.hemi = rig.hemi;
+    this.sun = rig.sun;
+    this.sunDir = new THREE.Vector3(0.5, 0.7, 0.5).normalize();
     this.baseSunIntensity = this.sun.intensity;
     this.baseHemiIntensity = this.hemi.intensity;
+    this.background = new THREE.Color(0x8fb8d8);
+    scene.background = this.background;
+
+    // Mây engine: plane AssetFactory, material trong suốt
+    this.clouds = [];
+    for (let i = 0; i < 8; i++) {
+      const w = 40 + (i % 4) * 18;
+      const cloud = createEngineAsset('cloud_' + i, [
+        { shape: 'plane', size: [w, w * 0.45, 1], position: [0, 0, 0], rotation: [0, 0, 0], color: 0xffffff, roughness: 1 },
+      ]);
+      cloud.traverse((o) => { if (o.isMesh) { o.material.transparent = true; o.material.opacity = 0.35; o.material.depthWrite = false; o.castShadow = false; o.receiveShadow = false; } });
+      cloud.rotation.x = -Math.PI / 2;
+      cloud.position.set((i - 4) * 90, 90 + (i % 3) * 18, (i % 5 - 2) * 80);
+      cloud.renderOrder = -1;
+      scene.add(cloud);
+      this.clouds.push(cloud);
+    }
+
+    // Env capture: dome màu đơn (không shader) để PMREM vẫn có reflection
+    this.envScene = new THREE.Scene();
+    this.envMesh = new THREE.Mesh(new THREE.SphereGeometry(50, 16, 12), new THREE.MeshBasicMaterial({ color: 0x8fb8d8, side: THREE.BackSide }));
+    this.envScene.add(this.envMesh);
+    this.pmrem = new THREE.PMREMGenerator(engine.renderer);
+    this._envRT = null;
   }
 
   set(def) {
@@ -135,50 +73,59 @@ export class Sky {
     u.sunColor.value.setHex(def.light.sun);
     u.night.value = def.light.night ? 1 : 0;
     u.cloudCover.value = def.weather === 'rain' ? 0.85 : def.weather === 'fog' ? 0.6 : def.weather === 'embers' ? 0.55 : 0.42;
-    // Gió engine theo thời tiết: mưa/bão gió mạnh, trời trong gió nhẹ
     atmosphereSystem.setWind({
       speed: def.weather === 'storm' ? 14 : def.weather === 'rain' ? 9 : def.weather === 'snowstorm' ? 12 : 5,
       gustiness: def.weather === 'storm' ? 0.7 : 0.3,
     });
-
-    this.scene_fog = this.engine.scene;
-    this.scene_fog.fog = new THREE.FogExp2(def.sky.bottom, def.sky.fogDensity);
+    this.background.setHex(def.sky.bottom).lerp(u.top.value, 0.45);
+    this.engine.scene.background = this.background;
+    this.engine.scene.fog = new THREE.FogExp2(def.sky.bottom, def.sky.fogDensity);
     this.hemi.color.setHex(def.light.ambient);
     this.hemi.intensity = def.light.ambientIntensity * (def.light.night ? 0.55 : 1);
     this.hemi.groundColor.setHex(def.palette.dirt);
     this.sun.color.setHex(def.light.sun);
     this.sun.intensity = def.light.sunIntensity * (def.light.night ? 1.4 : 1);
-    // lưu nền để thời tiết động (weather.js) điều biến quanh các giá trị gốc này
     this.baseSunIntensity = this.sun.intensity;
     this.baseHemiIntensity = this.hemi.intensity;
     this.engine.renderer.toneMappingExposure = def.light.night ? 0.92 : 1.06;
-
     const [az, el] = def.light.sunAngle;
     const d = 80;
     this.sunDir = new THREE.Vector3(Math.cos(az) * Math.cos(el * 0.5), Math.sin(el), Math.sin(az) * Math.cos(el * 0.5)).normalize();
     u.sunDir.value.copy(this.sunDir);
     this.sun.position.set(this.sunDir.x * d, this.sunDir.y * d, this.sunDir.z * d);
-
-    // env lighting from this sky (reflections + ambient for PBR materials)
+    // Env reflection từ màu trời hiện tại
+    this.envMesh.material.color.copy(u.top.value);
     if (this._envRT) this._envRT.dispose();
     this._envRT = this.pmrem.fromScene(this.envScene, 0.04, 1, 120);
     this.engine.scene.environment = this._envRT.texture;
     this.engine.scene.environmentIntensity = def.light.night ? 0.32 : 0.55;
+    // Mây theo cloudCover
+    for (const c of this.clouds) c.traverse((o) => { if (o.isMesh) o.material.opacity = 0.12 + u.cloudCover.value * 0.45; });
   }
 
   update(playerPos) {
     atmosphereSystem.update(1 / 60);
     const wind = atmosphereSystem.getWind();
     this.mat.uniforms.time.value += (1 / 60) * (0.7 + wind.speed * 0.08);
-    this.dome.position.set(playerPos.x, 0, playerPos.z);
+    const drift = wind.speed * 0.08 + 0.7;
+    for (const c of this.clouds) {
+      c.position.x += drift * 0.016;
+      c.position.z += drift * 0.004;
+      if (c.position.x > 420) c.position.x = -420;
+      // Mây bám theo player như dome cũ (không để player bay khỏi mây)
+      c.position.x = playerPos.x + ((c.position.x - playerPos.x + 420) % 840) - 420;
+      c.position.z = playerPos.z + ((c.position.z - playerPos.z + 420) % 840) - 420;
+    }
     this.sun.target.position.set(playerPos.x, 0, playerPos.z);
     this.sun.position.set(playerPos.x + this.sunDir.x * 60, Math.max(18, this.sunDir.y * 60), playerPos.z + this.sunDir.z * 60);
     this.sun.target.updateMatrixWorld();
   }
 
   dispose() {
-    this.dome.geometry.dispose(); this.envDome.geometry.dispose(); this.mat.dispose();
+    for (const c of this.clouds) { this.scene.remove(c); }
+    this.envMesh.geometry.dispose(); this.envMesh.material.dispose();
     this.pmrem.dispose();
     if (this._envRT) this._envRT.dispose();
+    if (this.lightRig) this.lightRig.dispose();
   }
 }

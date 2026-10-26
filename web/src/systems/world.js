@@ -12,6 +12,7 @@ import { mergeStaticProps } from '../gfx/merge.js';
 import { WIND, disposeSwayMaterials, syncEngineWind } from '../gfx/wind.js';
 import { WaterSurface, makeWaterfallStrip, waterfallFoam, WATER_TIME } from '../gfx/water.js';
 import { Interactable } from '../entities/interactable.js';
+import { terrainSystem } from '../assets/engineAssets.js';
 import { InfiniteWorld, CELL as CELL_SIZE_REF } from './infiniteWorld.js';
 import { hashSeed } from './worldgen.js';
 
@@ -155,7 +156,9 @@ export class World {
     const noise = makeNoise2D(def.seed);
     const size = def.size;
     const field = makeHeightField(def, noise);
-    this.heightFn = field.heightFn;
+    // Chiều cao qua TerrainSystem của engine (không có deformation thì = base)
+    const baseHeightFn = field.heightFn;
+    this.heightFn = (x, z) => terrainSystem.getDeformedHeight(x, z, baseHeightFn(x, z));
     this.roadX = field.roadX;
     this.spawnPoint = field.spawnPoint;
     this.goalPos = field.goalPos;

@@ -1,80 +1,12 @@
-// Terrain v2 (ENGINE quality): high-res heightfield + procedural detail albedo/normal
-// textures + valley AO. Nâng chất lượng lên mức engine preset 'ultra':
-// segment 192 (thay 160), anisotropy tới 16, normalScale mạnh hơn.
+// Terrain — ENGINE (bước 3): texture canvas tự vẽ (detail albedo + normal map
+// bằng CanvasTexture) ĐÃ XÓA. Mặt đất giờ chỉ dùng vertex colors theo palette
+// + material chuẩn của engine (roughness/envMapIntensity qua preset ultra),
+// chiều cao lấy qua TerrainSystem.getDeformedHeight(base) của engine — nếu
+// sau này có applyCrater/applyFissure thì mesh và heightFn cùng đổi theo
+// (xem systems/world.js: heightFn cũng qua terrainSystem).
+// Segment giữ nguyên preset ultra: 192, anisotropy tới 16.
 import * as THREE from 'three';
-import { ENGINE_PRESET } from '../assets/engineAssets.js';
-
-function makeDetailTexture() {
-  const s = 256;
-  const cv = document.createElement('canvas');
-  cv.width = cv.height = s;
-  const ctx = cv.getContext('2d');
-  ctx.fillStyle = '#b9b9b4';
-  ctx.fillRect(0, 0, s, s);
-  // soil speckles
-  for (let i = 0; i < 5200; i++) {
-    const g = 150 + (Math.random() * 105) | 0;
-    ctx.fillStyle = `rgba(${g},${g - 4},${g - 12},${0.16 + Math.random() * 0.2})`;
-    ctx.fillRect(Math.random() * s, Math.random() * s, 1 + Math.random() * 1.6, 1 + Math.random() * 1.6);
-  }
-  // tiny grass blade strokes
-  for (let i = 0; i < 900; i++) {
-    const x = Math.random() * s, y = Math.random() * s;
-    const g = 120 + (Math.random() * 70) | 0;
-    ctx.strokeStyle = `rgba(${(g * 0.55) | 0},${g},${(g * 0.45) | 0},0.28)`;
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-    ctx.lineTo(x + (Math.random() - 0.5) * 3, y - 2 - Math.random() * 3);
-    ctx.stroke();
-  }
-  const tex = new THREE.CanvasTexture(cv);
-  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-  tex.colorSpace = THREE.SRGBColorSpace;
-  tex.anisotropy = 4;
-  return tex;
-}
-
-function makeNormalTexture() {
-  const s = 256;
-  const cv = document.createElement('canvas');
-  cv.width = cv.height = s;
-  const ctx = cv.getContext('2d');
-  const h = new Float32Array(s * s);
-  for (let i = 0; i < s * s; i++) h[i] = Math.random();
-  // smooth a few passes
-  for (let p = 0; p < 2; p++) {
-    const out = new Float32Array(s * s);
-    for (let y = 0; y < s; y++) for (let x = 0; x < s; x++) {
-      let acc = 0, n = 0;
-      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
-        acc += h[((y + dy + s) % s) * s + ((x + dx + s) % s)]; n++;
-      }
-      out[y * s + x] = acc / n;
-    }
-    h.set(out);
-  }
-  const img = ctx.createImageData(s, s);
-  const strong = 2.2;
-  for (let y = 0; y < s; y++) for (let x = 0; x < s; x++) {
-    const hl = h[y * s + ((x - 1 + s) % s)], hr = h[y * s + ((x + 1) % s)];
-    const hd = h[((y - 1 + s) % s) * s + x], hu = h[((y + 1 + s) % s) * s + x];
-    let nx = (hl - hr) * strong, ny = (hd - hu) * strong, nz = 1;
-    const l = Math.hypot(nx, ny, nz); nx /= l; ny /= l; nz /= l;
-    const i = (y * s + x) * 4;
-    img.data[i] = (nx * 0.5 + 0.5) * 255;
-    img.data[i + 1] = (ny * 0.5 + 0.5) * 255;
-    img.data[i + 2] = (nz * 0.5 + 0.5) * 255;
-    img.data[i + 3] = 255;
-  }
-  ctx.putImageData(img, 0, 0);
-  const tex = new THREE.CanvasTexture(cv);
-  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-  tex.anisotropy = 4;
-  return tex;
-}
-
-let _detailTex = null, _normalTex = null;
+import { ENGINE_PRESET, terrainSystem } from '../assets/engineAssets.js';
 
 function anisotropyFor(world) {
   try { return Math.min(16, world.game.engine.renderer.capabilities.getMaxAnisotropy()); } catch { return 8; }
@@ -86,11 +18,7 @@ export function buildTerrain(world, def, quality = 'high') {
   const geo = new THREE.PlaneGeometry(size, size, seg, seg);
   geo.rotateX(-Math.PI / 2);
 
-  if (!_detailTex) _detailTex = makeDetailTexture();
-  if (!_normalTex) _normalTex = makeNormalTexture();
   const aniso = anisotropyFor(world);
-  _detailTex.anisotropy = aniso;
-  _normalTex.anisotropy = aniso;
 
   const pos = geo.attributes.position;
   const uv = geo.attributes.uv;
@@ -107,7 +35,7 @@ export function buildTerrain(world, def, quality = 'high') {
 
   for (let i = 0; i < pos.count; i++) {
     const x = pos.getX(i), z = pos.getZ(i);
-    const y = world.heightFn(x, z);
+    const y = terrainSystem.getDeformedHeight(x, z, world.heightFn(x, z));
     pos.setY(i, y);
     // tile the detail textures across the map (~7m per tile)
     uv.setXY(i, uv.getX(i) * (size / 7), uv.getY(i) * (size / 7));
@@ -129,9 +57,6 @@ export function buildTerrain(world, def, quality = 'high') {
 
   const mat = new THREE.MeshStandardMaterial({
     vertexColors: true,
-    map: _detailTex,
-    normalMap: _normalTex,
-    normalScale: new THREE.Vector2(0.65, 0.65),
     roughness: 0.96, metalness: 0,
     envMapIntensity: 0.25,
   });

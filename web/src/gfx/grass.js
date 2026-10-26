@@ -1,52 +1,21 @@
-// Instanced grass field — PHIÊN BẢN ENGINE: instancing + sway giữ nguyên API
-// ({mesh, geo, mat}), nhưng mật độ cỏ giờ lấy từ preset 'ultra' của engine
-// (vegetationDensity 1.0) và mỗi patch cỏ đăng ký vào FoliageSystem của engine
-// để engine biết vị trí thảm thực vật (dùng cho wind sway / chop sau này).
+// Instanced grass field — 100% ENGINE (bước 3): geometry lá cỏ tự vẽ
+// (crossed quads bằng BufferGeometry thủ công) ĐÃ XÓA, thay bằng
+// PrimitiveFactory.cubeBox của engine (lá cỏ = box mỏng 0.09x0.62x0.02,
+// instancing + sway theo gió engine giữ nguyên API {mesh, geo, mat}).
+// Mật độ lấy từ preset 'ultra' (vegetationDensity 1.0), mỗi patch đăng ký
+// vào FoliageSystem của engine.
 import * as THREE from 'three';
 import { makeSwayMaterial } from './wind.js';
-import { ENGINE_PRESET, foliageSystem } from '../assets/engineAssets.js';
+import { ENGINE_PRESET, foliageSystem, enginePrimitives } from '../assets/engineAssets.js';
 
 const GRASS_COUNTS = { ultra: 24000, high: 15000, medium: 7000, low: 0 };
 const VEG_DENSITY = ENGINE_PRESET.quality.vegetationDensity ?? 1.0;
 const MAX_GRASS = 24000;
 
 function bladeGeometry() {
-  // two crossed quads, 4 height rows, slight forward curve, tapered; normals up for soft lighting
-  const rows = 4, h = 0.62;
-  const quads = [
-    { rot: 0 },
-    { rot: Math.PI / 2 },
-  ];
-  const positions = [], normals = [], colors = [], uvs = [], indices = [];
-  let vi = 0;
-  for (const q of quads) {
-    const cos = Math.cos(q.rot), sin = Math.sin(q.rot);
-    for (let r = 0; r <= rows; r++) {
-      const t = r / rows;
-      const y = t * h;
-      const halfW = 0.045 * (1 - t * 0.75);
-      const bend = t * t * 0.14;
-      for (let sx = -1; sx <= 1; sx += 2) {
-        const lx = sx * halfW;
-        positions.push(lx * cos - bend * sin, y, lx * sin + bend * cos);
-        normals.push(0, 1, 0);
-        const shade = 0.55 + t * 0.55;
-        colors.push(shade, shade, shade);
-        uvs.push(0, t);
-      }
-    }
-    for (let r = 0; r < rows; r++) {
-      const a = vi + r * 2, b = a + 1, c = a + 2, d = a + 3;
-      indices.push(a, b, c, b, d, c);
-    }
-    vi += (rows + 1) * 2;
-  }
-  const geo = new THREE.BufferGeometry();
-  geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-  geo.setAttribute('normal', new THREE.Float32BufferAttribute(normals, 3));
-  geo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
-  geo.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
-  geo.setIndex(indices);
+  // Lá cỏ engine: box mỏng, gốc ở y=0 (dịch lên h/2 để instancing đặt đúng mặt đất)
+  const geo = enginePrimitives.cubeBox(0.09, 0.62, 0.02);
+  geo.translate(0, 0.31, 0);
   return geo;
 }
 

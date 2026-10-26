@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import { Entity } from './entity.js';
 import { bosses, BOSS_ATTACKS } from '../data/bosses.js';
 import { NPC_ATTACKS } from '../data/enemies.js';
-import { G, M } from '../gfx/materials.js';
+import { buildDragonRig } from '../gfx/engineMonsterRig.js';
 import { angleWrap, clamp } from '../core/utils.js';
 
 export const DRAGON_DEF = {
@@ -69,94 +69,8 @@ export class Dragon extends Entity {
     game.player.combat.iframes = 2.6;
   }
 
-  buildRig() {
-    const g = new THREE.Group();
-    const s = 1;
-    const scaleMat = M(0x7a1e12, { rough: 0.6 });
-    const bellyMat = M(0xc8a050, { rough: 0.7 });
-    const spikeMat = M(0x2a1010, { rough: 0.8 });
-    // thân
-    const body = new THREE.Mesh(G('sph', 0.75, 10, 8), scaleMat);
-    body.scale.set(0.8, 0.75, 1.5);
-    body.castShadow = true;
-    g.add(body);
-    const belly = new THREE.Mesh(G('sph', 0.6, 9, 7), bellyMat);
-    belly.scale.set(0.66, 0.55, 1.3);
-    belly.position.y = -0.18;
-    g.add(belly);
-    // cổ + đầu
-    const neck = new THREE.Group();
-    neck.position.set(0, 0.3, 0.85);
-    const nseg = new THREE.Mesh(G('cyl', 0.28, 0.38, 1.2, 8), scaleMat);
-    nseg.rotation.x = 1.15;
-    nseg.position.z = 0.45;
-    neck.add(nseg);
-    const head = new THREE.Group();
-    head.position.set(0, 0.42, 1.15);
-    const skull = new THREE.Mesh(G('sph', 0.34, 9, 7), scaleMat);
-    skull.scale.set(0.85, 0.75, 1.4);
-    skull.castShadow = true;
-    head.add(skull);
-    const snout = new THREE.Mesh(G('box', 0.3, 0.22, 0.55), scaleMat);
-    snout.position.set(0, -0.06, 0.45);
-    head.add(snout);
-    const jaw = new THREE.Mesh(G('box', 0.26, 0.1, 0.5), bellyMat);
-    jaw.position.set(0, -0.2, 0.42);
-    head.add(jaw);
-    for (const h of [-1, 1]) {
-      const horn = new THREE.Mesh(G('cone', 0.07, 0.5, 6), spikeMat);
-      horn.position.set(h * 0.16, 0.26, -0.05);
-      horn.rotation.set(-0.6, 0, -h * 0.5);
-      head.add(horn);
-    }
-    const eyeMat = new THREE.MeshStandardMaterial({ color: 0xffd257, emissive: 0xff8a10, emissiveIntensity: 3, roughness: 0.3 });
-    for (const e of [-1, 1]) {
-      const eye = new THREE.Mesh(G('sph', 0.05, 6, 5), eyeMat);
-      eye.position.set(e * 0.16, 0.08, 0.28);
-      head.add(eye);
-    }
-    neck.add(head);
-    g.add(neck);
-    // cánh (2 khớp xoay vẫy)
-    const wings = [];
-    for (const side of [-1, 1]) {
-      const pivot = new THREE.Group();
-      pivot.position.set(side * 0.5, 0.35, 0.1);
-      const arm = new THREE.Mesh(G('box', 1.5, 0.1, 0.28), scaleMat);
-      arm.position.x = side * 0.75;
-      pivot.add(arm);
-      const membrane = new THREE.Mesh(G('plane', 2.3, 1.7),
-        M(0x8a2a1a, { rough: 0.75, extra: { side: THREE.DoubleSide, transparent: true, opacity: 0.92 } }));
-      membrane.position.set(side * 1.35, -0.45, -0.5);
-      membrane.rotation.set(-0.35, side * 0.55, side * -0.25);
-      pivot.add(membrane);
-      g.add(pivot);
-      wings.push(pivot);
-    }
-    // đuôi (2 đoạn lắc lư)
-    const tail = new THREE.Group();
-    tail.position.set(0, 0.1, -1.0);
-    const t1 = new THREE.Mesh(G('cone', 0.3, 1.6, 7), scaleMat);
-    t1.rotation.x = Math.PI / 2;
-    t1.position.z = -0.8;
-    tail.add(t1);
-    const t2 = new THREE.Mesh(G('cone', 0.14, 1.2, 6), scaleMat);
-    t2.rotation.x = Math.PI / 2;
-    t2.position.z = -1.9;
-    tail.add(t2);
-    const spike = new THREE.Mesh(G('cone', 0.12, 0.4, 5), spikeMat);
-    spike.position.z = -2.5;
-    spike.rotation.x = -Math.PI / 2;
-    tail.add(spike);
-    g.add(tail);
-    // gai lưng
-    for (let i = 0; i < 5; i++) {
-      const sp = new THREE.Mesh(G('cone', 0.09, 0.3, 5), spikeMat);
-      sp.position.set(0, 0.55 - i * 0.02, 0.55 - i * 0.42);
-      g.add(sp);
-    }
-    return { group: g, joints: { wings, neck, tail, head } };
-  }
+  // Rig rồng bằng ENGINE buildMonster (flyer, height 3.6, cánh circle engine)
+  buildRig() { return buildDragonRig(); }
 
   distTo(p) { return Math.hypot(p.pos.x - this.pos.x, p.pos.z - this.pos.z); }
   effAttack() { return this.stats.attack; }

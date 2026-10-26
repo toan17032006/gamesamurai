@@ -29,3 +29,13 @@ export { configureLights } from '../engine/src/renderer/light-mapper.ts';
 export { convertToStandard, setMaterialParams } from '../engine/src/renderer/material-mapper.ts';
 export { mapBoneNames, retargetRigClip } from '../engine/src/combiner/rig-synchronizer.ts';
 export { RealisticHumanPlayer } from '../engine/src/player/realistic-human-player.ts';
+// Bước 3 (full-engine render): loop/FPS, physics world, transform, socket, memory, input
+export { Ticker as EngineTicker } from '../engine/src/core/loop.ts';
+export { PhysicsWorld as EnginePhysicsWorld } from '../engine/src/physics/index.ts';
+export { Scaler as EngineScaler, applyScale as engineApplyScale, bakeScaleIntoGeometry as engineBakeScale } from '../engine/src/transformer/scaler.ts';
+export { PivotAdjuster as EnginePivotAdjuster, applyPivot as engineApplyPivot } from '../engine/src/transformer/pivot-adjuster.ts';
+export { SocketBinder as EngineSocketBinder, findBone as engineFindBone, listSockets as engineListSockets } from '../engine/src/combiner/socket-binder.ts';
+export { MemoryDisposer as EngineMemoryDisposer } from '../engine/src/memory/memory-disposer.ts';
+export { InputMap as EngineInputMap } from '../engine/src/input/input-map.ts';
+export { PrimitiveFactory as EnginePrimitiveFactory } from '../engine/src/procedural/primitive-factory.ts';
+export { AssetFactory as EngineAssetFactory } from '../engine/src/procedural/asset-factory.ts';

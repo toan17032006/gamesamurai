@@ -7,8 +7,35 @@ import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPa
 import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 import { SMAAPass } from 'three/examples/jsm/postprocessing/SMAAPass.js';
 import { GTAOPass } from 'three/examples/jsm/postprocessing/GTAOPass.js';
-import { createGradingPass } from '../gfx/post.js';
-import { Ticker } from '../framework/core/ticker.js';
+import { createGradingPass, createEngineGrainPass } from '../gfx/post.js';
+import { EngineTicker } from '../assets/engine-lib.js';
+
+// Vòng lặp qua Ticker của ENGINE (fixedStep=0 => dt biến thiên như cũ,
+// fpsCap theo targetFps, stats fps/frameMs từ engine). hitstop/timeScale
+// của game được giữ lại bằng wrapper: khi hitstop>0, timeScale=0.06.
+class EngineLoopTicker {
+  constructor(update) {
+    this._update = update;
+    this.timeScale = 1;
+    this._hitstop = 0;
+    this.stats = { fps: 0, frameMs: 0, drawCalls: 0, renderScale: 1 };
+    this._ticker = new EngineTicker({
+      update: (dt, rawDt) => this._tick(dt, rawDt),
+      fixedStep: 0, fpsCap: 0, maxFrameTime: 0.05,
+    });
+  }
+  hitstop(seconds) { this._hitstop = Math.max(this._hitstop, seconds); }
+  setFpsCap(cap) { try { this._ticker.setFpsCap(cap); } catch { /* engine version cũ không có setFpsCap */ } }
+  start() { this._ticker.start(); }
+  stop() { this._ticker.stop(); }
+  _tick(dt, rawDt) {
+    if (this._hitstop > 0) { this._hitstop -= rawDt; this.timeScale = 0.06; }
+    else this.timeScale = 1;
+    this._update(dt * this.timeScale, rawDt);
+    const st = this._ticker.stats;
+    this.stats.fps = st.fps; this.stats.frameMs = st.frameMs;
+  }
+}
 
 const MIN_SCALE = 0.5, MAX_SCALE = 1.0;
 
@@ -22,8 +49,8 @@ export class Engine {
     this.renderer.toneMappingExposure = 1.05;
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(66, window.innerWidth / window.innerHeight, 0.1, 900);
-    // vòng lặp qua framework Ticker: dt clamp, timeScale, hitstop, FPS stats
-    this.ticker = new Ticker({ update: (dt, rawDt) => this._frame(dt, rawDt), maxDt: 0.05 });
+    // vòng lặp qua Ticker của ENGINE (xem EngineLoopTicker ở trên)
+    this.ticker = new EngineLoopTicker((dt, rawDt) => this._frame(dt, rawDt));
     this.stats = Object.assign(this.ticker.stats, { drawCalls: 0, renderScale: 1 });
     this.quality = 'high';
     this.onBeforeRender = null;
@@ -46,13 +73,15 @@ export class Engine {
     this.gtaoPass.output = GTAOPass.OUTPUT.Default;
     this.gtaoPass.blendIntensity = 0.9;
     this.gradingPass = createGradingPass();
-    this.gradingPass.uniforms.uResolution.value = [window.innerWidth * (window.devicePixelRatio || 1), window.innerHeight * (window.devicePixelRatio || 1)];
+    this.grainPass = createEngineGrainPass();
+    this.grainPass.enabled = false;
     this.outputPass = new OutputPass();
     this.composer.addPass(this.renderPass);
     this.composer.addPass(this.gtaoPass);
     this.composer.addPass(this.bloomPass);
     this.composer.addPass(this.smaaPass);
     this.composer.addPass(this.gradingPass);
+    this.composer.addPass(this.grainPass);
     this.composer.addPass(this.outputPass);
     this.composerEnabled = true;
 
@@ -63,7 +92,6 @@ export class Engine {
   _resize() {
     const w = window.innerWidth, h = window.innerHeight;
     const dpr = window.devicePixelRatio || 1;
-    this.gradingPass.uniforms.uResolution.value = [w * dpr, h * dpr];
     this.gtaoPass.setSize(w, h);
     this._applyResolution();
   }
@@ -84,7 +112,8 @@ export class Engine {
     Object.assign(this.options, opts);
     const rs = this.options.resolutionScale;
     if (rs !== 'auto') this.renderScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, parseFloat(rs) || 1));
-    this.gradingPass.uniforms.uGrain.value = this.options.grain ? 0.05 : 0;
+    this.grainPass.enabled = !!this.options.grain;
+    if (this.options.targetFps) this.ticker.setFpsCap(this.options.targetFps);
     if (opts.shadowQuality !== undefined) this._applyShadowQuality();
     this._applyResolution();
   }

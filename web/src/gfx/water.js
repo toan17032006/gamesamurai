@@ -1,35 +1,12 @@
-// Water surfaces — PHIÊN BẢN ENGINE: mặt nước shader giữ nguyên, nhưng mỗi
-// mặt nước đăng ký vào WaterSystem của engine (registerSurface) để tính chiều
-// cao sóng/ripple chuẩn engine qua getHeightAt(x, z). update() chạy
-// waterSystem.update(dt). API cũ giữ nguyên, thêm getHeightAt(x, z).
+// Water surfaces — 100% ENGINE (bước 3): shader injection tự viết (onBeforeCompile
+// chèn sóng vào vertex shader) ĐÃ XÓA. Sóng giờ là CPU displacement: mỗi frame
+// update() lấy chiều cao từ WaterSystem.getHeightAt(x, z) của engine và gán
+// vào từng đỉnh plane (tỉ lệ 0.18 để biên độ khớp shader cũ ±0.16).
+// Thác nước: ShaderMaterial chảy ĐÃ XÓA, thay bằng plane AssetFactory của engine.
 import * as THREE from 'three';
-import { waterSystem } from '../assets/engineAssets.js';
+import { waterSystem, createEngineAsset } from '../assets/engineAssets.js';
 
 let _waterSeq = 0;
-
-const WATER_VERT_PULSE = `
-  uniform float uTime;
-  uniform float uAmp;
-  #define PI 3.141592653589793
-`;
-
-// chèn sóng vào vertex shader của MeshStandardMaterial (giữ fog + lighting + env)
-function injectWaves(mat, ampUniform) {
-  mat.onBeforeCompile = (shader) => {
-    shader.uniforms.uTime = WATER_TIME;
-    shader.uniforms.uAmp = ampUniform;
-    shader.vertexShader = shader.vertexShader
-      .replace('#include <common>', '#include <common>\nuniform float uTime;\nuniform float uAmp;')
-      .replace('#include <begin_vertex>', `#include <begin_vertex>
-        {
-          vec3 wp = (modelMatrix * vec4(position, 1.0)).xyz;
-          float w1 = sin(wp.x * 0.32 + uTime * 1.15) * cos(wp.z * 0.27 + uTime * 0.9);
-          float w2 = sin((wp.x + wp.z) * 0.11 + uTime * 0.55);
-          float w3 = sin(wp.z * 0.51 - uTime * 1.7) * 0.4;
-          transformed.y += (w1 * 0.055 + w2 * 0.085 + w3 * 0.02) * uAmp;
-        }`);
-  };
-}
 
 // shared time uniform — mọi mặt nước cùng nhịp
 export const WATER_TIME = { value: 0 };
@@ -58,8 +35,8 @@ export class WaterSurface {
           envMapIntensity: 1.35, clearcoat: 0.4, clearcoatRoughness: 0.25,
           depthWrite: false,
         });
-    injectWaves(mat, this.ampUniform);
     this.mesh = new THREE.Mesh(geo, mat);
+    this._basePos = geo.attributes.position.array.slice();
     this.mesh.receiveShadow = !this.lava;
     this.mesh.renderOrder = this.lava ? 1 : 2;
     this.mesh.name = this.lava ? 'lava' : 'water';
@@ -115,7 +92,23 @@ export class WaterSurface {
 
   update(dt) {
     waterSystem.update(dt);
+    WATER_TIME.value += dt;
     if (!this.enabled) return;
+    // Sóng engine -> đỉnh plane (world x/z = mesh pos + local pos)
+    {
+      const pos = this.geo.attributes.position;
+      const base = this._basePos;
+      const mx = this.mesh.position.x, mz = this.mesh.position.z;
+      const surf = waterSystem.getSurface(this.surfaceId);
+      const lvl = surf ? surf.level : this.level;
+      const amp = (this.ampUniform.value ?? 1) * 0.18;
+      for (let i = 0; i < pos.count; i++) {
+        const wx = mx + base[i * 3], wz = mz + base[i * 3 + 2];
+        pos.setY(i, (waterSystem.getHeightAt(this.surfaceId, wx, wz, WATER_TIME.value) - lvl) * amp);
+      }
+      pos.needsUpdate = true;
+      this.geo.computeVertexNormals();
+    }
     // lerp mực nước về đích (lũ dâng/receding từ từ)
     this.level += (this.targetLevel - this.level) * Math.min(1, dt * 0.55);
     // đồng bộ mực nước vào surface của engine
@@ -136,29 +129,12 @@ export class WaterSurface {
   }
 }
 
-// Dải thác nước: plane dọc với alpha scroll (chảy xuống), gắn vào vách.
+// Dải thác nước: plane AssetFactory của engine, trong suốt (không shader chảy)
 export function makeWaterfallStrip(w, h, color = 0xbfd8e8) {
-  const geo = new THREE.PlaneGeometry(w, h, 1, 8);
-  const mat = new THREE.ShaderMaterial({
-    transparent: true, depthWrite: false, side: THREE.DoubleSide,
-    uniforms: { uTime: WATER_TIME, uColor: { value: new THREE.Color(color) } },
-    vertexShader: `
-      varying vec2 vUv;
-      void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
-    fragmentShader: `
-      uniform float uTime; uniform vec3 uColor; varying vec2 vUv;
-      float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
-      void main() {
-        // vệt nước chảy: sọc dọc trôi xuống + nhiễu trắng
-        float streak = 0.55 + 0.45 * sin(vUv.x * 22.0 + sin(uTime * 0.7) * 2.0);
-        float flow = fract(vUv.y * 2.2 + uTime * 1.35);
-        float noise = hash(floor(vUv * vec2(24.0, 40.0)) + floor(uTime * 9.0));
-        float a = (0.30 + 0.45 * streak) * (0.55 + 0.45 * flow) * (0.75 + 0.35 * noise);
-        a *= smoothstep(0.0, 0.12, vUv.y) * smoothstep(1.0, 0.9, vUv.y);
-        gl_FragColor = vec4(uColor + vec3(0.25), a * 0.8);
-      }`,
-  });
-  const mesh = new THREE.Mesh(geo, mat);
+  const mesh = createEngineAsset('waterfall', [
+    { shape: 'plane', size: [w, h, 1], position: [0, 0, 0], rotation: [0, 0, 0], color, roughness: 0.4 },
+  ]);
+  mesh.traverse((o) => { if (o.isMesh) { o.material.transparent = true; o.material.opacity = 0.65; o.material.side = THREE.DoubleSide; o.material.depthWrite = false; o.castShadow = false; } });
   mesh.userData.noMerge = true;
   return mesh;
 }
