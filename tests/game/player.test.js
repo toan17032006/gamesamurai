@@ -3,7 +3,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as THREE from 'three';
-import { Player, Monster } from '../../web/src/game/actor.js';
+import { Player } from '../../web/src/game/player.js';
+import { Monster } from '../../web/src/game/monster.js';
 
 const scene = new THREE.Scene();
 
