@@ -19,6 +19,8 @@ import {
 } from '../types.js';
 import type { Vec3 } from '../../types/index.js';
 
+import { recordSubsystemAction } from '../../core/subsystem-activity.js';
+
 export class AnimalBase {
   public id: string;
   public species: string;
@@ -195,9 +197,9 @@ export class AnimalBase {
   public setAnimalBodyMass(mass: number): void { this.appearance.bodyMass = Math.max(0.001, mass); }
   public setAnimalBodyShape(shape: string): void { this.appearance.bodyShape = shape; }
   public updateBodyProportions(): void { this.appearance.height = this.appearance.length * 0.55; }
-  public updateSurfaceDetails(): void {}
-  public updateSpeciesMarkings(): void {}
-  public updateBodySilhouette(): void {}
-  public updateAnimalShading(): void {}
-  public updateAnimalVisibility(): void {}
+  public updateSurfaceDetails(): void { recordSubsystemAction(this, 'updateSurfaceDetails', 'AnimalBase'); }
+  public updateSpeciesMarkings(): void { recordSubsystemAction(this, 'updateSpeciesMarkings', 'AnimalBase'); }
+  public updateBodySilhouette(): void { recordSubsystemAction(this, 'updateBodySilhouette', 'AnimalBase'); }
+  public updateAnimalShading(): void { recordSubsystemAction(this, 'updateAnimalShading', 'AnimalBase'); }
+  public updateAnimalVisibility(): void { recordSubsystemAction(this, 'updateAnimalVisibility', 'AnimalBase'); }
 }

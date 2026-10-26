@@ -7,6 +7,8 @@
 import { BoneTransform, AnimalMuscleState } from '../types.js';
 import type { Vec3 } from '../../types/index.js';
 
+import { recordSubsystemAction } from '../../core/subsystem-activity.js';
+
 export class SkeletonMusclesSubsystem {
   public bones: Map<string, BoneTransform> = new Map();
   public muscles: Map<string, AnimalMuscleState> = new Map();
@@ -46,8 +48,8 @@ export class SkeletonMusclesSubsystem {
 
   public loadSkeletalRig(): boolean { this.skeletalRigLoaded = true; return true; }
   public createSkeletalHierarchy(): boolean { this.hierarchyCreated = true; return true; }
-  public updateBoneTransforms(): void {}
-  public updateRootBone(): void {}
+  public updateBoneTransforms(): void { recordSubsystemAction(this, 'updateBoneTransforms', 'SkeletonMusclesSubsystem'); }
+  public updateRootBone(): void { recordSubsystemAction(this, 'updateRootBone', 'SkeletonMusclesSubsystem'); }
   public updateAxialSkeleton(): void {
     this.updateSkullBones();
     this.updateVertebralColumn();
@@ -58,14 +60,14 @@ export class SkeletonMusclesSubsystem {
     this.updatePelvicStructure();
     this.updateLimbBones();
   }
-  public updateSkullBones(): void {}
-  public updateVertebralColumn(): void {}
-  public updateRibCage(): void {}
-  public updateSternum(): void {}
-  public updatePelvicStructure(): void {}
-  public updateLimbBones(): void {}
-  public updateJointTransforms(): void {}
-  public constrainBoneRotations(): void {}
+  public updateSkullBones(): void { recordSubsystemAction(this, 'updateSkullBones', 'SkeletonMusclesSubsystem'); }
+  public updateVertebralColumn(): void { recordSubsystemAction(this, 'updateVertebralColumn', 'SkeletonMusclesSubsystem'); }
+  public updateRibCage(): void { recordSubsystemAction(this, 'updateRibCage', 'SkeletonMusclesSubsystem'); }
+  public updateSternum(): void { recordSubsystemAction(this, 'updateSternum', 'SkeletonMusclesSubsystem'); }
+  public updatePelvicStructure(): void { recordSubsystemAction(this, 'updatePelvicStructure', 'SkeletonMusclesSubsystem'); }
+  public updateLimbBones(): void { recordSubsystemAction(this, 'updateLimbBones', 'SkeletonMusclesSubsystem'); }
+  public updateJointTransforms(): void { recordSubsystemAction(this, 'updateJointTransforms', 'SkeletonMusclesSubsystem'); }
+  public constrainBoneRotations(): void { recordSubsystemAction(this, 'constrainBoneRotations', 'SkeletonMusclesSubsystem'); }
   public calculateBoneLengths(): Map<string, number> {
     const lengths = new Map<string, number>();
     for (const [k, v] of this.bones.entries()) {
@@ -75,7 +77,7 @@ export class SkeletonMusclesSubsystem {
   }
   public calculateJointAngles(): Map<string, number> { return new Map(); }
   public validateSkeletonHierarchy(): boolean { return this.bones.size > 0; }
-  public retargetAnimalSkeleton(): void {}
+  public retargetAnimalSkeleton(): void { recordSubsystemAction(this, 'retargetAnimalSkeleton', 'SkeletonMusclesSubsystem'); }
 
   // 081–100. Cơ bắp, gân và mô mềm
   public initializeAnimalMuscles(): void {
@@ -90,13 +92,13 @@ export class SkeletonMusclesSubsystem {
   }
   public calculateMuscleForce(muscleId = 'back'): number { return this.muscles.get(muscleId)?.force ?? 0; }
   public calculateMuscleTension(muscleId = 'back'): number { return this.muscles.get(muscleId)?.tension ?? 0; }
-  public updateMuscleDeformation(): void {}
-  public updateTendonStretch(): void {}
-  public updateLigamentConstraints(): void {}
-  public updateSoftTissueMotion(): void {}
-  public updateSkinDeformation(): void {}
-  public updateFatDistribution(): void {}
-  public updateBodyCompression(): void {}
+  public updateMuscleDeformation(): void { recordSubsystemAction(this, 'updateMuscleDeformation', 'SkeletonMusclesSubsystem'); }
+  public updateTendonStretch(): void { recordSubsystemAction(this, 'updateTendonStretch', 'SkeletonMusclesSubsystem'); }
+  public updateLigamentConstraints(): void { recordSubsystemAction(this, 'updateLigamentConstraints', 'SkeletonMusclesSubsystem'); }
+  public updateSoftTissueMotion(): void { recordSubsystemAction(this, 'updateSoftTissueMotion', 'SkeletonMusclesSubsystem'); }
+  public updateSkinDeformation(): void { recordSubsystemAction(this, 'updateSkinDeformation', 'SkeletonMusclesSubsystem'); }
+  public updateFatDistribution(): void { recordSubsystemAction(this, 'updateFatDistribution', 'SkeletonMusclesSubsystem'); }
+  public updateBodyCompression(): void { recordSubsystemAction(this, 'updateBodyCompression', 'SkeletonMusclesSubsystem'); }
   public updateMuscleBulging(): void {
     for (const m of this.muscles.values()) { m.bulge = m.activation * 0.15; }
   }
@@ -111,5 +113,5 @@ export class SkeletonMusclesSubsystem {
     for (const m of this.muscles.values()) sum += m.force;
     return sum;
   }
-  public resolveMuscleConstraints(): void {}
+  public resolveMuscleConstraints(): void { recordSubsystemAction(this, 'resolveMuscleConstraints', 'SkeletonMusclesSubsystem'); }
 }

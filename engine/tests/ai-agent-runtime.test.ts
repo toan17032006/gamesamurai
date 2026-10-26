@@ -15,7 +15,7 @@ import {
 } from '../src/ai/index.js';
 import { Steering, type SteeringAgent } from '../src/ai/steering.js';
 import { NPCMemoryLearningSystem } from '../src/npc/index.js';
-import { Bot, NPC, Player } from '../src/objects/index.js';
+import { Bot, Monster, NPC, Player } from '../src/objects/index.js';
 import functionsCatalog from './ai_npc_functions_2400.json';
 
 interface CatalogFunction {
@@ -266,6 +266,28 @@ describe('Isolated per-agent AI runtime', () => {
     const result = bot.performAgentAction('idle', 0.2);
     expect(result.agentId).toBe('bot_ai');
     expect(result.learning.newQ).toBeGreaterThanOrEqual(0);
+  });
+
+  it('keeps Monster brains and learned state independent', () => {
+    const first = new Monster('monster_a', 'Grokk', 220);
+    const second = new Monster('monster_b', 'Grokk', 220);
+
+    expect(first.hasTag('monster')).toBe(true);
+    expect(first.getBrain().identity.archetype).toBe('monster');
+    expect(second.getBrain().identity.archetype).toBe('monster');
+    expect(first.getBrain().identity.seed).not.toBe(second.getBrain().identity.seed);
+    expect(first.getBrain().personality).not.toEqual(second.getBrain().personality);
+    expect(first.getBrain().getSkill('melee')).not.toEqual(second.getBrain().getSkill('melee'));
+
+    first.getBrain().remember({ summary: 'Ambushed a caravan', importance: 0.8 });
+    first.update(0.1);
+
+    expect(first.state.aiState).toBe('idle');
+    expect(first.peekLastBrainUpdate()).not.toBeNull();
+    expect(second.peekLastBrainUpdate()).toBeNull();
+    expect(second.getBrain().getMemoryCount()).toBe(0);
+    expect(first.getBrain().getMemoryCount()).toBe(1);
+    expect(first.getBrain().memory).not.toBe(second.getBrain().memory);
   });
 
   it('keeps steering wander state per agent instead of a shared static angle', () => {

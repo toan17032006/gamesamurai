@@ -60,6 +60,8 @@ function boundsOverlap(a: Aabb, b: Aabb): boolean {
   );
 }
 
+import { recordSubsystemAction } from '../../core/subsystem-activity.js';
+
 export class EnvironmentalDynamicsSubsystem {
   public particleSystems: Map<string, ParticleEffectSystem> = new Map();
   public ecosystems: Map<string, any> = new Map();
@@ -84,9 +86,9 @@ export class EnvironmentalDynamicsSubsystem {
     if (ps) ps.activeCount = Math.min(ps.maxCount, ps.activeCount + count);
   }
 
-  public updateParticleMotion(particle: any, deltaTime: number): void {}
-  public applyParticleGravity(particle: any): void {}
-  public applyParticleWind(particle: any, wind: any): void {}
+  public updateParticleMotion(particle: any, deltaTime: number): void { recordSubsystemAction(this, 'updateParticleMotion', 'EnvironmentalDynamicsSubsystem'); }
+  public applyParticleGravity(particle: any): void { recordSubsystemAction(this, 'applyParticleGravity', 'EnvironmentalDynamicsSubsystem'); }
+  public applyParticleWind(particle: any, wind: any): void { recordSubsystemAction(this, 'applyParticleWind', 'EnvironmentalDynamicsSubsystem'); }
   /**
    * Hệ số kéo của một hạt.
    *
@@ -102,11 +104,11 @@ export class EnvironmentalDynamicsSubsystem {
   }
 
   public simulateDustCloud(position: Vec3, force: any): any { return { position, radius: 5.0 }; }
-  public spreadDustCloud(cloud: any, wind: any): void {}
-  public dissipateDustCloud(cloud: any, rate: number): void {}
+  public spreadDustCloud(cloud: any, wind: any): void { recordSubsystemAction(this, 'spreadDustCloud', 'EnvironmentalDynamicsSubsystem'); }
+  public dissipateDustCloud(cloud: any, rate: number): void { recordSubsystemAction(this, 'dissipateDustCloud', 'EnvironmentalDynamicsSubsystem'); }
   public createSandBurst(position: Vec3, force: any): any { return { position }; }
-  public simulateBlowingSand(sand: any, wind: any): void {}
-  public simulateDustDevilParticles(particles: any): void {}
+  public simulateBlowingSand(sand: any, wind: any): void { recordSubsystemAction(this, 'simulateBlowingSand', 'EnvironmentalDynamicsSubsystem'); }
+  public simulateDustDevilParticles(particles: any): void { recordSubsystemAction(this, 'simulateDustDevilParticles', 'EnvironmentalDynamicsSubsystem'); }
   /**
    * Hạt phấn hoa bắt từ cây.
    *
@@ -132,7 +134,7 @@ export class EnvironmentalDynamicsSubsystem {
     }
     return particles;
   }
-  public dispersePollen(pollen: any, wind: any): void {}
+  public dispersePollen(pollen: any, wind: any): void { recordSubsystemAction(this, 'dispersePollen', 'EnvironmentalDynamicsSubsystem'); }
   /**
    * Lá rơi từ tán cây.
    *
@@ -160,7 +162,7 @@ export class EnvironmentalDynamicsSubsystem {
     }
     return leaves;
   }
-  public simulateFallingLeafParticles(leaves: any): void {}
+  public simulateFallingLeafParticles(leaves: any): void { recordSubsystemAction(this, 'simulateFallingLeafParticles', 'EnvironmentalDynamicsSubsystem'); }
   /** Cánh hoa rơi — số cánh theo kích thước bông hoa, rơi chậm hơn lá. */
   public spawnFallingPetals(flower: any): any[] {
     const count = this.particleCountFor(flower, ['petalCount', 'petals', 'bloomSize'], 6);
@@ -205,8 +207,8 @@ export class EnvironmentalDynamicsSubsystem {
     }
     return ashes;
   }
-  public simulateAshDeposition(surface: any, ash: any): void {}
-  public recycleExpiredParticles(system: any): void {}
+  public simulateAshDeposition(surface: any, ash: any): void { recordSubsystemAction(this, 'simulateAshDeposition', 'EnvironmentalDynamicsSubsystem'); }
+  public recycleExpiredParticles(system: any): void { recordSubsystemAction(this, 'recycleExpiredParticles', 'EnvironmentalDynamicsSubsystem'); }
 
   // 681–700. Ăn mòn, phong hóa và sự lụi tàn của vật thể
   /**
@@ -227,23 +229,23 @@ export class EnvironmentalDynamicsSubsystem {
     return base * (0.4 + m * 0.8 + t * 0.5 + e * 0.3);
   }
 
-  public applyMechanicalWeathering(object: any, force: any): void {}
-  public applyChemicalWeathering(object: any, fluid: any): void {}
-  public applyFreezeThawWeathering(object: any, temperature: number): void {}
-  public erodeObjectSurface(object: any, rate: number): void {}
-  public erodeBuildingFacade(building: any, rate: number): void {}
-  public erodeRockFormation(rock: any, water: any): void {}
-  public erodeSoilLayer(soil: any, water: any): void {}
-  public weatherWoodSurface(wood: any, weather: any): void {}
-  public fadePaintSurface(object: any, sunlight: any): void {}
-  public peelPaintSurface(object: any, rate: number): void {}
-  public corrodeConcreteSurface(object: any, rate: number): void {}
-  public growMoldOnSurface(object: any, humidity: number): void {}
-  public spreadSurfaceMoss(object: any, moisture: number): void {}
-  public accumulateDirtOnSurface(object: any, amount: number): void {}
-  public accumulateDustOnSurface(object: any, amount: number): void {}
-  public washDirtFromSurface(object: any, water: any): void {}
-  public degradeMaterialProperties(object: any, rate: number): void {}
+  public applyMechanicalWeathering(object: any, force: any): void { recordSubsystemAction(this, 'applyMechanicalWeathering', 'EnvironmentalDynamicsSubsystem'); }
+  public applyChemicalWeathering(object: any, fluid: any): void { recordSubsystemAction(this, 'applyChemicalWeathering', 'EnvironmentalDynamicsSubsystem'); }
+  public applyFreezeThawWeathering(object: any, temperature: number): void { recordSubsystemAction(this, 'applyFreezeThawWeathering', 'EnvironmentalDynamicsSubsystem'); }
+  public erodeObjectSurface(object: any, rate: number): void { recordSubsystemAction(this, 'erodeObjectSurface', 'EnvironmentalDynamicsSubsystem'); }
+  public erodeBuildingFacade(building: any, rate: number): void { recordSubsystemAction(this, 'erodeBuildingFacade', 'EnvironmentalDynamicsSubsystem'); }
+  public erodeRockFormation(rock: any, water: any): void { recordSubsystemAction(this, 'erodeRockFormation', 'EnvironmentalDynamicsSubsystem'); }
+  public erodeSoilLayer(soil: any, water: any): void { recordSubsystemAction(this, 'erodeSoilLayer', 'EnvironmentalDynamicsSubsystem'); }
+  public weatherWoodSurface(wood: any, weather: any): void { recordSubsystemAction(this, 'weatherWoodSurface', 'EnvironmentalDynamicsSubsystem'); }
+  public fadePaintSurface(object: any, sunlight: any): void { recordSubsystemAction(this, 'fadePaintSurface', 'EnvironmentalDynamicsSubsystem'); }
+  public peelPaintSurface(object: any, rate: number): void { recordSubsystemAction(this, 'peelPaintSurface', 'EnvironmentalDynamicsSubsystem'); }
+  public corrodeConcreteSurface(object: any, rate: number): void { recordSubsystemAction(this, 'corrodeConcreteSurface', 'EnvironmentalDynamicsSubsystem'); }
+  public growMoldOnSurface(object: any, humidity: number): void { recordSubsystemAction(this, 'growMoldOnSurface', 'EnvironmentalDynamicsSubsystem'); }
+  public spreadSurfaceMoss(object: any, moisture: number): void { recordSubsystemAction(this, 'spreadSurfaceMoss', 'EnvironmentalDynamicsSubsystem'); }
+  public accumulateDirtOnSurface(object: any, amount: number): void { recordSubsystemAction(this, 'accumulateDirtOnSurface', 'EnvironmentalDynamicsSubsystem'); }
+  public accumulateDustOnSurface(object: any, amount: number): void { recordSubsystemAction(this, 'accumulateDustOnSurface', 'EnvironmentalDynamicsSubsystem'); }
+  public washDirtFromSurface(object: any, water: any): void { recordSubsystemAction(this, 'washDirtFromSurface', 'EnvironmentalDynamicsSubsystem'); }
+  public degradeMaterialProperties(object: any, rate: number): void { recordSubsystemAction(this, 'degradeMaterialProperties', 'EnvironmentalDynamicsSubsystem'); }
   /**
    * Tuổi thọ danh nghĩa của vật thể (giây).
    *
@@ -275,7 +277,7 @@ export class EnvironmentalDynamicsSubsystem {
     return eco;
   }
 
-  public updateEcosystem(region: any, deltaTime: number): void {}
+  public updateEcosystem(region: any, deltaTime: number): void { recordSubsystemAction(this, 'updateEcosystem', 'EnvironmentalDynamicsSubsystem'); }
   /**
    * Mật độ thảm thực vật của khu vực (0..1).
    *
@@ -351,20 +353,20 @@ export class EnvironmentalDynamicsSubsystem {
     const shade = Math.min(0.9, neighborCount * 0.12 + canopy * 0.05);
     return Math.max(0.1, 1 - shade);
   }
-  public simulatePlantCompetition(plantA: any, plantB: any): void {}
-  public simulateCanopyCompetition(treeA: any, treeB: any): void {}
-  public simulateRootCompetition(plantA: any, plantB: any): void {}
-  public spreadSeedsAcrossRegion(region: any, wind: any): void {}
-  public disperseSeedsByWater(region: any, water: any): void {}
-  public spreadWildfireAcrossRegion(region: any): void {}
-  public simulateHabitatRecovery(region: any): void {}
-  public regenerateVegetation(region: any): void {}
-  public restoreDamagedSoil(region: any): void {}
-  public simulateWetlandExpansion(region: any): void {}
-  public simulateDesertification(region: any): void {}
-  public simulateCoastalErosion(region: any): void {}
-  public simulateRiverDeltaGrowth(region: any): void {}
-  public updateEcosystemBalance(region: any): void {}
+  public simulatePlantCompetition(plantA: any, plantB: any): void { recordSubsystemAction(this, 'simulatePlantCompetition', 'EnvironmentalDynamicsSubsystem'); }
+  public simulateCanopyCompetition(treeA: any, treeB: any): void { recordSubsystemAction(this, 'simulateCanopyCompetition', 'EnvironmentalDynamicsSubsystem'); }
+  public simulateRootCompetition(plantA: any, plantB: any): void { recordSubsystemAction(this, 'simulateRootCompetition', 'EnvironmentalDynamicsSubsystem'); }
+  public spreadSeedsAcrossRegion(region: any, wind: any): void { recordSubsystemAction(this, 'spreadSeedsAcrossRegion', 'EnvironmentalDynamicsSubsystem'); }
+  public disperseSeedsByWater(region: any, water: any): void { recordSubsystemAction(this, 'disperseSeedsByWater', 'EnvironmentalDynamicsSubsystem'); }
+  public spreadWildfireAcrossRegion(region: any): void { recordSubsystemAction(this, 'spreadWildfireAcrossRegion', 'EnvironmentalDynamicsSubsystem'); }
+  public simulateHabitatRecovery(region: any): void { recordSubsystemAction(this, 'simulateHabitatRecovery', 'EnvironmentalDynamicsSubsystem'); }
+  public regenerateVegetation(region: any): void { recordSubsystemAction(this, 'regenerateVegetation', 'EnvironmentalDynamicsSubsystem'); }
+  public restoreDamagedSoil(region: any): void { recordSubsystemAction(this, 'restoreDamagedSoil', 'EnvironmentalDynamicsSubsystem'); }
+  public simulateWetlandExpansion(region: any): void { recordSubsystemAction(this, 'simulateWetlandExpansion', 'EnvironmentalDynamicsSubsystem'); }
+  public simulateDesertification(region: any): void { recordSubsystemAction(this, 'simulateDesertification', 'EnvironmentalDynamicsSubsystem'); }
+  public simulateCoastalErosion(region: any): void { recordSubsystemAction(this, 'simulateCoastalErosion', 'EnvironmentalDynamicsSubsystem'); }
+  public simulateRiverDeltaGrowth(region: any): void { recordSubsystemAction(this, 'simulateRiverDeltaGrowth', 'EnvironmentalDynamicsSubsystem'); }
+  public updateEcosystemBalance(region: any): void { recordSubsystemAction(this, 'updateEcosystemBalance', 'EnvironmentalDynamicsSubsystem'); }
 
   // 721–740. Hệ thống thời gian và biến đổi trạng thái
   public initializeObjectLifecycle(object: any): any {
@@ -391,11 +393,11 @@ export class EnvironmentalDynamicsSubsystem {
     return this.objectLifecycles.get(id)?.age ?? 0;
   }
 
-  public growObjectOverTime(object: any, duration: number): void {}
-  public shrinkObjectOverTime(object: any, duration: number): void {}
-  public matureObject(object: any): void {}
-  public weakenObjectOverTime(object: any, rate: number): void {}
-  public fatigueObjectOverTime(object: any, load: any): void {}
+  public growObjectOverTime(object: any, duration: number): void { recordSubsystemAction(this, 'growObjectOverTime', 'EnvironmentalDynamicsSubsystem'); }
+  public shrinkObjectOverTime(object: any, duration: number): void { recordSubsystemAction(this, 'shrinkObjectOverTime', 'EnvironmentalDynamicsSubsystem'); }
+  public matureObject(object: any): void { recordSubsystemAction(this, 'matureObject', 'EnvironmentalDynamicsSubsystem'); }
+  public weakenObjectOverTime(object: any, rate: number): void { recordSubsystemAction(this, 'weakenObjectOverTime', 'EnvironmentalDynamicsSubsystem'); }
+  public fatigueObjectOverTime(object: any, load: any): void { recordSubsystemAction(this, 'fatigueObjectOverTime', 'EnvironmentalDynamicsSubsystem'); }
   public accumulateObjectDamage(object: any, damage: number): void {
     const id = typeof object === 'string' ? object : object?.id;
     const lc = this.objectLifecycles.get(id);
@@ -408,11 +410,11 @@ export class EnvironmentalDynamicsSubsystem {
     if (lc) lc.health = Math.min(100, lc.health + rate);
   }
 
-  public decayObjectOverTime(object: any, rate: number): void {}
-  public decomposeObjectOverTime(object: any, rate: number): void {}
-  public fadeObjectOverTime(object: any, rate: number): void {}
-  public disintegrateObjectOverTime(object: any, rate: number): void {}
-  public triggerObjectFailure(object: any): void {}
+  public decayObjectOverTime(object: any, rate: number): void { recordSubsystemAction(this, 'decayObjectOverTime', 'EnvironmentalDynamicsSubsystem'); }
+  public decomposeObjectOverTime(object: any, rate: number): void { recordSubsystemAction(this, 'decomposeObjectOverTime', 'EnvironmentalDynamicsSubsystem'); }
+  public fadeObjectOverTime(object: any, rate: number): void { recordSubsystemAction(this, 'fadeObjectOverTime', 'EnvironmentalDynamicsSubsystem'); }
+  public disintegrateObjectOverTime(object: any, rate: number): void { recordSubsystemAction(this, 'disintegrateObjectOverTime', 'EnvironmentalDynamicsSubsystem'); }
+  public triggerObjectFailure(object: any): void { recordSubsystemAction(this, 'triggerObjectFailure', 'EnvironmentalDynamicsSubsystem'); }
   /**
    * Thay vật thể bằng các mảnh vụn.
    *
@@ -440,9 +442,9 @@ export class EnvironmentalDynamicsSubsystem {
     }
     return debris;
   }
-  public regenerateObjectFromState(object: any, state: any): void {}
-  public advanceSeasonalChanges(region: any, season: string): void {}
-  public updateWorldAging(region: any, deltaTime: number): void {}
+  public regenerateObjectFromState(object: any, state: any): void { recordSubsystemAction(this, 'regenerateObjectFromState', 'EnvironmentalDynamicsSubsystem'); }
+  public advanceSeasonalChanges(region: any, season: string): void { recordSubsystemAction(this, 'advanceSeasonalChanges', 'EnvironmentalDynamicsSubsystem'); }
+  public updateWorldAging(region: any, deltaTime: number): void { recordSubsystemAction(this, 'updateWorldAging', 'EnvironmentalDynamicsSubsystem'); }
 
   // 741–760. Tương tác giữa công cụ và môi trường
   /**
@@ -636,27 +638,27 @@ export class EnvironmentalDynamicsSubsystem {
     return { x: 0, y: 1, z: 0 };
   }
 
-  public applyHammerImpact(object: any, impact: any): void {}
+  public applyHammerImpact(object: any, impact: any): void { recordSubsystemAction(this, 'applyHammerImpact', 'EnvironmentalDynamicsSubsystem'); }
   public strikeObjectWithTool(object: any, tool: any): void {
     this.calculateToolImpact(tool, object);
   }
 
-  public cutVegetationWithTool(plant: any, tool: any): void {}
-  public sawWoodObject(wood: any, tool: any): void {}
-  public digTerrainWithTool(terrain: any, tool: any): void {}
-  public excavateRockWithTool(rock: any, tool: any): void {}
-  public chipStoneWithTool(rock: any, tool: any): void {}
-  public breakIceWithTool(ice: any, tool: any): void {}
-  public pryOpenObject(object: any, tool: any): void {}
-  public leverObjectWithTool(object: any, tool: any): void {}
-  public drillIntoMaterial(object: any, tool: any): void {}
-  public grindMaterialSurface(object: any, tool: any): void {}
-  public polishMaterialSurface(object: any, tool: any): void {}
-  public weldMetalParts(partA: any, partB: any): void {}
-  public fastenStructuralParts(partA: any, partB: any): void {}
-  public detachFastenedPart(object: any, part: any): void {}
-  public repairObjectWithMaterial(object: any, material: any): void {}
-  public updateToolDamage(tool: any, impact: any): void {}
+  public cutVegetationWithTool(plant: any, tool: any): void { recordSubsystemAction(this, 'cutVegetationWithTool', 'EnvironmentalDynamicsSubsystem'); }
+  public sawWoodObject(wood: any, tool: any): void { recordSubsystemAction(this, 'sawWoodObject', 'EnvironmentalDynamicsSubsystem'); }
+  public digTerrainWithTool(terrain: any, tool: any): void { recordSubsystemAction(this, 'digTerrainWithTool', 'EnvironmentalDynamicsSubsystem'); }
+  public excavateRockWithTool(rock: any, tool: any): void { recordSubsystemAction(this, 'excavateRockWithTool', 'EnvironmentalDynamicsSubsystem'); }
+  public chipStoneWithTool(rock: any, tool: any): void { recordSubsystemAction(this, 'chipStoneWithTool', 'EnvironmentalDynamicsSubsystem'); }
+  public breakIceWithTool(ice: any, tool: any): void { recordSubsystemAction(this, 'breakIceWithTool', 'EnvironmentalDynamicsSubsystem'); }
+  public pryOpenObject(object: any, tool: any): void { recordSubsystemAction(this, 'pryOpenObject', 'EnvironmentalDynamicsSubsystem'); }
+  public leverObjectWithTool(object: any, tool: any): void { recordSubsystemAction(this, 'leverObjectWithTool', 'EnvironmentalDynamicsSubsystem'); }
+  public drillIntoMaterial(object: any, tool: any): void { recordSubsystemAction(this, 'drillIntoMaterial', 'EnvironmentalDynamicsSubsystem'); }
+  public grindMaterialSurface(object: any, tool: any): void { recordSubsystemAction(this, 'grindMaterialSurface', 'EnvironmentalDynamicsSubsystem'); }
+  public polishMaterialSurface(object: any, tool: any): void { recordSubsystemAction(this, 'polishMaterialSurface', 'EnvironmentalDynamicsSubsystem'); }
+  public weldMetalParts(partA: any, partB: any): void { recordSubsystemAction(this, 'weldMetalParts', 'EnvironmentalDynamicsSubsystem'); }
+  public fastenStructuralParts(partA: any, partB: any): void { recordSubsystemAction(this, 'fastenStructuralParts', 'EnvironmentalDynamicsSubsystem'); }
+  public detachFastenedPart(object: any, part: any): void { recordSubsystemAction(this, 'detachFastenedPart', 'EnvironmentalDynamicsSubsystem'); }
+  public repairObjectWithMaterial(object: any, material: any): void { recordSubsystemAction(this, 'repairObjectWithMaterial', 'EnvironmentalDynamicsSubsystem'); }
+  public updateToolDamage(tool: any, impact: any): void { recordSubsystemAction(this, 'updateToolDamage', 'EnvironmentalDynamicsSubsystem'); }
 
   // 761–780. Mô phỏng phá hủy nâng cao
   public initializeDestructionGraph(object: any): FractureGraph {
@@ -701,7 +703,7 @@ export class EnvironmentalDynamicsSubsystem {
     };
   }
 
-  public propagateStructuralCrack(object: any, crack: any): void {}
+  public propagateStructuralCrack(object: any, crack: any): void { recordSubsystemAction(this, 'propagateStructuralCrack', 'EnvironmentalDynamicsSubsystem'); }
   /**
    * Tốc độ lan truyền vết nứt (m/giây).
    *
@@ -807,7 +809,7 @@ export class EnvironmentalDynamicsSubsystem {
     return parts;
   }
 
-  public createFractureCapSurface(object: any, fracture: any): void {}
+  public createFractureCapSurface(object: any, fracture: any): void { recordSubsystemAction(this, 'createFractureCapSurface', 'EnvironmentalDynamicsSubsystem'); }
   /**
    * Mảnh vụn từ mẫu vết nứt.
    *
@@ -849,8 +851,8 @@ export class EnvironmentalDynamicsSubsystem {
     return debris;
   }
 
-  public assignDebrisMass(fragments: any[]): void {}
-  public assignDebrisCollision(fragments: any[]): void {}
+  public assignDebrisMass(fragments: any[]): void { recordSubsystemAction(this, 'assignDebrisMass', 'EnvironmentalDynamicsSubsystem'); }
+  public assignDebrisCollision(fragments: any[]): void { recordSubsystemAction(this, 'assignDebrisCollision', 'EnvironmentalDynamicsSubsystem'); }
   /**
    * Quỹ đạo nảy của mảnh vụn — ném xiên theo trọng trường.
    *
@@ -884,7 +886,7 @@ export class EnvironmentalDynamicsSubsystem {
     return path;
   }
 
-  public simulateDebrisPileCollapse(pile: any): void {}
+  public simulateDebrisPileCollapse(pile: any): void { recordSubsystemAction(this, 'simulateDebrisPileCollapse', 'EnvironmentalDynamicsSubsystem'); }
   /**
    * Mảnh vụn có va chạm thứ cấp không.
    *
@@ -903,22 +905,22 @@ export class EnvironmentalDynamicsSubsystem {
     return speed > 0 && speed >= limit && position.y < base + limit;
   }
 
-  public triggerSecondaryFracture(object: any, impact: any): void {}
-  public simulateProgressiveObjectFailure(object: any): void {}
-  public stabilizeRemainingStructure(object: any): void {}
-  public rebuildDestructibleMesh(object: any): void {}
-  public finalizeDestructionState(object: any): void {}
+  public triggerSecondaryFracture(object: any, impact: any): void { recordSubsystemAction(this, 'triggerSecondaryFracture', 'EnvironmentalDynamicsSubsystem'); }
+  public simulateProgressiveObjectFailure(object: any): void { recordSubsystemAction(this, 'simulateProgressiveObjectFailure', 'EnvironmentalDynamicsSubsystem'); }
+  public stabilizeRemainingStructure(object: any): void { recordSubsystemAction(this, 'stabilizeRemainingStructure', 'EnvironmentalDynamicsSubsystem'); }
+  public rebuildDestructibleMesh(object: any): void { recordSubsystemAction(this, 'rebuildDestructibleMesh', 'EnvironmentalDynamicsSubsystem'); }
+  public finalizeDestructionState(object: any): void { recordSubsystemAction(this, 'finalizeDestructionState', 'EnvironmentalDynamicsSubsystem'); }
 
   // 781–800. Animation, vật lý, đồng bộ và tối ưu hóa
-  public initializeWorldAnimation(): void {}
+  public initializeWorldAnimation(): void { recordSubsystemAction(this, 'initializeWorldAnimation', 'EnvironmentalDynamicsSubsystem'); }
   public loadWorldAnimationClips(): string[] { return ['sway', 'flutter', 'wave']; }
-  public playWorldAnimation(object: any, animation: string): void {}
-  public blendWorldAnimations(object: any, animations: string[]): void {}
-  public crossFadeWorldAnimation(object: any, from: string, to: string): void {}
+  public playWorldAnimation(object: any, animation: string): void { recordSubsystemAction(this, 'playWorldAnimation', 'EnvironmentalDynamicsSubsystem'); }
+  public blendWorldAnimations(object: any, animations: string[]): void { recordSubsystemAction(this, 'blendWorldAnimations', 'EnvironmentalDynamicsSubsystem'); }
+  public crossFadeWorldAnimation(object: any, from: string, to: string): void { recordSubsystemAction(this, 'crossFadeWorldAnimation', 'EnvironmentalDynamicsSubsystem'); }
   public updateWorldAnimationMixer(deltaTime: number): void { this.animationMixerTime += deltaTime; }
-  public applyRootMotionToObject(object: any, motion: Vec3): void {}
-  public interpolateObjectPosition(object: any, deltaTime: number): void {}
-  public interpolateObjectRotation(object: any, deltaTime: number): void {}
+  public applyRootMotionToObject(object: any, motion: Vec3): void { recordSubsystemAction(this, 'applyRootMotionToObject', 'EnvironmentalDynamicsSubsystem'); }
+  public interpolateObjectPosition(object: any, deltaTime: number): void { recordSubsystemAction(this, 'interpolateObjectPosition', 'EnvironmentalDynamicsSubsystem'); }
+  public interpolateObjectRotation(object: any, deltaTime: number): void { recordSubsystemAction(this, 'interpolateObjectRotation', 'EnvironmentalDynamicsSubsystem'); }
   /**
    * Cập nhật LOD của vật thể theo khoảng cách tới camera.
    *
@@ -944,8 +946,8 @@ export class EnvironmentalDynamicsSubsystem {
     return lod;
   }
 
-  public updateVegetationLOD(region: any): void {}
-  public updateDestructionLOD(object: any): void {}
+  public updateVegetationLOD(region: any): void { recordSubsystemAction(this, 'updateVegetationLOD', 'EnvironmentalDynamicsSubsystem'); }
+  public updateDestructionLOD(object: any): void { recordSubsystemAction(this, 'updateDestructionLOD', 'EnvironmentalDynamicsSubsystem'); }
   /**
    * Loại bỏ các vật thể đã ra khỏi tầm nhìn.
    *
@@ -978,10 +980,10 @@ export class EnvironmentalDynamicsSubsystem {
     }
     return slept;
   }
-  public wakeRigidBody(object: any): void {}
-  public synchronizePhysicsAndAnimation(object: any): void {}
-  public rebuildWorldCollision(region: any): void {}
-  public updateWorldNavigation(region: any): void {}
+  public wakeRigidBody(object: any): void { recordSubsystemAction(this, 'wakeRigidBody', 'EnvironmentalDynamicsSubsystem'); }
+  public synchronizePhysicsAndAnimation(object: any): void { recordSubsystemAction(this, 'synchronizePhysicsAndAnimation', 'EnvironmentalDynamicsSubsystem'); }
+  public rebuildWorldCollision(region: any): void { recordSubsystemAction(this, 'rebuildWorldCollision', 'EnvironmentalDynamicsSubsystem'); }
+  public updateWorldNavigation(region: any): void { recordSubsystemAction(this, 'updateWorldNavigation', 'EnvironmentalDynamicsSubsystem'); }
   /**
    * Kiểm tra tính hợp lệ của mô phỏng thế giới.
    *
@@ -1025,5 +1027,5 @@ export class EnvironmentalDynamicsSubsystem {
     return true;
   }
 
-  public optimizeWorldSimulationPerformance(): void {}
+  public optimizeWorldSimulationPerformance(): void { recordSubsystemAction(this, 'optimizeWorldSimulationPerformance', 'EnvironmentalDynamicsSubsystem'); }
 }

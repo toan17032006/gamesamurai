@@ -4,6 +4,8 @@
  * @description Avian skeleton, wings, feathers, flight mechanics, perching and feeding (281–340).
  */
 
+import { recordSubsystemAction } from '../../core/subsystem-activity.js';
+
 export class BirdSubsystem {
   public wingsSpread = false;
   public isFlying = false;
@@ -13,44 +15,44 @@ export class BirdSubsystem {
   public wingAmplitude = 1.0;
 
   // 281–300. Chim: bộ xương, cánh và lông vũ
-  public initializeBirdSkeleton(): void {}
-  public updateBirdSpine(): void {}
-  public updateBirdNeck(): void {}
-  public updateBirdSkull(): void {}
-  public updateBirdSternum(): void {}
-  public updateBirdKeel(): void {}
-  public updateBirdShoulderJoint(): void {}
-  public updateBirdElbowJoint(): void {}
-  public updateBirdWristJoint(): void {}
-  public updateBirdWingBones(): void {}
-  public updateBirdLegBones(): void {}
-  public updateBirdToeBones(): void {}
-  public updateBirdTailBones(): void {}
-  public updatePrimaryFeathers(): void {}
-  public updateSecondaryFeathers(): void {}
-  public updateTailFeathers(): void {}
+  public initializeBirdSkeleton(): void { recordSubsystemAction(this, 'initializeBirdSkeleton', 'BirdSubsystem'); }
+  public updateBirdSpine(): void { recordSubsystemAction(this, 'updateBirdSpine', 'BirdSubsystem'); }
+  public updateBirdNeck(): void { recordSubsystemAction(this, 'updateBirdNeck', 'BirdSubsystem'); }
+  public updateBirdSkull(): void { recordSubsystemAction(this, 'updateBirdSkull', 'BirdSubsystem'); }
+  public updateBirdSternum(): void { recordSubsystemAction(this, 'updateBirdSternum', 'BirdSubsystem'); }
+  public updateBirdKeel(): void { recordSubsystemAction(this, 'updateBirdKeel', 'BirdSubsystem'); }
+  public updateBirdShoulderJoint(): void { recordSubsystemAction(this, 'updateBirdShoulderJoint', 'BirdSubsystem'); }
+  public updateBirdElbowJoint(): void { recordSubsystemAction(this, 'updateBirdElbowJoint', 'BirdSubsystem'); }
+  public updateBirdWristJoint(): void { recordSubsystemAction(this, 'updateBirdWristJoint', 'BirdSubsystem'); }
+  public updateBirdWingBones(): void { recordSubsystemAction(this, 'updateBirdWingBones', 'BirdSubsystem'); }
+  public updateBirdLegBones(): void { recordSubsystemAction(this, 'updateBirdLegBones', 'BirdSubsystem'); }
+  public updateBirdToeBones(): void { recordSubsystemAction(this, 'updateBirdToeBones', 'BirdSubsystem'); }
+  public updateBirdTailBones(): void { recordSubsystemAction(this, 'updateBirdTailBones', 'BirdSubsystem'); }
+  public updatePrimaryFeathers(): void { recordSubsystemAction(this, 'updatePrimaryFeathers', 'BirdSubsystem'); }
+  public updateSecondaryFeathers(): void { recordSubsystemAction(this, 'updateSecondaryFeathers', 'BirdSubsystem'); }
+  public updateTailFeathers(): void { recordSubsystemAction(this, 'updateTailFeathers', 'BirdSubsystem'); }
   public spreadWingFeathers(): void { this.wingsSpread = true; }
   public foldWingFeathers(): void { this.wingsSpread = false; }
-  public ruffleBodyFeathers(): void {}
-  public preenIndividualFeathers(): void {}
+  public ruffleBodyFeathers(): void { recordSubsystemAction(this, 'ruffleBodyFeathers', 'BirdSubsystem'); }
+  public preenIndividualFeathers(): void { recordSubsystemAction(this, 'preenIndividualFeathers', 'BirdSubsystem'); }
 
   // 301–320. Chim: vỗ cánh và bay
-  public initializeBirdFlight(): void {}
+  public initializeBirdFlight(): void { recordSubsystemAction(this, 'initializeBirdFlight', 'BirdSubsystem'); }
   public spreadWings(): void { this.wingsSpread = true; }
   public foldWings(): void { this.wingsSpread = false; }
   public flapWings(): void { this.performDownstroke(); this.performUpstroke(); }
-  public performUpstroke(): void {}
-  public performDownstroke(): void {}
+  public performUpstroke(): void { recordSubsystemAction(this, 'performUpstroke', 'BirdSubsystem'); }
+  public performDownstroke(): void { recordSubsystemAction(this, 'performDownstroke', 'BirdSubsystem'); }
   public adjustWingAmplitude(amp = 1.0): void { this.wingAmplitude = amp; }
   public adjustWingFrequency(freq = 4.0): void { this.wingFrequency = freq; }
   public glideForward(): void { this.isGliding = true; }
   public soarOnThermals(): void { this.isGliding = true; }
-  public diveTowardTarget(target: any): void {}
-  public climbDuringFlight(): void {}
-  public bankLeftDuringFlight(): void {}
-  public bankRightDuringFlight(): void {}
-  public brakeWithWings(): void {}
-  public hoverLikeBird(): void {}
+  public diveTowardTarget(target: any): void { recordSubsystemAction(this, 'diveTowardTarget', 'BirdSubsystem'); }
+  public climbDuringFlight(): void { recordSubsystemAction(this, 'climbDuringFlight', 'BirdSubsystem'); }
+  public bankLeftDuringFlight(): void { recordSubsystemAction(this, 'bankLeftDuringFlight', 'BirdSubsystem'); }
+  public bankRightDuringFlight(): void { recordSubsystemAction(this, 'bankRightDuringFlight', 'BirdSubsystem'); }
+  public brakeWithWings(): void { recordSubsystemAction(this, 'brakeWithWings', 'BirdSubsystem'); }
+  public hoverLikeBird(): void { recordSubsystemAction(this, 'hoverLikeBird', 'BirdSubsystem'); }
   public takeOffFromGround(): void { this.isFlying = true; this.isPerched = false; this.spreadWings(); }
   public takeOffFromWater(): void { this.takeOffFromGround(); }
   public landOnGround(): void { this.isFlying = false; this.foldWings(); }
@@ -59,22 +61,22 @@ export class BirdSubsystem {
   // 321–340. Chim: đậu, đi, kiếm ăn và giao tiếp
   public perchOnBranch(branch: any): void { this.isPerched = true; }
   public releasePerchGrip(): void { this.isPerched = false; }
-  public adjustPerchingBalance(): void {}
-  public walkLikeBird(): void {}
-  public hopLikeBird(): void {}
-  public runLikeBird(): void {}
-  public peckAtGround(): void {}
-  public peckAtFood(food: any): void {}
-  public probeWithBeak(target: any): void {}
-  public scoopFoodWithBeak(food: any): void {}
-  public swallowPrey(prey: any): void {}
-  public drinkLikeBird(): void {}
-  public preenFeathers(): void {}
-  public cleanBeak(): void {}
-  public scratchHeadWithFoot(): void {}
-  public fluffBodyFeathers(): void {}
-  public performCourtshipDisplay(): void {}
-  public spreadTailDisplay(): void {}
-  public bobHeadLikeBird(): void {}
-  public coordinateBirdVocalization(): void {}
+  public adjustPerchingBalance(): void { recordSubsystemAction(this, 'adjustPerchingBalance', 'BirdSubsystem'); }
+  public walkLikeBird(): void { recordSubsystemAction(this, 'walkLikeBird', 'BirdSubsystem'); }
+  public hopLikeBird(): void { recordSubsystemAction(this, 'hopLikeBird', 'BirdSubsystem'); }
+  public runLikeBird(): void { recordSubsystemAction(this, 'runLikeBird', 'BirdSubsystem'); }
+  public peckAtGround(): void { recordSubsystemAction(this, 'peckAtGround', 'BirdSubsystem'); }
+  public peckAtFood(food: any): void { recordSubsystemAction(this, 'peckAtFood', 'BirdSubsystem'); }
+  public probeWithBeak(target: any): void { recordSubsystemAction(this, 'probeWithBeak', 'BirdSubsystem'); }
+  public scoopFoodWithBeak(food: any): void { recordSubsystemAction(this, 'scoopFoodWithBeak', 'BirdSubsystem'); }
+  public swallowPrey(prey: any): void { recordSubsystemAction(this, 'swallowPrey', 'BirdSubsystem'); }
+  public drinkLikeBird(): void { recordSubsystemAction(this, 'drinkLikeBird', 'BirdSubsystem'); }
+  public preenFeathers(): void { recordSubsystemAction(this, 'preenFeathers', 'BirdSubsystem'); }
+  public cleanBeak(): void { recordSubsystemAction(this, 'cleanBeak', 'BirdSubsystem'); }
+  public scratchHeadWithFoot(): void { recordSubsystemAction(this, 'scratchHeadWithFoot', 'BirdSubsystem'); }
+  public fluffBodyFeathers(): void { recordSubsystemAction(this, 'fluffBodyFeathers', 'BirdSubsystem'); }
+  public performCourtshipDisplay(): void { recordSubsystemAction(this, 'performCourtshipDisplay', 'BirdSubsystem'); }
+  public spreadTailDisplay(): void { recordSubsystemAction(this, 'spreadTailDisplay', 'BirdSubsystem'); }
+  public bobHeadLikeBird(): void { recordSubsystemAction(this, 'bobHeadLikeBird', 'BirdSubsystem'); }
+  public coordinateBirdVocalization(): void { recordSubsystemAction(this, 'coordinateBirdVocalization', 'BirdSubsystem'); }
 }

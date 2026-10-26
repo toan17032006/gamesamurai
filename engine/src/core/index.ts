@@ -7,3 +7,4 @@ export * from './event-bus';
 export * from './rng';
 export * from './tween';
 export * from './timer';
+export * from './subsystem-activity.js';

@@ -37,6 +37,8 @@ const DOOR_HEIGHT = 2.1;
 /** Diện tích chuẩn của một ô cửa sổ (m²). */
 const WINDOW_AREA = 1.5;
 
+import { recordSubsystemAction } from '../../core/subsystem-activity.js';
+
 export class BuildingArchitectureSubsystem {
   public buildings: Map<string, BuildingEntity> = new Map();
   public walls: Map<string, WallSection> = new Map();
@@ -200,7 +202,7 @@ export class BuildingArchitectureSubsystem {
     return false;
   }
 
-  public generateBuildingGeometry(building: BuildingEntity | string): void {}
+  public generateBuildingGeometry(building: BuildingEntity | string): void { recordSubsystemAction(this, 'generateBuildingGeometry', 'BuildingArchitectureSubsystem'); }
   public generateBuildingFoundation(building: BuildingEntity | string): void {
     const b = typeof building === 'string' ? this.buildings.get(building) : building;
     if (b) b.foundation = true;
@@ -224,10 +226,10 @@ export class BuildingArchitectureSubsystem {
     }
   }
 
-  public generateBuildingFloors(building: BuildingEntity | string): void {}
-  public generateBuildingColumns(building: BuildingEntity | string): void {}
-  public generateBuildingBeams(building: BuildingEntity | string): void {}
-  public connectStructuralElements(building: BuildingEntity | string): void {}
+  public generateBuildingFloors(building: BuildingEntity | string): void { recordSubsystemAction(this, 'generateBuildingFloors', 'BuildingArchitectureSubsystem'); }
+  public generateBuildingColumns(building: BuildingEntity | string): void { recordSubsystemAction(this, 'generateBuildingColumns', 'BuildingArchitectureSubsystem'); }
+  public generateBuildingBeams(building: BuildingEntity | string): void { recordSubsystemAction(this, 'generateBuildingBeams', 'BuildingArchitectureSubsystem'); }
+  public connectStructuralElements(building: BuildingEntity | string): void { recordSubsystemAction(this, 'connectStructuralElements', 'BuildingArchitectureSubsystem'); }
   public calculateBuildingMass(building: BuildingEntity | string): number {
     const b = typeof building === 'string' ? this.buildings.get(building) : building;
     return b ? b.mass : 10000;
@@ -265,7 +267,7 @@ export class BuildingArchitectureSubsystem {
     return this.calculateStructuralStress(building) > 60;
   }
 
-  public updateBuildingCondition(building: BuildingEntity | string): void {}
+  public updateBuildingCondition(building: BuildingEntity | string): void { recordSubsystemAction(this, 'updateBuildingCondition', 'BuildingArchitectureSubsystem'); }
   public repairBuildingDamage(building: BuildingEntity | string): void {
     const b = typeof building === 'string' ? this.buildings.get(building) : building;
     if (b) b.integrity = Math.min(100, b.integrity + 30);
@@ -280,7 +282,7 @@ export class BuildingArchitectureSubsystem {
     this.initiateStructuralCollapse(building);
   }
 
-  public regenerateBuildingCollision(building: BuildingEntity | string): void {}
+  public regenerateBuildingCollision(building: BuildingEntity | string): void { recordSubsystemAction(this, 'regenerateBuildingCollision', 'BuildingArchitectureSubsystem'); }
 
   // 441–460. Tường, mái, cửa và cửa sổ
   public createWall(building: BuildingEntity | string): WallSection {
@@ -323,7 +325,7 @@ export class BuildingArchitectureSubsystem {
     );
   }
 
-  public chipWallSurface(wall: WallSection | string, impact: any): void {}
+  public chipWallSurface(wall: WallSection | string, impact: any): void { recordSubsystemAction(this, 'chipWallSurface', 'BuildingArchitectureSubsystem'); }
 
   /**
    * Phá tường.
@@ -362,9 +364,9 @@ export class BuildingArchitectureSubsystem {
     return roof;
   }
 
-  public bendRoof(roof: RoofSection | string, load: any): void {}
-  public crackRoof(roof: RoofSection | string, force: any): void {}
-  public detachRoofPanel(roof: RoofSection | string, panel: any): void {}
+  public bendRoof(roof: RoofSection | string, load: any): void { recordSubsystemAction(this, 'bendRoof', 'BuildingArchitectureSubsystem'); }
+  public crackRoof(roof: RoofSection | string, force: any): void { recordSubsystemAction(this, 'crackRoof', 'BuildingArchitectureSubsystem'); }
+  public detachRoofPanel(roof: RoofSection | string, panel: any): void { recordSubsystemAction(this, 'detachRoofPanel', 'BuildingArchitectureSubsystem'); }
   /**
    * Làm sập mái.
    *
@@ -562,16 +564,16 @@ export class BuildingArchitectureSubsystem {
     return [...order].sort((a, c) => scores[c] - scores[a]);
   }
 
-  public weakenStructuralSupport(support: any): void {}
-  public removeStructuralSupport(support: any): void {}
-  public fractureStructuralJoint(joint: any): void {}
-  public breakStructuralBeam(beam: any, force: any): void {}
-  public buckleStructuralColumn(column: any, load: any): void {}
+  public weakenStructuralSupport(support: any): void { recordSubsystemAction(this, 'weakenStructuralSupport', 'BuildingArchitectureSubsystem'); }
+  public removeStructuralSupport(support: any): void { recordSubsystemAction(this, 'removeStructuralSupport', 'BuildingArchitectureSubsystem'); }
+  public fractureStructuralJoint(joint: any): void { recordSubsystemAction(this, 'fractureStructuralJoint', 'BuildingArchitectureSubsystem'); }
+  public breakStructuralBeam(beam: any, force: any): void { recordSubsystemAction(this, 'breakStructuralBeam', 'BuildingArchitectureSubsystem'); }
+  public buckleStructuralColumn(column: any, load: any): void { recordSubsystemAction(this, 'buckleStructuralColumn', 'BuildingArchitectureSubsystem'); }
   public triggerProgressiveCollapse(building: BuildingEntity | string): void {
     this.initiateStructuralCollapse(building);
   }
 
-  public simulateFloorCollapse(floor: any): void {}
+  public simulateFloorCollapse(floor: any): void { recordSubsystemAction(this, 'simulateFloorCollapse', 'BuildingArchitectureSubsystem'); }
   public simulateRoofCollapse(roof: any): void {
     this.collapseRoof(roof, 100);
   }
@@ -617,8 +619,8 @@ export class BuildingArchitectureSubsystem {
     return fragments;
   }
 
-  public applyImpulseToDebris(debris: any, impulse: any): void {}
-  public simulateDebrisCollision(debris: any): void {}
+  public applyImpulseToDebris(debris: any, impulse: any): void { recordSubsystemAction(this, 'applyImpulseToDebris', 'BuildingArchitectureSubsystem'); }
+  public simulateDebrisCollision(debris: any): void { recordSubsystemAction(this, 'simulateDebrisCollision', 'BuildingArchitectureSubsystem'); }
   /** Đống mảnh vụn — chiều cao đống theo khối lượng và thể tích mảnh. */
   public simulateDebrisPile(debris: any): any {
     const count = Array.isArray(debris)
@@ -641,10 +643,10 @@ export class BuildingArchitectureSubsystem {
     return { radius, particleCount: Math.round(count * 12), settledMass: mass };
   }
 
-  public settleDebrisPile(debris: any): void {}
-  public dissipateCollapseDust(dust: any): void {}
-  public updateCollapsedBuilding(building: BuildingEntity | string): void {}
-  public clearBuildingDebris(building: BuildingEntity | string): void {}
+  public settleDebrisPile(debris: any): void { recordSubsystemAction(this, 'settleDebrisPile', 'BuildingArchitectureSubsystem'); }
+  public dissipateCollapseDust(dust: any): void { recordSubsystemAction(this, 'dissipateCollapseDust', 'BuildingArchitectureSubsystem'); }
+  public updateCollapsedBuilding(building: BuildingEntity | string): void { recordSubsystemAction(this, 'updateCollapsedBuilding', 'BuildingArchitectureSubsystem'); }
+  public clearBuildingDebris(building: BuildingEntity | string): void { recordSubsystemAction(this, 'clearBuildingDebris', 'BuildingArchitectureSubsystem'); }
 
   // 481–500. Đồ nội thất và vật dụng trong nhà
   public createFurniture(type = 'chair'): FurnitureEntity {
@@ -665,8 +667,8 @@ export class BuildingArchitectureSubsystem {
     if (f) f.position = { ...position };
   }
 
-  public rotateFurniture(furniture: FurnitureEntity | string, angle: number): void {}
-  public slideFurniture(furniture: FurnitureEntity | string, surface: any): void {}
+  public rotateFurniture(furniture: FurnitureEntity | string, angle: number): void { recordSubsystemAction(this, 'rotateFurniture', 'BuildingArchitectureSubsystem'); }
+  public slideFurniture(furniture: FurnitureEntity | string, surface: any): void { recordSubsystemAction(this, 'slideFurniture', 'BuildingArchitectureSubsystem'); }
   /**
    * Đổ đồ nội thất.
    *
@@ -692,16 +694,16 @@ export class BuildingArchitectureSubsystem {
     f.isToppled = true;
   }
 
-  public pullChair(chair: FurnitureEntity | string, direction: any): void {}
-  public pushTable(table: FurnitureEntity | string, force: any): void {}
+  public pullChair(chair: FurnitureEntity | string, direction: any): void { recordSubsystemAction(this, 'pullChair', 'BuildingArchitectureSubsystem'); }
+  public pushTable(table: FurnitureEntity | string, force: any): void { recordSubsystemAction(this, 'pushTable', 'BuildingArchitectureSubsystem'); }
   public overturnTable(table: FurnitureEntity | string, force: any): void {
     this.toppleChair(table, force);
   }
 
-  public openDrawer(drawer: any): void {}
-  public closeDrawer(drawer: any): void {}
-  public openCabinet(cabinet: any): void {}
-  public closeCabinet(cabinet: any): void {}
+  public openDrawer(drawer: any): void { recordSubsystemAction(this, 'openDrawer', 'BuildingArchitectureSubsystem'); }
+  public closeDrawer(drawer: any): void { recordSubsystemAction(this, 'closeDrawer', 'BuildingArchitectureSubsystem'); }
+  public openCabinet(cabinet: any): void { recordSubsystemAction(this, 'openCabinet', 'BuildingArchitectureSubsystem'); }
+  public closeCabinet(cabinet: any): void { recordSubsystemAction(this, 'closeCabinet', 'BuildingArchitectureSubsystem'); }
   /**
    * Gãy khớp của đồ nội thất.
    *
@@ -763,9 +765,9 @@ export class BuildingArchitectureSubsystem {
     };
   }
 
-  public deformMetalObject(object: any, force: any): void {}
-  public tearFabricObject(object: any, force: any): void {}
-  public scatterHouseholdObjects(objects: any[], impulse: any): void {}
+  public deformMetalObject(object: any, force: any): void { recordSubsystemAction(this, 'deformMetalObject', 'BuildingArchitectureSubsystem'); }
+  public tearFabricObject(object: any, force: any): void { recordSubsystemAction(this, 'tearFabricObject', 'BuildingArchitectureSubsystem'); }
+  public scatterHouseholdObjects(objects: any[], impulse: any): void { recordSubsystemAction(this, 'scatterHouseholdObjects', 'BuildingArchitectureSubsystem'); }
   public restoreFurnitureState(furniture: FurnitureEntity | string): void {
     const f = typeof furniture === 'string' ? this.furniture.get(furniture) : furniture;
     if (f) { f.isToppled = false; f.isBroken = false; }

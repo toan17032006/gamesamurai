@@ -63,6 +63,8 @@ const FIRE_RESISTANCE: Record<string, number> = Object.freeze({
   soil: 0.9,
 });
 
+import { recordSubsystemAction } from '../../core/subsystem-activity.js';
+
 export class WeatherAtmosphereSubsystem {
   public wind: WindState = {
     direction: { x: 1, y: 0, z: 0 },
@@ -151,11 +153,11 @@ export class WeatherAtmosphereSubsystem {
     };
   }
 
-  public spawnRaindrops(area: any): void {}
-  public updateRaindropMotion(drop: any, deltaTime: number): void {}
-  public applyWindToRaindrops(drops: any, wind: any): void {}
-  public createRainSplash(position: Vec3): void {}
-  public accumulateRainwater(surface: any, amount: number): void {}
+  public spawnRaindrops(area: any): void { recordSubsystemAction(this, 'spawnRaindrops', 'WeatherAtmosphereSubsystem'); }
+  public updateRaindropMotion(drop: any, deltaTime: number): void { recordSubsystemAction(this, 'updateRaindropMotion', 'WeatherAtmosphereSubsystem'); }
+  public applyWindToRaindrops(drops: any, wind: any): void { recordSubsystemAction(this, 'applyWindToRaindrops', 'WeatherAtmosphereSubsystem'); }
+  public createRainSplash(position: Vec3): void { recordSubsystemAction(this, 'createRainSplash', 'WeatherAtmosphereSubsystem'); }
+  public accumulateRainwater(surface: any, amount: number): void { recordSubsystemAction(this, 'accumulateRainwater', 'WeatherAtmosphereSubsystem'); }
   /**
    * Hệ tuyết rơi.
    *
@@ -181,11 +183,11 @@ export class WeatherAtmosphereSubsystem {
     };
   }
 
-  public spawnSnowflakes(area: any): void {}
-  public updateSnowflakeMotion(flake: any, deltaTime: number): void {}
-  public accumulateSnow(surface: any, amount: number): void {}
-  public compactSnow(snow: any, force: any): void {}
-  public meltSnow(snow: any, temperature: number): void {}
+  public spawnSnowflakes(area: any): void { recordSubsystemAction(this, 'spawnSnowflakes', 'WeatherAtmosphereSubsystem'); }
+  public updateSnowflakeMotion(flake: any, deltaTime: number): void { recordSubsystemAction(this, 'updateSnowflakeMotion', 'WeatherAtmosphereSubsystem'); }
+  public accumulateSnow(surface: any, amount: number): void { recordSubsystemAction(this, 'accumulateSnow', 'WeatherAtmosphereSubsystem'); }
+  public compactSnow(snow: any, force: any): void { recordSubsystemAction(this, 'compactSnow', 'WeatherAtmosphereSubsystem'); }
+  public meltSnow(snow: any, temperature: number): void { recordSubsystemAction(this, 'meltSnow', 'WeatherAtmosphereSubsystem'); }
   /**
    * Băng đầu (icicle) mọc trên bề mặt.
    *
@@ -209,12 +211,12 @@ export class WeatherAtmosphereSubsystem {
   public growIcicle(icicle: any, temperature: number): void {
     if (icicle && temperature < 0) icicle.length += Math.max(0.25, Math.abs(temperature) * 0.05);
   }
-  public breakIcicle(icicle: any, force: any): void {}
-  public freezeWetSurface(surface: any, temperature: number): void {}
-  public thawFrozenSurface(surface: any, temperature: number): void {}
+  public breakIcicle(icicle: any, force: any): void { recordSubsystemAction(this, 'breakIcicle', 'WeatherAtmosphereSubsystem'); }
+  public freezeWetSurface(surface: any, temperature: number): void { recordSubsystemAction(this, 'freezeWetSurface', 'WeatherAtmosphereSubsystem'); }
+  public thawFrozenSurface(surface: any, temperature: number): void { recordSubsystemAction(this, 'thawFrozenSurface', 'WeatherAtmosphereSubsystem'); }
   public createHailstone(size = 0.02): any { return { size }; }
-  public spawnHailstorm(area: any): void {}
-  public simulateHailImpact(hailstone: any, surface: any): void {}
+  public spawnHailstorm(area: any): void { recordSubsystemAction(this, 'spawnHailstorm', 'WeatherAtmosphereSubsystem'); }
+  public simulateHailImpact(hailstone: any, surface: any): void { recordSubsystemAction(this, 'simulateHailImpact', 'WeatherAtmosphereSubsystem'); }
 
   // 321–340. Gió, áp suất và khí quyển
   /**
@@ -244,22 +246,22 @@ export class WeatherAtmosphereSubsystem {
     };
   }
 
-  public updateWindField(field: any, deltaTime: number): void {}
+  public updateWindField(field: any, deltaTime: number): void { recordSubsystemAction(this, 'updateWindField', 'WeatherAtmosphereSubsystem'); }
   public setWindDirection(direction: Vec3): void { this.wind.direction = { ...direction }; }
   public setWindSpeed(speed: number): void { this.wind.speed = Math.max(0, speed); }
   public calculateWindPressure(object: any, wind: any): number { return (wind?.speed ?? this.wind.speed) * 1.25; }
   public calculateWindDrag(object: any, wind: any): number { return (wind?.speed ?? this.wind.speed) * 0.5; }
-  public simulateWindGust(gust: any): void {}
-  public simulateWindTurbulence(field: any): void {}
-  public simulateThermalUpdraft(field: any): void {}
-  public simulateDowndraft(field: any): void {}
-  public simulateWindShear(field: any): void {}
-  public simulateDustDevil(position: Vec3): void {}
-  public simulateTornado(tornado: any): void {}
-  public applyWindToParticles(particles: any, wind: any): void {}
-  public applyWindToCloth(cloth: any, wind: any): void {}
-  public applyWindToFlags(flags: any, wind: any): void {}
-  public applyWindToStructures(structures: any, wind: any): void {}
+  public simulateWindGust(gust: any): void { recordSubsystemAction(this, 'simulateWindGust', 'WeatherAtmosphereSubsystem'); }
+  public simulateWindTurbulence(field: any): void { recordSubsystemAction(this, 'simulateWindTurbulence', 'WeatherAtmosphereSubsystem'); }
+  public simulateThermalUpdraft(field: any): void { recordSubsystemAction(this, 'simulateThermalUpdraft', 'WeatherAtmosphereSubsystem'); }
+  public simulateDowndraft(field: any): void { recordSubsystemAction(this, 'simulateDowndraft', 'WeatherAtmosphereSubsystem'); }
+  public simulateWindShear(field: any): void { recordSubsystemAction(this, 'simulateWindShear', 'WeatherAtmosphereSubsystem'); }
+  public simulateDustDevil(position: Vec3): void { recordSubsystemAction(this, 'simulateDustDevil', 'WeatherAtmosphereSubsystem'); }
+  public simulateTornado(tornado: any): void { recordSubsystemAction(this, 'simulateTornado', 'WeatherAtmosphereSubsystem'); }
+  public applyWindToParticles(particles: any, wind: any): void { recordSubsystemAction(this, 'applyWindToParticles', 'WeatherAtmosphereSubsystem'); }
+  public applyWindToCloth(cloth: any, wind: any): void { recordSubsystemAction(this, 'applyWindToCloth', 'WeatherAtmosphereSubsystem'); }
+  public applyWindToFlags(flags: any, wind: any): void { recordSubsystemAction(this, 'applyWindToFlags', 'WeatherAtmosphereSubsystem'); }
+  public applyWindToStructures(structures: any, wind: any): void { recordSubsystemAction(this, 'applyWindToStructures', 'WeatherAtmosphereSubsystem'); }
   public calculateWindLoad(structure: any, wind: any): number { return (wind?.speed ?? this.wind.speed) * 10; }
   /**
    * Vật thể có bị gió làm hư hại không.
@@ -277,7 +279,7 @@ export class WeatherAtmosphereSubsystem {
     return load > resistanceForce;
   }
 
-  public updateAtmosphericPressure(field: any): void {}
+  public updateAtmosphericPressure(field: any): void { recordSubsystemAction(this, 'updateAtmosphericPressure', 'WeatherAtmosphereSubsystem'); }
 
   // 341–360. Mây, sương mù và các hiện tượng bầu trời
   public createCloud(cloudType = 'cumulus'): any {
@@ -286,21 +288,21 @@ export class WeatherAtmosphereSubsystem {
     this.clouds.set(id, cloud);
     return cloud;
   }
-  public generateCloudVolume(cloud: any): void {}
-  public updateCloudShape(cloud: any, deltaTime: number): void {}
-  public moveCloudWithWind(cloud: any, wind: any): void {}
-  public mergeClouds(cloudA: any, cloudB: any): void {}
-  public separateClouds(cloudA: any, cloudB: any): void {}
-  public dissipateCloud(cloud: any, rate: number): void {}
-  public condenseCloudVapor(cloud: any): void {}
-  public simulateCumulusGrowth(cloud: any): void {}
-  public simulateStormCloudGrowth(cloud: any): void {}
+  public generateCloudVolume(cloud: any): void { recordSubsystemAction(this, 'generateCloudVolume', 'WeatherAtmosphereSubsystem'); }
+  public updateCloudShape(cloud: any, deltaTime: number): void { recordSubsystemAction(this, 'updateCloudShape', 'WeatherAtmosphereSubsystem'); }
+  public moveCloudWithWind(cloud: any, wind: any): void { recordSubsystemAction(this, 'moveCloudWithWind', 'WeatherAtmosphereSubsystem'); }
+  public mergeClouds(cloudA: any, cloudB: any): void { recordSubsystemAction(this, 'mergeClouds', 'WeatherAtmosphereSubsystem'); }
+  public separateClouds(cloudA: any, cloudB: any): void { recordSubsystemAction(this, 'separateClouds', 'WeatherAtmosphereSubsystem'); }
+  public dissipateCloud(cloud: any, rate: number): void { recordSubsystemAction(this, 'dissipateCloud', 'WeatherAtmosphereSubsystem'); }
+  public condenseCloudVapor(cloud: any): void { recordSubsystemAction(this, 'condenseCloudVapor', 'WeatherAtmosphereSubsystem'); }
+  public simulateCumulusGrowth(cloud: any): void { recordSubsystemAction(this, 'simulateCumulusGrowth', 'WeatherAtmosphereSubsystem'); }
+  public simulateStormCloudGrowth(cloud: any): void { recordSubsystemAction(this, 'simulateStormCloudGrowth', 'WeatherAtmosphereSubsystem'); }
   public createFogVolume(area: any): any { return { area, density: 0.6 }; }
-  public spreadFog(fog: any, wind: any): void {}
-  public dissipateFog(fog: any, temperature: number): void {}
-  public simulateGroundFog(area: any): void {}
-  public simulateMistOverWater(water: any): void {}
-  public simulateAtmosphericHaze(atmosphere: any): void {}
+  public spreadFog(fog: any, wind: any): void { recordSubsystemAction(this, 'spreadFog', 'WeatherAtmosphereSubsystem'); }
+  public dissipateFog(fog: any, temperature: number): void { recordSubsystemAction(this, 'dissipateFog', 'WeatherAtmosphereSubsystem'); }
+  public simulateGroundFog(area: any): void { recordSubsystemAction(this, 'simulateGroundFog', 'WeatherAtmosphereSubsystem'); }
+  public simulateMistOverWater(water: any): void { recordSubsystemAction(this, 'simulateMistOverWater', 'WeatherAtmosphereSubsystem'); }
+  public simulateAtmosphericHaze(atmosphere: any): void { recordSubsystemAction(this, 'simulateAtmosphericHaze', 'WeatherAtmosphereSubsystem'); }
   /**
    * Cầu vồng.
    *
@@ -330,9 +332,9 @@ export class WeatherAtmosphereSubsystem {
     };
   }
 
-  public updateRainbowVisibility(rainbow: any): void {}
-  public simulateHeatShimmer(area: any): void {}
-  public updateSkyAtmosphere(atmosphere: any): void {}
+  public updateRainbowVisibility(rainbow: any): void { recordSubsystemAction(this, 'updateRainbowVisibility', 'WeatherAtmosphereSubsystem'); }
+  public simulateHeatShimmer(area: any): void { recordSubsystemAction(this, 'simulateHeatShimmer', 'WeatherAtmosphereSubsystem'); }
+  public updateSkyAtmosphere(atmosphere: any): void { recordSubsystemAction(this, 'updateSkyAtmosphere', 'WeatherAtmosphereSubsystem'); }
 
   // 361–380. Sấm, chớp và bão
   /**
@@ -346,7 +348,7 @@ export class WeatherAtmosphereSubsystem {
     return { area, energy: Number.isFinite(energy) ? energy : DEFAULT_STORM_ENERGY, active: true };
   }
 
-  public accumulateStormEnergy(storm: any): void {}
+  public accumulateStormEnergy(storm: any): void { recordSubsystemAction(this, 'accumulateStormEnergy', 'WeatherAtmosphereSubsystem'); }
   /**
    * Sinh tia sét từ cơn bão.
    *
@@ -393,9 +395,9 @@ export class WeatherAtmosphereSubsystem {
     const radius = Number(storm?.radius ?? 0);
     return Number.isFinite(radius) && radius > 0 ? radius : DEFAULT_STORM_RADIUS;
   }
-  public branchLightningBolt(bolt: LightningBolt): void {}
-  public illuminateSceneWithLightning(bolt: LightningBolt): void {}
-  public createLightningFlash(position: Vec3): void {}
+  public branchLightningBolt(bolt: LightningBolt): void { recordSubsystemAction(this, 'branchLightningBolt', 'WeatherAtmosphereSubsystem'); }
+  public illuminateSceneWithLightning(bolt: LightningBolt): void { recordSubsystemAction(this, 'illuminateSceneWithLightning', 'WeatherAtmosphereSubsystem'); }
+  public createLightningFlash(position: Vec3): void { recordSubsystemAction(this, 'createLightningFlash', 'WeatherAtmosphereSubsystem'); }
   /**
    * Điểm tia sét đánh xuống.
    *
@@ -415,14 +417,14 @@ export class WeatherAtmosphereSubsystem {
     };
   }
 
-  public strikeLightningTarget(target: any): void {}
-  public applyLightningDamage(target: any): void {}
-  public createThunderSound(bolt: LightningBolt): void {}
-  public propagateThunderWave(position: Vec3): void {}
-  public createStormWind(storm: any): void {}
-  public generateStormRain(storm: any): void {}
-  public spawnStormDebris(storm: any): void {}
-  public simulateStormSurge(coast: any): void {}
+  public strikeLightningTarget(target: any): void { recordSubsystemAction(this, 'strikeLightningTarget', 'WeatherAtmosphereSubsystem'); }
+  public applyLightningDamage(target: any): void { recordSubsystemAction(this, 'applyLightningDamage', 'WeatherAtmosphereSubsystem'); }
+  public createThunderSound(bolt: LightningBolt): void { recordSubsystemAction(this, 'createThunderSound', 'WeatherAtmosphereSubsystem'); }
+  public propagateThunderWave(position: Vec3): void { recordSubsystemAction(this, 'propagateThunderWave', 'WeatherAtmosphereSubsystem'); }
+  public createStormWind(storm: any): void { recordSubsystemAction(this, 'createStormWind', 'WeatherAtmosphereSubsystem'); }
+  public generateStormRain(storm: any): void { recordSubsystemAction(this, 'generateStormRain', 'WeatherAtmosphereSubsystem'); }
+  public spawnStormDebris(storm: any): void { recordSubsystemAction(this, 'spawnStormDebris', 'WeatherAtmosphereSubsystem'); }
+  public simulateStormSurge(coast: any): void { recordSubsystemAction(this, 'simulateStormSurge', 'WeatherAtmosphereSubsystem'); }
   /**
    * Sát thương của cơn bão lên công trình.
    *
@@ -442,10 +444,10 @@ export class WeatherAtmosphereSubsystem {
     return Math.max(0, base * pressureFactor);
   }
 
-  public dissipateThunderstorm(storm: any): void {}
-  public simulateHurricane(hurricane: any): void {}
-  public simulateCyclone(cyclone: any): void {}
-  public updateStormRecovery(area: any): void {}
+  public dissipateThunderstorm(storm: any): void { recordSubsystemAction(this, 'dissipateThunderstorm', 'WeatherAtmosphereSubsystem'); }
+  public simulateHurricane(hurricane: any): void { recordSubsystemAction(this, 'simulateHurricane', 'WeatherAtmosphereSubsystem'); }
+  public simulateCyclone(cyclone: any): void { recordSubsystemAction(this, 'simulateCyclone', 'WeatherAtmosphereSubsystem'); }
+  public updateStormRecovery(area: any): void { recordSubsystemAction(this, 'updateStormRecovery', 'WeatherAtmosphereSubsystem'); }
 
   // 381–400. Lửa, khói và nhiệt
   public createFire(source: any): FireEntity {
@@ -560,8 +562,8 @@ export class WeatherAtmosphereSubsystem {
     const f = typeof fire === 'string' ? this.fires.get(fire) : fire;
     return f ? f.temperature : 600;
   }
-  public updateFlameShape(fire: FireEntity | string): void {}
-  public spawnFireParticles(fire: FireEntity | string): void {}
+  public updateFlameShape(fire: FireEntity | string): void { recordSubsystemAction(this, 'updateFlameShape', 'WeatherAtmosphereSubsystem'); }
+  public spawnFireParticles(fire: FireEntity | string): void { recordSubsystemAction(this, 'spawnFireParticles', 'WeatherAtmosphereSubsystem'); }
   /**
    * Khói từ ngọn lửa.
    *
@@ -586,8 +588,8 @@ export class WeatherAtmosphereSubsystem {
       particleCount: Math.round(density * 200),
     };
   }
-  public spreadSmoke(smoke: any, wind: any): void {}
-  public dissipateSmoke(smoke: any, rate: number): void {}
+  public spreadSmoke(smoke: any, wind: any): void { recordSubsystemAction(this, 'spreadSmoke', 'WeatherAtmosphereSubsystem'); }
+  public dissipateSmoke(smoke: any, rate: number): void { recordSubsystemAction(this, 'dissipateSmoke', 'WeatherAtmosphereSubsystem'); }
 
   /**
    * Tia lửa bắn ra từ nguồn lửa.
@@ -610,13 +612,13 @@ export class WeatherAtmosphereSubsystem {
     };
   }
 
-  public scatterEmbers(embers: any, wind: any): void {}
+  public scatterEmbers(embers: any, wind: any): void { recordSubsystemAction(this, 'scatterEmbers', 'WeatherAtmosphereSubsystem'); }
   public igniteDryVegetation(plant: any): void { this.createFire(plant); }
-  public charObjectSurface(object: any, heat: number): void {}
-  public burnObjectMaterial(object: any, rate: number): void {}
-  public deformObjectByHeat(object: any, heat: number): void {}
-  public meltObjectMaterial(object: any, temperature: number): void {}
-  public coolBurningObject(object: any, rate: number): void {}
+  public charObjectSurface(object: any, heat: number): void { recordSubsystemAction(this, 'charObjectSurface', 'WeatherAtmosphereSubsystem'); }
+  public burnObjectMaterial(object: any, rate: number): void { recordSubsystemAction(this, 'burnObjectMaterial', 'WeatherAtmosphereSubsystem'); }
+  public deformObjectByHeat(object: any, heat: number): void { recordSubsystemAction(this, 'deformObjectByHeat', 'WeatherAtmosphereSubsystem'); }
+  public meltObjectMaterial(object: any, temperature: number): void { recordSubsystemAction(this, 'meltObjectMaterial', 'WeatherAtmosphereSubsystem'); }
+  public coolBurningObject(object: any, rate: number): void { recordSubsystemAction(this, 'coolBurningObject', 'WeatherAtmosphereSubsystem'); }
   /**
    * Mức sát thương do lửa (0..100).
    *
@@ -635,7 +637,7 @@ export class WeatherAtmosphereSubsystem {
 
   // 401–420. Đá rơi, sạt lở và tuyết lở
   public createRockfall(region: any): any { return { region, active: true }; }
-  public releaseRockFromSlope(rock: any, slope: any): void {}
+  public releaseRockFromSlope(rock: any, slope: any): void { recordSubsystemAction(this, 'releaseRockFromSlope', 'WeatherAtmosphereSubsystem'); }
   /**
    * Quỹ đạo đá lăn từ sườn.
    *
@@ -668,9 +670,9 @@ export class WeatherAtmosphereSubsystem {
     return path;
   }
 
-  public simulateRockBouncing(rock: any, surface: any): void {}
-  public simulateRockRolling(rock: any, slope: any): void {}
-  public simulateRockFragmentation(rock: any): void {}
+  public simulateRockBouncing(rock: any, surface: any): void { recordSubsystemAction(this, 'simulateRockBouncing', 'WeatherAtmosphereSubsystem'); }
+  public simulateRockRolling(rock: any, slope: any): void { recordSubsystemAction(this, 'simulateRockRolling', 'WeatherAtmosphereSubsystem'); }
+  public simulateRockFragmentation(rock: any): void { recordSubsystemAction(this, 'simulateRockFragmentation', 'WeatherAtmosphereSubsystem'); }
   public createLandslide(region: any): any { return { region, mass: 10000 }; }
   /**
    * Sườn có sạt lở không.
@@ -686,14 +688,14 @@ export class WeatherAtmosphereSubsystem {
     return driving > 0.35;
   }
 
-  public displaceLandslideSoil(landslide: any): void {}
-  public simulateDebrisFlow(flow: any): void {}
-  public depositLandslideDebris(landslide: any): void {}
+  public displaceLandslideSoil(landslide: any): void { recordSubsystemAction(this, 'displaceLandslideSoil', 'WeatherAtmosphereSubsystem'); }
+  public simulateDebrisFlow(flow: any): void { recordSubsystemAction(this, 'simulateDebrisFlow', 'WeatherAtmosphereSubsystem'); }
+  public depositLandslideDebris(landslide: any): void { recordSubsystemAction(this, 'depositLandslideDebris', 'WeatherAtmosphereSubsystem'); }
   public createAvalanche(region: any): any { return { region, snowVolume: 50000 }; }
-  public triggerSnowSlabFailure(snowpack: any): void {}
-  public simulateAvalancheMotion(avalanche: any): void {}
-  public simulateAvalancheDebris(avalanche: any): void {}
-  public buryObjectsInDebris(objects: any[], debris: any): void {}
+  public triggerSnowSlabFailure(snowpack: any): void { recordSubsystemAction(this, 'triggerSnowSlabFailure', 'WeatherAtmosphereSubsystem'); }
+  public simulateAvalancheMotion(avalanche: any): void { recordSubsystemAction(this, 'simulateAvalancheMotion', 'WeatherAtmosphereSubsystem'); }
+  public simulateAvalancheDebris(avalanche: any): void { recordSubsystemAction(this, 'simulateAvalancheDebris', 'WeatherAtmosphereSubsystem'); }
+  public buryObjectsInDebris(objects: any[], debris: any): void { recordSubsystemAction(this, 'buryObjectsInDebris', 'WeatherAtmosphereSubsystem'); }
   /**
    * Độ sâu vùi của vật thể trong khối vụn.
    *
@@ -708,7 +710,7 @@ export class WeatherAtmosphereSubsystem {
     return Math.max(0.1, volume / Math.max(0.05, extent * extent) + extent * 0.5);
   }
 
-  public stabilizeDamagedSlope(region: any): void {}
-  public erodeUnstableSlope(region: any): void {}
-  public updateSlopeAfterFailure(region: any): void {}
+  public stabilizeDamagedSlope(region: any): void { recordSubsystemAction(this, 'stabilizeDamagedSlope', 'WeatherAtmosphereSubsystem'); }
+  public erodeUnstableSlope(region: any): void { recordSubsystemAction(this, 'erodeUnstableSlope', 'WeatherAtmosphereSubsystem'); }
+  public updateSlopeAfterFailure(region: any): void { recordSubsystemAction(this, 'updateSlopeAfterFailure', 'WeatherAtmosphereSubsystem'); }
 }

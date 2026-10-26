@@ -7,6 +7,8 @@
 import { AnimalSensoryState } from '../types.js';
 import type { Vec3 } from '../../types/index.js';
 
+import { recordSubsystemAction } from '../../core/subsystem-activity.js';
+
 export class HeadSensesSubsystem {
   public headRotation: Vec3 = { x: 0, y: 0, z: 0 };
   public neckLength = 0.4;
@@ -99,7 +101,7 @@ export class HeadSensesSubsystem {
   }
 
   // 101–120. Đầu, hộp sọ và cổ
-  public updateAnimalHead(): void {}
+  public updateAnimalHead(): void { recordSubsystemAction(this, 'updateAnimalHead', 'HeadSensesSubsystem'); }
   public rotateHeadLeft(angle = 0.5): void { this.headRotation.y = -Math.abs(angle); }
   public rotateHeadRight(angle = 0.5): void { this.headRotation.y = Math.abs(angle); }
   public tiltHeadUp(angle = 0.4): void { this.headRotation.x = Math.abs(angle); }
@@ -110,29 +112,29 @@ export class HeadSensesSubsystem {
   public rotateNeck(angle = 0.3): void { this.headRotation.y = angle * 0.5; }
   public stabilizeHead(): void { this.headRotation = { x: 0, y: 0, z: 0 }; }
   public trackHeadTarget(target: Vec3): void { this.senses.visualTarget = { ...target }; }
-  public updateSkullOrientation(): void {}
+  public updateSkullOrientation(): void { recordSubsystemAction(this, 'updateSkullOrientation', 'HeadSensesSubsystem'); }
   public updateJawOpening(angle = 0.6): void { this.jawAngle = angle; }
   public updateJawClosing(): void { this.jawAngle = 0; }
-  public updateBiteMechanics(): void {}
-  public updateSnoutMovement(): void {}
-  public updateMuzzleDeformation(): void {}
-  public updateBeakMovement(): void {}
-  public updateHeadInertia(): void {}
-  public blendHeadAnimations(): void {}
+  public updateBiteMechanics(): void { recordSubsystemAction(this, 'updateBiteMechanics', 'HeadSensesSubsystem'); }
+  public updateSnoutMovement(): void { recordSubsystemAction(this, 'updateSnoutMovement', 'HeadSensesSubsystem'); }
+  public updateMuzzleDeformation(): void { recordSubsystemAction(this, 'updateMuzzleDeformation', 'HeadSensesSubsystem'); }
+  public updateBeakMovement(): void { recordSubsystemAction(this, 'updateBeakMovement', 'HeadSensesSubsystem'); }
+  public updateHeadInertia(): void { recordSubsystemAction(this, 'updateHeadInertia', 'HeadSensesSubsystem'); }
+  public blendHeadAnimations(): void { recordSubsystemAction(this, 'blendHeadAnimations', 'HeadSensesSubsystem'); }
 
   // 121–140. Mắt, mí mắt và thị giác
-  public initializeAnimalVision(): void {}
-  public updateAnimalEyes(): void {}
+  public initializeAnimalVision(): void { recordSubsystemAction(this, 'initializeAnimalVision', 'HeadSensesSubsystem'); }
+  public updateAnimalEyes(): void { recordSubsystemAction(this, 'updateAnimalEyes', 'HeadSensesSubsystem'); }
   public lookAtTarget(target: Vec3): void { this.senses.visualTarget = { ...target }; }
-  public moveLeftEye(direction: Vec3): void {}
-  public moveRightEye(direction: Vec3): void {}
-  public synchronizeEyeDirection(): void {}
+  public moveLeftEye(direction: Vec3): void { recordSubsystemAction(this, 'moveLeftEye', 'HeadSensesSubsystem'); }
+  public moveRightEye(direction: Vec3): void { recordSubsystemAction(this, 'moveRightEye', 'HeadSensesSubsystem'); }
+  public synchronizeEyeDirection(): void { recordSubsystemAction(this, 'synchronizeEyeDirection', 'HeadSensesSubsystem'); }
   public blinkEyes(): void { this.eyesOpen = false; setTimeout && setTimeout(() => { this.eyesOpen = true; }, 150); }
   public closeEyes(): void { this.eyesOpen = false; }
   public openEyes(): void { this.eyesOpen = true; }
-  public updateEyelids(): void {}
+  public updateEyelids(): void { recordSubsystemAction(this, 'updateEyelids', 'HeadSensesSubsystem'); }
   public updatePupilSize(size = 0.5): void { this.pupilSize = Math.max(0.1, Math.min(1.0, size)); }
-  public updatePupilDirection(direction?: Vec3): void {}
+  public updatePupilDirection(direction?: Vec3): void { recordSubsystemAction(this, 'updatePupilDirection', 'HeadSensesSubsystem'); }
   public trackMovingObject(target: Vec3): void { this.senses.visualTarget = { ...target }; }
   public detectVisualStimulus(): boolean { return this.senses.visualTarget !== null; }
   public calculateVisualField(): number { return this.senses.visualFieldAngle; }
@@ -140,11 +142,11 @@ export class HeadSensesSubsystem {
   public detectMotionInVision(): boolean { return this.senses.motionDetected; }
   public updateNightVision(enabled = true): void { this.senses.nightVisionActive = enabled; }
   public updateDepthPerception(): number { return this.senses.visualDistance * 0.8; }
-  public updateVisualAttention(): void {}
+  public updateVisualAttention(): void { recordSubsystemAction(this, 'updateVisualAttention', 'HeadSensesSubsystem'); }
 
   // 141–160. Tai, thính giác và định vị âm thanh
-  public initializeAnimalHearing(): void {}
-  public updateAnimalEars(): void {}
+  public initializeAnimalHearing(): void { recordSubsystemAction(this, 'initializeAnimalHearing', 'HeadSensesSubsystem'); }
+  public updateAnimalEars(): void { recordSubsystemAction(this, 'updateAnimalEars', 'HeadSensesSubsystem'); }
   public rotateLeftEar(angle = 0.4): void { this.leftEarAngle = angle; }
   public rotateRightEar(angle = 0.4): void { this.rightEarAngle = angle; }
   public raiseEars(): void { this.earsRaised = true; }
@@ -154,40 +156,40 @@ export class HeadSensesSubsystem {
   public calculateSoundDirection(soundPos: Vec3): Vec3 { return { x: soundPos.x, y: soundPos.y, z: soundPos.z }; }
   public calculateSoundDistance(soundPos: Vec3): number { return Math.hypot(soundPos.x, soundPos.y, soundPos.z); }
   public localizeSoundSource(soundPos: Vec3): void { this.senses.auditoryFocusTarget = { ...soundPos }; }
-  public filterEnvironmentalNoise(): void {}
+  public filterEnvironmentalNoise(): void { recordSubsystemAction(this, 'filterEnvironmentalNoise', 'HeadSensesSubsystem'); }
   public detectHighFrequencySound(): boolean { return true; }
   public detectLowFrequencySound(): boolean { return true; }
-  public updateAuditoryAttention(): void {}
+  public updateAuditoryAttention(): void { recordSubsystemAction(this, 'updateAuditoryAttention', 'HeadSensesSubsystem'); }
   public reactToLoudNoise(): void { this.raiseEars(); }
   public reactToFamiliarSound(): void { this.twitchEars(); }
   public synchronizeEarMovement(): void { this.rightEarAngle = this.leftEarAngle; }
-  public updateAuditoryMemory(): void {}
-  public blendEarAnimations(): void {}
+  public updateAuditoryMemory(): void { recordSubsystemAction(this, 'updateAuditoryMemory', 'HeadSensesSubsystem'); }
+  public blendEarAnimations(): void { recordSubsystemAction(this, 'blendEarAnimations', 'HeadSensesSubsystem'); }
 
   // 161–180. Mũi, khứu giác và cảm nhận hóa học
-  public initializeAnimalOlfaction(): void {}
-  public updateAnimalNose(): void {}
-  public sniffAir(): void {}
-  public sniffGround(): void {}
-  public sniffObject(object: any): void {}
+  public initializeAnimalOlfaction(): void { recordSubsystemAction(this, 'initializeAnimalOlfaction', 'HeadSensesSubsystem'); }
+  public updateAnimalNose(): void { recordSubsystemAction(this, 'updateAnimalNose', 'HeadSensesSubsystem'); }
+  public sniffAir(): void { recordSubsystemAction(this, 'sniffAir', 'HeadSensesSubsystem'); }
+  public sniffGround(): void { recordSubsystemAction(this, 'sniffGround', 'HeadSensesSubsystem'); }
+  public sniffObject(object: any): void { recordSubsystemAction(this, 'sniffObject', 'HeadSensesSubsystem'); }
   public detectScent(scent: any): boolean { return true; }
   public analyzeScentComposition(): string { return 'prey_trail'; }
-  public trackScentTrail(trail: any): void {}
-  public followScentSource(source: any): void {}
+  public trackScentTrail(trail: any): void { recordSubsystemAction(this, 'trackScentTrail', 'HeadSensesSubsystem'); }
+  public followScentSource(source: any): void { recordSubsystemAction(this, 'followScentSource', 'HeadSensesSubsystem'); }
   public distinguishFamiliarScent(scent: any): boolean { return true; }
   public detectFoodOdor(): boolean { return true; }
   public detectPredatorOdor(): boolean { return false; }
   public detectMateOdor(): boolean { return false; }
   public detectTerritoryScent(): boolean { return true; }
-  public updateNostrilMovement(): void {}
-  public updateOlfactoryMemory(): void {}
+  public updateNostrilMovement(): void { recordSubsystemAction(this, 'updateNostrilMovement', 'HeadSensesSubsystem'); }
+  public updateOlfactoryMemory(): void { recordSubsystemAction(this, 'updateOlfactoryMemory', 'HeadSensesSubsystem'); }
   public detectChemicalStimulus(): boolean { return true; }
   public compareScentIntensity(): number { return 0.85; }
-  public updateScentInvestigation(): void {}
-  public blendSniffingAnimation(): void {}
+  public updateScentInvestigation(): void { recordSubsystemAction(this, 'updateScentInvestigation', 'HeadSensesSubsystem'); }
+  public blendSniffingAnimation(): void { recordSubsystemAction(this, 'blendSniffingAnimation', 'HeadSensesSubsystem'); }
 
   // 181–200. Miệng, lưỡi, răng và thức ăn
-  public initializeAnimalMouth(): void {}
+  public initializeAnimalMouth(): void { recordSubsystemAction(this, 'initializeAnimalMouth', 'HeadSensesSubsystem'); }
   public openAnimalMouth(): void { this.updateJawOpening(0.6); }
   public closeAnimalMouth(): void { this.updateJawClosing(); }
   public extendTongue(): void { this.tongueExtension = 1.0; }
@@ -196,15 +198,15 @@ export class HeadSensesSubsystem {
   public lickFur(): void { this.extendTongue(); }
   public lickPaw(): void { this.extendTongue(); }
   public lickWaterSurface(): void { this.extendTongue(); }
-  public exposeTeeth(): void {}
-  public updateToothDisplay(): void {}
+  public exposeTeeth(): void { recordSubsystemAction(this, 'exposeTeeth', 'HeadSensesSubsystem'); }
+  public updateToothDisplay(): void { recordSubsystemAction(this, 'updateToothDisplay', 'HeadSensesSubsystem'); }
   public biteFood(food: any): void { this.updateJawOpening(0.7); this.updateJawClosing(); }
   public gripFoodWithMouth(food: any): void { this.updateJawClosing(); }
   public chewFood(): void { this.updateJawOpening(0.3); this.updateJawClosing(); }
   public swallowFood(): void { this.updateJawClosing(); }
-  public regurgitateFood(): void {}
-  public updateSalivation(): void {}
-  public updateJawCycle(): void {}
-  public animateTongueMovement(): void {}
-  public coordinateEatingMotion(): void {}
+  public regurgitateFood(): void { recordSubsystemAction(this, 'regurgitateFood', 'HeadSensesSubsystem'); }
+  public updateSalivation(): void { recordSubsystemAction(this, 'updateSalivation', 'HeadSensesSubsystem'); }
+  public updateJawCycle(): void { recordSubsystemAction(this, 'updateJawCycle', 'HeadSensesSubsystem'); }
+  public animateTongueMovement(): void { recordSubsystemAction(this, 'animateTongueMovement', 'HeadSensesSubsystem'); }
+  public coordinateEatingMotion(): void { recordSubsystemAction(this, 'coordinateEatingMotion', 'HeadSensesSubsystem'); }
 }

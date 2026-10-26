@@ -43,6 +43,8 @@ const SURFACE_ALBEDO: Record<string, number> = Object.freeze({
   ice: 0.6,
 });
 
+import { recordSubsystemAction } from '../../core/subsystem-activity.js';
+
 export class GeologyClimateSubsystem {
   public settlements: Map<string, any> = new Map();
   public roads: Map<string, any> = new Map();
@@ -128,12 +130,12 @@ export class GeologyClimateSubsystem {
     };
   }
 
-  public placeBuildingOnTerrain(building: any, terrain: any): void {}
-  public constructFoundation(building: any, terrain: any): void {}
-  public constructWallSection(building: any, section: any): void {}
-  public installRoofSection(building: any, section: any): void {}
-  public installWindow(building: any, window: any): void {}
-  public installDoor(building: any, door: any): void {}
+  public placeBuildingOnTerrain(building: any, terrain: any): void { recordSubsystemAction(this, 'placeBuildingOnTerrain', 'GeologyClimateSubsystem'); }
+  public constructFoundation(building: any, terrain: any): void { recordSubsystemAction(this, 'constructFoundation', 'GeologyClimateSubsystem'); }
+  public constructWallSection(building: any, section: any): void { recordSubsystemAction(this, 'constructWallSection', 'GeologyClimateSubsystem'); }
+  public installRoofSection(building: any, section: any): void { recordSubsystemAction(this, 'installRoofSection', 'GeologyClimateSubsystem'); }
+  public installWindow(building: any, window: any): void { recordSubsystemAction(this, 'installWindow', 'GeologyClimateSubsystem'); }
+  public installDoor(building: any, door: any): void { recordSubsystemAction(this, 'installDoor', 'GeologyClimateSubsystem'); }
   /**
    * Xây cầu qua một vùng.
    *
@@ -217,8 +219,8 @@ export class GeologyClimateSubsystem {
     if (r.cracks >= ROAD_FAILURE_CRACKS) r.isFailed = true;
   }
 
-  public erodeRoadSurface(road: any, weather: any): void {}
-  public generatePothole(road: any, position: Vec3): void {}
+  public erodeRoadSurface(road: any, weather: any): void { recordSubsystemAction(this, 'erodeRoadSurface', 'GeologyClimateSubsystem'); }
+  public generatePothole(road: any, position: Vec3): void { recordSubsystemAction(this, 'generatePothole', 'GeologyClimateSubsystem'); }
   public repairRoadSurface(road: any): void {
     const r = typeof road === 'string' ? this.roads.get(road) : road;
     if (r) {
@@ -250,7 +252,7 @@ export class GeologyClimateSubsystem {
     };
   }
 
-  public breakFenceSection(fence: any, section: any): void {}
+  public breakFenceSection(fence: any, section: any): void { recordSubsystemAction(this, 'breakFenceSection', 'GeologyClimateSubsystem'); }
 
   /**
    * Xây đập trong một vùng.
@@ -291,7 +293,7 @@ export class GeologyClimateSubsystem {
     dam.intact = false;
   }
 
-  public updateBuiltEnvironment(region: any): void {}
+  public updateBuiltEnvironment(region: any): void { recordSubsystemAction(this, 'updateBuiltEnvironment', 'GeologyClimateSubsystem'); }
 
   // 601–620. Động đất, núi lửa và địa chất
   public createEarthquake(region: any): any { return { region, magnitude: 6.5, active: true }; }
@@ -309,10 +311,10 @@ export class GeologyClimateSubsystem {
     return { frequency, amplitude, magnitude, distance };
   }
 
-  public propagateSeismicWave(wave: any): void {}
-  public shakeTerrain(terrain: any, wave: any): void {}
-  public shakeBuilding(building: any, wave: any): void {}
-  public triggerGroundRupture(region: any): void {}
+  public propagateSeismicWave(wave: any): void { recordSubsystemAction(this, 'propagateSeismicWave', 'GeologyClimateSubsystem'); }
+  public shakeTerrain(terrain: any, wave: any): void { recordSubsystemAction(this, 'shakeTerrain', 'GeologyClimateSubsystem'); }
+  public shakeBuilding(building: any, wave: any): void { recordSubsystemAction(this, 'shakeBuilding', 'GeologyClimateSubsystem'); }
+  public triggerGroundRupture(region: any): void { recordSubsystemAction(this, 'triggerGroundRupture', 'GeologyClimateSubsystem'); }
   /**
    * Vết nứt nền đất do động đất.
    *
@@ -338,8 +340,8 @@ export class GeologyClimateSubsystem {
     return cracks;
   }
 
-  public widenGroundCracks(region: any): void {}
-  public triggerLiquefaction(region: any): void {}
+  public widenGroundCracks(region: any): void { recordSubsystemAction(this, 'widenGroundCracks', 'GeologyClimateSubsystem'); }
+  public triggerLiquefaction(region: any): void { recordSubsystemAction(this, 'triggerLiquefaction', 'GeologyClimateSubsystem'); }
   /**
    * Mức sát thương của động đất.
    *
@@ -382,7 +384,7 @@ export class GeologyClimateSubsystem {
     if (v) v.pressure += 10;
   }
 
-  public simulateMagmaMovement(volcano: any): void {}
+  public simulateMagmaMovement(volcano: any): void { recordSubsystemAction(this, 'simulateMagmaMovement', 'GeologyClimateSubsystem'); }
   public triggerVolcanicEruption(volcano: any): void {
     const v = typeof volcano === 'string' ? this.volcanoes.get(volcano) : volcano;
     if (v) v.isErupting = true;
@@ -448,7 +450,7 @@ export class GeologyClimateSubsystem {
     };
   }
 
-  public updateGeologicalRecovery(region: any): void {}
+  public updateGeologicalRecovery(region: any): void { recordSubsystemAction(this, 'updateGeologicalRecovery', 'GeologyClimateSubsystem'); }
 
   // 621–640. Sông băng, băng trôi và biến đổi khí hậu cục bộ
   /**
@@ -474,10 +476,10 @@ export class GeologyClimateSubsystem {
     return g;
   }
 
-  public accumulateGlacierSnow(glacier: any): void {}
-  public compactGlacierSnow(glacier: any): void {}
-  public simulateGlacierFlow(glacier: any): void {}
-  public deformGlacierSurface(glacier: any): void {}
+  public accumulateGlacierSnow(glacier: any): void { recordSubsystemAction(this, 'accumulateGlacierSnow', 'GeologyClimateSubsystem'); }
+  public compactGlacierSnow(glacier: any): void { recordSubsystemAction(this, 'compactGlacierSnow', 'GeologyClimateSubsystem'); }
+  public simulateGlacierFlow(glacier: any): void { recordSubsystemAction(this, 'simulateGlacierFlow', 'GeologyClimateSubsystem'); }
+  public deformGlacierSurface(glacier: any): void { recordSubsystemAction(this, 'deformGlacierSurface', 'GeologyClimateSubsystem'); }
   /**
    * Vết nứt trên sông băng.
    *
@@ -492,8 +494,8 @@ export class GeologyClimateSubsystem {
     return { depth, strain, flow, thickness };
   }
 
-  public widenGlacierCrevasse(glacier: any): void {}
-  public fractureGlacierIce(glacier: any): void {}
+  public widenGlacierCrevasse(glacier: any): void { recordSubsystemAction(this, 'widenGlacierCrevasse', 'GeologyClimateSubsystem'); }
+  public fractureGlacierIce(glacier: any): void { recordSubsystemAction(this, 'fractureGlacierIce', 'GeologyClimateSubsystem'); }
   public calveGlacierIceberg(glacier: any): any { return this.createIceberg(glacier); }
 
   /**
@@ -522,20 +524,20 @@ export class GeologyClimateSubsystem {
     return b;
   }
 
-  public driftIceberg(iceberg: any, current: any): void {}
-  public rotateIceberg(iceberg: any, torque: any): void {}
+  public driftIceberg(iceberg: any, current: any): void { recordSubsystemAction(this, 'driftIceberg', 'GeologyClimateSubsystem'); }
+  public rotateIceberg(iceberg: any, torque: any): void { recordSubsystemAction(this, 'rotateIceberg', 'GeologyClimateSubsystem'); }
   public meltIceberg(iceberg: any, temperature: number): void {
     const b = typeof iceberg === 'string' ? this.icebergs.get(iceberg) : iceberg;
     if (b && temperature > 0) b.mass = Math.max(0, b.mass - 1000);
   }
 
-  public simulateSeaIceFormation(water: any): void {}
-  public simulateSeaIceBreakup(ice: any): void {}
-  public driftSeaIce(ice: any, current: any): void {}
-  public collideIceFloes(iceA: any, iceB: any): void {}
-  public freezeGroundWater(ground: any): void {}
-  public thawPermafrost(ground: any, temperature: number): void {}
-  public updateCryosphereState(region: any): void {}
+  public simulateSeaIceFormation(water: any): void { recordSubsystemAction(this, 'simulateSeaIceFormation', 'GeologyClimateSubsystem'); }
+  public simulateSeaIceBreakup(ice: any): void { recordSubsystemAction(this, 'simulateSeaIceBreakup', 'GeologyClimateSubsystem'); }
+  public driftSeaIce(ice: any, current: any): void { recordSubsystemAction(this, 'driftSeaIce', 'GeologyClimateSubsystem'); }
+  public collideIceFloes(iceA: any, iceB: any): void { recordSubsystemAction(this, 'collideIceFloes', 'GeologyClimateSubsystem'); }
+  public freezeGroundWater(ground: any): void { recordSubsystemAction(this, 'freezeGroundWater', 'GeologyClimateSubsystem'); }
+  public thawPermafrost(ground: any, temperature: number): void { recordSubsystemAction(this, 'thawPermafrost', 'GeologyClimateSubsystem'); }
+  public updateCryosphereState(region: any): void { recordSubsystemAction(this, 'updateCryosphereState', 'GeologyClimateSubsystem'); }
 
   // 641–660. Ánh sáng, nhiệt và chu kỳ ngày đêm
   /**
@@ -610,10 +612,10 @@ export class GeologyClimateSubsystem {
     return this.sunIntensity * 25 * area * (1 - Math.min(1, albedo));
   }
 
-  public heatObjectSurface(object: any, energy: number): void {}
-  public coolObjectSurface(object: any, rate: number): void {}
-  public simulateThermalExpansion(object: any, temperature: number): void {}
-  public simulateThermalContraction(object: any, temperature: number): void {}
+  public heatObjectSurface(object: any, energy: number): void { recordSubsystemAction(this, 'heatObjectSurface', 'GeologyClimateSubsystem'); }
+  public coolObjectSurface(object: any, rate: number): void { recordSubsystemAction(this, 'coolObjectSurface', 'GeologyClimateSubsystem'); }
+  public simulateThermalExpansion(object: any, temperature: number): void { recordSubsystemAction(this, 'simulateThermalExpansion', 'GeologyClimateSubsystem'); }
+  public simulateThermalContraction(object: any, temperature: number): void { recordSubsystemAction(this, 'simulateThermalContraction', 'GeologyClimateSubsystem'); }
   public fadeSunlightAtDusk(): void { this.sunIntensity = 0.2; }
   public restoreSunlightAtDawn(): void { this.sunIntensity = 0.8; }
   public updateNightLighting(): void { this.isNight = true; }
@@ -630,8 +632,8 @@ export class GeologyClimateSubsystem {
     return { intensity, phase: cycle, illumination, isNight: this.isNight };
   }
 
-  public updateCloudShadowMovement(cloud: any): void {}
-  public updateVegetationLightExposure(plant: any): void {}
+  public updateCloudShadowMovement(cloud: any): void { recordSubsystemAction(this, 'updateCloudShadowMovement', 'GeologyClimateSubsystem'); }
+  public updateVegetationLightExposure(plant: any): void { recordSubsystemAction(this, 'updateVegetationLightExposure', 'GeologyClimateSubsystem'); }
   /**
    * Hệ số phản xạ của bề mặt (0..1).
    *
@@ -645,6 +647,6 @@ export class GeologyClimateSubsystem {
     return Math.max(0, Math.min(1, albedo * (1 - Math.min(0.4, moisture * 0.4))));
   }
 
-  public simulateHeatTransfer(objectA: any, objectB: any): void {}
-  public updateEnvironmentalTemperature(region: any): void {}
+  public simulateHeatTransfer(objectA: any, objectB: any): void { recordSubsystemAction(this, 'simulateHeatTransfer', 'GeologyClimateSubsystem'); }
+  public updateEnvironmentalTemperature(region: any): void { recordSubsystemAction(this, 'updateEnvironmentalTemperature', 'GeologyClimateSubsystem'); }
 }

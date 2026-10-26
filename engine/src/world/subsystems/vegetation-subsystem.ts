@@ -89,6 +89,8 @@ const AIR_DENSITY = 1.225;
 /** Hệ số cản gió cho vật cầu. */
 const DRAG_COEFFICIENT = 1.2;
 
+import { recordSubsystemAction } from '../../core/subsystem-activity.js';
+
 export class VegetationSubsystem {
   public trees: Map<string, TreeEntity> = new Map();
   public branches: Map<string, BranchEntity> = new Map();
@@ -195,13 +197,13 @@ export class VegetationSubsystem {
     if (t) t.age = age;
   }
 
-  public updateTreeHeight(tree: TreeEntity | string): void {}
-  public updateTreeThickness(tree: TreeEntity | string): void {}
-  public updateTreeCanopy(tree: TreeEntity | string): void {}
-  public updateTreeRootSystem(tree: TreeEntity | string): void {}
-  public updateTreeTrunk(tree: TreeEntity | string): void {}
-  public updateTreeBark(tree: TreeEntity | string): void {}
-  public updateTreeBranchStructure(tree: TreeEntity | string): void {}
+  public updateTreeHeight(tree: TreeEntity | string): void { recordSubsystemAction(this, 'updateTreeHeight', 'VegetationSubsystem'); }
+  public updateTreeThickness(tree: TreeEntity | string): void { recordSubsystemAction(this, 'updateTreeThickness', 'VegetationSubsystem'); }
+  public updateTreeCanopy(tree: TreeEntity | string): void { recordSubsystemAction(this, 'updateTreeCanopy', 'VegetationSubsystem'); }
+  public updateTreeRootSystem(tree: TreeEntity | string): void { recordSubsystemAction(this, 'updateTreeRootSystem', 'VegetationSubsystem'); }
+  public updateTreeTrunk(tree: TreeEntity | string): void { recordSubsystemAction(this, 'updateTreeTrunk', 'VegetationSubsystem'); }
+  public updateTreeBark(tree: TreeEntity | string): void { recordSubsystemAction(this, 'updateTreeBark', 'VegetationSubsystem'); }
+  public updateTreeBranchStructure(tree: TreeEntity | string): void { recordSubsystemAction(this, 'updateTreeBranchStructure', 'VegetationSubsystem'); }
 
   public generateTreeBranches(tree: TreeEntity | string): void {
     const t = typeof tree === 'string' ? this.trees.get(tree) : tree;
@@ -251,7 +253,7 @@ export class VegetationSubsystem {
     this.trees.delete(id);
   }
 
-  public regenerateTreeGeometry(tree: TreeEntity | string): void {}
+  public regenerateTreeGeometry(tree: TreeEntity | string): void { recordSubsystemAction(this, 'regenerateTreeGeometry', 'VegetationSubsystem'); }
 
   // 061–080. Cành cây, nhánh nhỏ và gỗ
   public createBranch(tree: TreeEntity | string, parentBranch?: BranchEntity | string): BranchEntity {
@@ -373,11 +375,11 @@ export class VegetationSubsystem {
     this.breakBranch(branch);
   }
 
-  public fallBranch(branch: BranchEntity | string, gravity?: any): void {}
-  public splitWoodGrain(branch: BranchEntity | string): void {}
-  public crackWoodSurface(branch: BranchEntity | string): void {}
-  public decayWood(branch: BranchEntity | string, rate: number): void {}
-  public regenerateBranchMesh(branch: BranchEntity | string): void {}
+  public fallBranch(branch: BranchEntity | string, gravity?: any): void { recordSubsystemAction(this, 'fallBranch', 'VegetationSubsystem'); }
+  public splitWoodGrain(branch: BranchEntity | string): void { recordSubsystemAction(this, 'splitWoodGrain', 'VegetationSubsystem'); }
+  public crackWoodSurface(branch: BranchEntity | string): void { recordSubsystemAction(this, 'crackWoodSurface', 'VegetationSubsystem'); }
+  public decayWood(branch: BranchEntity | string, rate: number): void { recordSubsystemAction(this, 'decayWood', 'VegetationSubsystem'); }
+  public regenerateBranchMesh(branch: BranchEntity | string): void { recordSubsystemAction(this, 'regenerateBranchMesh', 'VegetationSubsystem'); }
 
   // 081–100. Lá cây và chuyển động từng chiếc lá
   public createLeaf(plant: any): LeafEntity {
@@ -396,8 +398,8 @@ export class VegetationSubsystem {
     return leaf;
   }
 
-  public initializeLeaf(leaf: LeafEntity | string): void {}
-  public updateLeaf(leaf: LeafEntity | string, deltaTime: number): void {}
+  public initializeLeaf(leaf: LeafEntity | string): void { recordSubsystemAction(this, 'initializeLeaf', 'VegetationSubsystem'); }
+  public updateLeaf(leaf: LeafEntity | string, deltaTime: number): void { recordSubsystemAction(this, 'updateLeaf', 'VegetationSubsystem'); }
   public growLeaf(leaf: LeafEntity | string, amount: number): void {
     const l = typeof leaf === 'string' ? this.leaves.get(leaf) : leaf;
     if (l) l.size += amount;
@@ -498,8 +500,8 @@ export class VegetationSubsystem {
     if (l) l.isAttached = false;
   }
 
-  public fallLeaf(leaf: LeafEntity | string, gravity?: any): void {}
-  public landLeaf(leaf: LeafEntity | string, surface?: any): void {}
+  public fallLeaf(leaf: LeafEntity | string, gravity?: any): void { recordSubsystemAction(this, 'fallLeaf', 'VegetationSubsystem'); }
+  public landLeaf(leaf: LeafEntity | string, surface?: any): void { recordSubsystemAction(this, 'landLeaf', 'VegetationSubsystem'); }
 
   // 101–120. Gió tác động lên cây, cành và lá
   public applyWindToTree(tree: TreeEntity | string, wind: any): void {
@@ -574,12 +576,12 @@ export class VegetationSubsystem {
         : [];
     for (const leaf of leaves) this.flutterLeaf(leaf, wind);
   }
-  public simulateWindGust(gust: any): void {}
-  public simulateTurbulentWind(wind: any): void {}
-  public simulateWindShear(wind: any): void {}
-  public updateWindDirection(direction: any): void {}
-  public updateWindStrength(strength: any): void {}
-  public updateWindFrequency(frequency: any): void {}
+  public simulateWindGust(gust: any): void { recordSubsystemAction(this, 'simulateWindGust', 'VegetationSubsystem'); }
+  public simulateTurbulentWind(wind: any): void { recordSubsystemAction(this, 'simulateTurbulentWind', 'VegetationSubsystem'); }
+  public simulateWindShear(wind: any): void { recordSubsystemAction(this, 'simulateWindShear', 'VegetationSubsystem'); }
+  public updateWindDirection(direction: any): void { recordSubsystemAction(this, 'updateWindDirection', 'VegetationSubsystem'); }
+  public updateWindStrength(strength: any): void { recordSubsystemAction(this, 'updateWindStrength', 'VegetationSubsystem'); }
+  public updateWindFrequency(frequency: any): void { recordSubsystemAction(this, 'updateWindFrequency', 'VegetationSubsystem'); }
   /**
    * Vật thể có bị hư hại do gió không.
    *
@@ -603,8 +605,8 @@ export class VegetationSubsystem {
   public breakWindDamagedBranch(branch: BranchEntity | string): void {
     this.breakBranch(branch);
   }
-  public shedLeavesInWind(tree: TreeEntity | string, wind: any): void {}
-  public stabilizeVegetationAfterWind(tree: TreeEntity | string): void {}
+  public shedLeavesInWind(tree: TreeEntity | string, wind: any): void { recordSubsystemAction(this, 'shedLeavesInWind', 'VegetationSubsystem'); }
+  public stabilizeVegetationAfterWind(tree: TreeEntity | string): void { recordSubsystemAction(this, 'stabilizeVegetationAfterWind', 'VegetationSubsystem'); }
 
   // 121–140. Rễ cây, đất và sự phát triển
   public createRootSystem(tree: TreeEntity | string): RootEntity {
@@ -626,9 +628,9 @@ export class VegetationSubsystem {
     if (r) r.length += amount;
   }
 
-  public extendRootIntoSoil(root: RootEntity | string, direction: any): void {}
-  public thickenRoot(root: RootEntity | string, amount: number): void {}
-  public branchRootSystem(root: RootEntity | string): void {}
+  public extendRootIntoSoil(root: RootEntity | string, direction: any): void { recordSubsystemAction(this, 'extendRootIntoSoil', 'VegetationSubsystem'); }
+  public thickenRoot(root: RootEntity | string, amount: number): void { recordSubsystemAction(this, 'thickenRoot', 'VegetationSubsystem'); }
+  public branchRootSystem(root: RootEntity | string): void { recordSubsystemAction(this, 'branchRootSystem', 'VegetationSubsystem'); }
   /**
    * Rễ có bị vướng vật cản không.
    *
@@ -645,8 +647,8 @@ export class VegetationSubsystem {
     const maxDepth = 0.5 + hardness * 0.5;
     return depth > maxDepth;
   }
-  public wrapRootAroundObstacle(root: RootEntity | string, obstacle: any): void {}
-  public penetrateSoil(root: RootEntity | string, soil: any): void {}
+  public wrapRootAroundObstacle(root: RootEntity | string, obstacle: any): void { recordSubsystemAction(this, 'wrapRootAroundObstacle', 'VegetationSubsystem'); }
+  public penetrateSoil(root: RootEntity | string, soil: any): void { recordSubsystemAction(this, 'penetrateSoil', 'VegetationSubsystem'); }
 
   /**
    * Lượng nước hấp thụ qua rễ (đơn vị lượng/giây).
@@ -692,10 +694,10 @@ export class VegetationSubsystem {
     const stress = this.numOf(record, ['stress'], 0);
     return integrity < 0.5 || stress > 0.5;
   }
-  public breakRoot(root: RootEntity | string, force?: any): void {}
-  public decayRoot(root: RootEntity | string, rate: number): void {}
-  public anchorTreeWithRoots(tree: TreeEntity | string): void {}
-  public loosenRootAnchorage(tree: TreeEntity | string): void {}
+  public breakRoot(root: RootEntity | string, force?: any): void { recordSubsystemAction(this, 'breakRoot', 'VegetationSubsystem'); }
+  public decayRoot(root: RootEntity | string, rate: number): void { recordSubsystemAction(this, 'decayRoot', 'VegetationSubsystem'); }
+  public anchorTreeWithRoots(tree: TreeEntity | string): void { recordSubsystemAction(this, 'anchorTreeWithRoots', 'VegetationSubsystem'); }
+  public loosenRootAnchorage(tree: TreeEntity | string): void { recordSubsystemAction(this, 'loosenRootAnchorage', 'VegetationSubsystem'); }
 
   /**
    * Độ ổn định của hệ rễ (0..100).
@@ -718,10 +720,10 @@ export class VegetationSubsystem {
     const load = this.numOf(record, ['height'], 0) * 8;
     return Math.max(0, Math.min(100, (soilStability * 60 + anchor * 40) / (1 + load * 0.05)));
   }
-  public simulateRootCompetition(root: any, neighbor: any): void {}
-  public updateRootGrowthDirection(root: RootEntity | string): void {}
-  public regenerateRootMesh(tree: TreeEntity | string): void {}
-  public updateRootSoilInteraction(tree: TreeEntity | string): void {}
+  public simulateRootCompetition(root: any, neighbor: any): void { recordSubsystemAction(this, 'simulateRootCompetition', 'VegetationSubsystem'); }
+  public updateRootGrowthDirection(root: RootEntity | string): void { recordSubsystemAction(this, 'updateRootGrowthDirection', 'VegetationSubsystem'); }
+  public regenerateRootMesh(tree: TreeEntity | string): void { recordSubsystemAction(this, 'regenerateRootMesh', 'VegetationSubsystem'); }
+  public updateRootSoilInteraction(tree: TreeEntity | string): void { recordSubsystemAction(this, 'updateRootSoilInteraction', 'VegetationSubsystem'); }
 
   // 141–160. Hoa, nụ hoa và cánh hoa
   public createFlower(plant: any): FlowerEntity {
@@ -738,14 +740,14 @@ export class VegetationSubsystem {
     return flower;
   }
 
-  public initializeFlower(flower: FlowerEntity | string): void {}
+  public initializeFlower(flower: FlowerEntity | string): void { recordSubsystemAction(this, 'initializeFlower', 'VegetationSubsystem'); }
   public growFlower(flower: FlowerEntity | string, amount: number): void {
     const f = typeof flower === 'string' ? this.flowers.get(flower) : flower;
     if (f) f.bloomState = Math.min(1.0, f.bloomState + amount);
   }
 
-  public developFlowerBud(flower: FlowerEntity | string): void {}
-  public swellFlowerBud(flower: FlowerEntity | string): void {}
+  public developFlowerBud(flower: FlowerEntity | string): void { recordSubsystemAction(this, 'developFlowerBud', 'VegetationSubsystem'); }
+  public swellFlowerBud(flower: FlowerEntity | string): void { recordSubsystemAction(this, 'swellFlowerBud', 'VegetationSubsystem'); }
   public openFlowerBud(flower: FlowerEntity | string): void {
     const f = typeof flower === 'string' ? this.flowers.get(flower) : flower;
     if (f) f.isOpen = true;
@@ -762,9 +764,9 @@ export class VegetationSubsystem {
     if (f) f.isOpen = false;
   }
 
-  public rotateFlower(flower: FlowerEntity | string, angle: number): void {}
-  public swayFlower(flower: FlowerEntity | string, wind: any): void {}
-  public flutterPetals(flower: FlowerEntity | string, wind: any): void {}
+  public rotateFlower(flower: FlowerEntity | string, angle: number): void { recordSubsystemAction(this, 'rotateFlower', 'VegetationSubsystem'); }
+  public swayFlower(flower: FlowerEntity | string, wind: any): void { recordSubsystemAction(this, 'swayFlower', 'VegetationSubsystem'); }
+  public flutterPetals(flower: FlowerEntity | string, wind: any): void { recordSubsystemAction(this, 'flutterPetals', 'VegetationSubsystem'); }
   public changePetalColor(flower: FlowerEntity | string, color: string): void {
     const f = typeof flower === 'string' ? this.flowers.get(flower) : flower;
     if (f) f.petalColor = color;
@@ -777,9 +779,9 @@ export class VegetationSubsystem {
     if (f) f.bloomState = Math.max(0, f.bloomState - rate);
   }
 
-  public dryPetals(flower: FlowerEntity | string, rate: number): void {}
-  public detachPetal(petal: any): void {}
-  public scatterPetals(flower: FlowerEntity | string, force?: any): void {}
+  public dryPetals(flower: FlowerEntity | string, rate: number): void { recordSubsystemAction(this, 'dryPetals', 'VegetationSubsystem'); }
+  public detachPetal(petal: any): void { recordSubsystemAction(this, 'detachPetal', 'VegetationSubsystem'); }
+  public scatterPetals(flower: FlowerEntity | string, force?: any): void { recordSubsystemAction(this, 'scatterPetals', 'VegetationSubsystem'); }
   public dropWitheredFlower(flower: FlowerEntity | string): void {
     const id = typeof flower === 'string' ? flower : flower.id;
     this.flowers.delete(id);
@@ -799,25 +801,25 @@ export class VegetationSubsystem {
     return fruit;
   }
 
-  public developFruit(fruit: FruitEntity | string): void {}
-  public growFruit(fruit: FruitEntity | string, amount: number): void {}
+  public developFruit(fruit: FruitEntity | string): void { recordSubsystemAction(this, 'developFruit', 'VegetationSubsystem'); }
+  public growFruit(fruit: FruitEntity | string, amount: number): void { recordSubsystemAction(this, 'growFruit', 'VegetationSubsystem'); }
   public ripenFruit(fruit: FruitEntity | string, rate: number): void {
     const f = typeof fruit === 'string' ? this.fruits.get(fruit) : fruit;
     if (f) f.ripeness = Math.min(1.0, f.ripeness + rate);
   }
 
-  public changeFruitColor(fruit: FruitEntity | string, color: string): void {}
-  public softenFruit(fruit: FruitEntity | string, amount: number): void {}
-  public rotFruit(fruit: FruitEntity | string, rate: number): void {}
+  public changeFruitColor(fruit: FruitEntity | string, color: string): void { recordSubsystemAction(this, 'changeFruitColor', 'VegetationSubsystem'); }
+  public softenFruit(fruit: FruitEntity | string, amount: number): void { recordSubsystemAction(this, 'softenFruit', 'VegetationSubsystem'); }
+  public rotFruit(fruit: FruitEntity | string, rate: number): void { recordSubsystemAction(this, 'rotFruit', 'VegetationSubsystem'); }
   public detachFruit(fruit: FruitEntity | string): void {
     const f = typeof fruit === 'string' ? this.fruits.get(fruit) : fruit;
     if (f) f.isDetached = true;
   }
 
-  public fallFruit(fruit: FruitEntity | string, gravity?: any): void {}
-  public bounceFruit(fruit: FruitEntity | string, surface?: any): void {}
-  public splitFruit(fruit: FruitEntity | string, force?: any): void {}
-  public exposeSeeds(fruit: FruitEntity | string): void {}
+  public fallFruit(fruit: FruitEntity | string, gravity?: any): void { recordSubsystemAction(this, 'fallFruit', 'VegetationSubsystem'); }
+  public bounceFruit(fruit: FruitEntity | string, surface?: any): void { recordSubsystemAction(this, 'bounceFruit', 'VegetationSubsystem'); }
+  public splitFruit(fruit: FruitEntity | string, force?: any): void { recordSubsystemAction(this, 'splitFruit', 'VegetationSubsystem'); }
+  public exposeSeeds(fruit: FruitEntity | string): void { recordSubsystemAction(this, 'exposeSeeds', 'VegetationSubsystem'); }
 
   public createSeed(plant: any): SeedEntity {
     const id = `seed_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
@@ -830,8 +832,8 @@ export class VegetationSubsystem {
     return seed;
   }
 
-  public disperseSeed(seed: SeedEntity | string, force?: any): void {}
-  public burySeed(seed: SeedEntity | string, soil?: any): void {}
+  public disperseSeed(seed: SeedEntity | string, force?: any): void { recordSubsystemAction(this, 'disperseSeed', 'VegetationSubsystem'); }
+  public burySeed(seed: SeedEntity | string, soil?: any): void { recordSubsystemAction(this, 'burySeed', 'VegetationSubsystem'); }
   public germinateSeed(seed: SeedEntity | string): boolean {
     const s = typeof seed === 'string' ? this.seeds.get(seed) : seed;
     if (s) { s.germinated = true; return true; }
@@ -839,9 +841,9 @@ export class VegetationSubsystem {
   }
 
   public sproutSeed(seed: SeedEntity | string): void { this.germinateSeed(seed); }
-  public developSeedling(seedling: any): void {}
-  public maturePlant(plant: any): void {}
-  public restartPlantGrowthCycle(plant: any): void {}
+  public developSeedling(seedling: any): void { recordSubsystemAction(this, 'developSeedling', 'VegetationSubsystem'); }
+  public maturePlant(plant: any): void { recordSubsystemAction(this, 'maturePlant', 'VegetationSubsystem'); }
+  public restartPlantGrowthCycle(plant: any): void { recordSubsystemAction(this, 'restartPlantGrowthCycle', 'VegetationSubsystem'); }
 
   // 181–200. Héo úa, chết, mục nát và tái sinh
   public calculatePlantHealth(plant: any): number { return plant?.health ?? 100; }
@@ -880,24 +882,24 @@ export class VegetationSubsystem {
   }
 
   public wiltPlant(plant: any, rate: number): void { this.reducePlantVitality(plant, rate); }
-  public dryPlantLeaves(plant: any, rate: number): void {}
-  public discolorPlantLeaves(plant: any, color: string): void {}
-  public shedDeadLeaves(plant: any): void {}
+  public dryPlantLeaves(plant: any, rate: number): void { recordSubsystemAction(this, 'dryPlantLeaves', 'VegetationSubsystem'); }
+  public discolorPlantLeaves(plant: any, color: string): void { recordSubsystemAction(this, 'discolorPlantLeaves', 'VegetationSubsystem'); }
+  public shedDeadLeaves(plant: any): void { recordSubsystemAction(this, 'shedDeadLeaves', 'VegetationSubsystem'); }
   public killPlant(plant: any): void {
     if (plant) plant.health = 0;
   }
 
-  public enterDormancy(plant: any): void {}
-  public resumePlantGrowth(plant: any): void {}
-  public decayPlantTissue(plant: any, rate: number): void {}
-  public decomposeDeadPlant(plant: any): void {}
+  public enterDormancy(plant: any): void { recordSubsystemAction(this, 'enterDormancy', 'VegetationSubsystem'); }
+  public resumePlantGrowth(plant: any): void { recordSubsystemAction(this, 'resumePlantGrowth', 'VegetationSubsystem'); }
+  public decayPlantTissue(plant: any, rate: number): void { recordSubsystemAction(this, 'decayPlantTissue', 'VegetationSubsystem'); }
+  public decomposeDeadPlant(plant: any): void { recordSubsystemAction(this, 'decomposeDeadPlant', 'VegetationSubsystem'); }
   public detachDeadBranch(branch: BranchEntity | string): void { this.detachBranch(branch); }
-  public collapseDeadTree(tree: TreeEntity | string): void {}
-  public spreadPlantDisease(plant: any, neighbor: any): void {}
+  public collapseDeadTree(tree: TreeEntity | string): void { recordSubsystemAction(this, 'collapseDeadTree', 'VegetationSubsystem'); }
+  public spreadPlantDisease(plant: any, neighbor: any): void { recordSubsystemAction(this, 'spreadPlantDisease', 'VegetationSubsystem'); }
   public regenerateDamagedPlant(plant: any): void {
     if (plant) plant.health = 100;
   }
-  public recyclePlantNutrients(plant: any, soil: any): void {}
+  public recyclePlantNutrients(plant: any, soil: any): void { recordSubsystemAction(this, 'recyclePlantNutrients', 'VegetationSubsystem'); }
 
   // 201–220. Cỏ, bụi cây, dây leo và rêu
   public createGrassPatch(area: any): any {
@@ -1039,5 +1041,5 @@ export class VegetationSubsystem {
   }
 
   public growMoss(surface: any): any { return { surface, coverage: 0.5 }; }
-  public dryMoss(surface: any, rate?: number): void {}
+  public dryMoss(surface: any, rate?: number): void { recordSubsystemAction(this, 'dryMoss', 'VegetationSubsystem'); }
 }

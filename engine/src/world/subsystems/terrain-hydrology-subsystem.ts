@@ -44,6 +44,8 @@ interface SoilState extends SoilPatch {
   compactedLoad: number;
 }
 
+import { recordSubsystemAction } from '../../core/subsystem-activity.js';
+
 export class TerrainHydrologySubsystem {
   public rocks: Map<string, RockEntity> = new Map();
   public mountains: Map<string, MountainRegion> = new Map();
@@ -77,7 +79,7 @@ export class TerrainHydrologySubsystem {
     return rock;
   }
 
-  public generateRockGeometry(rock: RockEntity | string): void {}
+  public generateRockGeometry(rock: RockEntity | string): void { recordSubsystemAction(this, 'generateRockGeometry', 'TerrainHydrologySubsystem'); }
   public setRockHardness(rock: RockEntity | string, hardness: number): void {
     const r = typeof rock === 'string' ? this.rocks.get(rock) : rock;
     if (r) r.hardness = hardness;
@@ -130,18 +132,18 @@ export class TerrainHydrologySubsystem {
     return [];
   }
 
-  public chipRockSurface(rock: RockEntity | string, impact: any): void {}
-  public erodeRockSurface(rock: RockEntity | string, rate: number): void {}
-  public weatherRock(rock: RockEntity | string, weather: any): void {}
-  public dissolveRock(rock: RockEntity | string, fluid: any): void {}
-  public polishRockSurface(rock: RockEntity | string, amount: number): void {}
-  public dislodgeRock(rock: RockEntity | string, force: any): void {}
-  public rollRock(rock: RockEntity | string, direction: Vec3): void {}
-  public slideRock(rock: RockEntity | string, surface: any): void {}
-  public toppleRock(rock: RockEntity | string, force: any): void {}
-  public buryRock(rock: RockEntity | string, sediment: any): void {}
-  public exposeRock(rock: RockEntity | string, erosion: any): void {}
-  public regenerateRockCollision(rock: RockEntity | string): void {}
+  public chipRockSurface(rock: RockEntity | string, impact: any): void { recordSubsystemAction(this, 'chipRockSurface', 'TerrainHydrologySubsystem'); }
+  public erodeRockSurface(rock: RockEntity | string, rate: number): void { recordSubsystemAction(this, 'erodeRockSurface', 'TerrainHydrologySubsystem'); }
+  public weatherRock(rock: RockEntity | string, weather: any): void { recordSubsystemAction(this, 'weatherRock', 'TerrainHydrologySubsystem'); }
+  public dissolveRock(rock: RockEntity | string, fluid: any): void { recordSubsystemAction(this, 'dissolveRock', 'TerrainHydrologySubsystem'); }
+  public polishRockSurface(rock: RockEntity | string, amount: number): void { recordSubsystemAction(this, 'polishRockSurface', 'TerrainHydrologySubsystem'); }
+  public dislodgeRock(rock: RockEntity | string, force: any): void { recordSubsystemAction(this, 'dislodgeRock', 'TerrainHydrologySubsystem'); }
+  public rollRock(rock: RockEntity | string, direction: Vec3): void { recordSubsystemAction(this, 'rollRock', 'TerrainHydrologySubsystem'); }
+  public slideRock(rock: RockEntity | string, surface: any): void { recordSubsystemAction(this, 'slideRock', 'TerrainHydrologySubsystem'); }
+  public toppleRock(rock: RockEntity | string, force: any): void { recordSubsystemAction(this, 'toppleRock', 'TerrainHydrologySubsystem'); }
+  public buryRock(rock: RockEntity | string, sediment: any): void { recordSubsystemAction(this, 'buryRock', 'TerrainHydrologySubsystem'); }
+  public exposeRock(rock: RockEntity | string, erosion: any): void { recordSubsystemAction(this, 'exposeRock', 'TerrainHydrologySubsystem'); }
+  public regenerateRockCollision(rock: RockEntity | string): void { recordSubsystemAction(this, 'regenerateRockCollision', 'TerrainHydrologySubsystem'); }
 
   // 241–260. Núi, vách đá và địa hình
   /**
@@ -172,29 +174,29 @@ export class TerrainHydrologySubsystem {
     return mountain;
   }
 
-  public generateMountainTerrain(region: any): void {}
+  public generateMountainTerrain(region: any): void { recordSubsystemAction(this, 'generateMountainTerrain', 'TerrainHydrologySubsystem'); }
   public updateMountainHeight(region: any, amount: number): void {
     const m = typeof region === 'string' ? this.mountains.get(region) : region;
     if (m) m.height += amount;
   }
 
-  public deformMountainSurface(region: any, force: any): void {}
-  public formRockyRidge(region: any): void {}
-  public formMountainValley(region: any): void {}
-  public generateCliffFace(region: any): void {}
+  public deformMountainSurface(region: any, force: any): void { recordSubsystemAction(this, 'deformMountainSurface', 'TerrainHydrologySubsystem'); }
+  public formRockyRidge(region: any): void { recordSubsystemAction(this, 'formRockyRidge', 'TerrainHydrologySubsystem'); }
+  public formMountainValley(region: any): void { recordSubsystemAction(this, 'formMountainValley', 'TerrainHydrologySubsystem'); }
+  public generateCliffFace(region: any): void { recordSubsystemAction(this, 'generateCliffFace', 'TerrainHydrologySubsystem'); }
   public erodeMountain(region: any, rate: number): void {
     const m = typeof region === 'string' ? this.mountains.get(region) : region;
     if (m) m.height = Math.max(0, m.height - rate);
   }
 
-  public weatherMountainSurface(region: any, weather: any): void {}
-  public fractureMountainRock(region: any, force: any): void {}
-  public triggerRockfall(region: any): void {}
-  public triggerLandslide(region: any): void {}
-  public collapseCliffSection(region: any, section: any): void {}
-  public generateTalusSlope(region: any): void {}
-  public depositMountainSediment(region: any, sediment: any): void {}
-  public carveRiverValley(region: any, river: any): void {}
+  public weatherMountainSurface(region: any, weather: any): void { recordSubsystemAction(this, 'weatherMountainSurface', 'TerrainHydrologySubsystem'); }
+  public fractureMountainRock(region: any, force: any): void { recordSubsystemAction(this, 'fractureMountainRock', 'TerrainHydrologySubsystem'); }
+  public triggerRockfall(region: any): void { recordSubsystemAction(this, 'triggerRockfall', 'TerrainHydrologySubsystem'); }
+  public triggerLandslide(region: any): void { recordSubsystemAction(this, 'triggerLandslide', 'TerrainHydrologySubsystem'); }
+  public collapseCliffSection(region: any, section: any): void { recordSubsystemAction(this, 'collapseCliffSection', 'TerrainHydrologySubsystem'); }
+  public generateTalusSlope(region: any): void { recordSubsystemAction(this, 'generateTalusSlope', 'TerrainHydrologySubsystem'); }
+  public depositMountainSediment(region: any, sediment: any): void { recordSubsystemAction(this, 'depositMountainSediment', 'TerrainHydrologySubsystem'); }
+  public carveRiverValley(region: any, river: any): void { recordSubsystemAction(this, 'carveRiverValley', 'TerrainHydrologySubsystem'); }
   /**
    * Tích tụ tuyết trên núi.
    *
@@ -236,7 +238,7 @@ export class TerrainHydrologySubsystem {
     return Math.max(0, Math.min(1, stability));
   }
 
-  public updateMountainCollision(region: any): void {}
+  public updateMountainCollision(region: any): void { recordSubsystemAction(this, 'updateMountainCollision', 'TerrainHydrologySubsystem'); }
 
   // 261–280. Đất, cát, bùn và trầm tích
   /**
@@ -267,7 +269,7 @@ export class TerrainHydrologySubsystem {
     return patch;
   }
 
-  public initializeSoilProperties(soil: SoilPatch | string): void {}
+  public initializeSoilProperties(soil: SoilPatch | string): void { recordSubsystemAction(this, 'initializeSoilProperties', 'TerrainHydrologySubsystem'); }
 
   /**
    * Nén đất.
@@ -289,26 +291,26 @@ export class TerrainHydrologySubsystem {
     if (s) s.compaction = Math.max(0, s.compaction - amount);
   }
 
-  public deformSoilSurface(soil: SoilPatch | string, force: any): void {}
+  public deformSoilSurface(soil: SoilPatch | string, force: any): void { recordSubsystemAction(this, 'deformSoilSurface', 'TerrainHydrologySubsystem'); }
   public createFootprint(soil: SoilPatch | string, foot: any): any {
     return { soil, foot, depth: 0.05 };
   }
 
-  public eraseFootprint(soil: SoilPatch | string, rate: number): void {}
-  public displaceSoil(soil: SoilPatch | string, direction: Vec3): void {}
-  public excavateSoil(soil: SoilPatch | string, amount: number): void {}
-  public fillExcavation(soil: SoilPatch | string, material: any): void {}
-  public erodeSoil(soil: SoilPatch | string, water: any): void {}
-  public depositSediment(soil: SoilPatch | string, sediment: any): void {}
+  public eraseFootprint(soil: SoilPatch | string, rate: number): void { recordSubsystemAction(this, 'eraseFootprint', 'TerrainHydrologySubsystem'); }
+  public displaceSoil(soil: SoilPatch | string, direction: Vec3): void { recordSubsystemAction(this, 'displaceSoil', 'TerrainHydrologySubsystem'); }
+  public excavateSoil(soil: SoilPatch | string, amount: number): void { recordSubsystemAction(this, 'excavateSoil', 'TerrainHydrologySubsystem'); }
+  public fillExcavation(soil: SoilPatch | string, material: any): void { recordSubsystemAction(this, 'fillExcavation', 'TerrainHydrologySubsystem'); }
+  public erodeSoil(soil: SoilPatch | string, water: any): void { recordSubsystemAction(this, 'erodeSoil', 'TerrainHydrologySubsystem'); }
+  public depositSediment(soil: SoilPatch | string, sediment: any): void { recordSubsystemAction(this, 'depositSediment', 'TerrainHydrologySubsystem'); }
   public liquefySoil(soil: SoilPatch | string, saturation: number): void {
     const s = typeof soil === 'string' ? this.soilPatches.get(soil) : soil;
     if (s) s.mudLevel = saturation;
   }
 
-  public dryMud(mud: any, rate: number): void {}
-  public crackDryMud(mud: any): void {}
-  public splashMud(mud: any, impact: any): void {}
-  public simulateSandSliding(sand: any, slope: any): void {}
+  public dryMud(mud: any, rate: number): void { recordSubsystemAction(this, 'dryMud', 'TerrainHydrologySubsystem'); }
+  public crackDryMud(mud: any): void { recordSubsystemAction(this, 'crackDryMud', 'TerrainHydrologySubsystem'); }
+  public splashMud(mud: any, impact: any): void { recordSubsystemAction(this, 'splashMud', 'TerrainHydrologySubsystem'); }
+  public simulateSandSliding(sand: any, slope: any): void { recordSubsystemAction(this, 'simulateSandSliding', 'TerrainHydrologySubsystem'); }
   /**
    * Hình thành cồn cát.
    *
@@ -323,8 +325,8 @@ export class TerrainHydrologySubsystem {
     return { height, width: spread * 3, volume, windSpeed: speed };
   }
 
-  public reshapeSandDune(dune: any, wind: any): void {}
-  public updateTerrainSurface(terrain: any): void {}
+  public reshapeSandDune(dune: any, wind: any): void { recordSubsystemAction(this, 'reshapeSandDune', 'TerrainHydrologySubsystem'); }
+  public updateTerrainSurface(terrain: any): void { recordSubsystemAction(this, 'updateTerrainSurface', 'TerrainHydrologySubsystem'); }
 
   // 281–300. Nước, dòng chảy và mặt nước
   public createWaterBody(type: WaterBodyEntity['type'] = 'river'): WaterBodyEntity {
@@ -340,8 +342,8 @@ export class TerrainHydrologySubsystem {
     return wb;
   }
 
-  public initializeWaterSimulation(water: WaterBodyEntity | string): void {}
-  public updateWaterSimulation(water: WaterBodyEntity | string, deltaTime: number): void {}
+  public initializeWaterSimulation(water: WaterBodyEntity | string): void { recordSubsystemAction(this, 'initializeWaterSimulation', 'TerrainHydrologySubsystem'); }
+  public updateWaterSimulation(water: WaterBodyEntity | string, deltaTime: number): void { recordSubsystemAction(this, 'updateWaterSimulation', 'TerrainHydrologySubsystem'); }
   /**
    * Tốc độ dòng chảy của mặt nước (m/s).
    *
@@ -365,10 +367,10 @@ export class TerrainHydrologySubsystem {
     if (wb) wb.waterLevel = level;
   }
 
-  public simulateWaterCurrent(water: WaterBodyEntity | string, force: any): void {}
-  public generateWaterWaves(water: WaterBodyEntity | string, wind: any): void {}
-  public propagateWaterWave(wave: any): void {}
-  public reflectWaterWave(wave: any, surface: any): void {}
+  public simulateWaterCurrent(water: WaterBodyEntity | string, force: any): void { recordSubsystemAction(this, 'simulateWaterCurrent', 'TerrainHydrologySubsystem'); }
+  public generateWaterWaves(water: WaterBodyEntity | string, wind: any): void { recordSubsystemAction(this, 'generateWaterWaves', 'TerrainHydrologySubsystem'); }
+  public propagateWaterWave(wave: any): void { recordSubsystemAction(this, 'propagateWaterWave', 'TerrainHydrologySubsystem'); }
+  public reflectWaterWave(wave: any, surface: any): void { recordSubsystemAction(this, 'reflectWaterWave', 'TerrainHydrologySubsystem'); }
   public createWaterRipple(position: Vec3): void {
     this.ripples.push({ position, time: Date.now() });
   }
@@ -377,13 +379,13 @@ export class TerrainHydrologySubsystem {
     return { position, force, dropletsCount: 20 };
   }
 
-  public simulateWaterDroplets(splash: any): void {}
-  public simulateWaterfall(waterfall: any): void {}
-  public simulateRiverFlow(river: any): void {}
-  public simulateStreamFlow(stream: any): void {}
-  public simulateFlooding(area: any, water: any): void {}
-  public erodeRiverbank(riverbank: any, water: any): void {}
-  public depositRiverSediment(river: any, sediment: any): void {}
+  public simulateWaterDroplets(splash: any): void { recordSubsystemAction(this, 'simulateWaterDroplets', 'TerrainHydrologySubsystem'); }
+  public simulateWaterfall(waterfall: any): void { recordSubsystemAction(this, 'simulateWaterfall', 'TerrainHydrologySubsystem'); }
+  public simulateRiverFlow(river: any): void { recordSubsystemAction(this, 'simulateRiverFlow', 'TerrainHydrologySubsystem'); }
+  public simulateStreamFlow(stream: any): void { recordSubsystemAction(this, 'simulateStreamFlow', 'TerrainHydrologySubsystem'); }
+  public simulateFlooding(area: any, water: any): void { recordSubsystemAction(this, 'simulateFlooding', 'TerrainHydrologySubsystem'); }
+  public erodeRiverbank(riverbank: any, water: any): void { recordSubsystemAction(this, 'erodeRiverbank', 'TerrainHydrologySubsystem'); }
+  public depositRiverSediment(river: any, sediment: any): void { recordSubsystemAction(this, 'depositRiverSediment', 'TerrainHydrologySubsystem'); }
   public freezeWaterSurface(water: WaterBodyEntity | string, temperature: number): void {
     const wb = typeof water === 'string' ? this.waterBodies.get(water) : water;
     if (wb && temperature <= 0) wb.isFrozen = true;

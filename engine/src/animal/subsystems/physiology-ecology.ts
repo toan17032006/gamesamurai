@@ -8,6 +8,8 @@
 import { AnimalPhysiologyState, AnimalBehaviorState } from '../types.js';
 import type { Vec3 } from '../../types/index.js';
 
+import { recordSubsystemAction } from '../../core/subsystem-activity.js';
+
 export class PhysiologyEcologySubsystem {
   public physiology: AnimalPhysiologyState = {
     heartRate: 75,
@@ -43,95 +45,95 @@ export class PhysiologyEcologySubsystem {
   public animationTime = 0;
 
   // 641–660. Hô hấp, tuần hoàn và hoạt động sinh lý
-  public initializeAnimalPhysiology(): void {}
+  public initializeAnimalPhysiology(): void { recordSubsystemAction(this, 'initializeAnimalPhysiology', 'PhysiologyEcologySubsystem'); }
   public updateRespiration(deltaTime: number): void { this.physiology.respirationRate = 15 + this.behavior.fear * 0.2; }
   public calculateRespiratoryRate(): number { return this.physiology.respirationRate; }
-  public updateLungExpansion(): void {}
-  public updateLungContraction(): void {}
-  public updateGillVentilation(): void {}
-  public updateTrachealVentilation(): void {}
+  public updateLungExpansion(): void { recordSubsystemAction(this, 'updateLungExpansion', 'PhysiologyEcologySubsystem'); }
+  public updateLungContraction(): void { recordSubsystemAction(this, 'updateLungContraction', 'PhysiologyEcologySubsystem'); }
+  public updateGillVentilation(): void { recordSubsystemAction(this, 'updateGillVentilation', 'PhysiologyEcologySubsystem'); }
+  public updateTrachealVentilation(): void { recordSubsystemAction(this, 'updateTrachealVentilation', 'PhysiologyEcologySubsystem'); }
   public updateHeartRate(): number { return this.physiology.heartRate; }
-  public updateBloodCirculation(): void {}
-  public regulateOxygenDemand(): void {}
-  public regulateCarbonDioxideRemoval(): void {}
-  public regulateBodyTemperature(): void {}
-  public regulateWaterBalance(): void {}
-  public regulateElectrolyteBalance(): void {}
-  public regulateEnergyConsumption(): void {}
+  public updateBloodCirculation(): void { recordSubsystemAction(this, 'updateBloodCirculation', 'PhysiologyEcologySubsystem'); }
+  public regulateOxygenDemand(): void { recordSubsystemAction(this, 'regulateOxygenDemand', 'PhysiologyEcologySubsystem'); }
+  public regulateCarbonDioxideRemoval(): void { recordSubsystemAction(this, 'regulateCarbonDioxideRemoval', 'PhysiologyEcologySubsystem'); }
+  public regulateBodyTemperature(): void { recordSubsystemAction(this, 'regulateBodyTemperature', 'PhysiologyEcologySubsystem'); }
+  public regulateWaterBalance(): void { recordSubsystemAction(this, 'regulateWaterBalance', 'PhysiologyEcologySubsystem'); }
+  public regulateElectrolyteBalance(): void { recordSubsystemAction(this, 'regulateElectrolyteBalance', 'PhysiologyEcologySubsystem'); }
+  public regulateEnergyConsumption(): void { recordSubsystemAction(this, 'regulateEnergyConsumption', 'PhysiologyEcologySubsystem'); }
   public calculateMetabolicRate(): number { return this.physiology.metabolicRate; }
-  public updateDigestiveActivity(): void {}
-  public updateExcretoryActivity(): void {}
-  public updatePhysiologicalStress(): void {}
+  public updateDigestiveActivity(): void { recordSubsystemAction(this, 'updateDigestiveActivity', 'PhysiologyEcologySubsystem'); }
+  public updateExcretoryActivity(): void { recordSubsystemAction(this, 'updateExcretoryActivity', 'PhysiologyEcologySubsystem'); }
+  public updatePhysiologicalStress(): void { recordSubsystemAction(this, 'updatePhysiologicalStress', 'PhysiologyEcologySubsystem'); }
   public recoverPhysiologicalHomeostasis(): void { this.physiology.stressLevel = 5; }
 
   // 661–680. Dinh dưỡng, săn mồi và kiếm ăn
-  public initializeAnimalFeeding(): void {}
+  public initializeAnimalFeeding(): void { recordSubsystemAction(this, 'initializeAnimalFeeding', 'PhysiologyEcologySubsystem'); }
   public detectPotentialFood(): boolean { return true; }
   public classifyFoodSource(): string { return 'prey'; }
   public evaluateFoodSafety(): boolean { return true; }
   public approachFoodSource(source: any): void { this.behavior.activeTarget = source; }
-  public investigateFoodSource(source: any): void {}
+  public investigateFoodSource(source: any): void { recordSubsystemAction(this, 'investigateFoodSource', 'PhysiologyEcologySubsystem'); }
   public selectFoodItem(items: any[]): any { return items[0]; }
-  public captureFoodItem(item: any): void {}
-  public manipulateFoodItem(item: any): void {}
+  public captureFoodItem(item: any): void { recordSubsystemAction(this, 'captureFoodItem', 'PhysiologyEcologySubsystem'); }
+  public manipulateFoodItem(item: any): void { recordSubsystemAction(this, 'manipulateFoodItem', 'PhysiologyEcologySubsystem'); }
   public ingestFoodItem(item: any): void { this.behavior.hunger = Math.max(0, this.behavior.hunger - 40); }
-  public processFoodInMouth(): void {}
-  public swallowFoodBolus(): void {}
+  public processFoodInMouth(): void { recordSubsystemAction(this, 'processFoodInMouth', 'PhysiologyEcologySubsystem'); }
+  public swallowFoodBolus(): void { recordSubsystemAction(this, 'swallowFoodBolus', 'PhysiologyEcologySubsystem'); }
   public trackPreyMovement(prey: any): void { this.behavior.activeTarget = prey; }
   public stalkPrey(prey: any): void { this.behavior.currentMotivation = 'hunting'; }
-  public pursuePrey(prey: any): void {}
-  public interceptPrey(prey: any): void {}
-  public executePredatoryStrike(prey: any): void {}
-  public secureCapturedPrey(prey: any): void {}
-  public shareFoodWithGroup(group: any): void {}
+  public pursuePrey(prey: any): void { recordSubsystemAction(this, 'pursuePrey', 'PhysiologyEcologySubsystem'); }
+  public interceptPrey(prey: any): void { recordSubsystemAction(this, 'interceptPrey', 'PhysiologyEcologySubsystem'); }
+  public executePredatoryStrike(prey: any): void { recordSubsystemAction(this, 'executePredatoryStrike', 'PhysiologyEcologySubsystem'); }
+  public secureCapturedPrey(prey: any): void { recordSubsystemAction(this, 'secureCapturedPrey', 'PhysiologyEcologySubsystem'); }
+  public shareFoodWithGroup(group: any): void { recordSubsystemAction(this, 'shareFoodWithGroup', 'PhysiologyEcologySubsystem'); }
   public updateFeedingMotivation(): void { this.behavior.hunger += 0.05; }
 
   // 681–700. Sinh sản, giao phối và chăm sóc con non
-  public initializeReproductiveBehavior(): void {}
+  public initializeReproductiveBehavior(): void { recordSubsystemAction(this, 'initializeReproductiveBehavior', 'PhysiologyEcologySubsystem'); }
   public detectReproductiveReadiness(): boolean { return true; }
   public detectPotentialMate(): boolean { return true; }
-  public approachPotentialMate(mate: any): void {}
+  public approachPotentialMate(mate: any): void { recordSubsystemAction(this, 'approachPotentialMate', 'PhysiologyEcologySubsystem'); }
   public performCourtshipBehavior(): void { this.behavior.currentMotivation = 'courting'; }
-  public performCourtshipVocalization(): void {}
-  public performCourtshipDisplay(): void {}
+  public performCourtshipVocalization(): void { recordSubsystemAction(this, 'performCourtshipVocalization', 'PhysiologyEcologySubsystem'); }
+  public performCourtshipDisplay(): void { recordSubsystemAction(this, 'performCourtshipDisplay', 'PhysiologyEcologySubsystem'); }
   public evaluateMateCompatibility(mate: any): boolean { return true; }
-  public initiateMatingSequence(): void {}
-  public terminateMatingSequence(): void {}
-  public searchForNestingSite(): void {}
-  public constructNest(): void {}
-  public prepareNestingMaterial(): void {}
-  public layEggs(): void {}
-  public incubateEggs(): void {}
-  public guardNest(): void {}
+  public initiateMatingSequence(): void { recordSubsystemAction(this, 'initiateMatingSequence', 'PhysiologyEcologySubsystem'); }
+  public terminateMatingSequence(): void { recordSubsystemAction(this, 'terminateMatingSequence', 'PhysiologyEcologySubsystem'); }
+  public searchForNestingSite(): void { recordSubsystemAction(this, 'searchForNestingSite', 'PhysiologyEcologySubsystem'); }
+  public constructNest(): void { recordSubsystemAction(this, 'constructNest', 'PhysiologyEcologySubsystem'); }
+  public prepareNestingMaterial(): void { recordSubsystemAction(this, 'prepareNestingMaterial', 'PhysiologyEcologySubsystem'); }
+  public layEggs(): void { recordSubsystemAction(this, 'layEggs', 'PhysiologyEcologySubsystem'); }
+  public incubateEggs(): void { recordSubsystemAction(this, 'incubateEggs', 'PhysiologyEcologySubsystem'); }
+  public guardNest(): void { recordSubsystemAction(this, 'guardNest', 'PhysiologyEcologySubsystem'); }
   public recognizeOffspring(offspring: any): boolean { return true; }
-  public retrieveOffspring(offspring: any): void {}
-  public feedOffspring(offspring: any): void {}
+  public retrieveOffspring(offspring: any): void { recordSubsystemAction(this, 'retrieveOffspring', 'PhysiologyEcologySubsystem'); }
+  public feedOffspring(offspring: any): void { recordSubsystemAction(this, 'feedOffspring', 'PhysiologyEcologySubsystem'); }
   public protectOffspring(offspring: any): void { this.behavior.aggression = 80; }
 
   // 701–720. Phát triển, sinh trưởng và thay đổi cơ thể
-  public initializeAnimalDevelopment(): void {}
-  public updateDevelopmentStage(): void {}
+  public initializeAnimalDevelopment(): void { recordSubsystemAction(this, 'initializeAnimalDevelopment', 'PhysiologyEcologySubsystem'); }
+  public updateDevelopmentStage(): void { recordSubsystemAction(this, 'updateDevelopmentStage', 'PhysiologyEcologySubsystem'); }
   public transitionToJuvenileStage(): void { this.stage = 'juvenile'; }
   public transitionToAdultStage(): void { this.stage = 'adult'; }
   public transitionToSeniorStage(): void { this.stage = 'senior'; }
   public calculateGrowthRate(): number { return 0.02; }
-  public updateBodySizeWithAge(): void {}
-  public updateBodyProportionsWithAge(): void {}
-  public updateSkeletalGrowth(): void {}
-  public updateMuscleGrowth(): void {}
-  public updateFeatherGrowth(): void {}
-  public updateFurGrowth(): void {}
-  public updateScaleDevelopment(): void {}
-  public updateHornGrowth(): void {}
-  public updateAntlerGrowth(): void {}
-  public initiateMolting(): void {}
-  public updateMoltingProgress(): void {}
-  public shedExoskeleton(): void {}
-  public recoverAfterMolting(): void {}
-  public updateLifeStageAppearance(): void {}
+  public updateBodySizeWithAge(): void { recordSubsystemAction(this, 'updateBodySizeWithAge', 'PhysiologyEcologySubsystem'); }
+  public updateBodyProportionsWithAge(): void { recordSubsystemAction(this, 'updateBodyProportionsWithAge', 'PhysiologyEcologySubsystem'); }
+  public updateSkeletalGrowth(): void { recordSubsystemAction(this, 'updateSkeletalGrowth', 'PhysiologyEcologySubsystem'); }
+  public updateMuscleGrowth(): void { recordSubsystemAction(this, 'updateMuscleGrowth', 'PhysiologyEcologySubsystem'); }
+  public updateFeatherGrowth(): void { recordSubsystemAction(this, 'updateFeatherGrowth', 'PhysiologyEcologySubsystem'); }
+  public updateFurGrowth(): void { recordSubsystemAction(this, 'updateFurGrowth', 'PhysiologyEcologySubsystem'); }
+  public updateScaleDevelopment(): void { recordSubsystemAction(this, 'updateScaleDevelopment', 'PhysiologyEcologySubsystem'); }
+  public updateHornGrowth(): void { recordSubsystemAction(this, 'updateHornGrowth', 'PhysiologyEcologySubsystem'); }
+  public updateAntlerGrowth(): void { recordSubsystemAction(this, 'updateAntlerGrowth', 'PhysiologyEcologySubsystem'); }
+  public initiateMolting(): void { recordSubsystemAction(this, 'initiateMolting', 'PhysiologyEcologySubsystem'); }
+  public updateMoltingProgress(): void { recordSubsystemAction(this, 'updateMoltingProgress', 'PhysiologyEcologySubsystem'); }
+  public shedExoskeleton(): void { recordSubsystemAction(this, 'shedExoskeleton', 'PhysiologyEcologySubsystem'); }
+  public recoverAfterMolting(): void { recordSubsystemAction(this, 'recoverAfterMolting', 'PhysiologyEcologySubsystem'); }
+  public updateLifeStageAppearance(): void { recordSubsystemAction(this, 'updateLifeStageAppearance', 'PhysiologyEcologySubsystem'); }
 
   // 721–740. Giác quan nâng cao và cảm nhận môi trường
-  public initializeEnvironmentalSensing(): void {}
+  public initializeEnvironmentalSensing(): void { recordSubsystemAction(this, 'initializeEnvironmentalSensing', 'PhysiologyEcologySubsystem'); }
   public senseAmbientTemperature(): number { return 22.0; }
   public senseHumidity(): number { return 55.0; }
   public senseWindDirection(): Vec3 { return { x: 1, y: 0, z: 0 }; }
@@ -149,13 +151,13 @@ export class PhysiologyEcologySubsystem {
   public detectHabitatBoundary(): boolean { return false; }
   public estimateEnvironmentalRisk(): number { return this.behavior.fear * 0.01; }
   public estimateResourceAvailability(): number { return 0.8; }
-  public updateEnvironmentalMemory(): void {}
-  public integrateSensoryInformation(): void {}
+  public updateEnvironmentalMemory(): void { recordSubsystemAction(this, 'updateEnvironmentalMemory', 'PhysiologyEcologySubsystem'); }
+  public integrateSensoryInformation(): void { recordSubsystemAction(this, 'integrateSensoryInformation', 'PhysiologyEcologySubsystem'); }
 
   // 741–760. Hành vi, cảm xúc và ra quyết định
-  public initializeAnimalBehavior(): void {}
+  public initializeAnimalBehavior(): void { recordSubsystemAction(this, 'initializeAnimalBehavior', 'PhysiologyEcologySubsystem'); }
   public updateAnimalBehavior(deltaTime: number): void { this.evaluateAnimalNeeds(); this.selectBehaviorState(); }
-  public evaluateAnimalNeeds(): void {}
+  public evaluateAnimalNeeds(): void { recordSubsystemAction(this, 'evaluateAnimalNeeds', 'PhysiologyEcologySubsystem'); }
   public calculateHungerLevel(): number { return this.behavior.hunger; }
   public calculateThirstLevel(): number { return this.behavior.thirst; }
   public calculateFatigueLevel(): number { return this.behavior.fatigue; }
@@ -170,61 +172,61 @@ export class PhysiologyEcologySubsystem {
     return this.behavior.currentMotivation;
   }
   public chooseNextAction(): string { return this.behavior.currentMotivation; }
-  public interruptCurrentBehavior(): void {}
-  public resumePreviousBehavior(): void {}
+  public interruptCurrentBehavior(): void { recordSubsystemAction(this, 'interruptCurrentBehavior', 'PhysiologyEcologySubsystem'); }
+  public resumePreviousBehavior(): void { recordSubsystemAction(this, 'resumePreviousBehavior', 'PhysiologyEcologySubsystem'); }
   public evaluateThreatResponse(): string { return this.behavior.fear > 70 ? 'flee' : 'fight'; }
   public chooseEscapeDirection(): Vec3 { return { x: -1, y: 0, z: 0 }; }
   public initiateDefensiveBehavior(): void { this.behavior.aggression = 60; }
   public investigateNovelStimulus(): void { this.behavior.currentMotivation = 'foraging'; }
-  public updateBehavioralMemory(): void {}
+  public updateBehavioralMemory(): void { recordSubsystemAction(this, 'updateBehavioralMemory', 'PhysiologyEcologySubsystem'); }
   public transitionBehaviorState(newState = 'idle'): void { this.behavior.currentMotivation = newState as any; }
 
   // 761–780. Bầy đàn, giao tiếp và lãnh thổ
-  public initializeSocialBehavior(): void {}
+  public initializeSocialBehavior(): void { recordSubsystemAction(this, 'initializeSocialBehavior', 'PhysiologyEcologySubsystem'); }
   public detectNearbyConspecifics(): any[] { return Array.from(this.groupMembers); }
   public recognizeIndividualAnimal(animal: any): boolean { return true; }
-  public maintainGroupSpacing(): void {}
+  public maintainGroupSpacing(): void { recordSubsystemAction(this, 'maintainGroupSpacing', 'PhysiologyEcologySubsystem'); }
   public followGroupLeader(leader: any): void { this.groupLeader = leader; }
   public electGroupLeader(group: any): any { return this.groupLeader; }
-  public synchronizeGroupMovement(group: any): void {}
+  public synchronizeGroupMovement(group: any): void { recordSubsystemAction(this, 'synchronizeGroupMovement', 'PhysiologyEcologySubsystem'); }
   public joinAnimalGroup(group: any): void { this.groupMembers.add(group); }
   public leaveAnimalGroup(group: any): void { this.groupMembers.delete(group); }
-  public coordinateGroupForaging(group: any): void {}
-  public performSocialGreeting(animal: any): void {}
-  public initiateSocialGrooming(animal: any): void {}
-  public exchangeVocalSignals(signal: any): void {}
-  public performAlarmCall(): void {}
+  public coordinateGroupForaging(group: any): void { recordSubsystemAction(this, 'coordinateGroupForaging', 'PhysiologyEcologySubsystem'); }
+  public performSocialGreeting(animal: any): void { recordSubsystemAction(this, 'performSocialGreeting', 'PhysiologyEcologySubsystem'); }
+  public initiateSocialGrooming(animal: any): void { recordSubsystemAction(this, 'initiateSocialGrooming', 'PhysiologyEcologySubsystem'); }
+  public exchangeVocalSignals(signal: any): void { recordSubsystemAction(this, 'exchangeVocalSignals', 'PhysiologyEcologySubsystem'); }
+  public performAlarmCall(): void { recordSubsystemAction(this, 'performAlarmCall', 'PhysiologyEcologySubsystem'); }
   public respondToAlarmCall(signal: any): void { this.behavior.fear = 70; }
-  public establishTerritorialBoundary(area: any): void {}
+  public establishTerritorialBoundary(area: any): void { recordSubsystemAction(this, 'establishTerritorialBoundary', 'PhysiologyEcologySubsystem'); }
   public patrolTerritory(area: any): void { this.behavior.currentMotivation = 'territorial'; }
-  public markTerritory(location: any): void {}
+  public markTerritory(location: any): void { recordSubsystemAction(this, 'markTerritory', 'PhysiologyEcologySubsystem'); }
   public defendTerritory(intruder: any): void { this.behavior.aggression = 90; }
-  public resolveSocialConflict(animal: any): void {}
+  public resolveSocialConflict(animal: any): void { recordSubsystemAction(this, 'resolveSocialConflict', 'PhysiologyEcologySubsystem'); }
 
   // 781–800. Vật lý, animation, AI và tối ưu hóa
-  public initializeAnimalPhysics(): void {}
+  public initializeAnimalPhysics(): void { recordSubsystemAction(this, 'initializeAnimalPhysics', 'PhysiologyEcologySubsystem'); }
   public createAnimalCollider(): any { return { type: 'box', size: { x: 1, y: 1, z: 2 } }; }
-  public applyAnimalGravity(deltaTime: number): void {}
-  public applyAnimalForce(force: Vec3): void {}
-  public resolveAnimalCollision(): void {}
+  public applyAnimalGravity(deltaTime: number): void { recordSubsystemAction(this, 'applyAnimalGravity', 'PhysiologyEcologySubsystem'); }
+  public applyAnimalForce(force: Vec3): void { recordSubsystemAction(this, 'applyAnimalForce', 'PhysiologyEcologySubsystem'); }
+  public resolveAnimalCollision(): void { recordSubsystemAction(this, 'resolveAnimalCollision', 'PhysiologyEcologySubsystem'); }
   public updateAnimalGroundContact(): boolean { return true; }
-  public solveAnimalIK(): void {}
-  public solveAnimalFootIK(): void {}
-  public blendAnimalAnimations(): void {}
-  public crossFadeAnimalAnimation(from: string, to: string, duration = 0.2): void {}
+  public solveAnimalIK(): void { recordSubsystemAction(this, 'solveAnimalIK', 'PhysiologyEcologySubsystem'); }
+  public solveAnimalFootIK(): void { recordSubsystemAction(this, 'solveAnimalFootIK', 'PhysiologyEcologySubsystem'); }
+  public blendAnimalAnimations(): void { recordSubsystemAction(this, 'blendAnimalAnimations', 'PhysiologyEcologySubsystem'); }
+  public crossFadeAnimalAnimation(from: string, to: string, duration = 0.2): void { recordSubsystemAction(this, 'crossFadeAnimalAnimation', 'PhysiologyEcologySubsystem'); }
   public updateAnimalAnimationMixer(deltaTime: number): void { this.animationTime += deltaTime; }
   public updateAnimalRootMotion(): Vec3 { return { x: 0, y: 0, z: 0 }; }
-  public applyAnimalSecondaryMotion(): void {}
-  public updateAnimalTailDynamics(): void {}
-  public updateAnimalClothDynamics(): void {}
+  public applyAnimalSecondaryMotion(): void { recordSubsystemAction(this, 'applyAnimalSecondaryMotion', 'PhysiologyEcologySubsystem'); }
+  public updateAnimalTailDynamics(): void { recordSubsystemAction(this, 'updateAnimalTailDynamics', 'PhysiologyEcologySubsystem'); }
+  public updateAnimalClothDynamics(): void { recordSubsystemAction(this, 'updateAnimalClothDynamics', 'PhysiologyEcologySubsystem'); }
   public updateAnimalLOD(distance = 10): number {
     if (distance > 50) this.currentLOD = 2;
     else if (distance > 20) this.currentLOD = 1;
     else this.currentLOD = 0;
     return this.currentLOD;
   }
-  public interpolateAnimalPosition(target: Vec3, alpha = 0.2): void {}
-  public interpolateAnimalRotation(target: any, alpha = 0.2): void {}
-  public synchronizeAnimalPhysics(): void {}
-  public optimizeAnimalSimulation(): void {}
+  public interpolateAnimalPosition(target: Vec3, alpha = 0.2): void { recordSubsystemAction(this, 'interpolateAnimalPosition', 'PhysiologyEcologySubsystem'); }
+  public interpolateAnimalRotation(target: any, alpha = 0.2): void { recordSubsystemAction(this, 'interpolateAnimalRotation', 'PhysiologyEcologySubsystem'); }
+  public synchronizeAnimalPhysics(): void { recordSubsystemAction(this, 'synchronizeAnimalPhysics', 'PhysiologyEcologySubsystem'); }
+  public optimizeAnimalSimulation(): void { recordSubsystemAction(this, 'optimizeAnimalSimulation', 'PhysiologyEcologySubsystem'); }
 }
