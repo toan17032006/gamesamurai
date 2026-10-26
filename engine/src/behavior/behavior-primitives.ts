@@ -48,6 +48,8 @@ export interface BehaviorOperationResult {
   tick: number;
   /** Thời lượng ước tính (giây) nếu thao tác có thời lượng. */
   duration?: number;
+  /** Độ tin cậy 0..1 — suy ra từ độ đầy đủ và độ nhất quán của bằng chứng. */
+  confidence?: number;
   /** Kết quả phụ để người gọi dùng tiếp. */
   result?: unknown;
   [key: string]: unknown;
@@ -143,6 +145,202 @@ export function evidenceConfidence(factors: Record<string, number>, explicit?: u
   const consistency = 1 / (1 + spread * 2);
 
   return Math.max(0, Math.min(1, completeness * (0.6 + 0.4 * consistency)));
+}
+
+// ---------------------------------------------------------------------------
+// Suy ra tín hiệu từ cấu hình / trạng thái thật
+// ---------------------------------------------------------------------------
+
+/**
+ * Miền giá trị đầy đủ của các khoá tín hiệu KHÔNG phải mức độ 0..1.
+ *
+ * Khoá không có trong bản này được coi là mức độ đã chuẩn hoá sẵn trong 0..1
+ * (`intensity`, `urgency`, `arousal`, `valence`…).
+ */
+const SIGNAL_DOMAINS: Record<string, number> = {
+  age: 100,
+  amount: 100,
+  bodyWeight: 100,
+  capacity: 100,
+  count: 100,
+  demand: 1000,
+  distance: 1000,
+  duration: 24,
+  energy: 100,
+  frequency: 20,
+  health: 100,
+  hours: 24,
+  level: 10,
+  magnitude: 10,
+  mass: 100,
+  population: 1000,
+  price: 100,
+  rate: 10,
+  speed: 20,
+  supply: 1000,
+  time: 60,
+  wealth: 1000,
+};
+
+/** Miền mặc định — khoá chưa biết được coi là đã chuẩn hoá trong 0..1. */
+const DEFAULT_SIGNAL_DOMAIN = 1;
+
+/** Khoá lá của một khoá phẳng dạng `a.b.c` (`weather.intensity` → `intensity`). */
+function leafKey(key: string): string {
+  const parts = key.split('.');
+  return parts[parts.length - 1] ?? key;
+}
+
+/**
+ * Chuẩn hoá một tín hiệu về 0..1 theo miền tự nhiên của khoá đó.
+ *
+ * - Khoá đã là mức độ 0..1 (miền = 1) ⇒ giữ nguyên, chỉ kẹp trên 1.
+ * - Khoá có miền lớn hơn (vd `energy` 0..100) ⇒ bão hoà mềm `|v| / (|v| + miền)`
+ *   để KHÔNG bao giờ chạm đỉnh 1.0: một giá trị "đã tới đỉnh" phải là kết quả
+ *   tính toán, không phải kẹp cứng.
+ */
+export function normalizeSignal(value: number, key: string): number {
+  if (!Number.isFinite(value)) return 0;
+  const domain = SIGNAL_DOMAINS[leafKey(key)] ?? DEFAULT_SIGNAL_DOMAIN;
+  const magnitude = Math.abs(value);
+  if (domain <= DEFAULT_SIGNAL_DOMAIN) return magnitude > 1 ? 1 : magnitude;
+  return magnitude / (magnitude + domain);
+}
+
+/** Đọc một tín hiệu số từ nguồn bất kỳ, hỗ trợ khoá lồng `a.b`. */
+export function readSignal(source: unknown, key: string): number | undefined {
+  if (!source || typeof source !== 'object') return undefined;
+  let current: unknown = source;
+  for (const part of key.split('.')) {
+    if (!current || typeof current !== 'object') return undefined;
+    current = (current as Record<string, unknown>)[part];
+  }
+  return typeof current === 'number' && Number.isFinite(current) ? current : undefined;
+}
+
+/** Một tín hiệu đã đọc được, kèm khoá gốc (để chuẩn hoá đúng miền). */
+export interface SignalReading {
+  /** Khoá đã đọc (có thể lồng, vd `weather.intensity`). */
+  key: string;
+  /** Giá trị số đọc được. */
+  value: number;
+}
+
+/**
+ * Tìm tín hiệu số đầu tiên có trong danh sách nguồn × danh sách khoá.
+ *
+ * Thứ tự nguồn = thứ tự ưu tiên (ví dụ `[config, state]` ⇒ cấu hình mới đè
+ * lên trạng thái đã có).
+ */
+export function findSignal(sources: unknown[], keys: string[]): SignalReading | undefined {
+  for (const source of sources) {
+    for (const key of keys) {
+      const value = readSignal(source, key);
+      if (value !== undefined) return { key, value };
+    }
+  }
+  return undefined;
+}
+
+/** Danh sách khoá của một object (rỗng nếu nguồn không phải object). */
+export function signalKeys(source: unknown): string[] {
+  if (!source || typeof source !== 'object' || Array.isArray(source)) return [];
+  return Object.keys(source as Record<string, unknown>);
+}
+
+/** Tóm tắt tập tín hiệu — dùng để trả về số liệu tính được. */
+export interface SignalSummary {
+  /** Số tín hiệu tìm thấy. */
+  count: number;
+  /** Trung bình giá trị tuyệt đối (đơn vị gốc). */
+  mean: number;
+  /** Tín hiệu lớn nhất (đơn vị gốc). */
+  peak: number;
+  /** Độ phân tán (độ lệch chuẩn của giá trị tuyệt đối). */
+  spread: number;
+  /** Mức độ hiệu lực 0..1 = trung bình tín hiệu đã chuẩn hoá. */
+  strength: number;
+}
+
+/** Làm tròn để số hiển thị ổn định (vẫn giữ khác biệt có ý nghĩa). */
+export function roundSignal(value: number): number {
+  return Math.round(value * 10000) / 10000;
+}
+
+/**
+ * Tóm tắt tập tín hiệu: số lượng, độ lớn, độ phân tán và mức độ hiệu lực.
+ *
+ * `strength` là trung bình của các tín hiệu đã chuẩn hoá theo miền của khoá ⇒
+ * phản ánh DỮ LIỆU, không phải hằng số.
+ */
+export function summarizeSignals(factors: Record<string, number>): SignalSummary {
+  const entries = Object.entries(factors);
+  if (entries.length === 0) {
+    return { count: 0, mean: 0, peak: 0, spread: 0, strength: 0 };
+  }
+
+  let sum = 0;
+  let peak = 0;
+  let strengthSum = 0;
+  for (const [key, value] of entries) {
+    const magnitude = Math.abs(value);
+    sum += magnitude;
+    if (magnitude > peak) peak = magnitude;
+    strengthSum += normalizeSignal(value, key);
+  }
+  const mean = sum / entries.length;
+  const variance =
+    entries.reduce((acc, [, value]) => acc + (Math.abs(value) - mean) ** 2, 0) / entries.length;
+
+  return {
+    count: entries.length,
+    mean: roundSignal(mean),
+    peak: roundSignal(peak),
+    spread: roundSignal(Math.sqrt(variance)),
+    strength: roundSignal(strengthSum / entries.length),
+  };
+}
+
+/**
+ * Hồ sơ hành động chuẩn cho các hàm `initiate*`.
+ *
+ * Mọi số đều suy ra từ cấu hình / trạng thái thật:
+ *  • `duration`   — thời lượng: `duration`/`length`/`time`/`hours` trong cấu hình;
+ *                   nếu không có thì dùng mức tín hiệu trung bình của cấu hình.
+ *  • `drive`      — động lực 0..1: `urgency`/`intensity`/`level`/`drive`/`effort`
+ *                   trong cấu hình (chuẩn hoá theo miền của khoá); nếu không có thì
+ *                   dùng cường độ đã suy ra từ cấu hình.
+ *  • `load`       — gánh nặng của hành động = động lực × thời lượng.
+ *  • `energyCost` — năng lượng tiêu hao = `energy`/`stamina` trong cấu hình × động lực.
+ *
+ * @param sources - nguồn tín hiệu theo thứ tự ưu tiên (thường là `[config, state]`)
+ * @param base - kết quả gốc của `applyInitialization` (lấy `intensity`, `signalMean`)
+ */
+export function deriveActionProfile(
+  sources: unknown[],
+  base: Record<string, unknown>,
+): Record<string, unknown> {
+  const intensity = typeof base.intensity === 'number' ? base.intensity : 0;
+  const signalMean = typeof base.signalMean === 'number' ? base.signalMean : 0;
+
+  const durationReading = findSignal(sources, ['duration', 'length', 'time', 'hours']);
+  const duration = durationReading && durationReading.value > 0 ? durationReading.value : signalMean;
+
+  const driveReading = findSignal(sources, ['urgency', 'intensity', 'level', 'drive', 'effort']);
+  const drive = driveReading ? normalizeSignal(driveReading.value, driveReading.key) : intensity;
+
+  const profile: Record<string, unknown> = {
+    duration: roundSignal(duration),
+    drive: roundSignal(drive),
+    load: roundSignal(drive * duration),
+  };
+
+  const energyReading = findSignal(sources, ['energy', 'stamina']);
+  if (energyReading) {
+    profile.energyCost = roundSignal(Math.abs(energyReading.value) * drive);
+  }
+
+  return profile;
 }
 
 /** Kết quả của một phép đánh giá dựa trên bằng chứng. */
@@ -702,17 +900,35 @@ export function memoryResult(
   };
 }
 
-/** Kết quả cho nhóm khởi tạo — có `initialized`. */
+/**
+ * Kết quả cho nhóm khởi tạo — có `initialized`.
+ *
+ * `intensity` PHẢI được suy ra từ cấu hình / trạng thái thật rồi truyền vào đây.
+ * Không có tín hiệu nào ⇒ cường độ bằng 0 (không phải 0.5 giả — trước đây mọi
+ * lời gọi `init*`/`initiate*` đều trả đúng 0.5 bất kể cấu hình có gì).
+ */
 export function initializationResult(
   name: string,
-  opts: { tick?: number; context?: unknown; extra?: Record<string, unknown> } = {},
+  opts: {
+    tick?: number;
+    context?: unknown;
+    intensity?: unknown;
+    confidence?: number;
+    extra?: Record<string, unknown>;
+  } = {},
 ): Record<string, unknown> {
   return {
     ...operationResult(name, {
-      tick: opts.tick,
+      intensity: clampIntensity(opts.intensity, 0),
       context: opts.context,
+      tick: opts.tick,
       status: 'initialized',
-      extra: { initialized: true, func: name, ...(opts.extra ?? {}) },
+      extra: {
+        initialized: true,
+        func: name,
+        confidence: opts.confidence ?? 0,
+        ...(opts.extra ?? {}),
+      },
     }),
   };
 }
@@ -927,11 +1143,56 @@ export class BehaviorSubsystemBase {
     return updateResult(func, deltaTime, this.simulationTicks, { context });
   }
 
-  /** Khởi tạo subsystem. */
+  /**
+   * Khởi tạo subsystem.
+   *
+   * Kết quả PHẢI phản ánh cấu hình / trạng thái thật, không phải hằng số:
+   *  • `intensity`        — mức độ hiệu lực của cấu hình (0..1): trung bình các
+   *    tín hiệu số đã chuẩn hoá theo miền của khoá. Khi cấu hình không có tín
+   *    hiệu nào thì lấy từ trạng thái đã có của subsystem.
+   *  • `confidence`       — độ tin cậy theo bằng chứng (độ đầy đủ × độ nhất quán).
+   *  • `appliedKeys`      — danh sách khoá cấu hình đã áp dụng.
+   *  • `appliedKeyCount`  — số khoá cấu hình đã áp dụng.
+   *  • `signalCount` / `signalMean` / `signalPeak` / `signalSpread` — thống kê tín hiệu.
+   *
+   * Trước đây mọi lời gọi `init*`/`initiate*` đều trả `intensity: 0.5` bất kể
+   * cấu hình có gì — cấu hình chỉ được `Object.assign(this.state, config)`
+   * (side-effect) chứ không hề có trong kết quả trả về.
+   */
   protected applyInitialization(func: string, config?: Record<string, any>): Record<string, unknown> {
     this.isInitialized = true;
-    if (config) Object.assign(this.state, config);
-    return initializationResult(func, { tick: this.simulationTicks });
+
+    // Ghi cấu hình vào trạng thái và ghi lại đúng những khoá đã áp dụng.
+    const appliedKeys: string[] = [];
+    if (config && typeof config === 'object') {
+      for (const key of Object.keys(config)) {
+        appliedKeys.push(key);
+        this.state[key] = config[key];
+      }
+    }
+
+    // Tín hiệu lấy từ cấu hình mới; nếu cấu hình không mang tín hiệu nào thì
+    // lấy từ trạng thái thật của subsystem (đã bao gồm cấu hình vừa áp dụng).
+    const configFactors = collectFactors(config);
+    const stateFactors = collectFactors(this.state);
+    const factors: Record<string, number> = { ...stateFactors, ...configFactors };
+    const summary = summarizeSignals(factors);
+
+    return initializationResult(func, {
+      tick: this.simulationTicks,
+      intensity: summary.strength,
+      confidence: roundSignal(evidenceConfidence(factors)),
+      extra: {
+        appliedKeys,
+        appliedKeyCount: appliedKeys.length,
+        stateKeyCount: Object.keys(this.state).length,
+        configSignalCount: Object.keys(configFactors).length,
+        signalCount: summary.count,
+        signalMean: summary.mean,
+        signalPeak: summary.peak,
+        signalSpread: summary.spread,
+      },
+    });
   }
 
   /** Chọn một phương án hành động. */

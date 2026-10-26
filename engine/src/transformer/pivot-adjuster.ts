@@ -113,5 +113,70 @@ export const PivotAdjuster = {
   restorePivot,
   createPivotOffset,
   unwrapPivot,
+  adjustPivotToCenterOfMass,
+  adjustPivotToBottomCenter,
+  createTransformChain,
 };
+
+// ============================================================================
+// Enhanced Type-Safe & Fluent Transform Chain Operations
+// ============================================================================
+
+import { EngineResult, engineOk, engineErr, TransformChain } from '../types/engine.types.js';
+
+export function applyPivotResult(
+  obj: THREE.Object3D,
+  spec: PivotSpec
+): EngineResult<THREE.Object3D> {
+  try {
+    const result = applyPivot(obj, spec);
+    return engineOk(result, { mode: spec.mode });
+  } catch (err: any) {
+    return engineErr({
+      code: 'PIVOT_APPLY_FAILED',
+      message: `Failed to apply pivot: ${err.message}`,
+      subsystem: 'PivotAdjuster',
+      stack: err.stack
+    });
+  }
+}
+
+export function adjustPivotToCenterOfMass(obj: THREE.Object3D): EngineResult<THREE.Object3D> {
+  return applyPivotResult(obj, { mode: 'center', bakeIntoGeometry: true });
+}
+
+export function adjustPivotToBottomCenter(obj: THREE.Object3D): EngineResult<THREE.Object3D> {
+  return applyPivotResult(obj, { mode: 'bottom', bakeIntoGeometry: true });
+}
+
+export function createTransformChain(obj: THREE.Object3D): TransformChain<THREE.Object3D> {
+  return {
+    target: obj,
+    translate(x: number, y: number, z: number) {
+      obj.position.x += x;
+      obj.position.y += y;
+      obj.position.z += z;
+      return this;
+    },
+    rotate(yaw: number, pitch: number, roll: number) {
+      obj.rotation.x += pitch;
+      obj.rotation.y += yaw;
+      obj.rotation.z += roll;
+      return this;
+    },
+    scale(factor: number) {
+      obj.scale.multiplyScalar(factor);
+      return this;
+    },
+    setPivot(pivotX: number, pivotY: number, pivotZ: number) {
+      applyPivot(obj, { mode: 'custom', custom: { x: pivotX, y: pivotY, z: pivotZ }, bakeIntoGeometry: true });
+      return this;
+    },
+    apply() {
+      obj.updateMatrixWorld(true);
+      return obj;
+    }
+  };
+}
+
 

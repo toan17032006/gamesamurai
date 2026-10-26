@@ -14,6 +14,7 @@
     "./transformer": "./src/transformer/index.ts",
     "./combiner": "./src/combiner/index.ts",
     "./physics": "./src/physics/index.ts",
+    "./spatial": "./src/spatial/index.ts",
     "./effects": "./src/effects/index.ts",
     "./renderer": "./src/renderer/index.ts",
     "./render": "./src/render/index.ts",
@@ -30,7 +31,9 @@
     "./world": "./src/world/index.ts",
     "./behavior": "./src/behavior/index.ts",
     "./spatial-ui": "./src/spatial-ui/index.ts",
-    "./ui-3d": "./src/spatial-ui/index.ts"
+    "./ui-3d": "./src/spatial-ui/index.ts",
+    "./npc": "./src/npc/index.ts",
+    "./ai-npc": "./src/npc/index.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

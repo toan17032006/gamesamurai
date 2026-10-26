@@ -30,10 +30,73 @@ export class HeadSensesSubsystem {
     waterCurrentSpeed: 0,
     ambientTemperature: 22,
     ambientHumidity: 60,
+    smellSensitivity: 0.5,
+    smellRange: 50,
+    hearingRange: 120,
+    maxFrequency: 20000,
+    minFrequency: 40,
+    familiarScents: [],
+    knownPredatorScents: [],
+    knownMateScent: null,
+    territoryMarkers: [],
+    chemicalThreshold: 0.15,
+    lastScentIntensity: 0,
+    lastScentComposition: 'unknown',
   };
 
   public eyesOpen = true;
   public pupilSize = 0.5;
+
+  // -------------------------------------------------------------------------
+  // Helper đọc dữ liệu thật — thay cho giá trị đóng cứng
+  // -------------------------------------------------------------------------
+
+  /** Đọc số từ nhiều khoá, có giá trị thay thế khi dữ liệu thiếu. */
+  private numOf(source: any, keys: string[], fallback: number): number {
+    if (source && typeof source === 'object') {
+      for (const key of keys) {
+        const value = (source as Record<string, unknown>)[key];
+        if (typeof value === 'number' && Number.isFinite(value)) return value;
+      }
+    }
+    return fallback;
+  }
+
+  /** Vị trí của nguồn kích thích. */
+  private positionOf(source: any): Vec3 {
+    const p = source?.position ?? source?.origin ?? source?.center;
+    if (p && typeof p === 'object') {
+      const x = Number(p.x ?? 0);
+      const y = Number(p.y ?? 0);
+      const z = Number(p.z ?? 0);
+      if (Number.isFinite(x) && Number.isFinite(y) && Number.isFinite(z)) return { x, y, z };
+    }
+    if (source && typeof source === 'object') {
+      const x = Number(source.x ?? NaN);
+      const y = Number(source.y ?? NaN);
+      const z = Number(source.z ?? NaN);
+      if (Number.isFinite(x) && Number.isFinite(y) && Number.isFinite(z)) return { x, y, z };
+    }
+    return { x: 0, y: 0, z: 0 };
+  }
+
+  /** Khoảng cách từ nguồn kích thích tới đầu con vật (gốc toạ độ). */
+  private distanceOf(source: any): number {
+    const declared = this.numOf(source, ['distance'], NaN);
+    if (Number.isFinite(declared)) return declared;
+    const p = this.positionOf(source);
+    return Math.hypot(p.x, p.y, p.z);
+  }
+
+  /** Tần số của nguồn âm thanh (Hz). */
+  private frequencyOf(source: any): number {
+    return this.numOf(source, ['frequency', 'hz'], 1000);
+  }
+
+  /** Cường độ của nguồn kích thích. */
+  private strengthOf(source: any): number {
+    return this.numOf(source, ['intensity', 'strength', 'concentration'], 0.5);
+  }
 
   // 101–120. Đầu, hộp sọ và cổ
   public updateAnimalHead(): void {}

@@ -48,6 +48,17 @@ export class TerrainHydrologySubsystem {
   public rocks: Map<string, RockEntity> = new Map();
   public mountains: Map<string, MountainRegion> = new Map();
   public soilPatches: Map<string, SoilPatch> = new Map();
+
+  /** Đọc số từ nhiều khoá, có giá trị thay thế khi dữ liệu thiếu. */
+  private numOf(source: any, keys: string[], fallback: number): number {
+    if (source && typeof source === 'object') {
+      for (const key of keys) {
+        const value = (source as Record<string, unknown>)[key];
+        if (typeof value === 'number' && Number.isFinite(value)) return value;
+      }
+    }
+    return fallback;
+  }
   public waterBodies: Map<string, WaterBodyEntity> = new Map();
   public ripples: Array<{ position: Vec3; time: number }> = [];
 
@@ -209,9 +220,20 @@ export class TerrainHydrologySubsystem {
     }
   }
 
+  /**
+   * Độ ổn định của sườn (0..1).
+   *
+   * Trước đây trả `undefined` khi vùng không phải vùng núi đã đăng ký. Nay
+   * tính từ độ dốc, độ ổn định đất và mức bão hoà nước.
+   */
   public calculateSlopeStability(region: any): number {
     const m = typeof region === 'string' ? this.mountains.get(region) : region;
-    return m ? m.slopeStability : 0.8;
+    if (m && Number.isFinite(Number(m.slopeStability))) return Number(m.slopeStability);
+    const steepness = this.numOf(region, ['steepness', 'slope', 'height'], 0);
+    const saturation = this.numOf(region, ['saturation', 'moisture'], 0);
+    const soilStrength = this.numOf(region, ['soilStrength', 'cohesion', 'stability'], 0.6);
+    const stability = soilStrength * (1 - Math.min(0.8, steepness * 0.5)) * (1 - saturation * 0.4);
+    return Math.max(0, Math.min(1, stability));
   }
 
   public updateMountainCollision(region: any): void {}
@@ -287,7 +309,20 @@ export class TerrainHydrologySubsystem {
   public crackDryMud(mud: any): void {}
   public splashMud(mud: any, impact: any): void {}
   public simulateSandSliding(sand: any, slope: any): void {}
-  public formSandDune(sand: any, wind: any): any { return { height: 3.0 }; }
+  /**
+   * Hình thành cồn cát.
+   *
+   * Trước đây luôn `{ height: 3 }`. Nay chiều cao cồn tính từ lượng cát và
+   * sức gió (gió mạnh ⇒ cồn thấp và rộng hơn).
+   */
+  public formSandDune(sand: any, wind: any): any {
+    const volume = this.numOf(sand, ['volume', 'amount', 'sandVolume'], 10);
+    const speed = this.numOf(wind, ['speed', 'windSpeed'], 4);
+    const spread = 1 + Math.min(4, speed * 0.2);
+    const height = Math.max(0.1, (volume / spread) * 0.3);
+    return { height, width: spread * 3, volume, windSpeed: speed };
+  }
+
   public reshapeSandDune(dune: any, wind: any): void {}
   public updateTerrainSurface(terrain: any): void {}
 
@@ -307,9 +342,22 @@ export class TerrainHydrologySubsystem {
 
   public initializeWaterSimulation(water: WaterBodyEntity | string): void {}
   public updateWaterSimulation(water: WaterBodyEntity | string, deltaTime: number): void {}
+  /**
+   * Tốc độ dòng chảy của mặt nước (m/s).
+   *
+   * Trước đây trả `undefined` khi mặt nước chưa được đăng ký. Nay tính từ
+   * gradient, độ sâu và lưu lượng khai báo.
+   */
   public calculateWaterFlow(water: WaterBodyEntity | string): number {
     const wb = typeof water === 'string' ? this.waterBodies.get(water) : water;
-    return wb ? wb.flowSpeed : 1.0;
+    if (wb && Number.isFinite(Number(wb.flowSpeed))) return Number(wb.flowSpeed);
+    const gradient = this.numOf(water, ['gradient', 'slope', 'steepness'], 0);
+    const depth = this.numOf(water, ['depth', 'level'], 1);
+    const flow = this.numOf(water, ['flow', 'discharge'], 0);
+    if (flow > 0) return flow;
+    // Manning xấp xỉ đơn giản: v ≈ (1/3)·R^(2/3)·S^(1/2)
+    const hydraulicRadius = Math.max(0.01, depth / 2);
+    return Math.max(0, (1 / 3) * Math.pow(hydraulicRadius, 2 / 3) * Math.sqrt(Math.max(0, gradient)));
   }
 
   public updateWaterLevel(water: WaterBodyEntity | string, level: number): void {

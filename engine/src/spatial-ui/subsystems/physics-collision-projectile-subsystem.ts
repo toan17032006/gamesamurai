@@ -1441,9 +1441,9 @@ export class PhysicsCollisionProjectileSubsystem {
   public calculateParticleLifetime(a?: any, b?: any, options?: any): any {
     const explicit = readNum(options, ['lifetime', 'maxLifetime'], Number.NaN);
     if (Number.isFinite(explicit)) return this.transformedNumber(explicit, options);
-    // `b` là nguồn dữ liệu thứ hai cho tuổi / thời lượng.
-    const age = readNum(a, ['age'], readNum(b, ['age'], 0));
-    const duration = readNum(a, ['lifetime', 'duration'], readNum(b, ['lifetime', 'duration'], 1));
+    // `b` là nguồn dữ liệu thứ hai (khoá `maxLifetime`) cho tuổi / thời lượng.
+    const age = readNum(a, ['age'], readNum(b, ['particleAge'], 0));
+    const duration = readNum(a, ['lifetime', 'duration'], readNum(b, ['maxLifetime'], 1));
     return this.transformedNumber(Math.max(0, duration - age), options);
   }
   /**
@@ -1510,19 +1510,20 @@ export class PhysicsCollisionProjectileSubsystem {
    * với đường cong mờ dần theo tuổi, rồi chuẩn hoá về [0, 1].
    */
   public calculateParticleOpacity(a?: any, b?: any, options?: any): any {
-    // `b` là nguồn dữ liệu thứ hai cho đồng hồ / độ mờ gốc.
+    // `b` là nguồn dữ liệu thứ hai (khoá `particleAge` / `particleLifetime` /
+    // `particleOpacity`) cho đồng hồ và độ mờ gốc.
     const age = readNum(
       a,
       ['age', 'elapsed', 'currentTime', 'time'],
-      readNum(options, ['age', 'elapsed', 'currentTime', 'time'], readNum(b, ['age', 'elapsed', 'currentTime', 'time'], 0)),
+      readNum(options, ['age', 'elapsed', 'currentTime', 'time'], readNum(b, ['particleAge'], 0)),
     );
     const lifetime = readNum(
       a,
       ['lifetime', 'duration'],
-      readNum(options, ['lifetime', 'duration'], readNum(b, ['lifetime', 'duration'], 1)),
+      readNum(options, ['lifetime', 'duration'], readNum(b, ['particleLifetime'], 1)),
     );
     const fade = particleOpacity(age, lifetime);
-    const base = readNum(a, ['opacity'], readNum(options, ['opacity'], readNum(b, ['opacity'], 1)));
+    const base = readNum(a, ['opacity'], readNum(options, ['opacity'], readNum(b, ['particleOpacity'], 1)));
     return this.transformedNumber(clamp01(base * fade), options);
   }
   /**
@@ -1601,19 +1602,20 @@ export class PhysicsCollisionProjectileSubsystem {
    * (fallback về bán kính hiệu ứng).
    */
   public calculateEffectExpansion(a?: any, b?: any, options?: any): any {
-    // `b` là nguồn dữ liệu thứ hai cho đồng hồ và mức giãn nở.
+    // `b` là nguồn dữ liệu thứ hai (khoá `effectAge` / `effectLifetime` /
+    // `effectExpansion`) cho đồng hồ và mức giãn nở.
     const age = readNum(
       a,
       ['age', 'elapsed', 'currentTime', 'time'],
-      readNum(options, ['age', 'elapsed', 'currentTime', 'time'], readNum(b, ['age', 'elapsed', 'currentTime', 'time'], 0)),
+      readNum(options, ['age', 'elapsed', 'currentTime', 'time'], readNum(b, ['effectAge'], 0)),
     );
     const lifetime = readNum(
       a,
       ['lifetime', 'duration'],
-      readNum(options, ['lifetime', 'duration'], readNum(b, ['lifetime', 'duration'], 1)),
+      readNum(options, ['lifetime', 'duration'], readNum(b, ['effectLifetime'], 1)),
     );
     const progress = effectExpansion(age, lifetime);
-    const amount = readNum(a, ['expansion'], readNum(b, ['expansion'], Number.NaN));
+    const amount = readNum(a, ['expansion'], readNum(b, ['effectExpansion'], Number.NaN));
     const target = Number.isFinite(amount) ? amount : effectRadius(a ?? options);
     return this.transformedNumber(target * progress, options);
   }
@@ -1633,9 +1635,9 @@ export class PhysicsCollisionProjectileSubsystem {
   public calculateEffectDuration(a?: any, b?: any, options?: any): any {
     const explicit = readNum(options, ['duration', 'lifetime'], Number.NaN);
     if (Number.isFinite(explicit)) return this.transformedNumber(explicit, options);
-    // `b` là nguồn dữ liệu thứ hai cho thời lượng.
+    // `b` là nguồn dữ liệu thứ hai (khoá `effectDuration`) cho thời lượng.
     const fromA = readNum(a, ['duration', 'lifetime', 'effectDuration'], Number.NaN);
-    const fromB = readNum(b, ['duration', 'lifetime', 'effectDuration'], Number.NaN);
+    const fromB = readNum(b, ['effectDuration'], Number.NaN);
     const value = Number.isFinite(fromA) ? fromA : (Number.isFinite(fromB) ? fromB : effectDuration(a ?? options));
     return this.transformedNumber(value, options);
   }
@@ -1646,9 +1648,9 @@ export class PhysicsCollisionProjectileSubsystem {
   public calculateEffectIntensity(a?: any, b?: any, options?: any): any {
     const explicit = readNum(options, ['intensity', 'strength', 'power'], Number.NaN);
     if (Number.isFinite(explicit)) return this.transformedNumber(explicit, options);
-    // `b` là nguồn dữ liệu thứ hai cho cường độ.
+    // `b` là nguồn dữ liệu thứ hai (khoá `effectIntensity`) cho cường độ.
     const fromA = readNum(a, ['intensity', 'strength', 'power'], Number.NaN);
-    const fromB = readNum(b, ['intensity', 'strength', 'power'], Number.NaN);
+    const fromB = readNum(b, ['effectIntensity'], Number.NaN);
     const value = Number.isFinite(fromA) ? fromA : (Number.isFinite(fromB) ? fromB : effectIntensity(a ?? options));
     return this.transformedNumber(value, options);
   }

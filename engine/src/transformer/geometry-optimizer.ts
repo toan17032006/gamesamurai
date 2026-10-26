@@ -7,7 +7,7 @@ import { invalidateBounds } from './bounds-calculator';
 
 const MERGE_ATTRIBUTES = ['position', 'normal', 'uv', 'color'] as const;
 
-export function mergeStatic(root: THREE.Object3D, opts: { computeNormals?: boolean } = {}): THREE.Object3D {
+export function mergeStatic(root: THREE.Object3D, opts: { computeNormals?: boolean } = {}): THREE.Group {
   const meshes = collectMeshes(root);
   if (meshes.length === 0) {
     const empty = new THREE.Group();

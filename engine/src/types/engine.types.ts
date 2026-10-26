@@ -84,3 +84,86 @@ export interface Engine {
   setFpsCap(cap: FpsCap): void;
   getStats(): EngineLoopStats;
 }
+
+// ============================================================================
+// Core Result, Error & Extensibility Contracts
+// ============================================================================
+
+export interface EngineError {
+  code: string;
+  message: string;
+  subsystem?: string;
+  stack?: string;
+  fatal?: boolean;
+  context?: Record<string, unknown>;
+}
+
+export type EngineResult<T, E = EngineError> =
+  | { ok: true; value: T; meta?: Record<string, unknown> }
+  | { ok: false; error: E; context?: string };
+
+export function engineOk<T>(value: T, meta?: Record<string, unknown>): EngineResult<T, never> {
+  return { ok: true, value, meta };
+}
+
+export function engineErr<E = EngineError>(error: E, context?: string): EngineResult<never, E> {
+  return { ok: false, error, context };
+}
+
+export interface TransformChain<T = unknown> {
+  target: T;
+  translate(x: number, y: number, z: number): TransformChain<T>;
+  rotate(yaw: number, pitch: number, roll: number): TransformChain<T>;
+  scale(factor: number): TransformChain<T>;
+  setPivot(pivotX: number, pivotY: number, pivotZ: number): TransformChain<T>;
+  apply(): T;
+}
+
+export interface CustomFieldRegistry<T = Record<string, unknown>> {
+  get<K extends keyof T>(key: K): T[K] | undefined;
+  set<K extends keyof T>(key: K, value: T[K]): void;
+  has(key: string): boolean;
+  delete(key: string): boolean;
+  clear(): void;
+  entries(): [string, unknown][];
+}
+
+export interface EngineExtensionSlot<T = unknown> {
+  id: string;
+  version: string;
+  data: T;
+  enabled: boolean;
+  onAttach?: (entityId: string) => void;
+  onDetach?: (entityId: string) => void;
+  onUpdate?: (deltaTime: number) => void;
+}
+
+export interface Component<TData = Record<string, unknown>> {
+  id: string;
+  type: string;
+  enabled: boolean;
+  data: TData;
+}
+
+export interface IEngineEntity<
+  TProps = Record<string, unknown>,
+  TExtension = unknown
+> {
+  uid: string;
+  name: string;
+  layerMask: number;
+  components: Map<string, Component>;
+  customProps: TProps;
+  extensionSlot?: EngineExtensionSlot<TExtension>;
+}
+
+export type EngineEntity<TProps = Record<string, unknown>, TExtension = unknown> = IEngineEntity<TProps, TExtension>;
+
+export interface SystemLifecycle {
+  init?(): Promise<void> | void;
+  update?(deltaTime: number): void;
+  fixedUpdate?(fixedDeltaTime: number): void;
+  render?(interpolation: number): void;
+  dispose?(): void;
+}
+

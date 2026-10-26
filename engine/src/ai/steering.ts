@@ -14,7 +14,33 @@ export interface SteeringAgent {
 }
 
 export class Steering {
-  private static wanderAngle = 0;
+  /**
+   * Per-agent wander phase. A WeakMap keeps the public static API while making
+   * the state belong to each agent instead of a single module-wide counter.
+   */
+  private static readonly wanderAngles = new WeakMap<SteeringAgent, number>();
+
+  /** Returns the current wander phase for an agent (creating it if needed). */
+  public static getWanderAngle(agent: SteeringAgent): number {
+    let angle = Steering.wanderAngles.get(agent);
+    if (angle === undefined) {
+      angle = Math.random() * Math.PI * 2;
+      Steering.wanderAngles.set(agent, angle);
+    }
+    return angle;
+  }
+
+  /** Overrides the wander phase for one agent. */
+  public static setWanderAngle(agent: SteeringAgent, angle: number): number {
+    const safe = Number.isFinite(angle) ? angle : 0;
+    Steering.wanderAngles.set(agent, safe);
+    return safe;
+  }
+
+  /** Clears accumulated wander state for one agent. */
+  public static resetWander(agent: SteeringAgent): boolean {
+    return Steering.wanderAngles.delete(agent);
+  }
 
   public static seek(agent: SteeringAgent, target: Vec3): Vec3 {
     const desired = {
@@ -65,7 +91,8 @@ export class Steering {
   }
 
   public static wander(agent: SteeringAgent, circleRadius: number = 2.0, circleDistance: number = 4.0, angleChange: number = 0.5): Vec3 {
-    this.wanderAngle += (Math.random() - 0.5) * angleChange;
+    const angle = Steering.getWanderAngle(agent) + (Math.random() - 0.5) * angleChange;
+    Steering.wanderAngles.set(agent, angle);
 
     // Circle center in front of agent
     const velLen = Math.hypot(agent.velocity.x, agent.velocity.z) || 1;
@@ -75,8 +102,8 @@ export class Steering {
     const circleCenterX = agent.position.x + forwardX * circleDistance;
     const circleCenterZ = agent.position.z + forwardZ * circleDistance;
 
-    const targetX = circleCenterX + Math.cos(this.wanderAngle) * circleRadius;
-    const targetZ = circleCenterZ + Math.sin(this.wanderAngle) * circleRadius;
+    const targetX = circleCenterX + Math.cos(angle) * circleRadius;
+    const targetZ = circleCenterZ + Math.sin(angle) * circleRadius;
 
     return this.seek(agent, { x: targetX, y: agent.position.y, z: targetZ });
   }

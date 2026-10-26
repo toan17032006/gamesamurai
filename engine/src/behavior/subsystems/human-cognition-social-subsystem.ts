@@ -14,7 +14,7 @@ import type {
   AnimalBehaviorState,
   BehaviorPolicyState
 } from '../types.js';
-import { BehaviorSubsystemBase } from '../behavior-primitives.js';
+import { BehaviorSubsystemBase, deriveActionProfile } from '../behavior-primitives.js';
 
 export class HumanCognitionSocialSubsystem extends BehaviorSubsystemBase {
   public isInitialized = false;
@@ -640,7 +640,9 @@ export class HumanCognitionSocialSubsystem extends BehaviorSubsystemBase {
    * Bắt đầu trò chuyện.
    */
   public initiateConversation(config?: Record<string, any>): any {
-    return this.applyInitialization('initiateConversation', config);
+    const result = this.applyInitialization('initiateConversation', config);
+    // Thời lượng hội thoại / mức độ chủ động / gánh nặng xã hội suy ra từ dữ liệu thật.
+    return { ...result, ...deriveActionProfile([config, this.state], result) };
   }
   /**
    * [0269] maintainConversation
@@ -1167,7 +1169,9 @@ export class HumanCognitionSocialSubsystem extends BehaviorSubsystemBase {
    * Bắt đầu hợp tác.
    */
   public initiateCooperation(config?: Record<string, any>): any {
-    return this.applyInitialization('initiateCooperation', config);
+    const result = this.applyInitialization('initiateCooperation', config);
+    // Thời lượng phối hợp / mức độ hợp tác / gánh nặng suy ra từ dữ liệu thật.
+    return { ...result, ...deriveActionProfile([config, this.state], result) };
   }
   /**
    * [0342] maintainCooperation
@@ -1263,7 +1267,9 @@ export class HumanCognitionSocialSubsystem extends BehaviorSubsystemBase {
    * Bắt đầu cạnh tranh.
    */
   public initiateCompetition(config?: Record<string, any>): any {
-    return this.applyInitialization('initiateCompetition', config);
+    const result = this.applyInitialization('initiateCompetition', config);
+    // Thời lượng tranh đấu / mức độ cạnh tranh / gánh nặng suy ra từ dữ liệu thật.
+    return { ...result, ...deriveActionProfile([config, this.state], result) };
   }
   /**
    * [0352] estimateCompetitorAbility

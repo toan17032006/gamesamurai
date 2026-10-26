@@ -14,7 +14,14 @@ import type {
   AnimalBehaviorState,
   BehaviorPolicyState
 } from '../types.js';
-import { BehaviorSubsystemBase } from '../behavior-primitives.js';
+import {
+  BehaviorSubsystemBase,
+  deriveActionProfile,
+  findSignal,
+  readSignal,
+  roundSignal,
+  signalKeys,
+} from '../behavior-primitives.js';
 
 export class HumanEmotionSubsystem extends BehaviorSubsystemBase {
   public isInitialized = false;
@@ -42,7 +49,31 @@ export class HumanEmotionSubsystem extends BehaviorSubsystemBase {
    * Khởi tạo nhân vật người.
    */
   public initHuman(config?: Record<string, any>): any {
-    return this.applyInitialization('initHuman', config);
+    const result = this.applyInitialization('initHuman', config);
+    // Hồ sơ cảm xúc / hành vi dựng từ cấu hình + trạng thái thật.
+    const sources = [config, this.state];
+    const age = findSignal(sources, ['age', 'ageYears']);
+    const stress = findSignal(sources, ['stress', 'stressLevel']);
+    const happiness = findSignal(sources, ['happiness', 'joy']);
+    const traits = config?.traits ?? this.state?.traits;
+    const traitKeys = signalKeys(traits);
+    const traitValues = traitKeys
+      .map((key) => readSignal(traits, key))
+      .filter((value): value is number => value !== undefined);
+    const traitMean =
+      traitValues.length > 0
+        ? traitValues.reduce((sum, value) => sum + value, 0) / traitValues.length
+        : 0;
+    return {
+      ...result,
+      profile: {
+        ageYears: age ? roundSignal(age.value) : null,
+        baselineStress: stress ? roundSignal(stress.value) : null,
+        baselineHappiness: happiness ? roundSignal(happiness.value) : null,
+        traits: traitKeys,
+        traitMean: roundSignal(traitMean),
+      },
+    };
   }
   /**
    * [0002] updateHumanState
@@ -984,7 +1015,9 @@ export class HumanEmotionSubsystem extends BehaviorSubsystemBase {
    * Bắt đầu đối đầu.
    */
   public initiateConfrontation(config?: Record<string, any>): any {
-    return this.applyInitialization('initiateConfrontation', config);
+    const result = this.applyInitialization('initiateConfrontation', config);
+    // Thời lượng đối đầu / mức độ kích hoạt / hao năng lượng suy ra từ dữ liệu thật.
+    return { ...result, ...deriveActionProfile([config, this.state], result) };
   }
   /**
    * [0117] withdrawFromConflict

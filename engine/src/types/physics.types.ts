@@ -112,3 +112,105 @@ export interface DestructionShard {
   mass: number;
   lifetime: number;
 }
+
+// ============================================================================
+// Enhanced RigidBody, Manifold, GJK/EPA & Impulse Contracts
+// ============================================================================
+
+export interface MassProperties {
+  mass: number;
+  inverseMass: number;
+  centerOfMass: Vec3;
+  /** 3x3 inertia tensor matrix (elements in row-major or column-major [ixx, ixy, ixz, iyx, iyy, iyz, izx, izy, izz]) */
+  inertiaTensor: [number, number, number, number, number, number, number, number, number];
+  inverseInertiaTensor: [number, number, number, number, number, number, number, number, number];
+  principalInertia: Vec3;
+}
+
+export interface RaycastHit {
+  hit: boolean;
+  distance: number;
+  point: Vec3;
+  normal: Vec3;
+  uv?: { u: number; v: number };
+  triangleIndex?: number;
+  bodyId?: string;
+  colliderShape?: CollisionShape['kind'];
+  material?: PhysicsMaterial;
+}
+
+export interface ContactPoint {
+  position: Vec3;
+  normal: Vec3; // Points from body A to body B
+  penetrationDepth: number;
+  normalImpulse?: number;
+  tangentImpulse1?: number;
+  tangentImpulse2?: number;
+}
+
+export interface ContactManifold {
+  bodyIdA: string;
+  bodyIdB: string;
+  points: ContactPoint[];
+  normal: Vec3;
+  tangent1: Vec3;
+  tangent2: Vec3;
+  isColliding: boolean;
+}
+
+export interface SimplexVertex {
+  point: Vec3; // Minkowski difference point (A - B)
+  pointA: Vec3; // Support point on shape A
+  pointB: Vec3; // Support point on shape B
+}
+
+export interface Simplex {
+  vertices: SimplexVertex[];
+  count: number;
+}
+
+export interface GJKResult {
+  intersecting: boolean;
+  distance: number;
+  closestPointA: Vec3;
+  closestPointB: Vec3;
+  iterations: number;
+  simplex: Simplex;
+}
+
+export interface EPAResult {
+  normal: Vec3; // Penetration normal
+  penetrationDepth: number;
+  contactPointA: Vec3;
+  contactPointB: Vec3;
+  iterations: number;
+}
+
+export interface ImpulseResolution {
+  linearImpulseA: Vec3;
+  linearImpulseB: Vec3;
+  angularImpulseA: Vec3;
+  angularImpulseB: Vec3;
+  appliedRestitution: number;
+  appliedFriction: number;
+}
+
+export interface SweepHit {
+  hit: boolean;
+  timeOfImpact: number; // 0 to 1
+  point: Vec3;
+  normal: Vec3;
+  distance: number;
+}
+
+export interface IRigidBody<T = unknown> extends PhysicsBody {
+  massProps: MassProperties;
+  linearDamping: number;
+  angularDamping: number;
+  sleepThreshold: number;
+  isSleeping: boolean;
+  userData: T;
+}
+
+export type RigidBodyDescriptor<T = unknown> = IRigidBody<T>;
+

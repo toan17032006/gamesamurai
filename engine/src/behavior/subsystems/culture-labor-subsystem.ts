@@ -14,7 +14,7 @@ import type {
   AnimalBehaviorState,
   BehaviorPolicyState
 } from '../types.js';
-import { BehaviorSubsystemBase } from '../behavior-primitives.js';
+import { BehaviorSubsystemBase, deriveActionProfile } from '../behavior-primitives.js';
 
 export class CultureLaborSubsystem extends BehaviorSubsystemBase {
   public isInitialized = false;
@@ -219,7 +219,9 @@ export class CultureLaborSubsystem extends BehaviorSubsystemBase {
    * Bắt đầu chơi.
    */
   public initiatePlayBehavior(config?: Record<string, any>): any {
-    return this.applyInitialization('initiatePlayBehavior', config);
+    const result = this.applyInitialization('initiatePlayBehavior', config);
+    // Thời lượng / động lực / hao năng lượng suy ra từ cấu hình + trạng thái thật.
+    return { ...result, ...deriveActionProfile([config, this.state], result) };
   }
   /**
    * [0623] explorePlayEnvironment

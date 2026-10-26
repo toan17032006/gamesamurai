@@ -14,7 +14,7 @@ import type {
   AnimalBehaviorState,
   BehaviorPolicyState
 } from '../types.js';
-import { BehaviorSubsystemBase } from '../behavior-primitives.js';
+import { BehaviorSubsystemBase, deriveActionProfile } from '../behavior-primitives.js';
 
 export class SomaticLifestyleSubsystem extends BehaviorSubsystemBase {
   public isInitialized = false;
@@ -504,7 +504,9 @@ export class SomaticLifestyleSubsystem extends BehaviorSubsystemBase {
    * Bắt đầu ăn.
    */
   public initiateEating(config?: Record<string, any>): any {
-    return this.applyInitialization('initiateEating', config);
+    const result = this.applyInitialization('initiateEating', config);
+    // Thời lượng bữa ăn / mức độ đói / hao năng lượng suy ra từ cấu hình + trạng thái thật.
+    return { ...result, ...deriveActionProfile([config, this.state], result) };
   }
   /**
    * [0452] controlBiteSize
@@ -658,7 +660,9 @@ export class SomaticLifestyleSubsystem extends BehaviorSubsystemBase {
    * Bắt đầu ngủ.
    */
   public initiateSleep(config?: Record<string, any>): any {
-    return this.applyInitialization('initiateSleep', config);
+    const result = this.applyInitialization('initiateSleep', config);
+    // Thời lượng ngủ / mức độ buồn ngủ / hao năng lượng suy ra từ cấu hình + trạng thái thật.
+    return { ...result, ...deriveActionProfile([config, this.state], result) };
   }
   /**
    * [0466] transitionSleepStage
@@ -826,7 +830,9 @@ export class SomaticLifestyleSubsystem extends BehaviorSubsystemBase {
    * Bắt đầu di chuyển.
    */
   public initiateLocomotion(config?: Record<string, any>): any {
-    return this.applyInitialization('initiateLocomotion', config);
+    const result = this.applyInitialization('initiateLocomotion', config);
+    // Thời lượng / tốc độ chủ động / hao năng lượng suy ra từ cấu hình + trạng thái thật.
+    return { ...result, ...deriveActionProfile([config, this.state], result) };
   }
   /**
    * [0482] selectWalkingDirection

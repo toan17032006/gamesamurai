@@ -30,6 +30,19 @@ const DEFAULT_VOLCANO_HEIGHT = 2000;
 /** Áp suất magma mặc định của núi lửa. */
 const DEFAULT_VOLCANO_PRESSURE = 50;
 
+/** Hệ số phản xạ (albedo) theo vật liệu bề mặt. */
+const SURFACE_ALBEDO: Record<string, number> = Object.freeze({
+  snow: 0.85,
+  sand: 0.4,
+  grass: 0.25,
+  soil: 0.2,
+  concrete: 0.3,
+  stone: 0.2,
+  asphalt: 0.1,
+  water: 0.05,
+  ice: 0.6,
+});
+
 export class GeologyClimateSubsystem {
   public settlements: Map<string, any> = new Map();
   public roads: Map<string, any> = new Map();
@@ -43,6 +56,47 @@ export class GeologyClimateSubsystem {
   public shadowLength = 1.0;
   public isNight = false;
 
+  // -------------------------------------------------------------------------
+  // Helper đọc dữ liệu thật — thay cho giá trị đóng cứng
+  // -------------------------------------------------------------------------
+
+  /** Đọc số từ nhiều khoá, có giá trị thay thế khi dữ liệu thiếu. */
+  private numOf(source: any, keys: string[], fallback: number): number {
+    if (source && typeof source === 'object') {
+      for (const key of keys) {
+        const value = (source as Record<string, unknown>)[key];
+        if (typeof value === 'number' && Number.isFinite(value)) return value;
+      }
+    }
+    return fallback;
+  }
+
+  /** Vị trí thế giới của đối tượng. */
+  private positionOf(source: any): Vec3 {
+    const p = source?.position ?? source?.origin ?? source?.center;
+    if (p && typeof source === 'object' && p && typeof p === 'object') {
+      const x = Number(p.x ?? 0);
+      const y = Number(p.y ?? 0);
+      const z = Number(p.z ?? 0);
+      if (Number.isFinite(x) && Number.isFinite(y) && Number.isFinite(z)) return { x, y, z };
+    }
+    return { x: 0, y: 0, z: 0 };
+  }
+
+  /** Kích thước đặc trưng (bán kính / cạnh lớn nhất) của đối tượng. */
+  private extentOf(source: any, fallback = 1): number {
+    const size = source?.size ?? source?.radius ?? source?.scale;
+    if (typeof size === 'number' && Number.isFinite(size) && size > 0) return size;
+    if (size && typeof size === 'object') {
+      const values = [size.x, size.y, size.z, size.max, size.width, size.height]
+        .map((v) => Number(v))
+        .filter((v) => Number.isFinite(v) && v > 0)
+        .sort((a, b) => b - a);
+      if (values.length > 0) return values[0];
+    }
+    return fallback;
+  }
+
   // 581–600. Phát triển đô thị và xây dựng môi trường
   public createSettlement(region: any): any {
     const id = `settlement_${Date.now()}`;
@@ -51,14 +105,57 @@ export class GeologyClimateSubsystem {
     return s;
   }
 
-  public generateBuildingPlot(region: any): any { return { plotId: `plot_${Date.now()}`, size: { x: 20, z: 20 } }; }
+  /**
+   * Lập mảnh đất để xây trong một vùng.
+   *
+   * Trước đây luôn trả mảnh 20×20. Nay diện tích mảnh suy ra từ quy hoạch của
+   * vùng (diện tích dự kiến / số mảnh) và độ dốc ảnh hưởng tới khả năng xây.
+   */
+  public generateBuildingPlot(region: any): any {
+    const id = `plot_${Date.now()}`;
+    const totalArea = this.numOf(region, ['area', 'plotArea', 'surfaceArea'], 400);
+    const plotCount = Math.max(1, this.numOf(region, ['plotCount', 'plots'], 1));
+    const slope = this.numOf(region, ['slope', 'steepness'], 0);
+    const usable = totalArea * (1 - Math.min(0.8, slope) * 0.5) / plotCount;
+    const side = Math.max(4, Math.sqrt(usable));
+    return {
+      plotId: id,
+      id,
+      size: { x: side, z: side },
+      area: usable,
+      slope,
+      elevation: this.numOf(region, ['elevation', 'height'], 0),
+    };
+  }
+
   public placeBuildingOnTerrain(building: any, terrain: any): void {}
   public constructFoundation(building: any, terrain: any): void {}
   public constructWallSection(building: any, section: any): void {}
   public installRoofSection(building: any, section: any): void {}
   public installWindow(building: any, window: any): void {}
   public installDoor(building: any, door: any): void {}
-  public constructBridge(region: any): any { return { bridgeId: `bridge_${Date.now()}` }; }
+  /**
+   * Xây cầu qua một vùng.
+   *
+   * Trước đây chỉ trả `{ bridgeId }`. Nay nhịp cầu, vật liệu và sức chịu tải
+   * suy ra từ dữ liệu vùng (chiều rộng vùng, độ dốc, vật liệu địa phương).
+   */
+  public constructBridge(region: any): any {
+    const id = `bridge_${Date.now()}`;
+    const span = this.numOf(region, ['span', 'width', 'riverWidth'], 30);
+    const material = String(region?.material ?? region?.terrainType ?? 'concrete');
+    const slope = this.numOf(region, ['slope', 'steepness'], 0);
+    const load = 50000 * (1 + Math.min(1, slope) * 0.5);
+    return {
+      bridgeId: id,
+      id,
+      span,
+      material,
+      loadCapacity: load,
+      deckElevation: this.numOf(region, ['elevation', 'height'], 10),
+    };
+  }
+
   /**
    * Xây đường trong một vùng.
    *
@@ -132,7 +229,27 @@ export class GeologyClimateSubsystem {
     }
   }
 
-  public constructFence(region: any): any { return { fenceId: `fence_${Date.now()}` }; }
+  /**
+   * Dựng hàng rào quanh vùng.
+   *
+   * Trước đây chỉ trả `{ fenceId }`. Nay chiều dài, chiều cao và vật liệu
+   * suy ra từ chu vi vùng và điều kiện địa hình.
+   */
+  public constructFence(region: any): any {
+    const id = `fence_${Date.now()}`;
+    const perimeter = this.numOf(region, ['perimeter', 'area'], 100);
+    const height = this.numOf(region, ['fenceHeight', 'height'], 1.8);
+    const material = String(region?.material ?? region?.terrainType ?? 'wood');
+    return {
+      fenceId: id,
+      id,
+      perimeter,
+      height,
+      material,
+      postCount: Math.max(1, Math.round(perimeter / 2.5)),
+    };
+  }
+
   public breakFenceSection(fence: any, section: any): void {}
 
   /**
@@ -178,15 +295,65 @@ export class GeologyClimateSubsystem {
 
   // 601–620. Động đất, núi lửa và địa chất
   public createEarthquake(region: any): any { return { region, magnitude: 6.5, active: true }; }
-  public calculateSeismicWave(earthquake: any): any { return { frequency: 5.0, amplitude: 2.0 }; }
+  /**
+   * Sóng địa chấn.
+   *
+   * Trước đây luôn `{ frequency: 5, amplitude: 2 }`. Nay tần số và biên độ suy
+   * ra từ cường độ động đất và khoảng cách tới tâm.
+   */
+  public calculateSeismicWave(earthquake: any): any {
+    const magnitude = this.numOf(earthquake, ['magnitude', 'intensity'], 6.5);
+    const distance = this.numOf(earthquake, ['distance', 'depth'], 10);
+    const frequency = Math.max(0.1, 5 - distance * 0.2);
+    const amplitude = Math.max(0, (magnitude - 3) * 0.6 * (1 / Math.max(1, distance * 0.2)));
+    return { frequency, amplitude, magnitude, distance };
+  }
+
   public propagateSeismicWave(wave: any): void {}
   public shakeTerrain(terrain: any, wave: any): void {}
   public shakeBuilding(building: any, wave: any): void {}
   public triggerGroundRupture(region: any): void {}
-  public generateGroundCracks(region: any): any[] { return [{ x: 0, z: 0 }, { x: 10, z: 10 }]; }
+  /**
+   * Vết nứt nền đất do động đất.
+   *
+   * Trước đây luôn trả hai điểm cố định. Nay số vết nứt và vị trí từng vết
+   * suy ra từ cường độ động đất và bán kính vùng ảnh hưởng.
+   */
+  public generateGroundCracks(region: any): any[] {
+    const magnitude = this.numOf(region, ['magnitude', 'intensity'], 6.5);
+    const radius = this.numOf(region, ['radius', 'area'], 50);
+    const count = Math.max(1, Math.min(24, Math.round((magnitude - 3) * 3)));
+    const origin = this.positionOf(region);
+    const cracks: any[] = [];
+    for (let i = 0; i < count; i++) {
+      const angle = i * 2.399963229728653;
+      const r = radius * Math.sqrt((i + 0.5) / count);
+      cracks.push({
+        x: origin.x + Math.cos(angle) * r,
+        z: origin.z + Math.sin(angle) * r,
+        width: Math.max(0.05, (magnitude - 3) * 0.08),
+        depth: Math.max(0.1, (magnitude - 3) * 0.4),
+      });
+    }
+    return cracks;
+  }
+
   public widenGroundCracks(region: any): void {}
   public triggerLiquefaction(region: any): void {}
-  public calculateSeismicDamage(region: any): number { return 80; }
+  /**
+   * Mức sát thương của động đất.
+   *
+   * Trước đây luôn `80`. Nay tính từ cường độ động đất, khoảng cách tới tâm và
+   * độ giòn của công trình trong vùng.
+   */
+  public calculateSeismicDamage(region: any): number {
+    const magnitude = this.numOf(region, ['magnitude', 'intensity'], 6.5);
+    const distance = this.numOf(region, ['distance', 'depth'], 10);
+    const fragility = this.numOf(region, ['fragility', 'vulnerability'], 0.5);
+    const attenuation = 1 / (1 + distance * 0.1);
+    return Math.max(0, Math.min(100, (magnitude - 3) * 12 * attenuation * (0.5 + fragility)));
+  }
+
 
   /**
    * Tạo núi lửa trong một vùng.
@@ -221,11 +388,66 @@ export class GeologyClimateSubsystem {
     if (v) v.isErupting = true;
   }
 
-  public spawnVolcanicProjectiles(volcano: any): any[] { return [{ id: 'bomb_1' }]; }
-  public simulateLavaFlow(volcano: any): any { return { length: 50, temp: 1100 }; }
+  /**
+   * Vật thể núi lửa bắn lên.
+   *
+   * Trước đây luôn trả một quả bom duy nhất. Nay số bom, tốc độ và quỹ đạo
+   * suy ra từ cường độ phun trào và áp suất magma.
+   */
+  public spawnVolcanicProjectiles(volcano: any): any[] {
+    const intensity = this.numOf(volcano, ['intensity', 'eruptionIntensity', 'pressure'], 0.5);
+    const pressure = this.numOf(volcano, ['pressure'], DEFAULT_VOLCANO_PRESSURE);
+    const count = Math.max(1, Math.min(32, Math.round(intensity * 12 + pressure * 0.05)));
+    const origin = this.positionOf(volcano);
+    const speed = 20 + pressure * 0.8;
+    const bombs: any[] = [];
+    for (let i = 0; i < count; i++) {
+      const angle = i * 2.399963229728653;
+      bombs.push({
+        id: `bomb_${i}`,
+        position: { x: origin.x, y: origin.y, z: origin.z },
+        velocity: { x: Math.cos(angle) * speed * 0.3, y: speed, z: Math.sin(angle) * speed * 0.3 },
+        mass: 0.5 + intensity,
+        temperature: 1100,
+      });
+    }
+    return bombs;
+  }
+
+  /**
+   * Dòng dung nham chảy.
+   *
+   * Trước đây luôn `{ length: 50, temp: 1100 }`. Nay chiều dài và nhiệt độ suy
+   * ra từ thể tích dung nham, độ nhớt và áp suất.
+   */
+  public simulateLavaFlow(volcano: any): any {
+    const volume = this.numOf(volcano, ['lavaVolume', 'volume'], 100);
+    const viscosity = this.numOf(volcano, ['viscosity'], 0.5);
+    const temperature = this.numOf(volcano, ['temperature', 'magmaTemperature'], 1100);
+    const length = volume * (1 - Math.min(0.9, viscosity)) * 0.5;
+    return { length, temp: temperature, volume, viscosity };
+  }
+
   public coolLavaFlow(lava: any): void { if (lava) lava.temp -= 50; }
   public solidifyLava(lava: any): void { if (lava) lava.temp = 20; }
-  public generateVolcanicAsh(volcano: any): any { return { plumeHeight: 3000 }; }
+  /**
+   * Cột tro núi lửa.
+   *
+   * Trước đây luôn `{ plumeHeight: 3000 }`. Nay chiều cao cột tro suy ra từ
+   * cường độ phun trào và tốc độ gió tầng cao.
+   */
+  public generateVolcanicAsh(volcano: any): any {
+    const intensity = this.numOf(volcano, ['intensity', 'eruptionIntensity'], 0.5);
+    const altitude = this.numOf(volcano, ['altitude', 'windSpeed', 'height'], 0);
+    const plumeHeight = 1000 + intensity * 4000 + altitude * 20;
+    return {
+      plumeHeight,
+      intensity,
+      altitude,
+      ashMass: intensity * 1000,
+    };
+  }
+
   public updateGeologicalRecovery(region: any): void {}
 
   // 621–640. Sông băng, băng trôi và biến đổi khí hậu cục bộ
@@ -256,7 +478,20 @@ export class GeologyClimateSubsystem {
   public compactGlacierSnow(glacier: any): void {}
   public simulateGlacierFlow(glacier: any): void {}
   public deformGlacierSurface(glacier: any): void {}
-  public generateGlacierCrevasse(glacier: any): any { return { depth: 30 }; }
+  /**
+   * Vết nứt trên sông băng.
+   *
+   * Trước đây luôn `{ depth: 30 }`. Nay độ sâu vết nứt suy ra từ ứng suất
+   * kéo và tốc độ chảy của sông băng.
+   */
+  public generateGlacierCrevasse(glacier: any): any {
+    const strain = this.numOf(glacier, ['strain', 'stress'], 0.2);
+    const flow = this.numOf(glacier, ['flowSpeed', 'flow', 'speed'], DEFAULT_GLACIER_FLOW);
+    const thickness = this.numOf(glacier, ['thickness'], DEFAULT_GLACIER_THICKNESS);
+    const depth = Math.max(1, strain * thickness * 2 + flow * 20);
+    return { depth, strain, flow, thickness };
+  }
+
   public widenGlacierCrevasse(glacier: any): void {}
   public fractureGlacierIce(glacier: any): void {}
   public calveGlacierIceberg(glacier: any): any { return this.createIceberg(glacier); }
@@ -303,7 +538,31 @@ export class GeologyClimateSubsystem {
   public updateCryosphereState(region: any): void {}
 
   // 641–660. Ánh sáng, nhiệt và chu kỳ ngày đêm
-  public createSunLight(): any { return { type: 'directional', intensity: this.sunIntensity }; }
+  /**
+   * Nguồn sáng mặt trời.
+   *
+   * Trước đây luôn trả cùng một cấu hình định hướng. Nay cường độ và hướng
+   * ánh sáng phản ánh vị trí mặt trời (có thể ghi đè bằng `state`).
+   */
+  public createSunLight(state?: any): any {
+    const position = state?.position ?? state?.sunPosition;
+    const resolved = position && typeof position === 'object'
+      ? {
+          x: Number(position.x ?? this.sunPosition.x),
+          y: Number(position.y ?? this.sunPosition.y),
+          z: Number(position.z ?? this.sunPosition.z),
+        }
+      : { ...this.sunPosition };
+    const intensity = this.numOf(state, ['intensity', 'sunIntensity'], this.sunIntensity);
+    const length = Math.hypot(resolved.x, resolved.y, resolved.z) || 1;
+    return {
+      type: 'directional',
+      intensity,
+      position: resolved,
+      direction: { x: -resolved.x / length, y: -resolved.y / length, z: -resolved.z / length },
+    };
+  }
+
   public updateSunPosition(time: number): void {
     const angle = (time / 86400) * Math.PI * 2;
     this.sunPosition = { x: Math.sin(angle) * 1000, y: Math.cos(angle) * 1000, z: 0 };
@@ -311,9 +570,23 @@ export class GeologyClimateSubsystem {
   }
 
   public updateSunIntensity(intensity: number): void { this.sunIntensity = intensity; }
-  public calculateSunlightDirection(): Vec3 {
-    const len = Math.hypot(this.sunPosition.x, this.sunPosition.y, this.sunPosition.z) || 1;
-    return { x: -this.sunPosition.x / len, y: -this.sunPosition.y / len, z: -this.sunPosition.z / len };
+  /**
+   * Hướng ánh sáng mặt trời (đơn vị hướng).
+   *
+   * Trước đây không nhận tham số nên chỉ phản ánh vị trí mặt trời nội bộ.
+   * Nay nhận thêm `state` để ghi đè vị trí mặt trời khi cần.
+   */
+  public calculateSunlightDirection(state?: any): Vec3 {
+    const position = state?.position ?? state?.sunPosition;
+    const resolved = position && typeof position === 'object'
+      ? {
+          x: Number(position.x ?? this.sunPosition.x),
+          y: Number(position.y ?? this.sunPosition.y),
+          z: Number(position.z ?? this.sunPosition.z),
+        }
+      : { ...this.sunPosition };
+    const len = Math.hypot(resolved.x, resolved.y, resolved.z) || 1;
+    return { x: -resolved.x / len, y: -resolved.y / len, z: -resolved.z / len };
   }
 
   public updateShadowDirection(): void {
@@ -325,7 +598,18 @@ export class GeologyClimateSubsystem {
     this.shadowLength = Math.max(0.5, 1000 / (Math.abs(this.sunPosition.y) + 1));
   }
 
-  public calculateSurfaceSolarHeating(surface: any): number { return this.sunIntensity * 25.0; }
+  /**
+   * Nhiệt hấp thụ mặt trời của bề mặt.
+   *
+   * Trước đây luôn `sunIntensity * 25`. Nay tính thêm từ diện tích bề mặt và
+   * hệ số phản xạ (albedo) của vật liệu.
+   */
+  public calculateSurfaceSolarHeating(surface: any): number {
+    const area = this.extentOf(surface, 1) * this.extentOf(surface, 1);
+    const albedo = this.numOf(surface, ['albedo', 'reflectance'], 0.2);
+    return this.sunIntensity * 25 * area * (1 - Math.min(1, albedo));
+  }
+
   public heatObjectSurface(object: any, energy: number): void {}
   public coolObjectSurface(object: any, rate: number): void {}
   public simulateThermalExpansion(object: any, temperature: number): void {}
@@ -333,10 +617,34 @@ export class GeologyClimateSubsystem {
   public fadeSunlightAtDusk(): void { this.sunIntensity = 0.2; }
   public restoreSunlightAtDawn(): void { this.sunIntensity = 0.8; }
   public updateNightLighting(): void { this.isNight = true; }
-  public simulateMoonlight(): any { return { intensity: 0.1 }; }
+  /**
+   * Ánh trăng.
+   *
+   * Trước đây luôn `{ intensity: 0.1 }`. Nay cường độ suy ra từ chu kỳ mặt
+   * trăng (0 = trăng mới, 0.5 = trăng tròn) và mức chiếu sáng.
+   */
+  public simulateMoonlight(phase?: any): any {
+    const cycle = this.numOf(phase, ['phase', 'moonPhase'], 0.5);
+    const illumination = Math.max(0, Math.sin(Math.PI * Math.min(1, Math.max(0, cycle))));
+    const intensity = illumination * 0.25;
+    return { intensity, phase: cycle, illumination, isNight: this.isNight };
+  }
+
   public updateCloudShadowMovement(cloud: any): void {}
   public updateVegetationLightExposure(plant: any): void {}
-  public calculateSurfaceReflectance(surface: any): number { return 0.2; }
+  /**
+   * Hệ số phản xạ của bề mặt (0..1).
+   *
+   * Trước đây luôn `0.2`. Nay suy ra từ vật liệu và độ ẩm bề mặt.
+   */
+  public calculateSurfaceReflectance(surface: any): number {
+    const material = String(surface?.material ?? surface?.type ?? 'stone');
+    const albedo = SURFACE_ALBEDO[material] ?? 0.2;
+    const moisture = this.numOf(surface, ['moisture', 'humidity'], 0);
+    // Bề mặt ướt phản xạ thấp hơn bề mặt khô.
+    return Math.max(0, Math.min(1, albedo * (1 - Math.min(0.4, moisture * 0.4))));
+  }
+
   public simulateHeatTransfer(objectA: any, objectB: any): void {}
   public updateEnvironmentalTemperature(region: any): void {}
 }

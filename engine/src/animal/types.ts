@@ -122,6 +122,30 @@ export interface AnimalSensoryState {
   waterCurrentSpeed: number;
   ambientTemperature: number; // Celsius
   ambientHumidity: number;
+  /** Độ nhạy khứu giác (0..1) — quyết định ngưỡng phát hiện mùi. */
+  smellSensitivity: number;
+  /** Tầm phát hiện mùi (m). */
+  smellRange: number;
+  /** Tầm nghe (m). */
+  hearingRange: number;
+  /** Tần số âm thanh cao nhất con vật nghe được (Hz). */
+  maxFrequency: number;
+  /** Tần số âm thanh thấp nhất con vật nghe được (Hz). */
+  minFrequency: number;
+  /** Các mùi quen thuộc đã ghi nhớ. */
+  familiarScents: string[];
+  /** Các mùi kẻ săn mồi đã nhận diện. */
+  knownPredatorScents: string[];
+  /** Mùi bạn đồng loại / bạn tình đã nhận diện. */
+  knownMateScent: string | null;
+  /** Các mốc lãnh thổ đã đánh dấu. */
+  territoryMarkers: string[];
+  /** Ngưỡng phát hiện hoá chất (0..1). */
+  chemicalThreshold: number;
+  /** Cường độ mùi mới nhất. */
+  lastScentIntensity: number;
+  /** Thành phần mùi mới nhất. */
+  lastScentComposition: string;
 }
 
 export interface AnimalPhysiologyState {

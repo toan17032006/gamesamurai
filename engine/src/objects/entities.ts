@@ -8,6 +8,17 @@ import { HealthPool, ManaPool, EnergyPool } from './attributes.js';
 import { Inventory } from './inventory.js';
 import { SkillBar } from './skills.js';
 import { LevelSystem } from './progression.js';
+import { AgentBrain } from '../ai/agent-brain.js';
+import type { AgentBrainSummary } from '../ai/agent-brain.js';
+import type {
+  AgentActionResult,
+  AgentBrainConfig,
+  AgentDecision,
+  AgentLearningResult,
+  AgentObservation,
+  AgentStimulus,
+  AgentUpdateResult,
+} from '../ai/agent-types.js';
 
 export interface Transform3D {
   position: [number, number, number];
@@ -198,11 +209,111 @@ export class NPC<TDialogue = any, TRole extends string = string> extends Entity<
   public isInteractable = true;
   public tradeInventory?: Inventory<any>;
 
-  constructor(id: string, name: string, role: TRole, dialogue?: TDialogue) {
+  /** Each NPC gets a private brain the first time it is used. */
+  private _brain: AgentBrain | null = null;
+  private _lastBrainUpdate: AgentUpdateResult | null = null;
+  private readonly _brainConfig: AgentBrainConfig;
+
+  constructor(
+    id: string,
+    name: string,
+    role: TRole,
+    dialogue?: TDialogue,
+    brainConfig: AgentBrainConfig = {},
+  ) {
     super(id, name, { isTalking: false });
     this.role = role;
     this.dialogueTree = dialogue;
+    this._brainConfig = brainConfig;
     this.addTag('npc');
+  }
+
+  /**
+   * Lazily creates this NPC's own brain. The brain owns all memory, personality,
+   * skills and learning state for this specific object id.
+   */
+  public get brain(): AgentBrain {
+    if (!this._brain) {
+      this._brain = new AgentBrain(
+        {
+          id: this.id,
+          name: this.name,
+          archetype: 'npc',
+          role: this.role,
+        },
+        this._brainConfig,
+      );
+    }
+    return this._brain;
+  }
+
+  public getBrain(): AgentBrain {
+    return this.brain;
+  }
+
+  public peekBrain(): AgentBrain | null {
+    return this._brain;
+  }
+
+  public getBrainSummary(): AgentBrainSummary {
+    return this.brain.getSummary();
+  }
+
+  public peekLastBrainUpdate(): AgentUpdateResult | null {
+    return this._lastBrainUpdate;
+  }
+
+  /** Build a perception frame from this NPC's transform and interaction state. */
+  public buildAgentObservation(): AgentObservation {
+    return {
+      tick: this._brain?.tickCount ?? 0,
+      position: {
+        x: this.transform.position[0],
+        y: this.transform.position[1],
+        z: this.transform.position[2],
+      },
+      environment: {
+        role: this.role,
+        isTalking: this.state.isTalking,
+      },
+    };
+  }
+
+  public think(observation?: AgentObservation): AgentDecision {
+    return this.brain.decide(observation ?? this.buildAgentObservation(), { explore: true });
+  }
+
+  public learnFromReward(reward: number, actionId?: string): AgentLearningResult {
+    const decision = this.brain.getLastDecision();
+    const observation = this.buildAgentObservation();
+    const stateKey = decision?.stateKey ?? this.brain.stateKeyFor(observation);
+    return this.brain.learn({
+      stateKey,
+      actionId: actionId ?? decision?.actionId ?? 'idle',
+      reward,
+      nextStateKey: stateKey,
+      done: false,
+    });
+  }
+
+  public performAgentAction(
+    actionId?: string,
+    difficulty = 0.5,
+    nextObservation?: AgentObservation,
+  ): AgentActionResult {
+    const decision = this.brain.getLastDecision();
+    return this.brain.performAction(
+      actionId ?? decision?.actionId ?? 'idle',
+      difficulty,
+      nextObservation,
+    );
+  }
+
+  public override update(dt: number): void {
+    super.update(dt);
+    if (this._brain) {
+      this._lastBrainUpdate = this._brain.update(this.buildAgentObservation(), dt);
+    }
   }
 
   public setDialogue(dialogue: TDialogue): void {
@@ -249,11 +360,128 @@ export class Bot<TBehavior = any, TBlackboard = Record<string, any>> extends Ent
   public patrolPath: [number, number, number][] = [];
   public currentPatrolIndex = 0;
 
-  constructor(id: string, name: string, maxHealth = 100, initialBlackboard?: TBlackboard) {
+  /** Each bot/monster owns a private brain; nothing is shared between ids. */
+  private _brain: AgentBrain | null = null;
+  private _lastBrainUpdate: AgentUpdateResult | null = null;
+  private readonly _brainConfig: AgentBrainConfig;
+  private readonly _archetype: 'bot' | 'monster';
+
+  constructor(
+    id: string,
+    name: string,
+    maxHealth = 100,
+    initialBlackboard?: TBlackboard,
+    brainConfig: AgentBrainConfig = {},
+    archetype: 'bot' | 'monster' = 'bot',
+  ) {
     super(id, name, { aiState: 'idle' });
     this.health = new HealthPool(maxHealth);
     this.blackboard = (initialBlackboard ?? {}) as TBlackboard;
+    this._brainConfig = brainConfig;
+    this._archetype = archetype;
     this.addTag('bot');
+  }
+
+  /**
+   * Lazily creates this bot's own brain. Its identity, personality, skills,
+   * memory and Q-table are never shared with another Bot instance.
+   */
+  public get brain(): AgentBrain {
+    if (!this._brain) {
+      this._brain = new AgentBrain(
+        {
+          id: this.id,
+          name: this.name,
+          archetype: this._archetype,
+        },
+        this._brainConfig,
+      );
+    }
+    return this._brain;
+  }
+
+  public getBrain(): AgentBrain {
+    return this.brain;
+  }
+
+  public peekBrain(): AgentBrain | null {
+    return this._brain;
+  }
+
+  public getBrainSummary(): AgentBrainSummary {
+    return this.brain.getSummary();
+  }
+
+  public peekLastBrainUpdate(): AgentUpdateResult | null {
+    return this._lastBrainUpdate;
+  }
+
+  /** Translate the legacy target/perception state into an AI observation. */
+  public buildAgentObservation(): AgentObservation {
+    const stimuli: AgentStimulus[] = [];
+    let threatLevel = 0;
+
+    if (this.targetEntity) {
+      const [tx, ty, tz] = this.targetEntity.transform.position;
+      const [x, y, z] = this.transform.position;
+      const distance = Math.hypot(tx - x, ty - y, tz - z);
+      const threat = Math.max(0.15, 1 - distance / Math.max(1, this.perceptionRadius));
+      stimuli.push({
+        id: this.targetEntity.id,
+        kind: 'enemy',
+        position: { x: tx, y: ty, z: tz },
+        distance,
+        threat,
+        tags: ['legacy-target'],
+      });
+      threatLevel = threat;
+    }
+
+    return {
+      tick: this._brain?.tickCount ?? 0,
+      position: {
+        x: this.transform.position[0],
+        y: this.transform.position[1],
+        z: this.transform.position[2],
+      },
+      health: (this.health.current / this.health.max) * 100,
+      threatLevel,
+      stimuli,
+      environment: {
+        legacyState: this.state.aiState,
+        patrolPoints: this.patrolPath.length,
+      },
+    };
+  }
+
+  public think(observation?: AgentObservation): AgentDecision {
+    return this.brain.decide(observation ?? this.buildAgentObservation(), { explore: true });
+  }
+
+  public learnFromReward(reward: number, actionId?: string): AgentLearningResult {
+    const decision = this.brain.getLastDecision();
+    const observation = this.buildAgentObservation();
+    const stateKey = decision?.stateKey ?? this.brain.stateKeyFor(observation);
+    return this.brain.learn({
+      stateKey,
+      actionId: actionId ?? decision?.actionId ?? 'idle',
+      reward,
+      nextStateKey: stateKey,
+      done: false,
+    });
+  }
+
+  public performAgentAction(
+    actionId?: string,
+    difficulty = 0.5,
+    nextObservation?: AgentObservation,
+  ): AgentActionResult {
+    const decision = this.brain.getLastDecision();
+    return this.brain.performAction(
+      actionId ?? decision?.actionId ?? 'idle',
+      difficulty,
+      nextObservation,
+    );
   }
 
   public setTarget(target: Entity | null): void {
@@ -299,6 +527,34 @@ export class Bot<TBehavior = any, TBlackboard = Record<string, any>> extends Ent
         this.state.aiState = this.patrolPath.length > 0 ? 'patrol' : 'idle';
       }
     }
+
+    // The modern brain observes, learns and decides independently from the
+    // legacy aiState machine above; legacy tests and consumers remain intact.
+    if (this._brain) {
+      this._lastBrainUpdate = this._brain.update(this.buildAgentObservation(), dt);
+    }
+  }
+}
+
+/**
+ * Explicit monster agent. A Monster is a Bot whose brain identifies as the
+ * `monster` archetype, giving it a distinct deterministic personality, skill
+ * bias and action preferences. It still exposes the full Bot legacy state
+ * machine and the modern per-agent brain API.
+ */
+export class Monster<
+  TBehavior = any,
+  TBlackboard = Record<string, any>,
+> extends Bot<TBehavior, TBlackboard> {
+  constructor(
+    id: string,
+    name: string,
+    maxHealth = 150,
+    initialBlackboard?: TBlackboard,
+    brainConfig: AgentBrainConfig = {},
+  ) {
+    super(id, name, maxHealth, initialBlackboard, brainConfig, 'monster');
+    this.addTag('monster');
   }
 }
 

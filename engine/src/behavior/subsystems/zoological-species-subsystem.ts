@@ -14,7 +14,13 @@ import type {
   AnimalBehaviorState,
   BehaviorPolicyState
 } from '../types.js';
-import { BehaviorSubsystemBase } from '../behavior-primitives.js';
+import {
+  BehaviorSubsystemBase,
+  deriveActionProfile,
+  findSignal,
+  normalizeSignal,
+  roundSignal,
+} from '../behavior-primitives.js';
 
 export class ZoologicalSpeciesSubsystem extends BehaviorSubsystemBase {
   public isInitialized = false;
@@ -382,7 +388,23 @@ export class ZoologicalSpeciesSubsystem extends BehaviorSubsystemBase {
    * Khởi tạo hành vi chó.
    */
   public initDogBehavior(config?: Record<string, any>): any {
-    return this.applyInitialization('initDogBehavior', config);
+    const result = this.applyInitialization('initDogBehavior', config);
+    // Hồ sơ chó dựng từ cấu hình + trạng thái thật (năng lượng / tốc độ / mức hoạt động).
+    const sources = [config, this.state];
+    const energy = findSignal(sources, ['energy', 'stamina']);
+    const speed = findSignal(sources, ['speed', 'agility']);
+    const activity = findSignal(sources, ['activity', 'activityLevel', 'intensity']);
+    const baseIntensity = typeof result.intensity === 'number' ? result.intensity : 0;
+    return {
+      ...result,
+      canineProfile: {
+        energy: energy ? roundSignal(energy.value) : null,
+        speed: speed ? roundSignal(speed.value) : null,
+        activityLevel: activity
+          ? roundSignal(normalizeSignal(activity.value, activity.key))
+          : roundSignal(baseIntensity),
+      },
+    };
   }
   /**
    * [0742] detectDogExcitement
@@ -473,7 +495,9 @@ export class ZoologicalSpeciesSubsystem extends BehaviorSubsystemBase {
    * Khởi xướng trò chơi.
    */
   public initiateDogPlay(config?: Record<string, any>): any {
-    return this.applyInitialization('initiateDogPlay', config);
+    const result = this.applyInitialization('initiateDogPlay', config);
+    // Thời lượng chơi / mức độ hào hứng / hao năng lượng suy ra từ dữ liệu thật.
+    return { ...result, ...deriveActionProfile([config, this.state], result) };
   }
   /**
    * [0755] inviteDogPlay
@@ -916,7 +940,9 @@ export class ZoologicalSpeciesSubsystem extends BehaviorSubsystemBase {
    * Bắt đầu truy đuổi.
    */
   public initiatePredatoryChase(config?: Record<string, any>): any {
-    return this.applyInitialization('initiatePredatoryChase', config);
+    const result = this.applyInitialization('initiatePredatoryChase', config);
+    // Thời lượng rượt đuổi / mức độ săn mồi / hao năng lượng suy ra từ dữ liệu thật.
+    return { ...result, ...deriveActionProfile([config, this.state], result) };
   }
   /**
    * [0811] adjustChaseSpeed

@@ -112,6 +112,8 @@ export { parseGltf, isGlb } from './gltf-parser';
 export type { GltfParseOptions, GltfParseResult } from './gltf-parser';
 export { parseCollada } from './collada-parser';
 export type { ColladaParseOptions, ColladaParseResult } from './collada-parser';
+export { parseFbx, detectFbxEncoding, fbxMetricsOf } from './fbx-parser';
+export type { FbxParseOptions, FbxParseResult } from './fbx-parser';
 export { parseXml, findChild, findChildren, findDescendant } from './xml-lite';
 export type { XmlNode } from './xml-lite';
 export { encodeBase64, decodeBase64 } from './base64';
@@ -687,3 +689,12 @@ export function formatKind(format: AssetFormat): AssetKind {
 export function formatSpec(format: AssetFormat) {
   return specOf(format);
 }
+
+// ---------------------------------------------------------------------------
+// Unified Multi-Format, PBR Unpacker, Motion & Extension Registry
+// ---------------------------------------------------------------------------
+export * from './extension-registry.js';
+export * from './texture-pbr-unpacker.js';
+export * from './motion-parser.js';
+export * from './multi-format-parser.js';
+

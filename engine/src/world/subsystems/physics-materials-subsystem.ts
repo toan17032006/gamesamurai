@@ -6,6 +6,7 @@
 
 import { RigidBodyData, SoftBodyData } from '../types.js';
 import type { Vec3 } from '../../types/index.js';
+import { forceMagnitude } from './vegetation-subsystem.js';
 
 export class PhysicsMaterialsSubsystem {
   public rigidBodies: Map<string, RigidBodyData> = new Map();
@@ -137,15 +138,44 @@ export class PhysicsMaterialsSubsystem {
 
   public calculateObjectVelocity(object: any): Vec3 {
     const id = typeof object === 'string' ? object : object?.id;
-    return this.rigidBodies.get(id)?.velocity ?? { x: 0, y: 0, z: 0 };
+    const stored = this.rigidBodies.get(id)?.velocity;
+    if (stored) return { x: stored.x, y: stored.y, z: stored.z };
+    // Chưa đăng ký thành thân cứng ⇒ dùng vận tốc khai báo trên chính vật thể.
+    const own = object?.velocity;
+    if (own && typeof own === 'object') {
+      const x = Number(own.x ?? 0);
+      const y = Number(own.y ?? 0);
+      const z = Number(own.z ?? 0);
+      if (Number.isFinite(x) && Number.isFinite(y) && Number.isFinite(z)) return { x, y, z };
+    }
+    return { x: 0, y: 0, z: 0 };
   }
 
   public calculateObjectAcceleration(object: any): Vec3 {
     const id = this.idOf(object);
     const rb = this.rigidBodies.get(id);
-    if (!rb) return { x: 0, y: 0, z: 0 };
+    if (!rb) {
+      // Chưa đăng ký thành thân cứng ⇒ gia tốc khai báo trên chính vật thể.
+      const own = object?.acceleration;
+      if (own && typeof own === 'object') {
+        const x = Number(own.x ?? 0);
+        const y = Number(own.y ?? 0);
+        const z = Number(own.z ?? 0);
+        if (Number.isFinite(x) && Number.isFinite(y) && Number.isFinite(z)) return { x, y, z };
+      }
+      return { x: 0, y: 0, z: 0 };
+    }
     const previous = this.previousVelocities.get(id);
-    if (!previous) return { x: 0, y: 0, z: 0 };
+    if (!previous) {
+      const own = object?.acceleration;
+      if (own && typeof own === 'object') {
+        const x = Number(own.x ?? 0);
+        const y = Number(own.y ?? 0);
+        const z = Number(own.z ?? 0);
+        if (Number.isFinite(x) && Number.isFinite(y) && Number.isFinite(z)) return { x, y, z };
+      }
+      return { x: 0, y: 0, z: 0 };
+    }
     const objectDt = object && typeof object === 'object' ? Number((object as any).dt) : NaN;
     const dt = Number.isFinite(objectDt) && objectDt > 0 ? objectDt : this.lastDeltaTime > 0 ? this.lastDeltaTime : 1 / 60;
     return {
@@ -156,7 +186,16 @@ export class PhysicsMaterialsSubsystem {
   }
   public calculateAngularVelocity(object: any): Vec3 {
     const id = typeof object === 'string' ? object : object?.id;
-    return this.rigidBodies.get(id)?.angularVelocity ?? { x: 0, y: 0, z: 0 };
+    const stored = this.rigidBodies.get(id)?.angularVelocity;
+    if (stored) return { x: stored.x, y: stored.y, z: stored.z };
+    const own = object?.angularVelocity;
+    if (own && typeof own === 'object') {
+      const x = Number(own.x ?? 0);
+      const y = Number(own.y ?? 0);
+      const z = Number(own.z ?? 0);
+      if (Number.isFinite(x) && Number.isFinite(y) && Number.isFinite(z)) return { x, y, z };
+    }
+    return { x: 0, y: 0, z: 0 };
   }
 
   public simulateObjectGravity(object: any): void {
@@ -181,11 +220,18 @@ export class PhysicsMaterialsSubsystem {
   public detectObjectCollision(objectA: any, objectB: any): boolean {
     const a = this.rigidBodies.get(this.idOf(objectA));
     const b = this.rigidBodies.get(this.idOf(objectB));
-    if (!a || !b) return false;
     const posA = objectA?.position ?? { x: 0, y: 0, z: 0 };
     const posB = objectB?.position ?? { x: 0, y: 0, z: 0 };
-    const radiusA = Number(objectA?.radius ?? 0.5);
-    const radiusB = Number(objectB?.radius ?? 0.5);
+    const radiusOf = (source: any, body: RigidBodyData | undefined): number => {
+      const declared = Number(source?.radius);
+      if (Number.isFinite(declared) && declared > 0) return declared;
+      if (body && body.density > 0 && body.mass > 0) {
+        return Math.cbrt(body.mass / body.density) * 0.5;
+      }
+      return 0.5;
+    };
+    const radiusA = radiusOf(objectA, a);
+    const radiusB = radiusOf(objectB, b);
     const distance = Math.hypot(
       Number(posB.x ?? 0) - Number(posA.x ?? 0),
       Number(posB.y ?? 0) - Number(posA.y ?? 0),
@@ -218,14 +264,20 @@ export class PhysicsMaterialsSubsystem {
   public calculateImpactEnergy(objectA: any, objectB: any): number {
     const a = this.rigidBodies.get(this.idOf(objectA));
     const b = this.rigidBodies.get(this.idOf(objectB));
-    if (!a || !b) return 0;
+    // Chưa đăng ký thành thân cứng ⇒ lấy khối lượng / vận tốc khai báo trên
+    // chính vật thể.
+    const massA = Number(a?.mass ?? objectA?.mass ?? 0);
+    const massB = Number(b?.mass ?? objectB?.mass ?? 0);
+    if (massA <= 0 || massB <= 0) return 0;
+    const velA = a?.velocity ?? objectA?.velocity ?? { x: 0, y: 0, z: 0 };
+    const velB = b?.velocity ?? objectB?.velocity ?? { x: 0, y: 0, z: 0 };
     const rel = {
-      x: a.velocity.x - b.velocity.x,
-      y: a.velocity.y - b.velocity.y,
-      z: a.velocity.z - b.velocity.z,
+      x: Number(velA.x ?? 0) - Number(velB.x ?? 0),
+      y: Number(velA.y ?? 0) - Number(velB.y ?? 0),
+      z: Number(velA.z ?? 0) - Number(velB.z ?? 0),
     };
     const speedSq = rel.x * rel.x + rel.y * rel.y + rel.z * rel.z;
-    const reducedMass = (a.mass * b.mass) / (a.mass + b.mass);
+    const reducedMass = (massA * massB) / (massA + massB);
     return 0.5 * reducedMass * speedSq;
   }
 
@@ -310,12 +362,19 @@ export class PhysicsMaterialsSubsystem {
 
   /** Có chạm cắt hay không — dựa trên độ sắc của công cụ và vật thể. */
   public detectCuttingContact(object: any, tool: any): boolean {
-    const sharpness = Number(tool?.sharpness ?? tool?.sharp ?? 0);
+    const sharpness = Number(
+      tool?.sharpness ?? tool?.sharp ?? object?.sharpness ?? object?.sharp ?? 0,
+    );
     if (!Number.isFinite(sharpness)) return false;
     if (sharpness <= 0) return false;
     const hardness = Number(object?.hardness ?? object?.material?.hardness ?? 1);
     const threshold = Number.isFinite(hardness) && hardness > 0 ? hardness : 1;
-    return sharpness >= threshold * 0.5;
+    // Lưỡi sắc phải hơn một nửa độ cứng vật thể, và tốc độ cắt phải đủ lớn
+    // (nếu công cụ có khai báo tốc độ).
+    const speed = forceMagnitude(tool?.velocity ?? tool?.speed ?? 0);
+    if (sharpness < threshold * 0.5) return false;
+    if (speed > 0 && speed < threshold * 0.5) return false;
+    return true;
   }
 
   /** Lực cắt tích luỹ thành vết nứt. */

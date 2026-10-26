@@ -6,16 +6,33 @@ import { StateBlender, BlenderLayer } from './state-blender';
 import { SocketBinder, SocketHandle } from './socket-binder';
 import { SpatialGrid } from '../renderer/culling-optimizer';
 import { createShaderMaterial } from '../effects/shader-compiler';
-import { computeBounds } from '../transformer/bounds-calculator';
 import { zoomAsset } from '../transformer/scaler';
-import { extractGeometry, extractRawBufferData } from '../asset-parser/geometry-extractor';
+import { mergeStatic } from '../transformer/geometry-optimizer';
+import { extractGeometry } from '../asset-parser/geometry-extractor';
 import { parseTextures } from '../asset-parser/texture-parser';
 import { bakeClips } from '../asset-parser/animation-baker';
+import {
+  buildCombinerPhysicsProxy,
+  collectCombinerVertices,
+  combinerQueryAABB,
+  combinerQuerySphere,
+  combinerRaycast,
+  computeCombinerBounds,
+  collisionShapeFromBounds,
+  makeCombineDiagnostics,
+  snapshotToAABB,
+  sweepColliderAgainstAABB,
+  validateCombinerCollisionShape,
+} from './spatial-mapper';
 import type {
   CombineOptions,
   CombineResult,
   CombinatorSpec,
   CombinerGroup,
+  CombinerMetadata,
+  CombinerRayInput,
+  SpatialBoundsKind,
+  SpatialBoundsSnapshot,
   UtilArg,
 } from '../types/combiner.types';
 
@@ -23,7 +40,7 @@ export type { CombineOptions, CombineResult, CombinatorSpec, CombinerGroup, Util
 
 export type MoveFn = (opts?: CombineOptions) => CombineResult;
 export type AttachFn = (rig: THREE.Object3D, asset?: THREE.Object3D, opts?: CombineOptions) => CombineResult;
-export type UtilFn = (root?: THREE.Object3D, arg?: UtilArg) => CombineResult;
+export type UtilFn = (root?: THREE.Object3D, arg?: UtilArg, opts?: CombineOptions) => CombineResult;
 export type EnvFn = (root?: THREE.Object3D, opts?: CombineOptions) => CombineResult;
 
 // ---------------------------------------------------------------------------
@@ -92,6 +109,8 @@ export const GROUP_IV_UTIL = [
   'combineAttachAudioEmitter', 'combineBakeAnimationClips', 'combineMapCustomShaderToMaterial', 'combineBuildSpatialGridNode',
   'combineSerializeEntityState', 'combineDeserializeEntityState', 'combineValidateCollisionShape', 'combineCacheParsedAssetData',
   'combineDisposeUnusedAssets', 'combinePoolEntityInstance', 'combineTriggerParticleEmitter', 'combineExecuteMasterPipeline',
+  'combineGenerateBoundingCapsule', 'combineComputeCenterOfMass', 'combineRaycastAssetBounds', 'combineQueryAssetBounds',
+  'combineSweepAssetCollider', 'combineBuildPhysicsProxy', 'combineValidateSpatialBounds',
 ] as const;
 
 export const GROUP_V_CREATURE = [
@@ -265,21 +284,157 @@ function clipsForName(name: string): { base?: string; overlay?: string } {
   return { base: body.slice(0, idx), overlay: body.slice(idx + 3) };
 }
 
+const PHYSICS_KEYWORDS = /physics|collision|gravity|impact|force|buoyan|fracture|shatter|debris|fall|collapse|sweep|ragdoll|mass|weight|stagger|knockback|pounce|slam|stomp|crash|break|stress|brittle/i;
+const SPATIAL_KEYWORDS = /bound|socket|attach|grip|aim|look|target|track|search|scan|sense|raycast|spatial|grid|distance|reach|range|volume|center|centre|pivot/i;
+
+/**
+ * Derive the spatial/physics/analytics metadata attached to every combiner.
+ *
+ * This is what reconnects the existing animation catalogue to the bounds,
+ * transform and physics systems without changing any public combiner name.
+ */
+function metadataFor(name: string, group: CombinerGroup, kind: CombinatorSpec['kind']): CombinerMetadata {
+  const physicsByKeyword = PHYSICS_KEYWORDS.test(name);
+  const spatialByKeyword = SPATIAL_KEYWORDS.test(name);
+  const usesPhysics = physicsByKeyword || ['destructible', 'earth', 'water', 'structure', 'props'].includes(group);
+  const isEnvironment = kind === 'environment';
+  const usesSpatial = spatialByKeyword || usesPhysics || kind === 'util' || isEnvironment;
+
+  let collider: CombinerMetadata['physics']['collider'] = 'box';
+  if (kind === 'attach') collider = 'none';
+  else if (kind === 'util') collider = 'mesh';
+  else if (['move', 'creature', 'creatureCombat', 'action', 'acro', 'humanoid', 'animalAdvanced'].includes(group)) collider = 'capsule';
+  else if (['foliage', 'atmosphere'].includes(group)) collider = 'sphere';
+
+  const query: CombinerMetadata['bounds']['query'] = /raycast|ray/i.test(name)
+    ? 'ray'
+    : /query|bound|volume|spatial/i.test(name)
+      ? 'aabb'
+      : /look|aim|target|track|search|scan|sense|pounce/i.test(name)
+        ? 'sphere'
+        : /attach|socket|grip/i.test(name)
+          ? 'segment'
+          : 'none';
+
+  const boundsRequired = usesSpatial || group === 'destructible';
+  const loops = ['move', 'creature', 'creatureCombat', 'action', 'acro', 'humanoid', 'animalAdvanced', 'env'].includes(group);
+  const cost: CombinerMetadata['analytics']['cost'] = group === 'destructible' || group === 'structure' || group === 'earth'
+    ? 'high'
+    : kind === 'util' || usesPhysics
+      ? 'medium'
+      : 'low';
+
+  return {
+    category: group,
+    bounds: {
+      required: boundsRequired,
+      volumeKind: collider === 'capsule' ? 'capsule' : collider === 'sphere' ? 'sphere' : 'aabb',
+      query,
+    },
+    physics: {
+      collider,
+      gravity: loops ? 1 : 0,
+      mass: collider === 'capsule' ? 70 : collider === 'none' ? 0 : 20,
+      friction: 0.7,
+      restitution: group === 'water' ? 0.3 : 0.15,
+      dynamic: usesPhysics && collider !== 'none',
+    },
+    transform: {
+      space: kind === 'environment' || kind === 'util' ? 'world' : 'local',
+      affectsRoot: kind === 'environment' || kind === 'util' || group === 'destructible',
+      animated: kind === 'move' || kind === 'blend' || kind === 'environment',
+    },
+    analytics: {
+      cost,
+      mixes: kind === 'blend' ? 2 : clipsForName(name).overlay ? 2 : 1,
+      usesPhysics,
+      usesSpatial,
+      deterministic: !/random|noise|wander|flicker/i.test(name),
+    },
+    tags: [
+      group,
+      kind,
+      usesPhysics ? 'physics' : 'animation',
+      ...(usesSpatial ? ['spatial'] : []),
+      ...(query !== 'none' ? [`query:${query}`] : []),
+    ],
+    custom: { boundsKind: collider === 'capsule' ? 'capsule' : 'aabb' },
+  };
+}
+
+function describeCombiner(name: string): string {
+  return name
+    .replace(/^(combine|blend|attach)/, '')
+    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+    .trim();
+}
+
+function withMetadata(
+  spec: Omit<CombinatorSpec, 'metadata' | 'requiresRoot' | 'priority' | 'tags' | 'description'>,
+): CombinatorSpec {
+  const metadata = metadataFor(spec.name, spec.group, spec.kind);
+  return {
+    ...spec,
+    description: describeCombiner(spec.name),
+    metadata,
+    requiresRoot: spec.kind === 'util' || spec.kind === 'environment',
+    priority: spec.kind === 'attach' ? 10 : spec.kind === 'util' ? 5 : 0,
+    tags: metadata.tags,
+  };
+}
+
 function deriveSpec(name: string, group: CombinerGroup): CombinatorSpec {
   if (isAttachName(name)) {
-    return { name, group: 'attach', kind: 'attach', socket: socketForName(name), mode: 'override', timeScaleKey: 'none' };
+    return withMetadata({
+      name,
+      group: 'attach',
+      kind: 'attach',
+      socket: socketForName(name),
+      mode: 'override',
+      timeScaleKey: 'none',
+    });
   }
   if (UTIL_NAMES.has(name)) {
-    return { name, group: 'util', kind: 'util', mode: 'override', timeScaleKey: 'none' };
+    return withMetadata({
+      name,
+      group: 'util',
+      kind: 'util',
+      mode: 'override',
+      timeScaleKey: 'none',
+    });
   }
   const { base, overlay } = clipsForName(name);
   if (name.startsWith('blend')) {
-    return { name, group: 'blend', kind: 'blend', baseClip: base, overlayClip: overlay, mode: modeForBlendName(name), timeScaleKey: 'none' };
+    return withMetadata({
+      name,
+      group: 'blend',
+      kind: 'blend',
+      baseClip: base,
+      overlayClip: overlay,
+      mode: modeForBlendName(name),
+      timeScaleKey: 'none',
+    });
   }
   if (['destructible', 'foliage', 'structure', 'water', 'atmosphere', 'earth', 'props'].includes(group)) {
-    return { name, group, kind: 'environment', baseClip: base, overlayClip: overlay, mode: 'override', timeScaleKey: 'speed' };
+    return withMetadata({
+      name,
+      group,
+      kind: 'environment',
+      baseClip: base,
+      overlayClip: overlay,
+      mode: 'override',
+      timeScaleKey: 'speed',
+    });
   }
-  return { name, group, kind: 'move', baseClip: base, overlayClip: overlay, mode: 'override', timeScaleKey: 'speed' };
+  return withMetadata({
+    name,
+    group,
+    kind: 'move',
+    baseClip: base,
+    overlayClip: overlay,
+    mode: 'override',
+    timeScaleKey: 'speed',
+  });
 }
 
 export function buildSpecs(): CombinatorSpec[] {
@@ -346,9 +501,9 @@ function makeMoveCombiner(spec: CombinatorSpec, blender: StateBlender): MoveFn {
 
     if (missing.length > 0) {
       warnOnceCombine(`missing:${spec.name}`, `${spec.name}: thiếu clip ${JSON.stringify(missing)} → layer disabled`);
-      return { ok: false, fn: spec.name, layers, info: { missing } };
+      return { ok: false, fn: spec.name, group: spec.group, layers, info: { missing } };
     }
-    return { ok: true, fn: spec.name, layers };
+    return { ok: true, fn: spec.name, group: spec.group, layers };
   };
 }
 
@@ -365,10 +520,10 @@ function makeAttachCombiner(spec: CombinatorSpec, binder: SocketBinder): AttachF
       slotTag: opts.slotTag,
     });
     if (!handle) {
-      return { ok: false, fn: spec.name, socket: null, info: { socket, reason: 'bone_not_found' } };
+      return { ok: false, fn: spec.name, group: spec.group, socket: null, info: { socket, reason: 'bone_not_found' } };
     }
     if (asset) binder.attachAsset(handle, asset);
-    return { ok: true, fn: spec.name, socket: handle };
+    return { ok: true, fn: spec.name, group: spec.group, socket: handle };
   };
 }
 
@@ -386,10 +541,10 @@ function makeBlendCombiner(spec: CombinatorSpec, blender: StateBlender): MoveFn 
     if (!clip) {
       layer.enabled = false;
       warnOnceCombine(`missing:${spec.name}`, `${spec.name}: thiếu clip "${usedName ?? '?'}" → layer disabled`);
-      return { ok: false, fn: spec.name, layers: [layer], info: { missing: usedName ? [usedName] : [] } };
+      return { ok: false, fn: spec.name, group: spec.group, layers: [layer], info: { missing: usedName ? [usedName] : [] } };
     }
     blender.play(layer, clip);
-    return { ok: true, fn: spec.name, layers: [layer], info: { mode: spec.mode } };
+    return { ok: true, fn: spec.name, group: spec.group, layers: [layer], info: { mode: spec.mode } };
   };
 }
 
@@ -399,64 +554,596 @@ function makeEnvCombiner(spec: CombinatorSpec, blender: StateBlender): EnvFn {
     const baseName = spec.baseClip ?? spec.name;
     const baseLayer = blender.layer(`${spec.name}:env`, { mode: 'override', timeScale: speed });
     const baseClip = blender.findClip(baseName);
+    let bounds: SpatialBoundsSnapshot | undefined;
 
     if (root) {
       if (spec.group === 'foliage' && opts.intensity) {
         root.rotation.z = Math.sin(Date.now() * 0.003) * opts.intensity * 0.1;
-      } else if (spec.group === 'destructible') {
-        computeBounds(root);
+      }
+      if (spec.group === 'destructible' || spec.group === 'foliage' || spec.group === 'structure' || spec.group === 'earth') {
+        bounds = computeCombinerBounds(root);
+        root.userData.combinerBounds = boundsSummary(bounds);
       }
     }
 
     if (!baseClip) {
       baseLayer.enabled = false;
-      return { ok: true, fn: spec.name, layers: [baseLayer], info: { envFallback: true, group: spec.group } };
+      return {
+        ok: true,
+        fn: spec.name,
+        group: spec.group,
+        layers: [baseLayer],
+        bounds,
+        info: { envFallback: true, group: spec.group, hasBounds: bounds !== undefined },
+      };
     }
 
     blender.play(baseLayer, baseClip);
-    return { ok: true, fn: spec.name, layers: [baseLayer], info: { group: spec.group } };
+    return { ok: true, fn: spec.name, group: spec.group, layers: [baseLayer], bounds, info: { group: spec.group } };
   };
 }
 
+interface SceneStats {
+  meshes: number;
+  triangles: number;
+  materials: number;
+}
+
+function sceneStats(root: THREE.Object3D): SceneStats {
+  let meshes = 0;
+  let triangles = 0;
+  const materials = new Set<THREE.Material>();
+  root.traverse((child) => {
+    const mesh = child as THREE.Mesh;
+    if (!mesh.isMesh) return;
+    meshes += 1;
+    const geometry = mesh.geometry;
+    const position = geometry.getAttribute('position');
+    if (position) {
+      triangles += geometry.getIndex()
+        ? Math.floor(geometry.getIndex()!.count / 3)
+        : Math.floor(position.count / 3);
+    }
+    if (Array.isArray(mesh.material)) {
+      for (const material of mesh.material) materials.add(material);
+    } else if (mesh.material) {
+      materials.add(mesh.material);
+    }
+  });
+  return { meshes, triangles, materials: materials.size };
+}
+
+function shapeFromArg(arg?: UtilArg): CollisionShape | undefined {
+  if (!arg || typeof arg !== 'object' || arg instanceof THREE.Object3D) return undefined;
+  const candidate = arg as Record<string, unknown>;
+  if (typeof candidate.kind !== 'string') return undefined;
+  return candidate as unknown as CollisionShape;
+}
+
+function rayFromOptions(root: THREE.Object3D, opts: CombineOptions): CombinerRayInput {
+  if (opts.ray) return opts.ray;
+  const bounds = computeCombinerBounds(root);
+  const max = Math.max(1, bounds.aabb.max[2] - bounds.aabb.min[2]);
+  return {
+    origin: [bounds.sphere.center[0], bounds.sphere.center[1], bounds.aabb.max[2] + max],
+    direction: [0, 0, -1],
+    maxDistance: max * 2 + bounds.sphere.radius,
+  };
+}
+
+interface EntitySnapshot {
+  name: string;
+  type: string;
+  position: [number, number, number];
+  rotation: [number, number, number, number];
+  scale: [number, number, number];
+  visible: boolean;
+  userData: Record<string, unknown>;
+  children: EntitySnapshot[];
+}
+
+function snapshotEntity(root: THREE.Object3D): EntitySnapshot {
+  return {
+    name: root.name,
+    type: root.type,
+    position: [root.position.x, root.position.y, root.position.z],
+    rotation: [root.quaternion.x, root.quaternion.y, root.quaternion.z, root.quaternion.w],
+    scale: [root.scale.x, root.scale.y, root.scale.z],
+    visible: root.visible,
+    userData: { ...root.userData },
+    children: root.children.map((child) => snapshotEntity(child)),
+  };
+}
+
+function isEntitySnapshot(value: unknown): value is EntitySnapshot {
+  if (!value || typeof value !== 'object') return false;
+  const candidate = value as Partial<EntitySnapshot>;
+  return typeof candidate.name === 'string'
+    && Array.isArray(candidate.position)
+    && Array.isArray(candidate.rotation)
+    && Array.isArray(candidate.scale);
+}
+
+function applyEntitySnapshot(root: THREE.Object3D, snapshot: EntitySnapshot): number {
+  let applied = 0;
+  root.name = snapshot.name;
+  root.position.set(...snapshot.position);
+  root.quaternion.set(...snapshot.rotation);
+  root.scale.set(...snapshot.scale);
+  root.visible = snapshot.visible;
+  root.userData = { ...root.userData, ...snapshot.userData };
+  applied += 1;
+
+  snapshot.children.forEach((childSnapshot, index) => {
+    const child = root.children[index];
+    if (child) applied += applyEntitySnapshot(child, childSnapshot);
+  });
+  return applied;
+}
+
+const parsedAssetCache = new Map<string, { stats: SceneStats; storedAt: number }>();
+const entityInstancePool = new Map<string, THREE.Object3D[]>();
+
+function boundsSummary(bounds: SpatialBoundsSnapshot): Record<string, unknown> {
+  return {
+    aabb: bounds.aabb,
+    obb: bounds.obb,
+    sphere: bounds.sphere,
+    capsule: bounds.capsule,
+    volume: bounds.volume,
+    surfaceArea: bounds.surfaceArea,
+    centerOfMass: bounds.centerOfMass,
+    vertexCount: bounds.vertexCount,
+    triangleCount: bounds.triangleCount,
+  };
+}
+
+function resolveBoundsMode(arg?: UtilArg, opts?: CombineOptions): SpatialBoundsKind | 'all' {
+  if (opts?.boundsMode) return opts.boundsMode;
+  if (typeof arg === 'string' && ['aabb', 'obb', 'sphere', 'capsule', 'all'].includes(arg)) {
+    return arg as SpatialBoundsKind | 'all';
+  }
+  return 'all';
+}
+
 function makeUtilCombiner(spec: CombinatorSpec): UtilFn {
-  return (root?: THREE.Object3D, arg?: UtilArg): CombineResult => {
+  return (root?: THREE.Object3D, arg?: UtilArg, opts: CombineOptions = {}): CombineResult => {
     const target = root ?? new THREE.Object3D();
+
     switch (spec.name) {
       case 'combineZoomAssetScale': {
         const factor = typeof arg === 'number' ? arg : 1.2;
         const res = zoomAsset(target, { factor });
-        return { ok: true, fn: spec.name, info: { factor: res } };
+        return { ok: true, fn: spec.name, group: spec.group, info: { factor: res } };
       }
       case 'combineExtractMeshBuffers': {
         const geo = extractGeometry(target);
-        return { ok: geo !== null, fn: spec.name, info: { hasGeometry: geo !== null } };
+        return { ok: geo !== null, fn: spec.name, group: spec.group, info: { hasGeometry: geo !== null } };
       }
       case 'combineExtractTextureMaps': {
         const textures = parseTextures(target);
-        return { ok: true, fn: spec.name, info: { count: textures.length, textures } };
+        return { ok: true, fn: spec.name, group: spec.group, info: { count: textures.length, textures } };
       }
-      case 'combineGenerateBoundingBox':
+      case 'combineGenerateBoundingBox': {
+        const bounds = computeCombinerBounds(target);
+        return {
+          ok: true,
+          fn: spec.name,
+          group: spec.group,
+          bounds,
+          info: {
+            mode: resolveBoundsMode(arg, opts),
+            aabb: bounds.aabb,
+            dimensions: [
+              bounds.aabb.max[0] - bounds.aabb.min[0],
+              bounds.aabb.max[1] - bounds.aabb.min[1],
+              bounds.aabb.max[2] - bounds.aabb.min[2],
+            ],
+            source: 'SpatialMath/AABB',
+          },
+        };
+      }
       case 'combineGenerateBoundingSphere': {
-        const b = computeBounds(target);
-        return { ok: true, fn: spec.name, info: { bounds: b } };
+        const bounds = computeCombinerBounds(target);
+        return {
+          ok: true,
+          fn: spec.name,
+          group: spec.group,
+          bounds,
+          info: { sphere: bounds.sphere, mode: resolveBoundsMode(arg, opts), source: 'SpatialMath/Sphere' },
+        };
+      }
+      case 'combineGenerateBoundingCapsule': {
+        const bounds = computeCombinerBounds(target);
+        return {
+          ok: bounds.capsule !== null,
+          fn: spec.name,
+          group: spec.group,
+          bounds,
+          info: { capsule: bounds.capsule, source: 'SpatialMath/Capsule' },
+        };
+      }
+      case 'combineComputeCenterOfMass': {
+        const bounds = computeCombinerBounds(target);
+        return {
+          ok: true,
+          fn: spec.name,
+          group: spec.group,
+          bounds,
+          info: { centerOfMass: bounds.centerOfMass, volume: bounds.volume },
+        };
+      }
+      case 'combineOptimizeDrawCalls': {
+        const before = sceneStats(target);
+        const merged = mergeStatic(target, { computeNormals: true });
+        merged.name = target.name ? `${target.name}_combined` : 'combined_asset';
+        const after = sceneStats(merged);
+        return {
+          ok: after.meshes <= before.meshes,
+          fn: spec.name,
+          group: spec.group,
+          info: {
+            before,
+            after,
+            mergedRoot: merged,
+            drawCallsSaved: Math.max(0, before.meshes - after.meshes),
+          },
+        };
+      }
+      case 'combineSetupLevelOfDetail': {
+        const stats = sceneStats(target);
+        const distances = [0, 15, 30, 60];
+        const ratios = [1, 0.5, 0.25, 0.1];
+        const levels = distances.map((distance, index) => ({
+          level: index,
+          distance,
+          ratio: ratios[index],
+          targetTriangles: Math.max(1, Math.round(stats.triangles * ratios[index])),
+        }));
+        return {
+          ok: stats.triangles > 0,
+          fn: spec.name,
+          group: spec.group,
+          info: { levels, originalTriangles: stats.triangles },
+        };
+      }
+      case 'combineAttachLightToSocket': {
+        const boneName = typeof arg === 'string' ? arg : 'head';
+        const socket = target.getObjectByName(boneName) ?? target;
+        const light = new THREE.PointLight(0xfff1d6, 1, 10, 2);
+        light.name = `combiner_light_${boneName}`;
+        light.userData.combiner = spec.name;
+        socket.add(light);
+        return {
+          ok: true,
+          fn: spec.name,
+          group: spec.group,
+          info: { bone: socket.name || boneName, attached: true, lightName: light.name },
+        };
+      }
+      case 'combineAttachAudioEmitter': {
+        const emitter = new THREE.Object3D();
+        emitter.name = typeof arg === 'string' ? `audio_${arg}` : 'combiner_audio_emitter';
+        emitter.userData = { combiner: spec.name, config: opts.data ?? arg ?? null };
+        target.add(emitter);
+        return {
+          ok: true,
+          fn: spec.name,
+          group: spec.group,
+          info: { emitter: emitter.name, attached: true },
+        };
+      }
+      case 'combineBakeAnimationClips': {
+        const clips = target.animations ?? [];
+        const baked = bakeClips(clips);
+        return {
+          ok: clips.length > 0,
+          fn: spec.name,
+          group: spec.group,
+          info: {
+            sourceCount: clips.length,
+            bakedCount: baked.length,
+            clips: baked.map((clip) => ({ name: clip.name, duration: clip.duration, tracks: clip.tracks.length })),
+          },
+        };
+      }
+      case 'combineMapCustomShaderToMaterial': {
+        const vertexShader = [
+          'void main() {',
+          '  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);',
+          '}',
+        ].join('\n');
+        const fragmentShader = [
+          'uniform vec3 tint;',
+          'void main() {',
+          '  gl_FragColor = vec4(tint, 1.0);',
+          '}',
+        ].join('\n');
+        const shader = createShaderMaterial(vertexShader, fragmentShader, {
+          tint: { value: new THREE.Color(0.85, 0.88, 0.95) },
+        }, { name: 'combiner_custom_shader' });
+        let count = 0;
+        target.traverse((child) => {
+          const mesh = child as THREE.Mesh;
+          if (!mesh.isMesh) return;
+          mesh.material = shader;
+          count += 1;
+        });
+        return {
+          ok: count > 0,
+          fn: spec.name,
+          group: spec.group,
+          info: { applied: count, material: shader.name },
+        };
       }
       case 'combineBuildSpatialGridNode': {
         const grid = new SpatialGrid(32);
         grid.insert('node', target.position, 1);
-        return { ok: true, fn: spec.name, info: { cell: grid.query(target.position, 1).length } };
+        grid.insert('neighbor', new THREE.Vector3(target.position.x + 1, target.position.y, target.position.z), 1);
+        const cell = grid.query(target.position, 1);
+        return {
+          ok: cell.length > 0,
+          fn: spec.name,
+          group: spec.group,
+          info: { cell: cell.length, ids: cell, cellSize: 32 },
+        };
+      }
+      case 'combineSerializeEntityState': {
+        const state = snapshotEntity(target);
+        return {
+          ok: true,
+          fn: spec.name,
+          group: spec.group,
+          info: { state, nodes: state.children.length + 1, json: JSON.stringify(state) },
+        };
+      }
+      case 'combineDeserializeEntityState': {
+        let raw: unknown = arg;
+        if (typeof arg === 'string') {
+          try {
+            raw = JSON.parse(arg) as unknown;
+          } catch (error) {
+            return {
+              ok: false,
+              fn: spec.name,
+              group: spec.group,
+              info: { error: error instanceof Error ? error.message : String(error) },
+            };
+          }
+        }
+        if (!isEntitySnapshot(raw)) {
+          return { ok: false, fn: spec.name, group: spec.group, info: { error: 'invalid_entity_snapshot' } };
+        }
+        const applied = applyEntitySnapshot(target, raw);
+        return { ok: true, fn: spec.name, group: spec.group, info: { applied } };
       }
       case 'combineValidateCollisionShape': {
-        const shape = arg as CollisionShape | undefined;
-        const valid = !!shape && typeof shape.kind === 'string';
-        return { ok: valid, fn: spec.name, info: { shape } };
+        const shape = opts.collisionShape ?? shapeFromArg(arg);
+        const validation = validateCombinerCollisionShape(shape);
+        return {
+          ok: validation.valid,
+          fn: spec.name,
+          group: spec.group,
+          info: {
+            kind: validation.kind,
+            errors: validation.errors,
+            warnings: validation.warnings,
+            shape: shape ?? null,
+          },
+        };
       }
-      case 'combineTriggerParticleEmitter':
-        return { ok: true, fn: spec.name, info: { triggered: true, config: arg } };
+      case 'combineCacheParsedAssetData': {
+        const key = typeof arg === 'string' ? arg : target.name || target.uuid;
+        const entry = { stats: sceneStats(target), storedAt: Date.now() };
+        parsedAssetCache.set(key, entry);
+        return {
+          ok: true,
+          fn: spec.name,
+          group: spec.group,
+          info: { key, cached: true, cacheSize: parsedAssetCache.size, stats: entry.stats },
+        };
+      }
+      case 'combineDisposeUnusedAssets': {
+        const geometries = new Set<THREE.BufferGeometry>();
+        const materials = new Set<THREE.Material>();
+        target.traverse((child) => {
+          const mesh = child as THREE.Mesh;
+          if (!mesh.isMesh) return;
+          if (mesh.geometry) geometries.add(mesh.geometry);
+          if (Array.isArray(mesh.material)) {
+            for (const material of mesh.material) materials.add(material);
+          } else if (mesh.material) {
+            materials.add(mesh.material);
+          }
+        });
+        for (const geometry of geometries) geometry.dispose();
+        for (const material of materials) material.dispose();
+        return {
+          ok: true,
+          fn: spec.name,
+          group: spec.group,
+          info: { geometries: geometries.size, materials: materials.size, disposed: true },
+        };
+      }
+      case 'combinePoolEntityInstance': {
+        const key = typeof arg === 'string' ? arg : target.name || 'default';
+        const pool = entityInstancePool.get(key) ?? [];
+        pool.push(target.clone(true));
+        entityInstancePool.set(key, pool);
+        return {
+          ok: true,
+          fn: spec.name,
+          group: spec.group,
+          info: { key, pooled: pool.length, pools: entityInstancePool.size },
+        };
+      }
+      case 'combineTriggerParticleEmitter': {
+        const particleEvent = { type: 'combiner:particle' } as unknown as Parameters<THREE.Object3D['dispatchEvent']>[0];
+        target.dispatchEvent(particleEvent);
+        return {
+          ok: true,
+          fn: spec.name,
+          group: spec.group,
+          info: { triggered: true, config: opts.data ?? arg ?? null, event: 'combiner:particle' },
+        };
+      }
+      case 'combineRaycastAssetBounds': {
+        const ray = rayFromOptions(target, opts);
+        const bounds = computeCombinerBounds(target);
+        const hit = combinerRaycast(target, ray);
+        return {
+          ok: true,
+          fn: spec.name,
+          group: spec.group,
+          bounds,
+          info: {
+            ray,
+            hit,
+            source: 'SpatialMath/TriangleBVH',
+          },
+        };
+      }
+      case 'combineQueryAssetBounds': {
+        const bounds = computeCombinerBounds(target);
+        const query = opts.queryBounds ?? {
+          min: bounds.aabb.min,
+          max: bounds.aabb.max,
+        };
+        const hits = combinerQueryAABB(target, query);
+        return {
+          ok: true,
+          fn: spec.name,
+          group: spec.group,
+          bounds,
+          info: { query, hits, count: hits.length, source: 'SpatialMath/AABB-query' },
+        };
+      }
+      case 'combineSweepAssetCollider': {
+        const bounds = computeCombinerBounds(target);
+        const vertices = collectCombinerVertices(target);
+        const shape = opts.collisionShape
+          ?? collisionShapeFromBounds(bounds, 'box', vertices)
+          ?? { kind: 'sphere' as const, radius: Math.max(1e-4, bounds.sphere.radius) };
+        const position = opts.shapePosition ?? bounds.centerOfMass;
+        const displacement = opts.displacement ?? [0, -1, 0] as const;
+        const targetBounds = opts.queryBounds
+          ?? { min: bounds.aabb.min, max: bounds.aabb.max };
+        const hit = sweepColliderAgainstAABB(
+          shape,
+          { x: position[0], y: position[1], z: position[2] },
+          { x: displacement[0], y: displacement[1], z: displacement[2] },
+          snapshotToAABB({ ...bounds, aabb: { min: targetBounds.min, max: targetBounds.max } }),
+        );
+        return {
+          ok: true,
+          fn: spec.name,
+          group: spec.group,
+          bounds,
+          info: {
+            shape: shape.kind,
+            hit: {
+              hit: hit.hit,
+              timeOfImpact: hit.timeOfImpact,
+              distance: hit.distance,
+              point: [hit.point.x, hit.point.y, hit.point.z],
+              normal: [hit.normal.x, hit.normal.y, hit.normal.z],
+            },
+            source: 'SpatialMath/sweep',
+          },
+        };
+      }
+      case 'combineBuildPhysicsProxy': {
+        const bounds = computeCombinerBounds(target);
+        const vertices = collectCombinerVertices(target);
+        const proxy = buildCombinerPhysicsProxy(bounds, {
+          kind: opts.collisionShape?.kind === 'capsule'
+            ? 'capsule'
+            : opts.collisionShape?.kind === 'sphere'
+              ? 'sphere'
+              : 'box',
+          mass: opts.mass,
+          gravityScale: opts.gravity,
+          friction: opts.data && typeof opts.data === 'object' && 'friction' in opts.data
+            ? Number(opts.data.friction)
+            : undefined,
+          vertices,
+        });
+        return {
+          ok: proxy !== null,
+          fn: spec.name,
+          group: spec.group,
+          bounds,
+          physics: proxy ?? undefined,
+          info: { proxy, source: 'SpatialMath/physics-proxy' },
+        };
+      }
+      case 'combineValidateSpatialBounds': {
+        const bounds = computeCombinerBounds(target);
+        const values = [
+          ...bounds.aabb.min,
+          ...bounds.aabb.max,
+          ...bounds.obb.center,
+          ...bounds.obb.halfExtents,
+          ...bounds.obb.orientation,
+          ...bounds.sphere.center,
+          bounds.sphere.radius,
+          ...bounds.centerOfMass,
+        ];
+        const finite = values.every((value) => Number.isFinite(value));
+        const ordered = bounds.aabb.min[0] <= bounds.aabb.max[0]
+          && bounds.aabb.min[1] <= bounds.aabb.max[1]
+          && bounds.aabb.min[2] <= bounds.aabb.max[2];
+        const positive = bounds.sphere.radius > 0 || bounds.vertexCount === 0;
+        return {
+          ok: finite && ordered && positive,
+          fn: spec.name,
+          group: spec.group,
+          bounds,
+          info: {
+            finite,
+            ordered,
+            positive,
+            vertexCount: bounds.vertexCount,
+            volume: bounds.volume,
+          },
+        };
+      }
       case 'combineExecuteMasterPipeline':
-      case 'combineMasterPipelineExecution':
-        return { ok: true, fn: spec.name, info: { pipeline: 'master_completed' } };
+      case 'combineMasterPipelineExecution': {
+        const startedAt = typeof performance !== 'undefined' ? performance.now() : Date.now();
+        const bounds = computeCombinerBounds(target);
+        const vertices = collectCombinerVertices(target);
+        const proxy = buildCombinerPhysicsProxy(bounds, { kind: 'box', vertices });
+        const validation = proxy ? validateCombinerCollisionShape(proxy.shape) : null;
+        const stats = sceneStats(target);
+        target.userData.combinerPipeline = {
+          bounds: boundsSummary(bounds),
+          stats,
+          physics: proxy,
+          valid: validation?.valid ?? false,
+        };
+        return {
+          ok: validation?.valid ?? false,
+          fn: spec.name,
+          group: spec.group,
+          bounds,
+          physics: proxy ?? undefined,
+          info: {
+            pipeline: 'master_completed',
+            stats,
+            collision: validation,
+            bounds: boundsSummary(bounds),
+          },
+          diagnostics: makeCombineDiagnostics(startedAt),
+        };
+      }
       default:
-        return { ok: true, fn: spec.name, info: { executed: true, arg } };
+        return {
+          ok: false,
+          fn: spec.name,
+          group: spec.group,
+          info: { unsupported: true, name: spec.name, arg: arg ?? null },
+        };
     }
   };
 }

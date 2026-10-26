@@ -1,9 +1,13 @@
 // engine/src/types/index.ts — Barrel export toàn bộ định nghĩa kiểu dữ liệu engine
-export * from './asset.types';
-export * from './transform.types';
-export * from './physics.types';
-export * from './effects.types';
-export * from './renderer.types';
-export * from './combiner.types';
-export * from './environment.types';
-export * from './engine.types';
+export * from './asset.types.js';
+export * from './transform.types.js';
+export * from './physics.types.js';
+export * from './effects.types.js';
+export * from './renderer.types.js';
+export * from './combiner.types.js';
+export * from './environment.types.js';
+export * from './engine.types.js';
+export * from './geometry.types.js';
+export * from './format.types.js';
+export * from './spatial.types.js';
+

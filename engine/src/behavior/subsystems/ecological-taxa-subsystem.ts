@@ -14,7 +14,7 @@ import type {
   AnimalBehaviorState,
   BehaviorPolicyState
 } from '../types.js';
-import { BehaviorSubsystemBase } from '../behavior-primitives.js';
+import { BehaviorSubsystemBase, deriveActionProfile } from '../behavior-primitives.js';
 
 export class EcologicalTaxaSubsystem extends BehaviorSubsystemBase {
   public isInitialized = false;
@@ -481,7 +481,9 @@ export class EcologicalTaxaSubsystem extends BehaviorSubsystemBase {
    * Khởi tạo di chuyển theo bầy.
    */
   public initiateSwarmMovement(config?: Record<string, any>): any {
-    return this.applyInitialization('initiateSwarmMovement', config);
+    const result = this.applyInitialization('initiateSwarmMovement', config);
+    // Thời lượng di chuyển / động lực / hao năng lượng suy ra từ cấu hình + trạng thái thật.
+    return { ...result, ...deriveActionProfile([config, this.state], result) };
   }
   /**
    * [0958] followSwarmDirection
@@ -987,7 +989,9 @@ export class EcologicalTaxaSubsystem extends BehaviorSubsystemBase {
    * Khởi động phản ứng bỏ chạy của đàn.
    */
   public initiateHerdFlight(config?: Record<string, any>): any {
-    return this.applyInitialization('initiateHerdFlight', config);
+    const result = this.applyInitialization('initiateHerdFlight', config);
+    // Thời lượng bỏ chạy / mức độ hoảng loạn / hao năng lượng suy ra từ dữ liệu thật.
+    return { ...result, ...deriveActionProfile([config, this.state], result) };
   }
   /**
    * [1028] synchronizeHerdRunning

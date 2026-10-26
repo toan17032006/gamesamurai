@@ -37,6 +37,32 @@ const IGNITION_SOURCES: Record<string, { temperature: number; intensity: number;
 /** Đặc trưng mặc định của một ngọn lửa. */
 const DEFAULT_FIRE_PROFILE = { temperature: 650, intensity: 1.0, spreadRate: 0.2 };
 
+/** Độ dễ cháy của vật liệu (0..1). */
+const FLAMMABILITY: Record<string, number> = Object.freeze({
+  wood: 0.8,
+  grass: 0.9,
+  cloth: 0.7,
+  paper: 0.85,
+  oil: 0.95,
+  stone: 0.02,
+  metal: 0.05,
+  glass: 0.01,
+  soil: 0.1,
+});
+
+/** Sức chịu lửa của vật liệu (0..1) — 1 là không cháy. */
+const FIRE_RESISTANCE: Record<string, number> = Object.freeze({
+  wood: 0.3,
+  grass: 0.15,
+  cloth: 0.2,
+  paper: 0.1,
+  oil: 0.05,
+  stone: 0.95,
+  metal: 0.9,
+  glass: 0.8,
+  soil: 0.9,
+});
+
 export class WeatherAtmosphereSubsystem {
   public wind: WindState = {
     direction: { x: 1, y: 0, z: 0 },
@@ -60,22 +86,128 @@ export class WeatherAtmosphereSubsystem {
   public lightningBolts: LightningBolt[] = [];
   public clouds: Map<string, any> = new Map();
 
+  // -------------------------------------------------------------------------
+  // Helper đọc dữ liệu thật — thay cho giá trị đóng cứng
+  // -------------------------------------------------------------------------
+
+  /** Đọc số từ nhiều khoá, có giá trị thay thế khi dữ liệu thiếu. */
+  private numOf(source: any, keys: string[], fallback: number): number {
+    if (source && typeof source === 'object') {
+      for (const key of keys) {
+        const value = (source as Record<string, unknown>)[key];
+        if (typeof value === 'number' && Number.isFinite(value)) return value;
+      }
+    }
+    return fallback;
+  }
+
+  /** Vị trí thế giới của đối tượng. */
+  private positionOf(source: any): Vec3 {
+    const p = source?.position ?? source?.origin ?? source?.center;
+    if (p && typeof p === 'object') {
+      const x = Number(p.x ?? 0);
+      const y = Number(p.y ?? 0);
+      const z = Number(p.z ?? 0);
+      if (Number.isFinite(x) && Number.isFinite(y) && Number.isFinite(z)) return { x, y, z };
+    }
+    return { x: 0, y: 0, z: 0 };
+  }
+
+  /** Kích thước đặc trưng (bán kính / cạnh lớn nhất) của đối tượng. */
+  private extentOf(source: any, fallback = 1): number {
+    const size = source?.size ?? source?.radius ?? source?.scale;
+    if (typeof size === 'number' && Number.isFinite(size) && size > 0) return size;
+    if (size && typeof size === 'object') {
+      const values = [size.x, size.y, size.z, size.max, size.width, size.height]
+        .map((v) => Number(v))
+        .filter((v) => Number.isFinite(v) && v > 0)
+        .sort((a, b) => b - a);
+      if (values.length > 0) return values[0];
+    }
+    return fallback;
+  }
+
   // 301–320. Mưa, tuyết, băng và mưa đá
-  public createRainSystem(): any { return { active: true, dropCount: 5000 }; }
+  /**
+   * Hệ mưa.
+   *
+   * Trước đây luôn `{ active: true, dropCount: 5000 }`. Nay số giọt mưa tính từ
+   * diện tích và cường độ mưa (tham số `config` hoặc trạng thái thời tiết).
+   */
+  public createRainSystem(config?: any): any {
+    const area = this.numOf(config, ['area', 'size', 'surfaceArea'], 100);
+    const intensity = this.numOf(
+      config,
+      ['intensity', 'rainIntensity'],
+      this.weather.rainIntensity > 0 ? this.weather.rainIntensity : 0.5,
+    );
+    const dropCount = Math.max(0, Math.round(area * 50 * intensity));
+    return {
+      active: dropCount > 0,
+      dropCount,
+      intensity,
+      area,
+      fallSpeed: 8 + intensity * 4,
+    };
+  }
+
   public spawnRaindrops(area: any): void {}
   public updateRaindropMotion(drop: any, deltaTime: number): void {}
   public applyWindToRaindrops(drops: any, wind: any): void {}
   public createRainSplash(position: Vec3): void {}
   public accumulateRainwater(surface: any, amount: number): void {}
-  public createSnowfallSystem(): any { return { active: true, flakeCount: 2000 }; }
+  /**
+   * Hệ tuyết rơi.
+   *
+   * Trước đây luôn `{ active: true, flakeCount: 2000 }`. Nay số bông tuyết và
+   * tốc độ rơi tính từ cường độ tuyết và nhiệt độ.
+   */
+  public createSnowfallSystem(config?: any): any {
+    const area = this.numOf(config, ['area', 'size', 'surfaceArea'], 100);
+    const intensity = this.numOf(
+      config,
+      ['intensity', 'snowIntensity'],
+      Math.max(this.weather.snowIntensity, 0),
+    );
+    const temperature = this.numOf(config, ['temperature'], this.weather.temperature);
+    const flakeCount = Math.max(0, Math.round(area * 20 * intensity));
+    return {
+      active: flakeCount > 0,
+      flakeCount,
+      intensity,
+      area,
+      temperature,
+      fallSpeed: Math.max(0.2, 1.2 - temperature * 0.05),
+    };
+  }
+
   public spawnSnowflakes(area: any): void {}
   public updateSnowflakeMotion(flake: any, deltaTime: number): void {}
   public accumulateSnow(surface: any, amount: number): void {}
   public compactSnow(snow: any, force: any): void {}
   public meltSnow(snow: any, temperature: number): void {}
-  public createIcicle(surface: any): any { return { length: 0.3 }; }
+  /**
+   * Băng đầu (icicle) mọc trên bề mặt.
+   *
+   * Trước đây luôn `{ length: 0.3 }`. Nay chiều dài tính từ kích thước bề mặt
+   * và nhiệt độ (càng lạnh càng dài).
+   */
+  public createIcicle(surface: any): any {
+    const extent = this.extentOf(surface, 0.5);
+    const temperature = this.numOf(surface, ['temperature'], this.weather.temperature);
+    const cold = Math.max(0, Math.min(1, (0 - temperature) / 20));
+    const length = extent * (0.2 + cold * 0.8);
+    const origin = this.positionOf(surface);
+    return {
+      length,
+      temperature,
+      position: { x: origin.x, y: origin.y - length, z: origin.z },
+      mass: length * 0.002,
+    };
+  }
+
   public growIcicle(icicle: any, temperature: number): void {
-    if (icicle && temperature < 0) icicle.length += 0.05;
+    if (icicle && temperature < 0) icicle.length += Math.max(0.25, Math.abs(temperature) * 0.05);
   }
   public breakIcicle(icicle: any, force: any): void {}
   public freezeWetSurface(surface: any, temperature: number): void {}
@@ -85,7 +217,33 @@ export class WeatherAtmosphereSubsystem {
   public simulateHailImpact(hailstone: any, surface: any): void {}
 
   // 321–340. Gió, áp suất và khí quyển
-  public createWindField(): any { return { ...this.wind }; }
+  /**
+   * Trường gió.
+   *
+   * Trước đây luôn trả bản sao của trạng thái gió nội bộ ⇒ không phản ánh
+   * yêu cầu của người gọi. Nay các ghi đè trong `overrides` được áp dụng lên
+   * trạng thái gió.
+   */
+  public createWindField(overrides?: any): any {
+    const base = {
+      direction: { ...this.wind.direction },
+      speed: this.wind.speed,
+      gustiness: this.wind.gustiness,
+      pressure: this.wind.pressure,
+    };
+    if (!overrides || typeof overrides !== 'object') return base;
+    const speed = this.numOf(overrides, ['speed', 'windSpeed'], base.speed);
+    const gustiness = this.numOf(overrides, ['gustiness'], base.gustiness);
+    const pressure = this.numOf(overrides, ['pressure', 'airPressure'], base.pressure);
+    const direction = overrides.direction ?? overrides.windDirection;
+    return {
+      direction: direction && typeof direction === 'object' ? { ...direction } : base.direction,
+      speed: Math.max(0, speed),
+      gustiness: Math.max(0, gustiness),
+      pressure,
+    };
+  }
+
   public updateWindField(field: any, deltaTime: number): void {}
   public setWindDirection(direction: Vec3): void { this.wind.direction = { ...direction }; }
   public setWindSpeed(speed: number): void { this.wind.speed = Math.max(0, speed); }
@@ -103,7 +261,22 @@ export class WeatherAtmosphereSubsystem {
   public applyWindToFlags(flags: any, wind: any): void {}
   public applyWindToStructures(structures: any, wind: any): void {}
   public calculateWindLoad(structure: any, wind: any): number { return (wind?.speed ?? this.wind.speed) * 10; }
-  public detectWindDamage(object: any, wind: any): boolean { return (wind?.speed ?? this.wind.speed) > 25; }
+  /**
+   * Vật thể có bị gió làm hư hại không.
+   *
+   * Trước đây chỉ so tốc độ gió với ngưỡng cứng. Nay tải gió (tốc độ × diện
+   * tích chắn gió) được so với sức chịu gió của chính vật thể.
+   */
+  public detectWindDamage(object: any, wind: any): boolean {
+    const speed = this.numOf(wind, ['speed', 'windSpeed'], this.wind.speed);
+    const extent = this.extentOf(object, 1);
+    const resistance = this.numOf(object, ['windResistance'], 0.5);
+    // Sức chịu gió quy về lực tương đương (đơn vị tham chiếu 100).
+    const resistanceForce = resistance * 100;
+    const load = speed * extent * extent;
+    return load > resistanceForce;
+  }
+
   public updateAtmosphericPressure(field: any): void {}
 
   // 341–360. Mây, sương mù và các hiện tượng bầu trời
@@ -128,7 +301,35 @@ export class WeatherAtmosphereSubsystem {
   public simulateGroundFog(area: any): void {}
   public simulateMistOverWater(water: any): void {}
   public simulateAtmosphericHaze(atmosphere: any): void {}
-  public createRainbow(atmosphere: any): any { return { visible: true }; }
+  /**
+   * Cầu vồng.
+   *
+   * Trước đây luôn `{ visible: true }`. Nay mức độ hiện và cường độ cầu vồng
+   * phụ thuộc vị trí mặt trời, lượng mưa và độ ẩm.
+   */
+  public createRainbow(atmosphere: any): any {
+    const sunElevation = this.numOf(atmosphere, ['sunElevation', 'elevation'], 45);
+    const rain = this.numOf(
+      atmosphere,
+      ['rain', 'rainIntensity', 'precipitation'],
+      this.weather.rainIntensity > 0 ? this.weather.rainIntensity : 0.4,
+    );
+    const humidity = this.numOf(
+      atmosphere,
+      ['humidity'],
+      this.weather.humidity > 20 ? this.weather.humidity / 100 : 0.6,
+    );
+    const angle = 42 - sunElevation * 0.5;
+    const visible = rain > 0.05 && humidity > 0.2 && sunElevation > 0;
+    return {
+      visible,
+      angle,
+      radius: 42,
+      intensity: visible ? Math.min(1, rain * 0.2) * Math.min(1, humidity * 2) : 0,
+      arc: 180,
+    };
+  }
+
   public updateRainbowVisibility(rainbow: any): void {}
   public simulateHeatShimmer(area: any): void {}
   public updateSkyAtmosphere(atmosphere: any): void {}
@@ -195,7 +396,25 @@ export class WeatherAtmosphereSubsystem {
   public branchLightningBolt(bolt: LightningBolt): void {}
   public illuminateSceneWithLightning(bolt: LightningBolt): void {}
   public createLightningFlash(position: Vec3): void {}
-  public calculateLightningStrikeTarget(storm: any): Vec3 { return { x: 0, y: 0, z: 0 }; }
+  /**
+   * Điểm tia sét đánh xuống.
+   *
+   * Trước đây luôn `{ x: 0, y: 0, z: 0 }`. Nay điểm đánh nằm trong vùng bão,
+   * lệch theo năng lượng bão (tất định — không dùng `Math.random`).
+   */
+  public calculateLightningStrikeTarget(storm: any): Vec3 {
+    const center = this.positionOf(storm);
+    const energy = this.numOf(storm, ['energy', 'intensity'], DEFAULT_STORM_ENERGY);
+    const radius = this.numOf(storm, ['radius'], DEFAULT_STORM_RADIUS);
+    const offset = (energy % 1) * radius * 0.5;
+    const angle = energy * 2.399963229728653;
+    return {
+      x: center.x + Math.cos(angle) * offset,
+      y: center.y,
+      z: center.z + Math.sin(angle) * offset,
+    };
+  }
+
   public strikeLightningTarget(target: any): void {}
   public applyLightningDamage(target: any): void {}
   public createThunderSound(bolt: LightningBolt): void {}
@@ -204,7 +423,25 @@ export class WeatherAtmosphereSubsystem {
   public generateStormRain(storm: any): void {}
   public spawnStormDebris(storm: any): void {}
   public simulateStormSurge(coast: any): void {}
-  public calculateStormDamage(structures: any): number { return 150; }
+  /**
+   * Sát thương của cơn bão lên công trình.
+   *
+   * Trước đây luôn `150`. Nay tính từ năng lượng bão, tốc độ gió, diện tích
+   * vùng chịu ảnh hưởng, số công trình và áp suất khí quyển.
+   */
+  public calculateStormDamage(structures: any): number {
+    const energy = this.numOf(structures, ['energy', 'stormEnergy'], DEFAULT_STORM_ENERGY);
+    const windSpeed = this.numOf(structures, ['windSpeed', 'speed'], this.wind.speed);
+    const area = this.numOf(structures, ['area', 'surfaceArea'], 100);
+    const count = Array.isArray(structures?.structures)
+      ? structures.structures.length
+      : this.numOf(structures, ['structureCount'], 1);
+    const pressure = this.numOf(structures, ['pressure', 'airPressure'], this.wind.pressure);
+    const base = (energy * 0.5 + windSpeed * 2) * (area / 100) * count;
+    const pressureFactor = pressure > 0 ? 1 + (1013.25 - pressure) / 400 : 1;
+    return Math.max(0, base * pressureFactor);
+  }
+
   public dissipateThunderstorm(storm: any): void {}
   public simulateHurricane(hurricane: any): void {}
   public simulateCyclone(cyclone: any): void {}
@@ -301,17 +538,78 @@ export class WeatherAtmosphereSubsystem {
     // Ngọn lửa nguồn mất một phần cường độ khi truyền sang vật mới.
     source.intensity = Math.max(0, source.intensity - 0.05);
   }
-  public calculateCombustionRate(object: any): number { return 0.5; }
+  /**
+   * Tốc độ cháy của vật thể (0..1).
+   *
+   * Trước đây luôn `0.5`. Nay tính từ độ dễ cháy của vật liệu, độ ẩm (vật ẩm
+   * cháy chậm), nhiệt độ và nồng độ oxy.
+   */
+  public calculateCombustionRate(object: any): number {
+    const material = String(object?.material ?? object?.type ?? 'wood');
+    const flammability = FLAMMABILITY[material] ?? 0.5;
+    const moisture = this.numOf(object, ['moisture', 'humidity'], 0.2);
+    const temperature = this.numOf(object, ['temperature'], this.weather.temperature);
+    const oxygen = this.numOf(object, ['oxygen', 'oxygenLevel'], 0.21);
+    const dryness = Math.max(0, 1 - Math.min(1, moisture * 2));
+    const heat = Math.max(0, Math.min(1, temperature / 120));
+    const supply = oxygen > 0 ? Math.min(1, oxygen / 0.21) : 0;
+    return Math.max(0, Math.min(1, flammability * dryness * (0.4 + heat) * supply));
+  }
+
   public calculateFireTemperature(fire: FireEntity | string): number {
     const f = typeof fire === 'string' ? this.fires.get(fire) : fire;
     return f ? f.temperature : 600;
   }
   public updateFlameShape(fire: FireEntity | string): void {}
   public spawnFireParticles(fire: FireEntity | string): void {}
-  public generateSmoke(fire: FireEntity | string): any { return { density: 0.8 }; }
+  /**
+   * Khói từ ngọn lửa.
+   *
+   * Trước đây luôn `{ density: 0.8 }`. Nay mật độ khói tính từ cường độ và
+   * nhiệt độ của lửa cùng kích thước vùng cháy.
+   */
+  public generateSmoke(fire: FireEntity | string): any {
+    const f = typeof fire === 'string' ? this.fires.get(fire) : fire;
+    const temperature = this.numOf(f, ['temperature'], 0);
+    const intensity = this.numOf(f, ['intensity'], 0);
+    const size = this.extentOf(f, 1);
+    const density = Math.min(
+      1,
+      (intensity * 0.6 + Math.min(1, temperature / 1200) * 0.4) * Math.min(1, size / 2),
+    );
+    const origin = this.positionOf(f);
+    return {
+      density,
+      temperature,
+      origin,
+      riseSpeed: 0.5 + temperature / 400,
+      particleCount: Math.round(density * 200),
+    };
+  }
   public spreadSmoke(smoke: any, wind: any): void {}
   public dissipateSmoke(smoke: any, rate: number): void {}
-  public createEmber(emberSource: any): any { return { temp: 400 }; }
+
+  /**
+   * Tia lửa bắn ra từ nguồn lửa.
+   *
+   * Trước đây luôn `{ temp: 400 }`. Nay nhiệt độ, khối lượng, kích thước và
+   * thời gian sống suy từ nguồn.
+   */
+  public createEmber(emberSource: any): any {
+    const temperature = this.numOf(emberSource, ['temperature', 'temp'], 400);
+    const mass = this.numOf(emberSource, ['mass', 'weight'], 0.001);
+    const size = this.extentOf(emberSource, 0.01);
+    const origin = this.positionOf(emberSource);
+    return {
+      temp: temperature,
+      mass,
+      size,
+      position: { x: origin.x, y: origin.y, z: origin.z },
+      life: Math.max(0.5, 12 - temperature / 120),
+      drag: 0.6 * Math.min(1, size * 100),
+    };
+  }
+
   public scatterEmbers(embers: any, wind: any): void {}
   public igniteDryVegetation(plant: any): void { this.createFire(plant); }
   public charObjectSurface(object: any, heat: number): void {}
@@ -319,17 +617,75 @@ export class WeatherAtmosphereSubsystem {
   public deformObjectByHeat(object: any, heat: number): void {}
   public meltObjectMaterial(object: any, temperature: number): void {}
   public coolBurningObject(object: any, rate: number): void {}
-  public calculateFireDamage(object: any): number { return 50; }
+  /**
+   * Mức sát thương do lửa (0..100).
+   *
+   * Trước đây luôn `50`. Nay tính từ nhiệt độ tiếp xúc, mức phơi nhiễm và sức
+   * chịu lửa của vật liệu.
+   */
+  public calculateFireDamage(object: any): number {
+    const temperature = this.numOf(object, ['temperature', 'fireTemperature'], 0);
+    const material = String(object?.material ?? object?.type ?? 'wood');
+    const resistance = FIRE_RESISTANCE[material] ?? 0.5;
+    const exposure = this.numOf(object, ['exposure', 'fireExposure'], 1);
+    const heat = Math.max(0, Math.min(1, temperature / 1000));
+    return Math.max(0, Math.min(100, heat * exposure * 100 * (1 - resistance * 0.8)));
+  }
+
 
   // 401–420. Đá rơi, sạt lở và tuyết lở
   public createRockfall(region: any): any { return { region, active: true }; }
   public releaseRockFromSlope(rock: any, slope: any): void {}
-  public calculateRockfallTrajectory(rock: any): Vec3[] { return [{ x: 0, y: 10, z: 0 }, { x: 5, y: 0, z: 5 }]; }
+  /**
+   * Quỹ đạo đá lăn từ sườn.
+   *
+   * Trước đây luôn trả hai điểm cố định. Nay quỹ đạo được tích phân từ vị trí
+   * và vận tốc của đá dưới trọng trường.
+   */
+  public calculateRockfallTrajectory(rock: any): Vec3[] {
+    const start = this.positionOf(rock);
+    const velocity = rock?.velocity ?? { x: 0, y: 0, z: 0 };
+    let vx = Number(velocity.x ?? 0);
+    let vy = Number(velocity.y ?? 0);
+    let vz = Number(velocity.z ?? 0);
+    if (!Number.isFinite(vx)) vx = 0;
+    if (!Number.isFinite(vy)) vy = 0;
+    if (!Number.isFinite(vz)) vz = 0;
+    const gravity = this.numOf(rock, ['gravity'], 9.81);
+    const steps = Math.max(2, Math.min(64, this.numOf(rock, ['steps', 'sampleCount'], 12)));
+    const dt = 1 / 60;
+    const path: Vec3[] = [];
+    let x = start.x;
+    let y = start.y;
+    let z = start.z;
+    for (let i = 0; i < steps; i++) {
+      path.push({ x, y, z });
+      x += vx * dt;
+      y += vy * dt;
+      z += vz * dt;
+      vy -= gravity * dt;
+    }
+    return path;
+  }
+
   public simulateRockBouncing(rock: any, surface: any): void {}
   public simulateRockRolling(rock: any, slope: any): void {}
   public simulateRockFragmentation(rock: any): void {}
   public createLandslide(region: any): any { return { region, mass: 10000 }; }
-  public calculateSlopeFailure(region: any): boolean { return false; }
+  /**
+   * Sườn có sạt lở không.
+   *
+   * Trước đây luôn `false`. Nay sạt lở xảy ra khi lực phá hoại (độ dốc + mưa
+   * bão hoà) vượt quá sức chịu của sườn.
+   */
+  public calculateSlopeFailure(region: any): boolean {
+    const steepness = this.numOf(region, ['steepness', 'slope'], 0);
+    const stability = this.numOf(region, ['slopeStability', 'stability'], 1);
+    const saturation = this.numOf(region, ['saturation', 'moisture'], 0);
+    const driving = steepness * (1 - Math.min(1, stability)) + saturation * 0.5;
+    return driving > 0.35;
+  }
+
   public displaceLandslideSoil(landslide: any): void {}
   public simulateDebrisFlow(flow: any): void {}
   public depositLandslideDebris(landslide: any): void {}
@@ -338,7 +694,20 @@ export class WeatherAtmosphereSubsystem {
   public simulateAvalancheMotion(avalanche: any): void {}
   public simulateAvalancheDebris(avalanche: any): void {}
   public buryObjectsInDebris(objects: any[], debris: any): void {}
-  public calculateBurialDepth(object: any, debris: any): number { return 1.5; }
+  /**
+   * Độ sâu vùi của vật thể trong khối vụn.
+   *
+   * Trước đây luôn `1.5`. Nay độ sâu vùi tính từ khối lượng vụn và kích
+   * thước vật thể (vật càng lớn càng vùi sâu hơn).
+   */
+  public calculateBurialDepth(object: any, debris: any): number {
+    const mass = this.numOf(debris, ['mass', 'totalMass', 'volume'], 1);
+    const extent = this.extentOf(object, 0.5);
+    const density = this.numOf(debris, ['density'], 1600);
+    const volume = density > 0 ? mass / density : mass;
+    return Math.max(0.1, volume / Math.max(0.05, extent * extent) + extent * 0.5);
+  }
+
   public stabilizeDamagedSlope(region: any): void {}
   public erodeUnstableSlope(region: any): void {}
   public updateSlopeAfterFailure(region: any): void {}

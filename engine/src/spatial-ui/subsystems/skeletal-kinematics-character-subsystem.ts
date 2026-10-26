@@ -232,14 +232,15 @@ export class SkeletalKinematicsCharacterSubsystem {
   }
 
   /**
-   * Tên xương cần dùng: `options.bone` ghi đè tên xương của entity, rồi
-   * `options.side` chọn biến thể trái/phải của tên đó.
+   * Tên xương do `options.bone` yêu cầu, đã áp `options.side` (trái/phải).
+   *
+   * CHỈ đọc từ `options` — không suy ra từ entity, để hành vi mặc định (khi
+   * không truyền `options`) giữ nguyên như trước.
    */
-  private boneNameOf(sources: unknown[], options?: any): string | undefined {
+  private optionBoneName(options: any): string | undefined {
     const explicit = this.firstText([options], ['bone', 'boneName']);
-    const name = explicit ?? this.requestedBoneName(sources);
     const side = this.sideOf(options);
-    return name && side ? this.sidedBoneName(name, side) : name;
+    return explicit && side ? this.sidedBoneName(explicit, side) : explicit ?? undefined;
   }
 
   /**
@@ -712,7 +713,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    */
   public getBoneOrientation(entityOrAngle?: any, options?: any): any {
     const source = this.entityOf(entityOrAngle, options);
-    const name = this.boneNameOf([source], options);
+    const name = this.optionBoneName(options);
     const bone = name ? this.boneOf(source, [name]) : this.boneOf(source);
     if (bone) return orientation('getBoneOrientation', this.transformedQuaternion(bone.quaternion, options));
     const explicit = readQuat(source, ['quaternion', 'rotation']);
@@ -725,7 +726,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    */
   public getBoneLength(entity?: any, options?: any): any {
     const source = this.entityOf(entity, options);
-    const name = this.boneNameOf([source], options);
+    const name = this.optionBoneName(options);
     const length = name ? this.lengthOf(source, [name], 1) : this.lengthOf(source, [], 1);
     return this.transformedNumber(length, options);
   }
@@ -735,7 +736,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    */
   public getBoneScale(entity?: any, options?: any): any {
     const source = this.entityOf(entity, options);
-    const name = this.boneNameOf([source], options);
+    const name = this.optionBoneName(options);
     const bone = name ? this.boneOf(source, [name]) : this.boneOf(source);
     const raw = bone ? bone.scale : readVec(source, ['scale']);
     const base = magnitude(raw) > 0 ? raw : { x: 1, y: 1, z: 1 };
@@ -768,7 +769,7 @@ export class SkeletalKinematicsCharacterSubsystem {
   public getBoneChildren(a?: any, b?: any, options?: any): any {
     // `b` là nguồn xương thứ hai khi `a` không có cây xương.
     const source = this.boneSource(a, b, options);
-    const name = this.boneNameOf([a, b], options);
+    const name = this.optionBoneName(options);
     const bone = name ? this.boneOf(source, [name]) : this.boneOf(source);
     const children = bone ? bone.children.map((c) => c.name) : [];
     return named('getBoneChildren', children, { count: children.length, bone: bone?.name ?? null });
@@ -813,10 +814,10 @@ export class SkeletalKinematicsCharacterSubsystem {
   public calculateBoneChainLength(entity?: any, options?: any): any {
     const source = this.entityOf(entity, options);
     const bone = this.boneOf(source);
-    const requested = this.boneNameOf([source], options);
-    const name = typeof (source as any)?.bone === 'string'
-      ? (source as any).bone
-      : (requested ?? bone?.name ?? '');
+    // `options.bone` ghi đè xương mặc định (xương của entity, nếu không thì xương gốc).
+    const requested = this.optionBoneName(options);
+    const name = requested
+      ?? (typeof (source as any)?.bone === 'string' ? (source as any).bone : (bone?.name ?? ''));
     const length = name ? chainLength(this.skeletonOf(source), name) : this.lengthOf(source, [], 0);
     return this.transformedNumber(length, options);
   }
@@ -826,7 +827,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    */
   public calculateBoneHierarchyDepth(entity?: any, options?: any): any {
     const source = this.entityOf(entity, options);
-    const requested = this.boneNameOf([source], options);
+    const requested = this.optionBoneName(options);
     // `options.bone` → đo độ sâu của nhánh xương đó, không phải của cả cây.
     const root = requested ? this.boneOf(source, [requested]) : this.skeletonOf(source);
     const depth = hierarchyDepth(root);
@@ -838,7 +839,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    */
   public calculateBoneWorldTransform(target?: any, options?: any): any {
     const source = this.entityOf(target, options);
-    const requested = this.boneNameOf([source], options);
+    const requested = this.optionBoneName(options);
     const bone = requested ? this.boneOf(source, [requested]) : this.boneOf(source);
     const position = bone ? this.boneWorld(source, [bone.name]) : worldPoint(source);
     const quaternion = bone ? bone.quaternion : entityQuaternion(source);
@@ -852,7 +853,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    */
   public calculateBoneLocalTransform(target?: any, options?: any): any {
     const source = this.entityOf(target, options);
-    const requested = this.boneNameOf([source], options);
+    const requested = this.optionBoneName(options);
     const bone = requested ? this.boneOf(source, [requested]) : this.boneOf(source);
     const position = bone ? bone.position : { x: 0, y: 0, z: 0 };
     const quaternion = bone ? bone.quaternion : { x: 0, y: 0, z: 0, w: 1 };
@@ -895,7 +896,7 @@ export class SkeletalKinematicsCharacterSubsystem {
   public calculateBoneBindPose(a?: any, b?: any, options?: any): any {
     // `b` là nguồn xương thứ hai khi `a` không có cây xương.
     const source = this.boneSource(a, b, options);
-    const name = this.boneNameOf([a, b], options);
+    const name = this.optionBoneName(options);
     const bone = name ? this.boneOf(source, [name]) : this.boneOf(source);
     const pose = bone
       ? {
@@ -1140,7 +1141,7 @@ export class SkeletalKinematicsCharacterSubsystem {
   public getJointChildBone(a?: any, b?: any, options?: any): any {
     // `b` là nguồn xương thứ hai khi `a` không có cây xương.
     const source = this.boneSource(a, b, options);
-    const name = this.boneNameOf([a, b], options);
+    const name = this.optionBoneName(options);
     const bone = name ? this.boneOf(source, [name]) : this.boneOf(source);
     const child = bone?.children[0];
     return named('getJointChildBone', child ? child.name : null, {
@@ -1321,7 +1322,7 @@ export class SkeletalKinematicsCharacterSubsystem {
   public calculateJointChain(a?: any, b?: any, options?: any): any {
     // `b` là nguồn xương thứ hai khi `a` không có cây xương.
     const source = this.boneSource(a, b, options);
-    const name = this.boneNameOf([a, b], options);
+    const name = this.optionBoneName(options);
     const bone = name ? this.boneOf(source, [name]) : this.boneOf(source);
     const chain: string[] = [];
     let current: BoneDesc | undefined = bone;
@@ -1482,8 +1483,9 @@ export class SkeletalKinematicsCharacterSubsystem {
    * Trọng số của các khớp trong chuỗi IK.
    */
   public calculateIKJointWeights(a?: any, b?: any, options?: any): any {
-    // `a` / `b` là nguồn thứ hai/thứ ba cho số khớp và độ suy giảm.
-    const countFromA = Array.isArray(a) ? a.length : readNum(a, ['jointCount', 'count'], Number.NaN);
+    // `a` là danh sách khớp (mảng) và `b` là nguồn độ suy giảm khi
+    // `options` không chỉ định.
+    const countFromA = Array.isArray(a) ? a.length : Number.NaN;
     const explicitCount = readNum(options, ['jointCount', 'count'], Number.NaN);
     const count = Math.max(1, Math.floor(Number.isFinite(explicitCount) ? explicitCount : (Number.isFinite(countFromA) ? countFromA : 3)));
     const explicitFalloff = readNum(options, ['falloff'], Number.NaN);
@@ -1555,7 +1557,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    */
   public calculateSkeletonOrientation(entityOrAngle?: any, options?: any): any {
     const source = this.entityOf(entityOrAngle, options);
-    const name = this.boneNameOf([source], options);
+    const name = this.optionBoneName(options);
     const bones = this.bonesOf(source);
     const root = name ? this.boneOf(source, [name]) : bones[0];
     if (root) return orientation('calculateSkeletonOrientation', this.transformedQuaternion(root.quaternion, options));
@@ -1729,16 +1731,17 @@ export class SkeletalKinematicsCharacterSubsystem {
    * Hệ số trộn animation theo thời gian.
    */
   public calculateAnimationBlendFactor(a?: any, b?: any, options?: any): any {
-    // `a` / `b` là nguồn thời lượng / thời gian đã trôi khi `options` không có.
+    // `a` / `b` là nguồn thứ hai/thứ ba (khoá riêng `blendDuration` /
+    // `blendElapsed`) khi `options` không chỉ định.
     const duration = readNum(
       options,
       ['duration', 'blendDuration'],
-      readNum(a, ['duration', 'blendDuration'], readNum(b, ['duration', 'blendDuration'], 0.3)),
+      readNum(a, ['blendDuration'], readNum(b, ['blendDuration'], 0.3)),
     );
     const elapsed = readNum(
       options,
       ['elapsed', 'time'],
-      readNum(a, ['elapsed', 'time'], readNum(b, ['elapsed', 'time'], 0)),
+      readNum(a, ['blendElapsed'], readNum(b, ['blendElapsed'], 0)),
     );
     const factor = duration > 0 ? clamp01(elapsed / duration) : 1;
     return scalar(
@@ -1753,9 +1756,17 @@ export class SkeletalKinematicsCharacterSubsystem {
    * Thời gian của animation.
    */
   public calculateAnimationTime(a?: any, b?: any, options?: any): any {
-    // `b` là nguồn thứ hai cho thời gian / thời lượng.
-    const time = readNum(a, ['time', 'currentTime'], readNum(options, ['time'], readNum(b, ['time', 'currentTime'], 0)));
-    const duration = readNum(a, ['duration'], readNum(options, ['duration'], readNum(b, ['duration'], 1)));
+    // `b` là nguồn thứ hai cho thời gian / thời lượng (khoá `animationTime`).
+    const time = readNum(
+      a,
+      ['time', 'currentTime'],
+      readNum(options, ['time'], readNum(b, ['animationTime', 'animationCurrentTime'], 0)),
+    );
+    const duration = readNum(
+      a,
+      ['duration'],
+      readNum(options, ['duration'], readNum(b, ['animationDuration'], 1)),
+    );
     return named('calculateAnimationTime', this.transformedNumber(time, options), {
       duration,
       normalized: duration > 0 ? (time % duration) / duration : 0,

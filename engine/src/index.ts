@@ -87,7 +87,19 @@ export * as AnimalSystem from './animal/index.js';
 
 export * as BehaviorSystem from './behavior/index.js';
 
+export * as SpatialMath from './spatial/index.js';
+export type {
+  Vec3Like as SpatialVec3Like,
+  QuatLike as SpatialQuatLike,
+  SpatialHit,
+  SweepHitResult,
+} from './spatial/index.js';
+
 export * as SpatialUISystem from './spatial-ui/index.js';
 export * as SpatialUI from './spatial-ui/index.js';
+
+export * as NPCSystem from './npc/index.js';
+export * as NPCAISystem from './npc/index.js';
+export * as NPCAI from './npc/index.js';
 
 

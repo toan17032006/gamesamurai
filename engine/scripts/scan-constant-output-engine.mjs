@@ -133,6 +133,8 @@ function enrich(probe, index) {
   entity.fertility = 0.6;
   entity.toxicity = 0.2;
   entity.integrity = 0.9;
+  entity.sharpness = 1.2;
+  entity.cutSpeed = 4;
   entity.health = 0.9 * s;
   entity.energy = 80 * s;
   entity.hunger = 0.4 * s;

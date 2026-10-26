@@ -45,6 +45,43 @@ export class BuildingArchitectureSubsystem {
   public windows: Map<string, any> = new Map();
   public furniture: Map<string, FurnitureEntity> = new Map();
 
+  /** Đọc số từ nhiều khoá, có giá trị thay thế khi dữ liệu thiếu. */
+  private numOf(source: any, keys: string[], fallback: number): number {
+    if (source && typeof source === 'object') {
+      for (const key of keys) {
+        const value = (source as Record<string, unknown>)[key];
+        if (typeof value === 'number' && Number.isFinite(value)) return value;
+      }
+    }
+    return fallback;
+  }
+
+  /** Kích thước đặc trưng (bán kính / cạnh lớn nhất) của đối tượng. */
+  private extentOf(source: any, fallback = 1): number {
+    const size = source?.size ?? source?.radius ?? source?.scale;
+    if (typeof size === 'number' && Number.isFinite(size) && size > 0) return size;
+    if (size && typeof size === 'object') {
+      const values = [size.x, size.y, size.z, size.max, size.width, size.height]
+        .map((v) => Number(v))
+        .filter((v) => Number.isFinite(v) && v > 0)
+        .sort((a, b) => b - a);
+      if (values.length > 0) return values[0];
+    }
+    return fallback;
+  }
+
+  /** Vị trí thế giới của đối tượng. */
+  private positionOf(source: any): Vec3 {
+    const p = source?.position ?? source?.origin ?? source?.center;
+    if (p && typeof p === 'object') {
+      const x = Number(p.x ?? 0);
+      const y = Number(p.y ?? 0);
+      const z = Number(p.z ?? 0);
+      if (Number.isFinite(x) && Number.isFinite(y) && Number.isFinite(z)) return { x, y, z };
+    }
+    return { x: 0, y: 0, z: 0 };
+  }
+
   /**
    * Trạng thái phá hủy của từng bộ phận công trình.
    *
@@ -196,9 +233,23 @@ export class BuildingArchitectureSubsystem {
     return b ? b.mass : 10000;
   }
 
+  /**
+   * Trọng tâm của công trình.
+   *
+   * Trước đây trả `undefined` khi công trình chưa khai báo `centerOfMass`.
+   * Nay suy ra từ vị trí và chiều cao của công trình.
+   */
   public calculateBuildingCenterOfMass(building: BuildingEntity | string): Vec3 {
     const b = typeof building === 'string' ? this.buildings.get(building) : building;
-    return b ? b.centerOfMass : { x: 0, y: 3, z: 0 };
+    if (b && b.centerOfMass && typeof b.centerOfMass === 'object') {
+      const x = Number(b.centerOfMass.x);
+      const y = Number(b.centerOfMass.y);
+      const z = Number(b.centerOfMass.z);
+      if (Number.isFinite(x) && Number.isFinite(y) && Number.isFinite(z)) return { x, y, z };
+    }
+    const base = this.positionOf(b);
+    const height = this.numOf(b, ['height', 'elevation'], 3);
+    return { x: base.x, y: base.y + height * 0.5, z: base.z };
   }
 
   public calculateStructuralStress(building: BuildingEntity | string): number {
@@ -458,7 +509,17 @@ export class BuildingArchitectureSubsystem {
     w.isShattered = true;
   }
 
-  public scatterGlassFragments(window: any): any { return { fragmentsCount: 50 }; }
+  /** Mảnh kính văng ra — số mảnh và bán kính văng theo kích thước cửa sổ. */
+  public scatterGlassFragments(window: any): any {
+    const extent = this.extentOf(window, 1);
+    const fragments = Math.max(4, Math.min(120, Math.round(extent * extent * 60)));
+    return {
+      fragmentsCount: fragments,
+      scatterRadius: extent * 1.5,
+      fragmentSize: extent / Math.max(1, Math.sqrt(fragments)),
+    };
+  }
+
   public repairWindow(window: any): void {
     const w = typeof window === 'string' ? this.windows.get(window) : window;
     if (w) {
@@ -558,9 +619,29 @@ export class BuildingArchitectureSubsystem {
 
   public applyImpulseToDebris(debris: any, impulse: any): void {}
   public simulateDebrisCollision(debris: any): void {}
-  public simulateDebrisPile(debris: any): any { return { pileHeight: 2.0 }; }
+  /** Đống mảnh vụn — chiều cao đống theo khối lượng và thể tích mảnh. */
+  public simulateDebrisPile(debris: any): any {
+    const count = Array.isArray(debris)
+      ? debris.length
+      : this.numOf(debris, ['fragmentCount', 'count', 'debrisCount'], 1);
+    const volume = this.numOf(debris, ['volume', 'totalVolume'], 0);
+    const totalMass = this.numOf(debris, ['mass', 'totalMass'], count * 0.5);
+    const bulk = volume > 0 ? totalMass / volume : 1;
+    const pileHeight = Math.max(0.1, count * 0.05 * Math.max(0.5, bulk));
+    return { pileHeight, fragmentCount: count, totalMass, bulkDensity: bulk };
+  }
+
+  /** Đám bụi phát sinh khi đống mục vỡ — bán kính theo khối lượng mảnh. */
+  public generateDustCloud(debris: any): any {
+    const count = Array.isArray(debris)
+      ? debris.length
+      : this.numOf(debris, ['fragmentCount', 'count', 'debrisCount'], 1);
+    const mass = this.numOf(debris, ['mass', 'totalMass'], count * 0.5);
+    const radius = 3 + Math.sqrt(mass) * 1.5;
+    return { radius, particleCount: Math.round(count * 12), settledMass: mass };
+  }
+
   public settleDebrisPile(debris: any): void {}
-  public generateDustCloud(debris: any): any { return { radius: 15.0 }; }
   public dissipateCollapseDust(dust: any): void {}
   public updateCollapsedBuilding(building: BuildingEntity | string): void {}
   public clearBuildingDebris(building: BuildingEntity | string): void {}
@@ -642,8 +723,46 @@ export class BuildingArchitectureSubsystem {
     this.breakFurnitureJoint(furniture, null);
   }
 
-  public shatterCeramicObject(object: any, impact: any): any { return { shattered: true }; }
-  public breakGlassObject(object: any, impact: any): any { return { broken: true }; }
+  /**
+   * Vỡ vật thể gốm.
+   *
+   * Trước đây luôn `{ shattered: true }`. Nay số mảnh, kích thước mảnh và
+   * năng lượng hấp thụ tính từ kích thước vật thể và lực va chạm.
+   */
+  public shatterCeramicObject(object: any, impact: any): any {
+    const extent = this.extentOf(object, 0.2);
+    const energy = this.numOf(impact, ['energy', 'kineticEnergy', 'force'], 0);
+    const fragments = Math.max(3, Math.min(64, Math.round(extent * 40 + energy * 0.5)));
+    const origin = this.positionOf(object);
+    return {
+      shattered: true,
+      fragmentCount: fragments,
+      fragmentSize: extent / Math.max(1, Math.sqrt(fragments)),
+      absorbedEnergy: energy * 0.3,
+      origin,
+    };
+  }
+
+  /**
+   * Vỡ kính.
+   *
+   * Trước đây luôn `{ broken: true }`. Nay số mảnh và năng lượng hấp thụ tính
+   * từ diện tích kính và lực va chạm.
+   */
+  public breakGlassObject(object: any, impact: any): any {
+    const extent = this.extentOf(object, 0.5);
+    const energy = this.numOf(impact, ['energy', 'kineticEnergy', 'force'], 0);
+    const fragments = Math.max(4, Math.min(120, Math.round(extent * extent * 60 + energy * 0.3)));
+    const origin = this.positionOf(object);
+    return {
+      broken: true,
+      fragmentCount: fragments,
+      shardSize: extent / Math.max(1, Math.sqrt(fragments)),
+      absorbedEnergy: energy * 0.15,
+      origin,
+    };
+  }
+
   public deformMetalObject(object: any, force: any): void {}
   public tearFabricObject(object: any, force: any): void {}
   public scatterHouseholdObjects(objects: any[], impulse: any): void {}

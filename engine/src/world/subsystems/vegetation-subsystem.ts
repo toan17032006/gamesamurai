@@ -332,7 +332,8 @@ export class VegetationSubsystem {
   }
   public detectBranchStress(branch: BranchEntity | string): number {
     const b = typeof branch === 'string' ? this.branches.get(branch) : branch;
-    return b ? b.flexForce * 50 : 0;
+    if (!b) return 0;
+    return this.numOf(b, ['flexForce'], 0) * 50;
   }
 
   public detectBranchFracture(branch: BranchEntity | string): boolean {
@@ -628,17 +629,95 @@ export class VegetationSubsystem {
   public extendRootIntoSoil(root: RootEntity | string, direction: any): void {}
   public thickenRoot(root: RootEntity | string, amount: number): void {}
   public branchRootSystem(root: RootEntity | string): void {}
-  public detectRootObstacles(root: RootEntity | string): boolean { return false; }
+  /**
+   * Rễ có bị vướng vật cản không.
+   *
+   * Trước đây luôn `false`. Nay rễ bị chặn khi độ sâu vượt quá độ sâu mà tầng
+   * đất cứng cho phép đào, hoặc khi rễ đã ghi nhận vật cản.
+   */
+  public detectRootObstacles(root: RootEntity | string): boolean {
+    const r = typeof root === 'string' ? this.roots.get(root) : root;
+    if (!r) return false;
+    const record = r as any;
+    if (Array.isArray(record.obstacles) && record.obstacles.length > 0) return true;
+    const depth = this.numOf(record, ['depth'], 0);
+    const hardness = this.numOf(record.soil, ['hardness'], this.numOf(record, ['hardness'], 1));
+    const maxDepth = 0.5 + hardness * 0.5;
+    return depth > maxDepth;
+  }
   public wrapRootAroundObstacle(root: RootEntity | string, obstacle: any): void {}
   public penetrateSoil(root: RootEntity | string, soil: any): void {}
-  public absorbWaterThroughRoots(root: RootEntity | string): number { return 1.5; }
-  public absorbNutrientsThroughRoots(root: RootEntity | string): number { return 1.0; }
-  public detectRootDamage(root: RootEntity | string): boolean { return false; }
+
+  /**
+   * Lượng nước hấp thụ qua rễ (đơn vị lượng/giây).
+   *
+   * Trước đây luôn `1.5`. Nay tính từ độ ẩm đất, độ dài rễ và độ xốp của đất.
+   */
+  public absorbWaterThroughRoots(root: RootEntity | string): number {
+    const r = typeof root === 'string' ? this.roots.get(root) : root;
+    if (!r) return 0;
+    const record = r as any;
+    const moisture = this.numOf(record.soil, ['moisture'], this.numOf(record, ['moisture'], 0.4));
+    const length = this.numOf(record, ['length'], 0);
+    const porosity = this.numOf(record, ['porosity'], 0.35);
+    return Math.max(0, moisture * length * porosity * 10);
+  }
+
+  /**
+   * Lượng dinh dưỡng hấp thụ qua rễ (đơn vị lượng/giây).
+   *
+   * Trước đây luôn `1.0`. Nay tính từ độ phì của đất, độ dài rễ và mật độ đất.
+   */
+  public absorbNutrientsThroughRoots(root: RootEntity | string): number {
+    const r = typeof root === 'string' ? this.roots.get(root) : root;
+    if (!r) return 0;
+    const record = r as any;
+    const fertility = this.numOf(record.soil, ['fertility'], this.numOf(record, ['fertility'], 0.5));
+    const length = this.numOf(record, ['length'], 0);
+    const density = this.numOf(record, ['density'], 1.2);
+    return Math.max(0, fertility * length * Math.max(0.1, density));
+  }
+
+  /**
+   * Rễ có bị hư hại không.
+   *
+   * Trước đây luôn `false`. Nay rễ hư hại khi độ toàn vẹn thấp, hoặc khi ứng
+   * suất vượt quá khả năng giữ của rễ.
+   */
+  public detectRootDamage(root: RootEntity | string): boolean {
+    const r = typeof root === 'string' ? this.roots.get(root) : root;
+    if (!r) return false;
+    const record = r as any;
+    const integrity = this.numOf(record, ['integrity'], 1);
+    const stress = this.numOf(record, ['stress'], 0);
+    return integrity < 0.5 || stress > 0.5;
+  }
   public breakRoot(root: RootEntity | string, force?: any): void {}
   public decayRoot(root: RootEntity | string, rate: number): void {}
   public anchorTreeWithRoots(tree: TreeEntity | string): void {}
   public loosenRootAnchorage(tree: TreeEntity | string): void {}
-  public calculateRootStability(tree: TreeEntity | string): number { return 85; }
+
+  /**
+   * Độ ổn định của hệ rễ (0..100).
+   *
+   * Trước đây luôn `85`. Nay tính từ độ ổn định của đất, mức bám của từng rễ
+   * và tải trọng do chiều cao cây gây ra.
+   */
+  public calculateRootStability(tree: TreeEntity | string): number {
+    const t = typeof tree === 'string' ? this.trees.get(tree) : tree;
+    if (!t) return 0;
+    const record = t as any;
+    const rootIds = Array.isArray(record.roots) ? record.roots : [];
+    let anchor = 0;
+    for (const id of rootIds) {
+      const r = this.roots.get(id);
+      if (r) anchor += this.numOf(r, ['stability'], 0) * this.numOf(r, ['depth'], 0);
+    }
+    if (rootIds.length > 0) anchor /= rootIds.length;
+    const soilStability = this.numOf(record.soil, ['stability'], this.numOf(record, ['stability'], 0.7));
+    const load = this.numOf(record, ['height'], 0) * 8;
+    return Math.max(0, Math.min(100, (soilStability * 60 + anchor * 40) / (1 + load * 0.05)));
+  }
   public simulateRootCompetition(root: any, neighbor: any): void {}
   public updateRootGrowthDirection(root: RootEntity | string): void {}
   public regenerateRootMesh(tree: TreeEntity | string): void {}
@@ -767,8 +846,34 @@ export class VegetationSubsystem {
   // 181–200. Héo úa, chết, mục nát và tái sinh
   public calculatePlantHealth(plant: any): number { return plant?.health ?? 100; }
   public calculatePlantStress(plant: any): number { return 100 - (plant?.health ?? 100); }
-  public detectPlantDrought(plant: any): boolean { return false; }
-  public detectPlantDisease(plant: any): boolean { return false; }
+  /**
+   * Cây có bị hạn hán không.
+   *
+   * Trước đây luôn `false`. Nay hạn hán xảy ra khi độ ẩm đất thấp hơn ngưỡng
+   * mà cây cần để duy trì.
+   */
+  public detectPlantDrought(plant: any): boolean {
+    if (!plant) return false;
+    const moisture = this.numOf(plant.soil, ['moisture'], this.numOf(plant, ['moisture'], 0.4));
+    const threshold = this.numOf(plant, ['droughtThreshold', 'waterDemand'], 0.5);
+    return moisture < threshold;
+  }
+
+  /**
+   * Cây có bị bệnh không.
+   *
+   * Trước đây luôn `false`. Nay bệnh xuất hiện khi sức khoẻ thấp, độc tố
+   * cao, có ký sinh trùng, hoặc cây đang chịu ứng suất lớn.
+   */
+  public detectPlantDisease(plant: any): boolean {
+    if (!plant) return false;
+    const health = this.numOf(plant, ['health'], 100);
+    const toxicity = this.numOf(plant, ['toxicity'], 0);
+    const parasites = this.numOf(plant, ['parasiteCount'], 0);
+    const stress = this.numOf(plant, ['stress'], 0);
+    return health < 60 || toxicity > 0.5 || parasites > 0 || stress > 0.5;
+  }
+
   public detectPlantDamage(plant: any): boolean { return (plant?.health ?? 100) < 90; }
   public reducePlantVitality(plant: any, amount: number): void {
     if (plant && plant.health) plant.health = Math.max(0, plant.health - amount);

@@ -11,3 +11,4 @@ export * from './asset-exporter.js';
 export * from './asset-combiner.js';
 export * from './asset-factory.js';
 export * from './asset-designer.js';
+export * from './asset-forge.js';
