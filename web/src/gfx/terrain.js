@@ -1,5 +1,8 @@
-// Terrain v2: high-res heightfield + procedural detail albedo/normal textures + valley AO.
+// Terrain v2 (ENGINE quality): high-res heightfield + procedural detail albedo/normal
+// textures + valley AO. Nâng chất lượng lên mức engine preset 'ultra':
+// segment 192 (thay 160), anisotropy tới 16, normalScale mạnh hơn.
 import * as THREE from 'three';
+import { ENGINE_PRESET } from '../assets/engineAssets.js';
 
 function makeDetailTexture() {
   const s = 256;
@@ -74,12 +77,12 @@ function makeNormalTexture() {
 let _detailTex = null, _normalTex = null;
 
 function anisotropyFor(world) {
-  try { return Math.min(8, world.game.engine.renderer.capabilities.getMaxAnisotropy()); } catch { return 4; }
+  try { return Math.min(16, world.game.engine.renderer.capabilities.getMaxAnisotropy()); } catch { return 8; }
 }
 
 export function buildTerrain(world, def, quality = 'high') {
   const size = def.size;
-  const seg = quality === 'ultra' ? 160 : quality === 'low' ? 96 : 128;
+  const seg = quality === 'ultra' ? 192 : quality === 'low' ? 128 : 160;
   const geo = new THREE.PlaneGeometry(size, size, seg, seg);
   geo.rotateX(-Math.PI / 2);
 

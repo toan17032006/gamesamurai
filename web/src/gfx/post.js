@@ -1,15 +1,26 @@
-// Cinematic grading pass: split-tone (cool shadows / warm highlights), saturation,
-// contrast, gentle vignette, optional film grain. Runs in linear space, before OutputPass.
+// Cinematic grading pass — PHIÊN BẢN ENGINE: shader grading riêng của game giữ
+// nguyên (split-tone, saturation, contrast, vignette, grain) vì engine không có
+// đúng pass này, nhưng mặc định vignette/grain lấy từ preset 'ultra' của engine,
+// và re-export shader + PostProcessing của engine để dùng cho mode cinematic.
+// createGradingPass() vẫn trả ShaderPass với đúng uniforms mà core/engine.js cần:
+// uResolution, uGrain, enabled.
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
+import { EngineGradingShader, EngineGrainShader, EnginePostProcessing } from '../assets/engine-lib.js';
+import { ENGINE_PRESET } from '../assets/engineAssets.js';
+
+export { EngineGradingShader, EngineGrainShader, EnginePostProcessing };
+export function createEnginePostProcessing(renderer, scene, camera) {
+  return new EnginePostProcessing(renderer, scene, camera, ENGINE_PRESET.postFx);
+}
 
 export const GradingShader = {
   name: 'GradingShader',
   uniforms: {
     tDiffuse: { value: null },
-    uVignette: { value: 0.34 },
+    uVignette: { value: ENGINE_PRESET.postFx.vignette ?? 0.34 },
     uSaturation: { value: 1.07 },
     uContrast: { value: 1.045 },
-    uGrain: { value: 0.0 },
+    uGrain: { value: ENGINE_PRESET.postFx.grainIntensity ?? 0.0 },
     uTime: { value: 0 },
     uResolution: { value: [1920, 1080] },
   },

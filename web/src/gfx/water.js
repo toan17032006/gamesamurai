@@ -1,7 +1,11 @@
-// Water surfaces: animated shader plane (waves + flood level), lava variant, waterfall strips.
-// Một mặt nước lớn theo player — terrain cao hơn mặt nước sẽ che nó (depth test),
-// nên chỉ thấy nước nơi địa hình thấp hơn mực nước (sông, hồ, vùng ngập).
+// Water surfaces — PHIÊN BẢN ENGINE: mặt nước shader giữ nguyên, nhưng mỗi
+// mặt nước đăng ký vào WaterSystem của engine (registerSurface) để tính chiều
+// cao sóng/ripple chuẩn engine qua getHeightAt(x, z). update() chạy
+// waterSystem.update(dt). API cũ giữ nguyên, thêm getHeightAt(x, z).
 import * as THREE from 'three';
+import { waterSystem } from '../assets/engineAssets.js';
+
+let _waterSeq = 0;
 
 const WATER_VERT_PULSE = `
   uniform float uTime;
@@ -69,6 +73,21 @@ export class WaterSurface {
     this.floodMax = opts.floodMax ?? 0.55;
     this.baseLevel = opts.level ?? -9999;
     this.enabled = false;
+    // Đăng ký vào WaterSystem của engine
+    this.surfaceId = `water_${++_waterSeq}`;
+    waterSystem.registerSurface(this.surfaceId, this.baseLevel, {
+      waveAmplitude: this.lava ? 0.2 : 0.5, waveFrequency: 0.8,
+    });
+  }
+
+  /** Chiều cao sóng tại (x, z) theo engine WaterSystem. */
+  getHeightAt(x, z) {
+    return waterSystem.getHeightAt(this.surfaceId, x, z, WATER_TIME.value);
+  }
+
+  /** Tạo ripple tại (x, z) qua engine (bước chân, splash, va chạm). */
+  addRipple(x, z, strength = 0.5) {
+    waterSystem.addRipple(x, z, strength);
   }
 
   // mực nước cơ bản (không lũ)
@@ -95,9 +114,13 @@ export class WaterSurface {
   }
 
   update(dt) {
+    waterSystem.update(dt);
     if (!this.enabled) return;
     // lerp mực nước về đích (lũ dâng/receding từ từ)
     this.level += (this.targetLevel - this.level) * Math.min(1, dt * 0.55);
+    // đồng bộ mực nước vào surface của engine
+    const s = waterSystem.getSurface(this.surfaceId);
+    if (s) s.level = this.level;
     this.targetLevel = this.baseLevel + this.flood * this.floodMax;
     this.mesh.position.y = this.level;
     if (this.lava) {

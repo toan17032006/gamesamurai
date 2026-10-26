@@ -1,0 +1,4002 @@
+[
+  {
+    "num": 1,
+    "name": "createWorld",
+    "params": ""
+  },
+  {
+    "num": 2,
+    "name": "initializeWorld",
+    "params": ""
+  },
+  {
+    "num": 3,
+    "name": "destroyWorld",
+    "params": ""
+  },
+  {
+    "num": 4,
+    "name": "resetWorld",
+    "params": ""
+  },
+  {
+    "num": 5,
+    "name": "updateWorld",
+    "params": "deltaTime"
+  },
+  {
+    "num": 6,
+    "name": "fixedUpdateWorld",
+    "params": "fixedDeltaTime"
+  },
+  {
+    "num": 7,
+    "name": "setWorldConfig",
+    "params": "config"
+  },
+  {
+    "num": 8,
+    "name": "getWorldState",
+    "params": ""
+  },
+  {
+    "num": 9,
+    "name": "saveWorldState",
+    "params": ""
+  },
+  {
+    "num": 10,
+    "name": "restoreWorldState",
+    "params": "state"
+  },
+  {
+    "num": 11,
+    "name": "pauseWorldSimulation",
+    "params": ""
+  },
+  {
+    "num": 12,
+    "name": "resumeWorldSimulation",
+    "params": ""
+  },
+  {
+    "num": 13,
+    "name": "setWorldSimulationSpeed",
+    "params": "speed"
+  },
+  {
+    "num": 14,
+    "name": "setWorldTime",
+    "params": "time"
+  },
+  {
+    "num": 15,
+    "name": "advanceWorldTime",
+    "params": "deltaTime"
+  },
+  {
+    "num": 16,
+    "name": "setWorldBounds",
+    "params": "bounds"
+  },
+  {
+    "num": 17,
+    "name": "loadWorldRegion",
+    "params": "region"
+  },
+  {
+    "num": 18,
+    "name": "unloadWorldRegion",
+    "params": "region"
+  },
+  {
+    "num": 19,
+    "name": "validateWorldState",
+    "params": ""
+  },
+  {
+    "num": 20,
+    "name": "optimizeWorldSimulation",
+    "params": ""
+  },
+  {
+    "num": 21,
+    "name": "createWorldObject",
+    "params": "type"
+  },
+  {
+    "num": 22,
+    "name": "destroyWorldObject",
+    "params": "object"
+  },
+  {
+    "num": 23,
+    "name": "cloneWorldObject",
+    "params": "object"
+  },
+  {
+    "num": 24,
+    "name": "duplicateWorldObject",
+    "params": "object"
+  },
+  {
+    "num": 25,
+    "name": "setObjectPosition",
+    "params": "object, position"
+  },
+  {
+    "num": 26,
+    "name": "setObjectRotation",
+    "params": "object, rotation"
+  },
+  {
+    "num": 27,
+    "name": "setObjectScale",
+    "params": "object, scale"
+  },
+  {
+    "num": 28,
+    "name": "setObjectTransform",
+    "params": "object, transform"
+  },
+  {
+    "num": 29,
+    "name": "getObjectTransform",
+    "params": "object"
+  },
+  {
+    "num": 30,
+    "name": "updateObjectTransform",
+    "params": "object"
+  },
+  {
+    "num": 31,
+    "name": "setObjectVisibility",
+    "params": "object, visible"
+  },
+  {
+    "num": 32,
+    "name": "setObjectMaterial",
+    "params": "object, material"
+  },
+  {
+    "num": 33,
+    "name": "setObjectTexture",
+    "params": "object, texture"
+  },
+  {
+    "num": 34,
+    "name": "setObjectTags",
+    "params": "object, tags"
+  },
+  {
+    "num": 35,
+    "name": "getObjectTags",
+    "params": "object"
+  },
+  {
+    "num": 36,
+    "name": "attachObjectToParent",
+    "params": "object, parent"
+  },
+  {
+    "num": 37,
+    "name": "detachObjectFromParent",
+    "params": "object"
+  },
+  {
+    "num": 38,
+    "name": "transferObjectToRegion",
+    "params": "object, region"
+  },
+  {
+    "num": 39,
+    "name": "serializeWorldObject",
+    "params": "object"
+  },
+  {
+    "num": 40,
+    "name": "deserializeWorldObject",
+    "params": "data"
+  },
+  {
+    "num": 41,
+    "name": "createTree",
+    "params": "species"
+  },
+  {
+    "num": 42,
+    "name": "initializeTree",
+    "params": "tree"
+  },
+  {
+    "num": 43,
+    "name": "updateTree",
+    "params": "tree, deltaTime"
+  },
+  {
+    "num": 44,
+    "name": "growTree",
+    "params": "tree, amount"
+  },
+  {
+    "num": 45,
+    "name": "setTreeAge",
+    "params": "tree, age"
+  },
+  {
+    "num": 46,
+    "name": "updateTreeHeight",
+    "params": "tree"
+  },
+  {
+    "num": 47,
+    "name": "updateTreeThickness",
+    "params": "tree"
+  },
+  {
+    "num": 48,
+    "name": "updateTreeCanopy",
+    "params": "tree"
+  },
+  {
+    "num": 49,
+    "name": "updateTreeRootSystem",
+    "params": "tree"
+  },
+  {
+    "num": 50,
+    "name": "updateTreeTrunk",
+    "params": "tree"
+  },
+  {
+    "num": 51,
+    "name": "updateTreeBark",
+    "params": "tree"
+  },
+  {
+    "num": 52,
+    "name": "updateTreeBranchStructure",
+    "params": "tree"
+  },
+  {
+    "num": 53,
+    "name": "generateTreeBranches",
+    "params": "tree"
+  },
+  {
+    "num": 54,
+    "name": "extendTreeBranch",
+    "params": "branch"
+  },
+  {
+    "num": 55,
+    "name": "shortenTreeBranch",
+    "params": "branch"
+  },
+  {
+    "num": 56,
+    "name": "bendTreeBranch",
+    "params": "branch, force"
+  },
+  {
+    "num": 57,
+    "name": "twistTreeBranch",
+    "params": "branch, torque"
+  },
+  {
+    "num": 58,
+    "name": "repairTreeDamage",
+    "params": "tree"
+  },
+  {
+    "num": 59,
+    "name": "removeTree",
+    "params": "tree"
+  },
+  {
+    "num": 60,
+    "name": "regenerateTreeGeometry",
+    "params": "tree"
+  },
+  {
+    "num": 61,
+    "name": "createBranch",
+    "params": "tree, parentBranch"
+  },
+  {
+    "num": 62,
+    "name": "splitBranch",
+    "params": "branch"
+  },
+  {
+    "num": 63,
+    "name": "growBranch",
+    "params": "branch, amount"
+  },
+  {
+    "num": 64,
+    "name": "thickenBranch",
+    "params": "branch, amount"
+  },
+  {
+    "num": 65,
+    "name": "bendBranch",
+    "params": "branch, force"
+  },
+  {
+    "num": 66,
+    "name": "straightenBranch",
+    "params": "branch"
+  },
+  {
+    "num": 67,
+    "name": "rotateBranch",
+    "params": "branch, angle"
+  },
+  {
+    "num": 68,
+    "name": "twistBranch",
+    "params": "branch, angle"
+  },
+  {
+    "num": 69,
+    "name": "shakeBranch",
+    "params": "branch, intensity"
+  },
+  {
+    "num": 70,
+    "name": "applyBranchLoad",
+    "params": "branch, force"
+  },
+  {
+    "num": 71,
+    "name": "detectBranchStress",
+    "params": "branch"
+  },
+  {
+    "num": 72,
+    "name": "detectBranchFracture",
+    "params": "branch"
+  },
+  {
+    "num": 73,
+    "name": "breakBranch",
+    "params": "branch, force"
+  },
+  {
+    "num": 74,
+    "name": "snapBranchAtJoint",
+    "params": "branch, joint"
+  },
+  {
+    "num": 75,
+    "name": "detachBranch",
+    "params": "branch"
+  },
+  {
+    "num": 76,
+    "name": "fallBranch",
+    "params": "branch, gravity"
+  },
+  {
+    "num": 77,
+    "name": "splitWoodGrain",
+    "params": "branch"
+  },
+  {
+    "num": 78,
+    "name": "crackWoodSurface",
+    "params": "branch"
+  },
+  {
+    "num": 79,
+    "name": "decayWood",
+    "params": "branch, rate"
+  },
+  {
+    "num": 80,
+    "name": "regenerateBranchMesh",
+    "params": "branch"
+  },
+  {
+    "num": 81,
+    "name": "createLeaf",
+    "params": "plant"
+  },
+  {
+    "num": 82,
+    "name": "initializeLeaf",
+    "params": "leaf"
+  },
+  {
+    "num": 83,
+    "name": "updateLeaf",
+    "params": "leaf, deltaTime"
+  },
+  {
+    "num": 84,
+    "name": "growLeaf",
+    "params": "leaf, amount"
+  },
+  {
+    "num": 85,
+    "name": "shrinkLeaf",
+    "params": "leaf, amount"
+  },
+  {
+    "num": 86,
+    "name": "unfoldLeaf",
+    "params": "leaf"
+  },
+  {
+    "num": 87,
+    "name": "foldLeaf",
+    "params": "leaf"
+  },
+  {
+    "num": 88,
+    "name": "curlLeaf",
+    "params": "leaf, amount"
+  },
+  {
+    "num": 89,
+    "name": "uncurlLeaf",
+    "params": "leaf"
+  },
+  {
+    "num": 90,
+    "name": "bendLeaf",
+    "params": "leaf, force"
+  },
+  {
+    "num": 91,
+    "name": "twistLeaf",
+    "params": "leaf, angle"
+  },
+  {
+    "num": 92,
+    "name": "flutterLeaf",
+    "params": "leaf, wind"
+  },
+  {
+    "num": 93,
+    "name": "shakeLeaf",
+    "params": "leaf, intensity"
+  },
+  {
+    "num": 94,
+    "name": "droopLeaf",
+    "params": "leaf, amount"
+  },
+  {
+    "num": 95,
+    "name": "restoreLeafPose",
+    "params": "leaf"
+  },
+  {
+    "num": 96,
+    "name": "changeLeafColor",
+    "params": "leaf, color"
+  },
+  {
+    "num": 97,
+    "name": "dryLeaf",
+    "params": "leaf, rate"
+  },
+  {
+    "num": 98,
+    "name": "detachLeaf",
+    "params": "leaf"
+  },
+  {
+    "num": 99,
+    "name": "fallLeaf",
+    "params": "leaf, gravity"
+  },
+  {
+    "num": 100,
+    "name": "landLeaf",
+    "params": "leaf, surface"
+  },
+  {
+    "num": 101,
+    "name": "applyWindToTree",
+    "params": "tree, wind"
+  },
+  {
+    "num": 102,
+    "name": "applyWindToBranch",
+    "params": "branch, wind"
+  },
+  {
+    "num": 103,
+    "name": "applyWindToLeaf",
+    "params": "leaf, wind"
+  },
+  {
+    "num": 104,
+    "name": "calculateWindPressure",
+    "params": "object, wind"
+  },
+  {
+    "num": 105,
+    "name": "calculateWindDrag",
+    "params": "object, wind"
+  },
+  {
+    "num": 106,
+    "name": "calculateWindTorque",
+    "params": "object, wind"
+  },
+  {
+    "num": 107,
+    "name": "swayTreeTrunk",
+    "params": "tree, wind"
+  },
+  {
+    "num": 108,
+    "name": "swayTreeCanopy",
+    "params": "tree, wind"
+  },
+  {
+    "num": 109,
+    "name": "oscillateBranch",
+    "params": "branch, wind"
+  },
+  {
+    "num": 110,
+    "name": "flutterLeaves",
+    "params": "leafGroup, wind"
+  },
+  {
+    "num": 111,
+    "name": "simulateWindGust",
+    "params": "gust"
+  },
+  {
+    "num": 112,
+    "name": "simulateTurbulentWind",
+    "params": "wind"
+  },
+  {
+    "num": 113,
+    "name": "simulateWindShear",
+    "params": "wind"
+  },
+  {
+    "num": 114,
+    "name": "updateWindDirection",
+    "params": "direction"
+  },
+  {
+    "num": 115,
+    "name": "updateWindStrength",
+    "params": "strength"
+  },
+  {
+    "num": 116,
+    "name": "updateWindFrequency",
+    "params": "frequency"
+  },
+  {
+    "num": 117,
+    "name": "detectWindDamage",
+    "params": "object"
+  },
+  {
+    "num": 118,
+    "name": "breakWindDamagedBranch",
+    "params": "branch"
+  },
+  {
+    "num": 119,
+    "name": "shedLeavesInWind",
+    "params": "tree, wind"
+  },
+  {
+    "num": 120,
+    "name": "stabilizeVegetationAfterWind",
+    "params": "tree"
+  },
+  {
+    "num": 121,
+    "name": "createRootSystem",
+    "params": "tree"
+  },
+  {
+    "num": 122,
+    "name": "growRoot",
+    "params": "root, amount"
+  },
+  {
+    "num": 123,
+    "name": "extendRootIntoSoil",
+    "params": "root, direction"
+  },
+  {
+    "num": 124,
+    "name": "thickenRoot",
+    "params": "root, amount"
+  },
+  {
+    "num": 125,
+    "name": "branchRootSystem",
+    "params": "root"
+  },
+  {
+    "num": 126,
+    "name": "detectRootObstacles",
+    "params": "root"
+  },
+  {
+    "num": 127,
+    "name": "wrapRootAroundObstacle",
+    "params": "root, obstacle"
+  },
+  {
+    "num": 128,
+    "name": "penetrateSoil",
+    "params": "root, soil"
+  },
+  {
+    "num": 129,
+    "name": "absorbWaterThroughRoots",
+    "params": "root"
+  },
+  {
+    "num": 130,
+    "name": "absorbNutrientsThroughRoots",
+    "params": "root"
+  },
+  {
+    "num": 131,
+    "name": "detectRootDamage",
+    "params": "root"
+  },
+  {
+    "num": 132,
+    "name": "breakRoot",
+    "params": "root, force"
+  },
+  {
+    "num": 133,
+    "name": "decayRoot",
+    "params": "root, rate"
+  },
+  {
+    "num": 134,
+    "name": "anchorTreeWithRoots",
+    "params": "tree"
+  },
+  {
+    "num": 135,
+    "name": "loosenRootAnchorage",
+    "params": "tree"
+  },
+  {
+    "num": 136,
+    "name": "calculateRootStability",
+    "params": "tree"
+  },
+  {
+    "num": 137,
+    "name": "simulateRootCompetition",
+    "params": "root, neighbor"
+  },
+  {
+    "num": 138,
+    "name": "updateRootGrowthDirection",
+    "params": "root"
+  },
+  {
+    "num": 139,
+    "name": "regenerateRootMesh",
+    "params": "tree"
+  },
+  {
+    "num": 140,
+    "name": "updateRootSoilInteraction",
+    "params": "tree"
+  },
+  {
+    "num": 141,
+    "name": "createFlower",
+    "params": "plant"
+  },
+  {
+    "num": 142,
+    "name": "initializeFlower",
+    "params": "flower"
+  },
+  {
+    "num": 143,
+    "name": "growFlower",
+    "params": "flower, amount"
+  },
+  {
+    "num": 144,
+    "name": "developFlowerBud",
+    "params": "flower"
+  },
+  {
+    "num": 145,
+    "name": "swellFlowerBud",
+    "params": "flower"
+  },
+  {
+    "num": 146,
+    "name": "openFlowerBud",
+    "params": "flower"
+  },
+  {
+    "num": 147,
+    "name": "bloomFlower",
+    "params": "flower"
+  },
+  {
+    "num": 148,
+    "name": "unfoldPetals",
+    "params": "flower"
+  },
+  {
+    "num": 149,
+    "name": "foldPetals",
+    "params": "flower"
+  },
+  {
+    "num": 150,
+    "name": "rotateFlower",
+    "params": "flower, angle"
+  },
+  {
+    "num": 151,
+    "name": "swayFlower",
+    "params": "flower, wind"
+  },
+  {
+    "num": 152,
+    "name": "flutterPetals",
+    "params": "flower, wind"
+  },
+  {
+    "num": 153,
+    "name": "changePetalColor",
+    "params": "flower, color"
+  },
+  {
+    "num": 154,
+    "name": "closeFlowerAtNight",
+    "params": "flower"
+  },
+  {
+    "num": 155,
+    "name": "reopenFlowerAtDay",
+    "params": "flower"
+  },
+  {
+    "num": 156,
+    "name": "wiltFlower",
+    "params": "flower, rate"
+  },
+  {
+    "num": 157,
+    "name": "dryPetals",
+    "params": "flower, rate"
+  },
+  {
+    "num": 158,
+    "name": "detachPetal",
+    "params": "petal"
+  },
+  {
+    "num": 159,
+    "name": "scatterPetals",
+    "params": "flower, force"
+  },
+  {
+    "num": 160,
+    "name": "dropWitheredFlower",
+    "params": "flower"
+  },
+  {
+    "num": 161,
+    "name": "createFruit",
+    "params": "plant"
+  },
+  {
+    "num": 162,
+    "name": "developFruit",
+    "params": "fruit"
+  },
+  {
+    "num": 163,
+    "name": "growFruit",
+    "params": "fruit, amount"
+  },
+  {
+    "num": 164,
+    "name": "ripenFruit",
+    "params": "fruit, rate"
+  },
+  {
+    "num": 165,
+    "name": "changeFruitColor",
+    "params": "fruit, color"
+  },
+  {
+    "num": 166,
+    "name": "softenFruit",
+    "params": "fruit, amount"
+  },
+  {
+    "num": 167,
+    "name": "rotFruit",
+    "params": "fruit, rate"
+  },
+  {
+    "num": 168,
+    "name": "detachFruit",
+    "params": "fruit"
+  },
+  {
+    "num": 169,
+    "name": "fallFruit",
+    "params": "fruit, gravity"
+  },
+  {
+    "num": 170,
+    "name": "bounceFruit",
+    "params": "fruit, surface"
+  },
+  {
+    "num": 171,
+    "name": "splitFruit",
+    "params": "fruit, force"
+  },
+  {
+    "num": 172,
+    "name": "exposeSeeds",
+    "params": "fruit"
+  },
+  {
+    "num": 173,
+    "name": "createSeed",
+    "params": "plant"
+  },
+  {
+    "num": 174,
+    "name": "disperseSeed",
+    "params": "seed, force"
+  },
+  {
+    "num": 175,
+    "name": "burySeed",
+    "params": "seed, soil"
+  },
+  {
+    "num": 176,
+    "name": "germinateSeed",
+    "params": "seed"
+  },
+  {
+    "num": 177,
+    "name": "sproutSeed",
+    "params": "seed"
+  },
+  {
+    "num": 178,
+    "name": "developSeedling",
+    "params": "seedling"
+  },
+  {
+    "num": 179,
+    "name": "maturePlant",
+    "params": "plant"
+  },
+  {
+    "num": 180,
+    "name": "restartPlantGrowthCycle",
+    "params": "plant"
+  },
+  {
+    "num": 181,
+    "name": "calculatePlantHealth",
+    "params": "plant"
+  },
+  {
+    "num": 182,
+    "name": "calculatePlantStress",
+    "params": "plant"
+  },
+  {
+    "num": 183,
+    "name": "detectPlantDrought",
+    "params": "plant"
+  },
+  {
+    "num": 184,
+    "name": "detectPlantDisease",
+    "params": "plant"
+  },
+  {
+    "num": 185,
+    "name": "detectPlantDamage",
+    "params": "plant"
+  },
+  {
+    "num": 186,
+    "name": "reducePlantVitality",
+    "params": "plant, amount"
+  },
+  {
+    "num": 187,
+    "name": "wiltPlant",
+    "params": "plant, rate"
+  },
+  {
+    "num": 188,
+    "name": "dryPlantLeaves",
+    "params": "plant, rate"
+  },
+  {
+    "num": 189,
+    "name": "discolorPlantLeaves",
+    "params": "plant, color"
+  },
+  {
+    "num": 190,
+    "name": "shedDeadLeaves",
+    "params": "plant"
+  },
+  {
+    "num": 191,
+    "name": "killPlant",
+    "params": "plant"
+  },
+  {
+    "num": 192,
+    "name": "enterDormancy",
+    "params": "plant"
+  },
+  {
+    "num": 193,
+    "name": "resumePlantGrowth",
+    "params": "plant"
+  },
+  {
+    "num": 194,
+    "name": "decayPlantTissue",
+    "params": "plant, rate"
+  },
+  {
+    "num": 195,
+    "name": "decomposeDeadPlant",
+    "params": "plant"
+  },
+  {
+    "num": 196,
+    "name": "detachDeadBranch",
+    "params": "branch"
+  },
+  {
+    "num": 197,
+    "name": "collapseDeadTree",
+    "params": "tree"
+  },
+  {
+    "num": 198,
+    "name": "spreadPlantDisease",
+    "params": "plant, neighbor"
+  },
+  {
+    "num": 199,
+    "name": "regenerateDamagedPlant",
+    "params": "plant"
+  },
+  {
+    "num": 200,
+    "name": "recyclePlantNutrients",
+    "params": "plant, soil"
+  },
+  {
+    "num": 201,
+    "name": "createGrassPatch",
+    "params": "area"
+  },
+  {
+    "num": 202,
+    "name": "growGrassBlade",
+    "params": "blade"
+  },
+  {
+    "num": 203,
+    "name": "bendGrassBlade",
+    "params": "blade, wind"
+  },
+  {
+    "num": 204,
+    "name": "swayGrassPatch",
+    "params": "patch, wind"
+  },
+  {
+    "num": 205,
+    "name": "flattenGrassPatch",
+    "params": "patch, force"
+  },
+  {
+    "num": 206,
+    "name": "restoreGrassPatch",
+    "params": "patch"
+  },
+  {
+    "num": 207,
+    "name": "trampleGrassPatch",
+    "params": "patch"
+  },
+  {
+    "num": 208,
+    "name": "regrowTrampledGrass",
+    "params": "patch"
+  },
+  {
+    "num": 209,
+    "name": "dryGrassPatch",
+    "params": "patch, rate"
+  },
+  {
+    "num": 210,
+    "name": "igniteDryGrass",
+    "params": "patch"
+  },
+  {
+    "num": 211,
+    "name": "createShrub",
+    "params": "species"
+  },
+  {
+    "num": 212,
+    "name": "growShrub",
+    "params": "shrub, amount"
+  },
+  {
+    "num": 213,
+    "name": "trimShrub",
+    "params": "shrub, amount"
+  },
+  {
+    "num": 214,
+    "name": "crushShrub",
+    "params": "shrub, force"
+  },
+  {
+    "num": 215,
+    "name": "createVine",
+    "params": "plant"
+  },
+  {
+    "num": 216,
+    "name": "extendVine",
+    "params": "vine, amount"
+  },
+  {
+    "num": 217,
+    "name": "wrapVineAroundObject",
+    "params": "vine, object"
+  },
+  {
+    "num": 218,
+    "name": "detachVine",
+    "params": "vine"
+  },
+  {
+    "num": 219,
+    "name": "growMoss",
+    "params": "surface"
+  },
+  {
+    "num": 220,
+    "name": "dryMoss",
+    "params": "surface, rate"
+  },
+  {
+    "num": 221,
+    "name": "createRock",
+    "params": "type"
+  },
+  {
+    "num": 222,
+    "name": "generateRockGeometry",
+    "params": "rock"
+  },
+  {
+    "num": 223,
+    "name": "setRockHardness",
+    "params": "rock, hardness"
+  },
+  {
+    "num": 224,
+    "name": "applyRockStress",
+    "params": "rock, force"
+  },
+  {
+    "num": 225,
+    "name": "detectRockCracks",
+    "params": "rock"
+  },
+  {
+    "num": 226,
+    "name": "initiateRockFracture",
+    "params": "rock"
+  },
+  {
+    "num": 227,
+    "name": "fractureRock",
+    "params": "rock, force"
+  },
+  {
+    "num": 228,
+    "name": "splitRockIntoFragments",
+    "params": "rock"
+  },
+  {
+    "num": 229,
+    "name": "chipRockSurface",
+    "params": "rock, impact"
+  },
+  {
+    "num": 230,
+    "name": "erodeRockSurface",
+    "params": "rock, rate"
+  },
+  {
+    "num": 231,
+    "name": "weatherRock",
+    "params": "rock, weather"
+  },
+  {
+    "num": 232,
+    "name": "dissolveRock",
+    "params": "rock, fluid"
+  },
+  {
+    "num": 233,
+    "name": "polishRockSurface",
+    "params": "rock, amount"
+  },
+  {
+    "num": 234,
+    "name": "dislodgeRock",
+    "params": "rock, force"
+  },
+  {
+    "num": 235,
+    "name": "rollRock",
+    "params": "rock, direction"
+  },
+  {
+    "num": 236,
+    "name": "slideRock",
+    "params": "rock, surface"
+  },
+  {
+    "num": 237,
+    "name": "toppleRock",
+    "params": "rock, force"
+  },
+  {
+    "num": 238,
+    "name": "buryRock",
+    "params": "rock, sediment"
+  },
+  {
+    "num": 239,
+    "name": "exposeRock",
+    "params": "rock, erosion"
+  },
+  {
+    "num": 240,
+    "name": "regenerateRockCollision",
+    "params": "rock"
+  },
+  {
+    "num": 241,
+    "name": "createMountain",
+    "params": "region"
+  },
+  {
+    "num": 242,
+    "name": "generateMountainTerrain",
+    "params": "region"
+  },
+  {
+    "num": 243,
+    "name": "updateMountainHeight",
+    "params": "region, amount"
+  },
+  {
+    "num": 244,
+    "name": "deformMountainSurface",
+    "params": "region, force"
+  },
+  {
+    "num": 245,
+    "name": "formRockyRidge",
+    "params": "region"
+  },
+  {
+    "num": 246,
+    "name": "formMountainValley",
+    "params": "region"
+  },
+  {
+    "num": 247,
+    "name": "generateCliffFace",
+    "params": "region"
+  },
+  {
+    "num": 248,
+    "name": "erodeMountain",
+    "params": "region, rate"
+  },
+  {
+    "num": 249,
+    "name": "weatherMountainSurface",
+    "params": "region, weather"
+  },
+  {
+    "num": 250,
+    "name": "fractureMountainRock",
+    "params": "region, force"
+  },
+  {
+    "num": 251,
+    "name": "triggerRockfall",
+    "params": "region"
+  },
+  {
+    "num": 252,
+    "name": "triggerLandslide",
+    "params": "region"
+  },
+  {
+    "num": 253,
+    "name": "collapseCliffSection",
+    "params": "region, section"
+  },
+  {
+    "num": 254,
+    "name": "generateTalusSlope",
+    "params": "region"
+  },
+  {
+    "num": 255,
+    "name": "depositMountainSediment",
+    "params": "region, sediment"
+  },
+  {
+    "num": 256,
+    "name": "carveRiverValley",
+    "params": "region, river"
+  },
+  {
+    "num": 257,
+    "name": "accumulateSnowOnMountain",
+    "params": "region, snow"
+  },
+  {
+    "num": 258,
+    "name": "meltMountainSnow",
+    "params": "region, temperature"
+  },
+  {
+    "num": 259,
+    "name": "calculateSlopeStability",
+    "params": "region"
+  },
+  {
+    "num": 260,
+    "name": "updateMountainCollision",
+    "params": "region"
+  },
+  {
+    "num": 261,
+    "name": "createSoilPatch",
+    "params": "area"
+  },
+  {
+    "num": 262,
+    "name": "initializeSoilProperties",
+    "params": "soil"
+  },
+  {
+    "num": 263,
+    "name": "compactSoil",
+    "params": "soil, force"
+  },
+  {
+    "num": 264,
+    "name": "loosenSoil",
+    "params": "soil, amount"
+  },
+  {
+    "num": 265,
+    "name": "deformSoilSurface",
+    "params": "soil, force"
+  },
+  {
+    "num": 266,
+    "name": "createFootprint",
+    "params": "soil, foot"
+  },
+  {
+    "num": 267,
+    "name": "eraseFootprint",
+    "params": "soil, rate"
+  },
+  {
+    "num": 268,
+    "name": "displaceSoil",
+    "params": "soil, direction"
+  },
+  {
+    "num": 269,
+    "name": "excavateSoil",
+    "params": "soil, amount"
+  },
+  {
+    "num": 270,
+    "name": "fillExcavation",
+    "params": "soil, material"
+  },
+  {
+    "num": 271,
+    "name": "erodeSoil",
+    "params": "soil, water"
+  },
+  {
+    "num": 272,
+    "name": "depositSediment",
+    "params": "soil, sediment"
+  },
+  {
+    "num": 273,
+    "name": "liquefySoil",
+    "params": "soil, saturation"
+  },
+  {
+    "num": 274,
+    "name": "dryMud",
+    "params": "mud, rate"
+  },
+  {
+    "num": 275,
+    "name": "crackDryMud",
+    "params": "mud"
+  },
+  {
+    "num": 276,
+    "name": "splashMud",
+    "params": "mud, impact"
+  },
+  {
+    "num": 277,
+    "name": "simulateSandSliding",
+    "params": "sand, slope"
+  },
+  {
+    "num": 278,
+    "name": "formSandDune",
+    "params": "sand, wind"
+  },
+  {
+    "num": 279,
+    "name": "reshapeSandDune",
+    "params": "dune, wind"
+  },
+  {
+    "num": 280,
+    "name": "updateTerrainSurface",
+    "params": "terrain"
+  },
+  {
+    "num": 281,
+    "name": "createWaterBody",
+    "params": "type"
+  },
+  {
+    "num": 282,
+    "name": "initializeWaterSimulation",
+    "params": "water"
+  },
+  {
+    "num": 283,
+    "name": "updateWaterSimulation",
+    "params": "water, deltaTime"
+  },
+  {
+    "num": 284,
+    "name": "calculateWaterFlow",
+    "params": "water"
+  },
+  {
+    "num": 285,
+    "name": "updateWaterLevel",
+    "params": "water, level"
+  },
+  {
+    "num": 286,
+    "name": "simulateWaterCurrent",
+    "params": "water, force"
+  },
+  {
+    "num": 287,
+    "name": "generateWaterWaves",
+    "params": "water, wind"
+  },
+  {
+    "num": 288,
+    "name": "propagateWaterWave",
+    "params": "wave"
+  },
+  {
+    "num": 289,
+    "name": "reflectWaterWave",
+    "params": "wave, surface"
+  },
+  {
+    "num": 290,
+    "name": "createWaterRipple",
+    "params": "position"
+  },
+  {
+    "num": 291,
+    "name": "createSplash",
+    "params": "position, force"
+  },
+  {
+    "num": 292,
+    "name": "simulateWaterDroplets",
+    "params": "splash"
+  },
+  {
+    "num": 293,
+    "name": "simulateWaterfall",
+    "params": "waterfall"
+  },
+  {
+    "num": 294,
+    "name": "simulateRiverFlow",
+    "params": "river"
+  },
+  {
+    "num": 295,
+    "name": "simulateStreamFlow",
+    "params": "stream"
+  },
+  {
+    "num": 296,
+    "name": "simulateFlooding",
+    "params": "area, water"
+  },
+  {
+    "num": 297,
+    "name": "erodeRiverbank",
+    "params": "riverbank, water"
+  },
+  {
+    "num": 298,
+    "name": "depositRiverSediment",
+    "params": "river, sediment"
+  },
+  {
+    "num": 299,
+    "name": "freezeWaterSurface",
+    "params": "water, temperature"
+  },
+  {
+    "num": 300,
+    "name": "meltWaterSurface",
+    "params": "water, temperature"
+  },
+  {
+    "num": 301,
+    "name": "createRainSystem",
+    "params": ""
+  },
+  {
+    "num": 302,
+    "name": "spawnRaindrops",
+    "params": "area"
+  },
+  {
+    "num": 303,
+    "name": "updateRaindropMotion",
+    "params": "drop, deltaTime"
+  },
+  {
+    "num": 304,
+    "name": "applyWindToRaindrops",
+    "params": "drops, wind"
+  },
+  {
+    "num": 305,
+    "name": "createRainSplash",
+    "params": "position"
+  },
+  {
+    "num": 306,
+    "name": "accumulateRainwater",
+    "params": "surface, amount"
+  },
+  {
+    "num": 307,
+    "name": "createSnowfallSystem",
+    "params": ""
+  },
+  {
+    "num": 308,
+    "name": "spawnSnowflakes",
+    "params": "area"
+  },
+  {
+    "num": 309,
+    "name": "updateSnowflakeMotion",
+    "params": "flake, deltaTime"
+  },
+  {
+    "num": 310,
+    "name": "accumulateSnow",
+    "params": "surface, amount"
+  },
+  {
+    "num": 311,
+    "name": "compactSnow",
+    "params": "snow, force"
+  },
+  {
+    "num": 312,
+    "name": "meltSnow",
+    "params": "snow, temperature"
+  },
+  {
+    "num": 313,
+    "name": "createIcicle",
+    "params": "surface"
+  },
+  {
+    "num": 314,
+    "name": "growIcicle",
+    "params": "icicle, temperature"
+  },
+  {
+    "num": 315,
+    "name": "breakIcicle",
+    "params": "icicle, force"
+  },
+  {
+    "num": 316,
+    "name": "freezeWetSurface",
+    "params": "surface, temperature"
+  },
+  {
+    "num": 317,
+    "name": "thawFrozenSurface",
+    "params": "surface, temperature"
+  },
+  {
+    "num": 318,
+    "name": "createHailstone",
+    "params": "size"
+  },
+  {
+    "num": 319,
+    "name": "spawnHailstorm",
+    "params": "area"
+  },
+  {
+    "num": 320,
+    "name": "simulateHailImpact",
+    "params": "hailstone, surface"
+  },
+  {
+    "num": 321,
+    "name": "createWindField",
+    "params": ""
+  },
+  {
+    "num": 322,
+    "name": "updateWindField",
+    "params": "field, deltaTime"
+  },
+  {
+    "num": 323,
+    "name": "setWindDirection",
+    "params": "direction"
+  },
+  {
+    "num": 324,
+    "name": "setWindSpeed",
+    "params": "speed"
+  },
+  {
+    "num": 325,
+    "name": "calculateWindPressure",
+    "params": "object, wind"
+  },
+  {
+    "num": 326,
+    "name": "calculateWindDrag",
+    "params": "object, wind"
+  },
+  {
+    "num": 327,
+    "name": "simulateWindGust",
+    "params": "gust"
+  },
+  {
+    "num": 328,
+    "name": "simulateWindTurbulence",
+    "params": "field"
+  },
+  {
+    "num": 329,
+    "name": "simulateThermalUpdraft",
+    "params": "field"
+  },
+  {
+    "num": 330,
+    "name": "simulateDowndraft",
+    "params": "field"
+  },
+  {
+    "num": 331,
+    "name": "simulateWindShear",
+    "params": "field"
+  },
+  {
+    "num": 332,
+    "name": "simulateDustDevil",
+    "params": "position"
+  },
+  {
+    "num": 333,
+    "name": "simulateTornado",
+    "params": "tornado"
+  },
+  {
+    "num": 334,
+    "name": "applyWindToParticles",
+    "params": "particles, wind"
+  },
+  {
+    "num": 335,
+    "name": "applyWindToCloth",
+    "params": "cloth, wind"
+  },
+  {
+    "num": 336,
+    "name": "applyWindToFlags",
+    "params": "flags, wind"
+  },
+  {
+    "num": 337,
+    "name": "applyWindToStructures",
+    "params": "structures, wind"
+  },
+  {
+    "num": 338,
+    "name": "calculateWindLoad",
+    "params": "structure, wind"
+  },
+  {
+    "num": 339,
+    "name": "detectWindDamage",
+    "params": "object, wind"
+  },
+  {
+    "num": 340,
+    "name": "updateAtmosphericPressure",
+    "params": "field"
+  },
+  {
+    "num": 341,
+    "name": "createCloud",
+    "params": "cloudType"
+  },
+  {
+    "num": 342,
+    "name": "generateCloudVolume",
+    "params": "cloud"
+  },
+  {
+    "num": 343,
+    "name": "updateCloudShape",
+    "params": "cloud, deltaTime"
+  },
+  {
+    "num": 344,
+    "name": "moveCloudWithWind",
+    "params": "cloud, wind"
+  },
+  {
+    "num": 345,
+    "name": "mergeClouds",
+    "params": "cloudA, cloudB"
+  },
+  {
+    "num": 346,
+    "name": "separateClouds",
+    "params": "cloudA, cloudB"
+  },
+  {
+    "num": 347,
+    "name": "dissipateCloud",
+    "params": "cloud, rate"
+  },
+  {
+    "num": 348,
+    "name": "condenseCloudVapor",
+    "params": "cloud"
+  },
+  {
+    "num": 349,
+    "name": "simulateCumulusGrowth",
+    "params": "cloud"
+  },
+  {
+    "num": 350,
+    "name": "simulateStormCloudGrowth",
+    "params": "cloud"
+  },
+  {
+    "num": 351,
+    "name": "createFogVolume",
+    "params": "area"
+  },
+  {
+    "num": 352,
+    "name": "spreadFog",
+    "params": "fog, wind"
+  },
+  {
+    "num": 353,
+    "name": "dissipateFog",
+    "params": "fog, temperature"
+  },
+  {
+    "num": 354,
+    "name": "simulateGroundFog",
+    "params": "area"
+  },
+  {
+    "num": 355,
+    "name": "simulateMistOverWater",
+    "params": "water"
+  },
+  {
+    "num": 356,
+    "name": "simulateAtmosphericHaze",
+    "params": "atmosphere"
+  },
+  {
+    "num": 357,
+    "name": "createRainbow",
+    "params": "atmosphere"
+  },
+  {
+    "num": 358,
+    "name": "updateRainbowVisibility",
+    "params": "rainbow"
+  },
+  {
+    "num": 359,
+    "name": "simulateHeatShimmer",
+    "params": "area"
+  },
+  {
+    "num": 360,
+    "name": "updateSkyAtmosphere",
+    "params": "atmosphere"
+  },
+  {
+    "num": 361,
+    "name": "createThunderstorm",
+    "params": "area"
+  },
+  {
+    "num": 362,
+    "name": "accumulateStormEnergy",
+    "params": "storm"
+  },
+  {
+    "num": 363,
+    "name": "generateLightningBolt",
+    "params": "storm"
+  },
+  {
+    "num": 364,
+    "name": "branchLightningBolt",
+    "params": "bolt"
+  },
+  {
+    "num": 365,
+    "name": "illuminateSceneWithLightning",
+    "params": "bolt"
+  },
+  {
+    "num": 366,
+    "name": "createLightningFlash",
+    "params": "position"
+  },
+  {
+    "num": 367,
+    "name": "calculateLightningStrikeTarget",
+    "params": "storm"
+  },
+  {
+    "num": 368,
+    "name": "strikeLightningTarget",
+    "params": "target"
+  },
+  {
+    "num": 369,
+    "name": "applyLightningDamage",
+    "params": "target"
+  },
+  {
+    "num": 370,
+    "name": "createThunderSound",
+    "params": "bolt"
+  },
+  {
+    "num": 371,
+    "name": "propagateThunderWave",
+    "params": "position"
+  },
+  {
+    "num": 372,
+    "name": "createStormWind",
+    "params": "storm"
+  },
+  {
+    "num": 373,
+    "name": "generateStormRain",
+    "params": "storm"
+  },
+  {
+    "num": 374,
+    "name": "spawnStormDebris",
+    "params": "storm"
+  },
+  {
+    "num": 375,
+    "name": "simulateStormSurge",
+    "params": "coast"
+  },
+  {
+    "num": 376,
+    "name": "calculateStormDamage",
+    "params": "structures"
+  },
+  {
+    "num": 377,
+    "name": "dissipateThunderstorm",
+    "params": "storm"
+  },
+  {
+    "num": 378,
+    "name": "simulateHurricane",
+    "params": "hurricane"
+  },
+  {
+    "num": 379,
+    "name": "simulateCyclone",
+    "params": "cyclone"
+  },
+  {
+    "num": 380,
+    "name": "updateStormRecovery",
+    "params": "area"
+  },
+  {
+    "num": 381,
+    "name": "createFire",
+    "params": "source"
+  },
+  {
+    "num": 382,
+    "name": "igniteObject",
+    "params": "object, ignitionSource"
+  },
+  {
+    "num": 383,
+    "name": "extinguishFire",
+    "params": "fire"
+  },
+  {
+    "num": 384,
+    "name": "spreadFire",
+    "params": "fire, target"
+  },
+  {
+    "num": 385,
+    "name": "calculateCombustionRate",
+    "params": "object"
+  },
+  {
+    "num": 386,
+    "name": "calculateFireTemperature",
+    "params": "fire"
+  },
+  {
+    "num": 387,
+    "name": "updateFlameShape",
+    "params": "fire"
+  },
+  {
+    "num": 388,
+    "name": "spawnFireParticles",
+    "params": "fire"
+  },
+  {
+    "num": 389,
+    "name": "generateSmoke",
+    "params": "fire"
+  },
+  {
+    "num": 390,
+    "name": "spreadSmoke",
+    "params": "smoke, wind"
+  },
+  {
+    "num": 391,
+    "name": "dissipateSmoke",
+    "params": "smoke, rate"
+  },
+  {
+    "num": 392,
+    "name": "createEmber",
+    "params": "emberSource"
+  },
+  {
+    "num": 393,
+    "name": "scatterEmbers",
+    "params": "embers, wind"
+  },
+  {
+    "num": 394,
+    "name": "igniteDryVegetation",
+    "params": "plant"
+  },
+  {
+    "num": 395,
+    "name": "charObjectSurface",
+    "params": "object, heat"
+  },
+  {
+    "num": 396,
+    "name": "burnObjectMaterial",
+    "params": "object, rate"
+  },
+  {
+    "num": 397,
+    "name": "deformObjectByHeat",
+    "params": "object, heat"
+  },
+  {
+    "num": 398,
+    "name": "meltObjectMaterial",
+    "params": "object, temperature"
+  },
+  {
+    "num": 399,
+    "name": "coolBurningObject",
+    "params": "object, rate"
+  },
+  {
+    "num": 400,
+    "name": "calculateFireDamage",
+    "params": "object"
+  },
+  {
+    "num": 401,
+    "name": "createRockfall",
+    "params": "region"
+  },
+  {
+    "num": 402,
+    "name": "releaseRockFromSlope",
+    "params": "rock, slope"
+  },
+  {
+    "num": 403,
+    "name": "calculateRockfallTrajectory",
+    "params": "rock"
+  },
+  {
+    "num": 404,
+    "name": "simulateRockBouncing",
+    "params": "rock, surface"
+  },
+  {
+    "num": 405,
+    "name": "simulateRockRolling",
+    "params": "rock, slope"
+  },
+  {
+    "num": 406,
+    "name": "simulateRockFragmentation",
+    "params": "rock"
+  },
+  {
+    "num": 407,
+    "name": "createLandslide",
+    "params": "region"
+  },
+  {
+    "num": 408,
+    "name": "calculateSlopeFailure",
+    "params": "region"
+  },
+  {
+    "num": 409,
+    "name": "displaceLandslideSoil",
+    "params": "landslide"
+  },
+  {
+    "num": 410,
+    "name": "simulateDebrisFlow",
+    "params": "flow"
+  },
+  {
+    "num": 411,
+    "name": "depositLandslideDebris",
+    "params": "landslide"
+  },
+  {
+    "num": 412,
+    "name": "createAvalanche",
+    "params": "region"
+  },
+  {
+    "num": 413,
+    "name": "triggerSnowSlabFailure",
+    "params": "snowpack"
+  },
+  {
+    "num": 414,
+    "name": "simulateAvalancheMotion",
+    "params": "avalanche"
+  },
+  {
+    "num": 415,
+    "name": "simulateAvalancheDebris",
+    "params": "avalanche"
+  },
+  {
+    "num": 416,
+    "name": "buryObjectsInDebris",
+    "params": "objects, debris"
+  },
+  {
+    "num": 417,
+    "name": "calculateBurialDepth",
+    "params": "object, debris"
+  },
+  {
+    "num": 418,
+    "name": "stabilizeDamagedSlope",
+    "params": "region"
+  },
+  {
+    "num": 419,
+    "name": "erodeUnstableSlope",
+    "params": "region"
+  },
+  {
+    "num": 420,
+    "name": "updateSlopeAfterFailure",
+    "params": "region"
+  },
+  {
+    "num": 421,
+    "name": "createBuilding",
+    "params": "type"
+  },
+  {
+    "num": 422,
+    "name": "initializeBuilding",
+    "params": "building"
+  },
+  {
+    "num": 423,
+    "name": "generateBuildingGeometry",
+    "params": "building"
+  },
+  {
+    "num": 424,
+    "name": "generateBuildingFoundation",
+    "params": "building"
+  },
+  {
+    "num": 425,
+    "name": "generateBuildingWalls",
+    "params": "building"
+  },
+  {
+    "num": 426,
+    "name": "generateBuildingRoof",
+    "params": "building"
+  },
+  {
+    "num": 427,
+    "name": "generateBuildingFloors",
+    "params": "building"
+  },
+  {
+    "num": 428,
+    "name": "generateBuildingColumns",
+    "params": "building"
+  },
+  {
+    "num": 429,
+    "name": "generateBuildingBeams",
+    "params": "building"
+  },
+  {
+    "num": 430,
+    "name": "connectStructuralElements",
+    "params": "building"
+  },
+  {
+    "num": 431,
+    "name": "calculateBuildingMass",
+    "params": "building"
+  },
+  {
+    "num": 432,
+    "name": "calculateBuildingCenterOfMass",
+    "params": "building"
+  },
+  {
+    "num": 433,
+    "name": "calculateStructuralStress",
+    "params": "building"
+  },
+  {
+    "num": 434,
+    "name": "calculateStructuralLoad",
+    "params": "building"
+  },
+  {
+    "num": 435,
+    "name": "detectStructuralWeakness",
+    "params": "building"
+  },
+  {
+    "num": 436,
+    "name": "updateBuildingCondition",
+    "params": "building"
+  },
+  {
+    "num": 437,
+    "name": "repairBuildingDamage",
+    "params": "building"
+  },
+  {
+    "num": 438,
+    "name": "renovateBuilding",
+    "params": "building"
+  },
+  {
+    "num": 439,
+    "name": "demolishBuilding",
+    "params": "building"
+  },
+  {
+    "num": 440,
+    "name": "regenerateBuildingCollision",
+    "params": "building"
+  },
+  {
+    "num": 441,
+    "name": "createWall",
+    "params": "building"
+  },
+  {
+    "num": 442,
+    "name": "crackWall",
+    "params": "wall, force"
+  },
+  {
+    "num": 443,
+    "name": "chipWallSurface",
+    "params": "wall, impact"
+  },
+  {
+    "num": 444,
+    "name": "breakWall",
+    "params": "wall, force"
+  },
+  {
+    "num": 445,
+    "name": "collapseWallSection",
+    "params": "wall, section"
+  },
+  {
+    "num": 446,
+    "name": "createRoof",
+    "params": "building"
+  },
+  {
+    "num": 447,
+    "name": "bendRoof",
+    "params": "roof, load"
+  },
+  {
+    "num": 448,
+    "name": "crackRoof",
+    "params": "roof, force"
+  },
+  {
+    "num": 449,
+    "name": "detachRoofPanel",
+    "params": "roof, panel"
+  },
+  {
+    "num": 450,
+    "name": "collapseRoof",
+    "params": "roof, load"
+  },
+  {
+    "num": 451,
+    "name": "createDoor",
+    "params": "building"
+  },
+  {
+    "num": 452,
+    "name": "openDoor",
+    "params": "door"
+  },
+  {
+    "num": 453,
+    "name": "closeDoor",
+    "params": "door"
+  },
+  {
+    "num": 454,
+    "name": "breakDoor",
+    "params": "door, force"
+  },
+  {
+    "num": 455,
+    "name": "detachDoorFromFrame",
+    "params": "door"
+  },
+  {
+    "num": 456,
+    "name": "createWindow",
+    "params": "building"
+  },
+  {
+    "num": 457,
+    "name": "crackWindowGlass",
+    "params": "window, impact"
+  },
+  {
+    "num": 458,
+    "name": "shatterWindowGlass",
+    "params": "window, force"
+  },
+  {
+    "num": 459,
+    "name": "scatterGlassFragments",
+    "params": "window"
+  },
+  {
+    "num": 460,
+    "name": "repairWindow",
+    "params": "window"
+  },
+  {
+    "num": 461,
+    "name": "initiateStructuralCollapse",
+    "params": "building"
+  },
+  {
+    "num": 462,
+    "name": "calculateCollapseSequence",
+    "params": "building"
+  },
+  {
+    "num": 463,
+    "name": "weakenStructuralSupport",
+    "params": "support"
+  },
+  {
+    "num": 464,
+    "name": "removeStructuralSupport",
+    "params": "support"
+  },
+  {
+    "num": 465,
+    "name": "fractureStructuralJoint",
+    "params": "joint"
+  },
+  {
+    "num": 466,
+    "name": "breakStructuralBeam",
+    "params": "beam, force"
+  },
+  {
+    "num": 467,
+    "name": "buckleStructuralColumn",
+    "params": "column, load"
+  },
+  {
+    "num": 468,
+    "name": "triggerProgressiveCollapse",
+    "params": "building"
+  },
+  {
+    "num": 469,
+    "name": "simulateFloorCollapse",
+    "params": "floor"
+  },
+  {
+    "num": 470,
+    "name": "simulateRoofCollapse",
+    "params": "roof"
+  },
+  {
+    "num": 471,
+    "name": "detachStructuralDebris",
+    "params": "building"
+  },
+  {
+    "num": 472,
+    "name": "spawnBuildingFragments",
+    "params": "building"
+  },
+  {
+    "num": 473,
+    "name": "applyImpulseToDebris",
+    "params": "debris, impulse"
+  },
+  {
+    "num": 474,
+    "name": "simulateDebrisCollision",
+    "params": "debris"
+  },
+  {
+    "num": 475,
+    "name": "simulateDebrisPile",
+    "params": "debris"
+  },
+  {
+    "num": 476,
+    "name": "settleDebrisPile",
+    "params": "debris"
+  },
+  {
+    "num": 477,
+    "name": "generateDustCloud",
+    "params": "debris"
+  },
+  {
+    "num": 478,
+    "name": "dissipateCollapseDust",
+    "params": "dust"
+  },
+  {
+    "num": 479,
+    "name": "updateCollapsedBuilding",
+    "params": "building"
+  },
+  {
+    "num": 480,
+    "name": "clearBuildingDebris",
+    "params": "building"
+  },
+  {
+    "num": 481,
+    "name": "createFurniture",
+    "params": "type"
+  },
+  {
+    "num": 482,
+    "name": "moveFurniture",
+    "params": "furniture, position"
+  },
+  {
+    "num": 483,
+    "name": "rotateFurniture",
+    "params": "furniture, angle"
+  },
+  {
+    "num": 484,
+    "name": "slideFurniture",
+    "params": "furniture, surface"
+  },
+  {
+    "num": 485,
+    "name": "toppleChair",
+    "params": "chair, force"
+  },
+  {
+    "num": 486,
+    "name": "pullChair",
+    "params": "chair, direction"
+  },
+  {
+    "num": 487,
+    "name": "pushTable",
+    "params": "table, force"
+  },
+  {
+    "num": 488,
+    "name": "overturnTable",
+    "params": "table, force"
+  },
+  {
+    "num": 489,
+    "name": "openDrawer",
+    "params": "drawer"
+  },
+  {
+    "num": 490,
+    "name": "closeDrawer",
+    "params": "drawer"
+  },
+  {
+    "num": 491,
+    "name": "openCabinet",
+    "params": "cabinet"
+  },
+  {
+    "num": 492,
+    "name": "closeCabinet",
+    "params": "cabinet"
+  },
+  {
+    "num": 493,
+    "name": "breakFurnitureJoint",
+    "params": "furniture, joint"
+  },
+  {
+    "num": 494,
+    "name": "splitWoodenFurniture",
+    "params": "furniture"
+  },
+  {
+    "num": 495,
+    "name": "shatterCeramicObject",
+    "params": "object, impact"
+  },
+  {
+    "num": 496,
+    "name": "breakGlassObject",
+    "params": "object, impact"
+  },
+  {
+    "num": 497,
+    "name": "deformMetalObject",
+    "params": "object, force"
+  },
+  {
+    "num": 498,
+    "name": "tearFabricObject",
+    "params": "object, force"
+  },
+  {
+    "num": 499,
+    "name": "scatterHouseholdObjects",
+    "params": "objects, impulse"
+  },
+  {
+    "num": 500,
+    "name": "restoreFurnitureState",
+    "params": "furniture"
+  },
+  {
+    "num": 501,
+    "name": "initializeRigidBody",
+    "params": "object"
+  },
+  {
+    "num": 502,
+    "name": "setObjectMass",
+    "params": "object, mass"
+  },
+  {
+    "num": 503,
+    "name": "setObjectDensity",
+    "params": "object, density"
+  },
+  {
+    "num": 504,
+    "name": "setObjectFriction",
+    "params": "object, friction"
+  },
+  {
+    "num": 505,
+    "name": "setObjectRestitution",
+    "params": "object, restitution"
+  },
+  {
+    "num": 506,
+    "name": "applyForceToObject",
+    "params": "object, force"
+  },
+  {
+    "num": 507,
+    "name": "applyImpulseToObject",
+    "params": "object, impulse"
+  },
+  {
+    "num": 508,
+    "name": "applyTorqueToObject",
+    "params": "object, torque"
+  },
+  {
+    "num": 509,
+    "name": "calculateObjectVelocity",
+    "params": "object"
+  },
+  {
+    "num": 510,
+    "name": "calculateObjectAcceleration",
+    "params": "object"
+  },
+  {
+    "num": 511,
+    "name": "calculateAngularVelocity",
+    "params": "object"
+  },
+  {
+    "num": 512,
+    "name": "simulateObjectGravity",
+    "params": "object"
+  },
+  {
+    "num": 513,
+    "name": "simulateObjectAirResistance",
+    "params": "object"
+  },
+  {
+    "num": 514,
+    "name": "detectObjectCollision",
+    "params": "objectA, objectB"
+  },
+  {
+    "num": 515,
+    "name": "resolveObjectCollision",
+    "params": "objectA, objectB"
+  },
+  {
+    "num": 516,
+    "name": "calculateImpactEnergy",
+    "params": "objectA, objectB"
+  },
+  {
+    "num": 517,
+    "name": "calculateImpactDamage",
+    "params": "object, impact"
+  },
+  {
+    "num": 518,
+    "name": "simulateObjectPenetration",
+    "params": "object, surface"
+  },
+  {
+    "num": 519,
+    "name": "simulateObjectBounce",
+    "params": "object, surface"
+  },
+  {
+    "num": 520,
+    "name": "settleRigidBody",
+    "params": "object"
+  },
+  {
+    "num": 521,
+    "name": "initializeDestructionSystem",
+    "params": "object"
+  },
+  {
+    "num": 522,
+    "name": "defineFractureRegions",
+    "params": "object"
+  },
+  {
+    "num": 523,
+    "name": "calculateFractureThreshold",
+    "params": "object"
+  },
+  {
+    "num": 524,
+    "name": "detectCuttingContact",
+    "params": "object, tool"
+  },
+  {
+    "num": 525,
+    "name": "applyCuttingForce",
+    "params": "object, tool"
+  },
+  {
+    "num": 526,
+    "name": "sliceObject",
+    "params": "object, plane"
+  },
+  {
+    "num": 527,
+    "name": "cutObjectIntoPieces",
+    "params": "object, cutPath"
+  },
+  {
+    "num": 528,
+    "name": "severBranchWithBlade",
+    "params": "branch, blade"
+  },
+  {
+    "num": 529,
+    "name": "chopTreeTrunk",
+    "params": "tree, blade"
+  },
+  {
+    "num": 530,
+    "name": "splitWoodLog",
+    "params": "log, tool"
+  },
+  {
+    "num": 531,
+    "name": "breakObjectAtJoint",
+    "params": "object, joint"
+  },
+  {
+    "num": 532,
+    "name": "snapObjectInHalf",
+    "params": "object, force"
+  },
+  {
+    "num": 533,
+    "name": "fractureObjectSurface",
+    "params": "object, impact"
+  },
+  {
+    "num": 534,
+    "name": "shatterObject",
+    "params": "object, impulse"
+  },
+  {
+    "num": 535,
+    "name": "splitRockWithImpact",
+    "params": "rock, impact"
+  },
+  {
+    "num": 536,
+    "name": "detachObjectPart",
+    "params": "object, part"
+  },
+  {
+    "num": 537,
+    "name": "calculateDetachedPartVelocity",
+    "params": "part"
+  },
+  {
+    "num": 538,
+    "name": "spawnDetachedFragments",
+    "params": "object"
+  },
+  {
+    "num": 539,
+    "name": "applyDebrisPhysics",
+    "params": "fragments"
+  },
+  {
+    "num": 540,
+    "name": "finalizeObjectDestruction",
+    "params": "object"
+  },
+  {
+    "num": 541,
+    "name": "createSoftBody",
+    "params": "object"
+  },
+  {
+    "num": 542,
+    "name": "initializeSoftBodyPhysics",
+    "params": "object"
+  },
+  {
+    "num": 543,
+    "name": "deformSoftBody",
+    "params": "object, force"
+  },
+  {
+    "num": 544,
+    "name": "stretchSoftBody",
+    "params": "object, amount"
+  },
+  {
+    "num": 545,
+    "name": "compressSoftBody",
+    "params": "object, amount"
+  },
+  {
+    "num": 546,
+    "name": "bendSoftBody",
+    "params": "object, force"
+  },
+  {
+    "num": 547,
+    "name": "twistSoftBody",
+    "params": "object, torque"
+  },
+  {
+    "num": 548,
+    "name": "restoreSoftBodyShape",
+    "params": "object"
+  },
+  {
+    "num": 549,
+    "name": "simulateClothMotion",
+    "params": "cloth"
+  },
+  {
+    "num": 550,
+    "name": "simulateClothWind",
+    "params": "cloth, wind"
+  },
+  {
+    "num": 551,
+    "name": "foldCloth",
+    "params": "cloth"
+  },
+  {
+    "num": 552,
+    "name": "unfoldCloth",
+    "params": "cloth"
+  },
+  {
+    "num": 553,
+    "name": "tearCloth",
+    "params": "cloth, force"
+  },
+  {
+    "num": 554,
+    "name": "simulatePaperBending",
+    "params": "paper, force"
+  },
+  {
+    "num": 555,
+    "name": "crumplePaper",
+    "params": "paper"
+  },
+  {
+    "num": 556,
+    "name": "tearPaper",
+    "params": "paper, force"
+  },
+  {
+    "num": 557,
+    "name": "burnPaper",
+    "params": "paper, rate"
+  },
+  {
+    "num": 558,
+    "name": "simulateRopeMotion",
+    "params": "rope"
+  },
+  {
+    "num": 559,
+    "name": "stretchRope",
+    "params": "rope, force"
+  },
+  {
+    "num": 560,
+    "name": "snapRope",
+    "params": "rope, force"
+  },
+  {
+    "num": 561,
+    "name": "createMechanicalObject",
+    "params": "type"
+  },
+  {
+    "num": 562,
+    "name": "initializeMechanicalJoints",
+    "params": "object"
+  },
+  {
+    "num": 563,
+    "name": "rotateMechanicalJoint",
+    "params": "joint, angle"
+  },
+  {
+    "num": 564,
+    "name": "slideMechanicalJoint",
+    "params": "joint, distance"
+  },
+  {
+    "num": 565,
+    "name": "lockMechanicalJoint",
+    "params": "joint"
+  },
+  {
+    "num": 566,
+    "name": "unlockMechanicalJoint",
+    "params": "joint"
+  },
+  {
+    "num": 567,
+    "name": "applyMechanicalTorque",
+    "params": "object, torque"
+  },
+  {
+    "num": 568,
+    "name": "bendMetalSheet",
+    "params": "sheet, force"
+  },
+  {
+    "num": 569,
+    "name": "dentMetalSurface",
+    "params": "object, impact"
+  },
+  {
+    "num": 570,
+    "name": "deformMetalStructure",
+    "params": "object, load"
+  },
+  {
+    "num": 571,
+    "name": "fractureMetalPart",
+    "params": "object, force"
+  },
+  {
+    "num": 572,
+    "name": "fatigueMetalMaterial",
+    "params": "object, cycles"
+  },
+  {
+    "num": 573,
+    "name": "corrodeMetalSurface",
+    "params": "object, rate"
+  },
+  {
+    "num": 574,
+    "name": "rustMetalObject",
+    "params": "object, moisture"
+  },
+  {
+    "num": 575,
+    "name": "heatMetalObject",
+    "params": "object, temperature"
+  },
+  {
+    "num": 576,
+    "name": "coolMetalObject",
+    "params": "object, rate"
+  },
+  {
+    "num": 577,
+    "name": "expandMetalObject",
+    "params": "object, temperature"
+  },
+  {
+    "num": 578,
+    "name": "contractMetalObject",
+    "params": "object, temperature"
+  },
+  {
+    "num": 579,
+    "name": "jamMechanicalJoint",
+    "params": "joint"
+  },
+  {
+    "num": 580,
+    "name": "repairMechanicalObject",
+    "params": "object"
+  },
+  {
+    "num": 581,
+    "name": "createSettlement",
+    "params": "region"
+  },
+  {
+    "num": 582,
+    "name": "generateBuildingPlot",
+    "params": "region"
+  },
+  {
+    "num": 583,
+    "name": "placeBuildingOnTerrain",
+    "params": "building, terrain"
+  },
+  {
+    "num": 584,
+    "name": "constructFoundation",
+    "params": "building, terrain"
+  },
+  {
+    "num": 585,
+    "name": "constructWallSection",
+    "params": "building, section"
+  },
+  {
+    "num": 586,
+    "name": "installRoofSection",
+    "params": "building, section"
+  },
+  {
+    "num": 587,
+    "name": "installWindow",
+    "params": "building, window"
+  },
+  {
+    "num": 588,
+    "name": "installDoor",
+    "params": "building, door"
+  },
+  {
+    "num": 589,
+    "name": "constructBridge",
+    "params": "region"
+  },
+  {
+    "num": 590,
+    "name": "constructRoad",
+    "params": "region"
+  },
+  {
+    "num": 591,
+    "name": "paveRoadSurface",
+    "params": "road"
+  },
+  {
+    "num": 592,
+    "name": "crackRoadSurface",
+    "params": "road, load"
+  },
+  {
+    "num": 593,
+    "name": "erodeRoadSurface",
+    "params": "road, weather"
+  },
+  {
+    "num": 594,
+    "name": "generatePothole",
+    "params": "road, position"
+  },
+  {
+    "num": 595,
+    "name": "repairRoadSurface",
+    "params": "road"
+  },
+  {
+    "num": 596,
+    "name": "constructFence",
+    "params": "region"
+  },
+  {
+    "num": 597,
+    "name": "breakFenceSection",
+    "params": "fence, section"
+  },
+  {
+    "num": 598,
+    "name": "constructDam",
+    "params": "region"
+  },
+  {
+    "num": 599,
+    "name": "breachDam",
+    "params": "dam, force"
+  },
+  {
+    "num": 600,
+    "name": "updateBuiltEnvironment",
+    "params": "region"
+  },
+  {
+    "num": 601,
+    "name": "createEarthquake",
+    "params": "region"
+  },
+  {
+    "num": 602,
+    "name": "calculateSeismicWave",
+    "params": "earthquake"
+  },
+  {
+    "num": 603,
+    "name": "propagateSeismicWave",
+    "params": "wave"
+  },
+  {
+    "num": 604,
+    "name": "shakeTerrain",
+    "params": "terrain, wave"
+  },
+  {
+    "num": 605,
+    "name": "shakeBuilding",
+    "params": "building, wave"
+  },
+  {
+    "num": 606,
+    "name": "triggerGroundRupture",
+    "params": "region"
+  },
+  {
+    "num": 607,
+    "name": "generateGroundCracks",
+    "params": "region"
+  },
+  {
+    "num": 608,
+    "name": "widenGroundCracks",
+    "params": "region"
+  },
+  {
+    "num": 609,
+    "name": "triggerLiquefaction",
+    "params": "region"
+  },
+  {
+    "num": 610,
+    "name": "calculateSeismicDamage",
+    "params": "region"
+  },
+  {
+    "num": 611,
+    "name": "createVolcano",
+    "params": "region"
+  },
+  {
+    "num": 612,
+    "name": "accumulateMagmaPressure",
+    "params": "volcano"
+  },
+  {
+    "num": 613,
+    "name": "simulateMagmaMovement",
+    "params": "volcano"
+  },
+  {
+    "num": 614,
+    "name": "triggerVolcanicEruption",
+    "params": "volcano"
+  },
+  {
+    "num": 615,
+    "name": "spawnVolcanicProjectiles",
+    "params": "volcano"
+  },
+  {
+    "num": 616,
+    "name": "simulateLavaFlow",
+    "params": "volcano"
+  },
+  {
+    "num": 617,
+    "name": "coolLavaFlow",
+    "params": "lava"
+  },
+  {
+    "num": 618,
+    "name": "solidifyLava",
+    "params": "lava"
+  },
+  {
+    "num": 619,
+    "name": "generateVolcanicAsh",
+    "params": "volcano"
+  },
+  {
+    "num": 620,
+    "name": "updateGeologicalRecovery",
+    "params": "region"
+  },
+  {
+    "num": 621,
+    "name": "createGlacier",
+    "params": "region"
+  },
+  {
+    "num": 622,
+    "name": "accumulateGlacierSnow",
+    "params": "glacier"
+  },
+  {
+    "num": 623,
+    "name": "compactGlacierSnow",
+    "params": "glacier"
+  },
+  {
+    "num": 624,
+    "name": "simulateGlacierFlow",
+    "params": "glacier"
+  },
+  {
+    "num": 625,
+    "name": "deformGlacierSurface",
+    "params": "glacier"
+  },
+  {
+    "num": 626,
+    "name": "generateGlacierCrevasse",
+    "params": "glacier"
+  },
+  {
+    "num": 627,
+    "name": "widenGlacierCrevasse",
+    "params": "glacier"
+  },
+  {
+    "num": 628,
+    "name": "fractureGlacierIce",
+    "params": "glacier"
+  },
+  {
+    "num": 629,
+    "name": "calveGlacierIceberg",
+    "params": "glacier"
+  },
+  {
+    "num": 630,
+    "name": "createIceberg",
+    "params": "region"
+  },
+  {
+    "num": 631,
+    "name": "driftIceberg",
+    "params": "iceberg, current"
+  },
+  {
+    "num": 632,
+    "name": "rotateIceberg",
+    "params": "iceberg, torque"
+  },
+  {
+    "num": 633,
+    "name": "meltIceberg",
+    "params": "iceberg, temperature"
+  },
+  {
+    "num": 634,
+    "name": "simulateSeaIceFormation",
+    "params": "water"
+  },
+  {
+    "num": 635,
+    "name": "simulateSeaIceBreakup",
+    "params": "ice"
+  },
+  {
+    "num": 636,
+    "name": "driftSeaIce",
+    "params": "ice, current"
+  },
+  {
+    "num": 637,
+    "name": "collideIceFloes",
+    "params": "iceA, iceB"
+  },
+  {
+    "num": 638,
+    "name": "freezeGroundWater",
+    "params": "ground"
+  },
+  {
+    "num": 639,
+    "name": "thawPermafrost",
+    "params": "ground, temperature"
+  },
+  {
+    "num": 640,
+    "name": "updateCryosphereState",
+    "params": "region"
+  },
+  {
+    "num": 641,
+    "name": "createSunLight",
+    "params": ""
+  },
+  {
+    "num": 642,
+    "name": "updateSunPosition",
+    "params": "time"
+  },
+  {
+    "num": 643,
+    "name": "updateSunIntensity",
+    "params": "intensity"
+  },
+  {
+    "num": 644,
+    "name": "calculateSunlightDirection",
+    "params": ""
+  },
+  {
+    "num": 645,
+    "name": "updateShadowDirection",
+    "params": ""
+  },
+  {
+    "num": 646,
+    "name": "updateShadowLength",
+    "params": ""
+  },
+  {
+    "num": 647,
+    "name": "calculateSurfaceSolarHeating",
+    "params": "surface"
+  },
+  {
+    "num": 648,
+    "name": "heatObjectSurface",
+    "params": "object, energy"
+  },
+  {
+    "num": 649,
+    "name": "coolObjectSurface",
+    "params": "object, rate"
+  },
+  {
+    "num": 650,
+    "name": "simulateThermalExpansion",
+    "params": "object, temperature"
+  },
+  {
+    "num": 651,
+    "name": "simulateThermalContraction",
+    "params": "object, temperature"
+  },
+  {
+    "num": 652,
+    "name": "fadeSunlightAtDusk",
+    "params": ""
+  },
+  {
+    "num": 653,
+    "name": "restoreSunlightAtDawn",
+    "params": ""
+  },
+  {
+    "num": 654,
+    "name": "updateNightLighting",
+    "params": ""
+  },
+  {
+    "num": 655,
+    "name": "simulateMoonlight",
+    "params": ""
+  },
+  {
+    "num": 656,
+    "name": "updateCloudShadowMovement",
+    "params": "cloud"
+  },
+  {
+    "num": 657,
+    "name": "updateVegetationLightExposure",
+    "params": "plant"
+  },
+  {
+    "num": 658,
+    "name": "calculateSurfaceReflectance",
+    "params": "surface"
+  },
+  {
+    "num": 659,
+    "name": "simulateHeatTransfer",
+    "params": "objectA, objectB"
+  },
+  {
+    "num": 660,
+    "name": "updateEnvironmentalTemperature",
+    "params": "region"
+  },
+  {
+    "num": 661,
+    "name": "createParticleSystem",
+    "params": "type"
+  },
+  {
+    "num": 662,
+    "name": "spawnParticles",
+    "params": "system, count"
+  },
+  {
+    "num": 663,
+    "name": "updateParticleMotion",
+    "params": "particle, deltaTime"
+  },
+  {
+    "num": 664,
+    "name": "applyParticleGravity",
+    "params": "particle"
+  },
+  {
+    "num": 665,
+    "name": "applyParticleWind",
+    "params": "particle, wind"
+  },
+  {
+    "num": 666,
+    "name": "calculateParticleDrag",
+    "params": "particle"
+  },
+  {
+    "num": 667,
+    "name": "simulateDustCloud",
+    "params": "position, force"
+  },
+  {
+    "num": 668,
+    "name": "spreadDustCloud",
+    "params": "cloud, wind"
+  },
+  {
+    "num": 669,
+    "name": "dissipateDustCloud",
+    "params": "cloud, rate"
+  },
+  {
+    "num": 670,
+    "name": "createSandBurst",
+    "params": "position, force"
+  },
+  {
+    "num": 671,
+    "name": "simulateBlowingSand",
+    "params": "sand, wind"
+  },
+  {
+    "num": 672,
+    "name": "simulateDustDevilParticles",
+    "params": "particles"
+  },
+  {
+    "num": 673,
+    "name": "spawnPollenParticles",
+    "params": "plant"
+  },
+  {
+    "num": 674,
+    "name": "dispersePollen",
+    "params": "pollen, wind"
+  },
+  {
+    "num": 675,
+    "name": "spawnFallingLeaves",
+    "params": "tree"
+  },
+  {
+    "num": 676,
+    "name": "simulateFallingLeafParticles",
+    "params": "leaves"
+  },
+  {
+    "num": 677,
+    "name": "spawnFallingPetals",
+    "params": "flower"
+  },
+  {
+    "num": 678,
+    "name": "spawnAshParticles",
+    "params": "fire"
+  },
+  {
+    "num": 679,
+    "name": "simulateAshDeposition",
+    "params": "surface, ash"
+  },
+  {
+    "num": 680,
+    "name": "recycleExpiredParticles",
+    "params": "system"
+  },
+  {
+    "num": 681,
+    "name": "calculateWeatheringRate",
+    "params": "object"
+  },
+  {
+    "num": 682,
+    "name": "applyMechanicalWeathering",
+    "params": "object, force"
+  },
+  {
+    "num": 683,
+    "name": "applyChemicalWeathering",
+    "params": "object, fluid"
+  },
+  {
+    "num": 684,
+    "name": "applyFreezeThawWeathering",
+    "params": "object, temperature"
+  },
+  {
+    "num": 685,
+    "name": "erodeObjectSurface",
+    "params": "object, rate"
+  },
+  {
+    "num": 686,
+    "name": "erodeBuildingFacade",
+    "params": "building, rate"
+  },
+  {
+    "num": 687,
+    "name": "erodeRockFormation",
+    "params": "rock, water"
+  },
+  {
+    "num": 688,
+    "name": "erodeSoilLayer",
+    "params": "soil, water"
+  },
+  {
+    "num": 689,
+    "name": "weatherWoodSurface",
+    "params": "wood, weather"
+  },
+  {
+    "num": 690,
+    "name": "fadePaintSurface",
+    "params": "object, sunlight"
+  },
+  {
+    "num": 691,
+    "name": "peelPaintSurface",
+    "params": "object, rate"
+  },
+  {
+    "num": 692,
+    "name": "corrodeConcreteSurface",
+    "params": "object, rate"
+  },
+  {
+    "num": 693,
+    "name": "growMoldOnSurface",
+    "params": "object, humidity"
+  },
+  {
+    "num": 694,
+    "name": "spreadSurfaceMoss",
+    "params": "object, moisture"
+  },
+  {
+    "num": 695,
+    "name": "accumulateDirtOnSurface",
+    "params": "object, amount"
+  },
+  {
+    "num": 696,
+    "name": "accumulateDustOnSurface",
+    "params": "object, amount"
+  },
+  {
+    "num": 697,
+    "name": "washDirtFromSurface",
+    "params": "object, water"
+  },
+  {
+    "num": 698,
+    "name": "degradeMaterialProperties",
+    "params": "object, rate"
+  },
+  {
+    "num": 699,
+    "name": "calculateMaterialLifetime",
+    "params": "object"
+  },
+  {
+    "num": 700,
+    "name": "transitionObjectToRuins",
+    "params": "object"
+  },
+  {
+    "num": 701,
+    "name": "initializeEcosystem",
+    "params": "region"
+  },
+  {
+    "num": 702,
+    "name": "updateEcosystem",
+    "params": "region, deltaTime"
+  },
+  {
+    "num": 703,
+    "name": "calculateVegetationDensity",
+    "params": "region"
+  },
+  {
+    "num": 704,
+    "name": "calculateSoilMoisture",
+    "params": "region"
+  },
+  {
+    "num": 705,
+    "name": "calculateNutrientAvailability",
+    "params": "region"
+  },
+  {
+    "num": 706,
+    "name": "simulatePlantCompetition",
+    "params": "plantA, plantB"
+  },
+  {
+    "num": 707,
+    "name": "simulateCanopyCompetition",
+    "params": "treeA, treeB"
+  },
+  {
+    "num": 708,
+    "name": "calculateLightCompetition",
+    "params": "plant, neighbors"
+  },
+  {
+    "num": 709,
+    "name": "simulateRootCompetition",
+    "params": "plantA, plantB"
+  },
+  {
+    "num": 710,
+    "name": "spreadSeedsAcrossRegion",
+    "params": "region, wind"
+  },
+  {
+    "num": 711,
+    "name": "disperseSeedsByWater",
+    "params": "region, water"
+  },
+  {
+    "num": 712,
+    "name": "spreadWildfireAcrossRegion",
+    "params": "region"
+  },
+  {
+    "num": 713,
+    "name": "simulateHabitatRecovery",
+    "params": "region"
+  },
+  {
+    "num": 714,
+    "name": "regenerateVegetation",
+    "params": "region"
+  },
+  {
+    "num": 715,
+    "name": "restoreDamagedSoil",
+    "params": "region"
+  },
+  {
+    "num": 716,
+    "name": "simulateWetlandExpansion",
+    "params": "region"
+  },
+  {
+    "num": 717,
+    "name": "simulateDesertification",
+    "params": "region"
+  },
+  {
+    "num": 718,
+    "name": "simulateCoastalErosion",
+    "params": "region"
+  },
+  {
+    "num": 719,
+    "name": "simulateRiverDeltaGrowth",
+    "params": "region"
+  },
+  {
+    "num": 720,
+    "name": "updateEcosystemBalance",
+    "params": "region"
+  },
+  {
+    "num": 721,
+    "name": "initializeObjectLifecycle",
+    "params": "object"
+  },
+  {
+    "num": 722,
+    "name": "updateObjectLifecycle",
+    "params": "object, deltaTime"
+  },
+  {
+    "num": 723,
+    "name": "setObjectAge",
+    "params": "object, age"
+  },
+  {
+    "num": 724,
+    "name": "calculateObjectAge",
+    "params": "object"
+  },
+  {
+    "num": 725,
+    "name": "growObjectOverTime",
+    "params": "object, duration"
+  },
+  {
+    "num": 726,
+    "name": "shrinkObjectOverTime",
+    "params": "object, duration"
+  },
+  {
+    "num": 727,
+    "name": "matureObject",
+    "params": "object"
+  },
+  {
+    "num": 728,
+    "name": "weakenObjectOverTime",
+    "params": "object, rate"
+  },
+  {
+    "num": 729,
+    "name": "fatigueObjectOverTime",
+    "params": "object, load"
+  },
+  {
+    "num": 730,
+    "name": "accumulateObjectDamage",
+    "params": "object, damage"
+  },
+  {
+    "num": 731,
+    "name": "recoverObjectCondition",
+    "params": "object, rate"
+  },
+  {
+    "num": 732,
+    "name": "decayObjectOverTime",
+    "params": "object, rate"
+  },
+  {
+    "num": 733,
+    "name": "decomposeObjectOverTime",
+    "params": "object, rate"
+  },
+  {
+    "num": 734,
+    "name": "fadeObjectOverTime",
+    "params": "object, rate"
+  },
+  {
+    "num": 735,
+    "name": "disintegrateObjectOverTime",
+    "params": "object, rate"
+  },
+  {
+    "num": 736,
+    "name": "triggerObjectFailure",
+    "params": "object"
+  },
+  {
+    "num": 737,
+    "name": "replaceObjectWithDebris",
+    "params": "object"
+  },
+  {
+    "num": 738,
+    "name": "regenerateObjectFromState",
+    "params": "object, state"
+  },
+  {
+    "num": 739,
+    "name": "advanceSeasonalChanges",
+    "params": "region, season"
+  },
+  {
+    "num": 740,
+    "name": "updateWorldAging",
+    "params": "region, deltaTime"
+  },
+  {
+    "num": 741,
+    "name": "detectToolContact",
+    "params": "tool, object"
+  },
+  {
+    "num": 742,
+    "name": "calculateToolImpact",
+    "params": "tool, object"
+  },
+  {
+    "num": 743,
+    "name": "applyHammerImpact",
+    "params": "object, impact"
+  },
+  {
+    "num": 744,
+    "name": "strikeObjectWithTool",
+    "params": "object, tool"
+  },
+  {
+    "num": 745,
+    "name": "cutVegetationWithTool",
+    "params": "plant, tool"
+  },
+  {
+    "num": 746,
+    "name": "sawWoodObject",
+    "params": "wood, tool"
+  },
+  {
+    "num": 747,
+    "name": "digTerrainWithTool",
+    "params": "terrain, tool"
+  },
+  {
+    "num": 748,
+    "name": "excavateRockWithTool",
+    "params": "rock, tool"
+  },
+  {
+    "num": 749,
+    "name": "chipStoneWithTool",
+    "params": "rock, tool"
+  },
+  {
+    "num": 750,
+    "name": "breakIceWithTool",
+    "params": "ice, tool"
+  },
+  {
+    "num": 751,
+    "name": "pryOpenObject",
+    "params": "object, tool"
+  },
+  {
+    "num": 752,
+    "name": "leverObjectWithTool",
+    "params": "object, tool"
+  },
+  {
+    "num": 753,
+    "name": "drillIntoMaterial",
+    "params": "object, tool"
+  },
+  {
+    "num": 754,
+    "name": "grindMaterialSurface",
+    "params": "object, tool"
+  },
+  {
+    "num": 755,
+    "name": "polishMaterialSurface",
+    "params": "object, tool"
+  },
+  {
+    "num": 756,
+    "name": "weldMetalParts",
+    "params": "partA, partB"
+  },
+  {
+    "num": 757,
+    "name": "fastenStructuralParts",
+    "params": "partA, partB"
+  },
+  {
+    "num": 758,
+    "name": "detachFastenedPart",
+    "params": "object, part"
+  },
+  {
+    "num": 759,
+    "name": "repairObjectWithMaterial",
+    "params": "object, material"
+  },
+  {
+    "num": 760,
+    "name": "updateToolDamage",
+    "params": "tool, impact"
+  },
+  {
+    "num": 761,
+    "name": "initializeDestructionGraph",
+    "params": "object"
+  },
+  {
+    "num": 762,
+    "name": "generateFracturePattern",
+    "params": "object, impact"
+  },
+  {
+    "num": 763,
+    "name": "calculateFracturePropagation",
+    "params": "object"
+  },
+  {
+    "num": 764,
+    "name": "propagateStructuralCrack",
+    "params": "object, crack"
+  },
+  {
+    "num": 765,
+    "name": "calculateBreakPoint",
+    "params": "object, force"
+  },
+  {
+    "num": 766,
+    "name": "calculateFractureEnergy",
+    "params": "object, force"
+  },
+  {
+    "num": 767,
+    "name": "splitMeshAlongPlane",
+    "params": "object, plane"
+  },
+  {
+    "num": 768,
+    "name": "splitMeshAlongCurve",
+    "params": "object, curve"
+  },
+  {
+    "num": 769,
+    "name": "createFractureCapSurface",
+    "params": "object, fracture"
+  },
+  {
+    "num": 770,
+    "name": "generateFractureDebris",
+    "params": "object, fracture"
+  },
+  {
+    "num": 771,
+    "name": "assignDebrisMass",
+    "params": "fragments"
+  },
+  {
+    "num": 772,
+    "name": "assignDebrisCollision",
+    "params": "fragments"
+  },
+  {
+    "num": 773,
+    "name": "calculateDebrisTrajectory",
+    "params": "fragment"
+  },
+  {
+    "num": 774,
+    "name": "simulateDebrisPileCollapse",
+    "params": "pile"
+  },
+  {
+    "num": 775,
+    "name": "detectSecondaryImpact",
+    "params": "debris"
+  },
+  {
+    "num": 776,
+    "name": "triggerSecondaryFracture",
+    "params": "object, impact"
+  },
+  {
+    "num": 777,
+    "name": "simulateProgressiveObjectFailure",
+    "params": "object"
+  },
+  {
+    "num": 778,
+    "name": "stabilizeRemainingStructure",
+    "params": "object"
+  },
+  {
+    "num": 779,
+    "name": "rebuildDestructibleMesh",
+    "params": "object"
+  },
+  {
+    "num": 780,
+    "name": "finalizeDestructionState",
+    "params": "object"
+  },
+  {
+    "num": 781,
+    "name": "initializeWorldAnimation",
+    "params": ""
+  },
+  {
+    "num": 782,
+    "name": "loadWorldAnimationClips",
+    "params": ""
+  },
+  {
+    "num": 783,
+    "name": "playWorldAnimation",
+    "params": "object, animation"
+  },
+  {
+    "num": 784,
+    "name": "blendWorldAnimations",
+    "params": "object, animations"
+  },
+  {
+    "num": 785,
+    "name": "crossFadeWorldAnimation",
+    "params": "object, from, to"
+  },
+  {
+    "num": 786,
+    "name": "updateWorldAnimationMixer",
+    "params": "deltaTime"
+  },
+  {
+    "num": 787,
+    "name": "applyRootMotionToObject",
+    "params": "object, motion"
+  },
+  {
+    "num": 788,
+    "name": "interpolateObjectPosition",
+    "params": "object, deltaTime"
+  },
+  {
+    "num": 789,
+    "name": "interpolateObjectRotation",
+    "params": "object, deltaTime"
+  },
+  {
+    "num": 790,
+    "name": "updateObjectLOD",
+    "params": "object"
+  },
+  {
+    "num": 791,
+    "name": "updateVegetationLOD",
+    "params": "region"
+  },
+  {
+    "num": 792,
+    "name": "updateDestructionLOD",
+    "params": "object"
+  },
+  {
+    "num": 793,
+    "name": "cullInvisibleWorldObjects",
+    "params": ""
+  },
+  {
+    "num": 794,
+    "name": "sleepInactiveRigidBodies",
+    "params": ""
+  },
+  {
+    "num": 795,
+    "name": "wakeRigidBody",
+    "params": "object"
+  },
+  {
+    "num": 796,
+    "name": "synchronizePhysicsAndAnimation",
+    "params": "object"
+  },
+  {
+    "num": 797,
+    "name": "rebuildWorldCollision",
+    "params": "region"
+  },
+  {
+    "num": 798,
+    "name": "updateWorldNavigation",
+    "params": "region"
+  },
+  {
+    "num": 799,
+    "name": "validateWorldSimulation",
+    "params": "region"
+  },
+  {
+    "num": 800,
+    "name": "optimizeWorldSimulationPerformance",
+    "params": ""
+  }
+]

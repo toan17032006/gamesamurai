@@ -1,8 +1,9 @@
-// Draw-call reduction: merges static meshes of a built region into per-material,
-// per-grid-cell batches. Wind-swayed meshes (userData.windUniforms materials) and
-// anything flagged userData.noMerge keep their own draw calls.
+// Draw-call reduction — PHIÊN BẢN ENGINE: bucketing theo material/cell/shadow
+// vẫn là logic riêng của game (giữ sway/noMerge riêng), nhưng việc gộp geometry
+// trong mỗi bucket giờ qua mergeStatic của engine (GeometryOptimizer),
+// thay cho mergeGeometries trực tiếp cũ.
 import * as THREE from 'three';
-import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+import { mergeStatic } from '../assets/engine-lib.js';
 
 const _m = new THREE.Matrix4();
 
@@ -42,15 +43,25 @@ export function mergeStaticProps(regionGroup, cellSize = 26) {
   if (!originals.length) return [];
   const merged = [];
   for (const b of buckets.values()) {
-    const geo = b.geos.length === 1 ? b.geos[0] : mergeGeometries(b.geos, false);
-    for (const g of b.geos) if (g !== geo) g.dispose();
-    if (!geo) continue;
-    const mesh = new THREE.Mesh(geo, b.mat);
-    mesh.castShadow = b.castShadow;
-    mesh.receiveShadow = b.receiveShadow;
-    mesh.matrixAutoUpdate = false;
-    regionGroup.add(mesh);
-    merged.push(mesh);
+    // Gộp qua engine: dựng group tạm từ các geometry đã bake, mergeStatic
+    // trả về group đã gộp theo material, rồi gắn shadow flags của bucket.
+    const tmp = new THREE.Group();
+    for (const g of b.geos) {
+      const m = new THREE.Mesh(g, b.mat);
+      tmp.add(m);
+    }
+    tmp.updateMatrixWorld(true);
+    const mergedGroup = mergeStatic(tmp);
+    for (const g of b.geos) g.dispose();
+    const outMeshes = [];
+    mergedGroup.traverse((o) => { if (o.isMesh) outMeshes.push(o); });
+    for (const o of outMeshes) {
+      o.castShadow = b.castShadow;
+      o.receiveShadow = b.receiveShadow;
+      o.matrixAutoUpdate = false;
+      regionGroup.add(o);
+      merged.push(o);
+    }
   }
   for (const o of originals) o.parent.remove(o);
   return merged;

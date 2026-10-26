@@ -309,3 +309,8 @@ export const CLIPS = {
 CLIPS.fire_nova = CLIPS.e_slam;
 CLIPS.fire_ring = CLIPS.e_cast;
 CLIPS.shadow_fan = CLIPS.e_cast;
+
+// Bước 2 — engine: chuyển clip game sang THREE.AnimationClip để dùng với
+// StateBlender / retarget của engine. Xem engineAnimation.clipToThreeClip.
+export { clipToThreeClip, GAME_TO_ENGINE_BONES } from '../assets/engineAnimation.js';
+export const CLIP_NAMES = Object.keys(CLIPS);

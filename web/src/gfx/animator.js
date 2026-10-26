@@ -1,7 +1,10 @@
-// Pose-clip animator with crossfade blending and event firing.
-// Clips: { dur, loop, tracks: {joint: [{t, v:[x,y,z]}]}, events: [{t, name, data}] }
-// Special tracks: '_pos' (hips position offset), '_root' ([rootRotX, rootRotY]).
+// Pose-clip animator — PHIÊN BẢN ENGINE: crossfade dùng Easings của engine
+// (quadInOut thay cho blend tuyến tính), event phát qua EventBus của engine
+// (vẫn giữ onEvent callback cũ để tương thích). Pose sampling vẫn là dữ liệu
+// clip riêng của game (CLIPS), vì engine không có pose clip cho rig này;
+// xem engineAnimation.js để map rig game <-> rig engine.
 import { lerp, angleWrap } from '../core/utils.js';
+import { Easings, EventBus } from '../assets/engine-lib.js';
 
 const REST = {
   hips: [0, 0, 0], torso: [0.03, 0, 0], head: [0, 0, 0],
@@ -24,6 +27,7 @@ export class Animator {
     this.onEvent = null;
     this.doneCallback = null;
     this.enabled = true;
+    this.events = new EventBus();
   }
 
   get name() { return this.current ? this.current.name : ''; }
@@ -55,6 +59,7 @@ export class Animator {
       if (cur.t >= ev.t * dur) {
         this._fired.push(i);
         if (this.onEvent) this.onEvent(ev.name, ev.data);
+        this.events.emit(ev.name, ev.data);
       }
     }
     if (cur.t >= dur) {
@@ -94,7 +99,7 @@ export class Animator {
     const rest = REST;
     const cur = this._samplePose(this.current, this.current.t);
     let prevPose = null, w = 1;
-    if (this.prev && this.blendT < 1) { prevPose = this._samplePose(this.prev, Math.min(this.prev.t, this.prev.clip.dur)); w = this.blendT; }
+    if (this.prev && this.blendT < 1) { prevPose = this._samplePose(this.prev, Math.min(this.prev.t, this.prev.clip.dur)); w = Easings.quadInOut(this.blendT); }
 
     const setJoint = (name) => {
       const j = J[name];

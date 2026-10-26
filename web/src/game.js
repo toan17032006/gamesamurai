@@ -21,6 +21,7 @@ import { Npc } from './entities/npc.js';
 import { Creature } from './entities/creature.js';
 import { SettingsStore } from './framework/patterns/settings.js';
 import { LEVEL_MAP, LEVELS } from './data/levels.js';
+import { applyEngineRenderQuality, ENGINE_PRESET } from './assets/engineAssets.js';
 
 const SETTINGS_KEY = 'samurai_settings_v1';
 
@@ -81,6 +82,12 @@ export class Game {
   // ---- lifecycle ----------------------------------------------------------
   async start() {
     this.engine.setQuality(this.settings.quality);
+    // Render mới bằng engine: preset 'ultra' của @aetheria/engine (shadow 3072, bloom 0.8)
+    // áp lên renderer hiện có, không đổi tier chất lượng người dùng đã chọn.
+    if (this.settings.quality === 'ultra' || this.settings.quality === 'cinematic') {
+      applyEngineRenderQuality(this.engine);
+    }
+    this.enginePreset = ENGINE_PRESET;
     this.spawnPlayer();
     this.ui.showMenu();
     this.engine.start((dt, rawDt) => this.tick(dt, rawDt));

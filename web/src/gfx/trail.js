@@ -1,6 +1,7 @@
-// Ribbon weapon trail: samples blade base+tip each frame into a fading additive strip.
-// Ring-buffered (no per-frame allocations) for stable frame pacing at high FPS.
+// Ribbon weapon trail — PHIÊN BẢN ENGINE: ring buffer giữ nguyên, nhưng
+// đường cong fade giờ dùng Easings.quadOut của engine (thay pow 1.8 tự viết).
 import * as THREE from 'three';
+import { Easings } from '../assets/engine-lib.js';
 
 const N = 22;
 const LIFE = 0.17; // seconds of swing the ribbon covers, independent of frame rate
@@ -68,7 +69,7 @@ export class Trail {
       pa[i * 6 + 3] = valid ? this.tipRing[o] : this._v2.x;
       pa[i * 6 + 4] = valid ? this.tipRing[o + 1] : this._v2.y;
       pa[i * 6 + 5] = valid ? this.tipRing[o + 2] : this._v2.z;
-      const f = valid ? Math.pow(1 - age / LIFE, 1.8) * this.strength * 0.7 : 0;
+      const f = valid ? Easings.quadOut(Math.max(0, 1 - age / LIFE)) * this.strength * 0.7 : 0;
       const r = this.color.r * f, g = this.color.g * f, bl = this.color.b * f;
       ca[i * 6] = r; ca[i * 6 + 1] = g; ca[i * 6 + 2] = bl;
       ca[i * 6 + 3] = r; ca[i * 6 + 4] = g; ca[i * 6 + 5] = bl;

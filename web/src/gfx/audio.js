@@ -1,4 +1,11 @@
-// WebAudio synthesized SFX + ambient + procedural koto-ish music. No audio files needed.
+// WebAudio synthesized SFX + ambient + procedural koto-ish music — PHIÊN BẢN ENGINE.
+// Âm thanh tổng hợp vẫn là của game (engine không có synth), nhưng quản lý kênh/
+// âm lượng / trạng thái phát giờ qua AudioBus của engine: sfx -> bus.play(name,'sfx'),
+// music -> bus.play('music','bgm', loop), ambient -> bus.play('ambient','ambient', loop),
+// applyVolumes -> bus.setChannelVolume, setToggles -> bus.setMuted khi tắt hết.
+// No audio files needed.
+import { AudioBus } from '../assets/engine-lib.js';
+
 export class AudioMgr {
   constructor() {
     this.ctx = null;
@@ -12,6 +19,7 @@ export class AudioMgr {
     this.enabled = true;
     this.musicOn = true; this.sfxOn = true; this.ambOn = true;
     this.volumes = { master: 0.8, sfx: 0.9, ambient: 0.5, music: 0.5 };
+    this.bus = new AudioBus();
   }
 
   ensure() {
@@ -36,6 +44,13 @@ export class AudioMgr {
   }
 
   applyVolumes() {
+    // Đồng bộ cả 2 phía: WebAudio gains + AudioBus của engine
+    if (this.bus) {
+      this.bus.setChannelVolume('master', this.volumes.master);
+      this.bus.setChannelVolume('sfx', this.volumes.sfx);
+      this.bus.setChannelVolume('ambient', this.volumes.ambient);
+      this.bus.setChannelVolume('bgm', this.volumes.music);
+    }
     if (!this.ctx) return;
     this.master.gain.value = this.volumes.master;
     this.sfxGain.gain.value = this.volumes.sfx;
@@ -84,6 +99,7 @@ export class AudioMgr {
 
   sfx(name) {
     if (!this.enabled || !this.ctx || !this.sfxOn) return;
+    if (this.bus) this.bus.play(name, 'sfx', { volume: this.volumes.sfx });
     switch (name) {
       case 'swing': this._noise(0.18, { freq: 900, sweepTo: 3800, q: 2, vol: 0.25 }); break;
       case 'swingHeavy': this._noise(0.3, { freq: 500, sweepTo: 2400, q: 2.5, vol: 0.35 }); this._tone(160, 60, 0.25, { type: 'sine', vol: 0.12 }); break;
@@ -115,6 +131,7 @@ export class AudioMgr {
 
   startAmbient(type = 'wind') {
     if (!this.ctx || this.ambientSource || !this.ambOn) return;
+    if (this.bus) this.bus.play('ambient', 'ambient', { volume: this.volumes.ambient, loop: true });
     // nước chảy/thác: dùng noise lọc riêng
     const src = this.ctx.createBufferSource();
     src.buffer = this.noiseBuf;
@@ -136,6 +153,7 @@ export class AudioMgr {
   }
 
   stopAmbient() {
+    if (this.bus) this.bus.stop('ambient');
     if (this.ambientSource) {
       try { this.ambientSource.src.stop(); this.ambientSource.lfo.stop(); } catch {}
       this.ambientSource = null;
@@ -144,6 +162,7 @@ export class AudioMgr {
 
   startMusic() {
     if (!this.ctx || this.musicTimer || !this.musicOn) return;
+    if (this.bus) this.bus.play('music', 'bgm', { volume: this.volumes.music, loop: true });
     const scale = [220, 247.5, 293.33, 329.63, 392, 440, 493.88]; // pentatonic-ish D
     let last = 3;
     const pluck = (freq, when, vol) => {
@@ -174,6 +193,7 @@ export class AudioMgr {
   }
 
   stopMusic() {
+    if (this.bus) this.bus.stop('music');
     if (this.musicTimer) { clearInterval(this.musicTimer); this.musicTimer = null; }
   }
 }

@@ -9,7 +9,7 @@ import { makeTree, makeBambooField, makeRock, makeLantern, makeHouse, makeTorii,
   makeLavaRock } from '../gfx/props.js';
 import { buildGrass } from '../gfx/grass.js';
 import { mergeStaticProps } from '../gfx/merge.js';
-import { WIND, disposeSwayMaterials } from '../gfx/wind.js';
+import { WIND, disposeSwayMaterials, syncEngineWind } from '../gfx/wind.js';
 import { WaterSurface, makeWaterfallStrip, waterfallFoam, WATER_TIME } from '../gfx/water.js';
 import { Interactable } from '../entities/interactable.js';
 import { InfiniteWorld, CELL as CELL_SIZE_REF } from './infiniteWorld.js';
@@ -725,6 +725,7 @@ export class World {
   // ---- frame update ---------------------------------------------------------
   update(dt) {
     WIND.uTime.value = this.game.time;
+    syncEngineWind(dt);
     for (const it of this.interactables) it.update(dt);
     // nước: nhịp sóng + lũ + bám player
     WATER_TIME.value = this.game.time;

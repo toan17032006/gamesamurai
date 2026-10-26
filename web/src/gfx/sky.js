@@ -1,6 +1,10 @@
-// Sky v2: gradient + sun disc/halo + procedural fbm clouds + night stars,
-// plus PMREM environment lighting (PBR reflections/ambient from the sky itself).
+// Sky v2 — PHIÊN BẢN ENGINE: shader bầu trời giữ nguyên (engine không có
+// shader này), nhưng gió/mây giờ lấy từ AtmosphereSystem của engine:
+// set() đặt tốc độ gió theo thời tiết, update() chạy atmosphereSystem.update
+// và trôi mây nhanh hơn khi gió mạnh. Ánh sáng mặt trời/hemi vẫn do Sky quản,
+// vì configureLights của engine sẽ tạo thêm đèn trùng tên.
 import * as THREE from 'three';
+import { atmosphereSystem } from '../assets/engineAssets.js';
 
 const SKY_VERT = `
 varying vec3 vDir;
@@ -131,6 +135,11 @@ export class Sky {
     u.sunColor.value.setHex(def.light.sun);
     u.night.value = def.light.night ? 1 : 0;
     u.cloudCover.value = def.weather === 'rain' ? 0.85 : def.weather === 'fog' ? 0.6 : def.weather === 'embers' ? 0.55 : 0.42;
+    // Gió engine theo thời tiết: mưa/bão gió mạnh, trời trong gió nhẹ
+    atmosphereSystem.setWind({
+      speed: def.weather === 'storm' ? 14 : def.weather === 'rain' ? 9 : def.weather === 'snowstorm' ? 12 : 5,
+      gustiness: def.weather === 'storm' ? 0.7 : 0.3,
+    });
 
     this.scene_fog = this.engine.scene;
     this.scene_fog.fog = new THREE.FogExp2(def.sky.bottom, def.sky.fogDensity);
@@ -158,7 +167,9 @@ export class Sky {
   }
 
   update(playerPos) {
-    this.mat.uniforms.time.value += 1 / 60;
+    atmosphereSystem.update(1 / 60);
+    const wind = atmosphereSystem.getWind();
+    this.mat.uniforms.time.value += (1 / 60) * (0.7 + wind.speed * 0.08);
     this.dome.position.set(playerPos.x, 0, playerPos.z);
     this.sun.target.position.set(playerPos.x, 0, playerPos.z);
     this.sun.position.set(playerPos.x + this.sunDir.x * 60, Math.max(18, this.sunDir.y * 60), playerPos.z + this.sunDir.z * 60);

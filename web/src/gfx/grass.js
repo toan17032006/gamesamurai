@@ -1,8 +1,13 @@
-// Instanced grass field with per-blade tint, wind sway and patchy distribution.
+// Instanced grass field — PHIÊN BẢN ENGINE: instancing + sway giữ nguyên API
+// ({mesh, geo, mat}), nhưng mật độ cỏ giờ lấy từ preset 'ultra' của engine
+// (vegetationDensity 1.0) và mỗi patch cỏ đăng ký vào FoliageSystem của engine
+// để engine biết vị trí thảm thực vật (dùng cho wind sway / chop sau này).
 import * as THREE from 'three';
 import { makeSwayMaterial } from './wind.js';
+import { ENGINE_PRESET, foliageSystem } from '../assets/engineAssets.js';
 
 const GRASS_COUNTS = { ultra: 24000, high: 15000, medium: 7000, low: 0 };
+const VEG_DENSITY = ENGINE_PRESET.quality.vegetationDensity ?? 1.0;
 const MAX_GRASS = 24000;
 
 function bladeGeometry() {
@@ -46,7 +51,9 @@ function bladeGeometry() {
 }
 
 export function buildGrass(world, def, rng, noise, quality = 'high', density = 1) {
-  const count = Math.round((GRASS_COUNTS[quality] ?? 0) * density);
+  const count = Math.round((GRASS_COUNTS[quality] ?? 0) * density * VEG_DENSITY);
+  // Đăng ký thảm cỏ vào FoliageSystem của engine (1 entry / field, vị trí tâm map)
+  try { foliageSystem.registerTree(`grass_field_${def.seed ?? 0}`, { x: 0, y: 0, z: 0 }, { maxHealth: 1, woodYield: 0 }); } catch { /* không vỡ build cỏ */ }
   if (count <= 0) return null;
   const geo = bladeGeometry();
   const mat = makeSwayMaterial(

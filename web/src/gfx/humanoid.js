@@ -2,6 +2,7 @@
 // PBR cloth (sheen) / skin / metal, expressive head, katana with hamon & saya, blob shadow.
 import * as THREE from 'three';
 import { G, M } from './materials.js';
+import { buildBoneMap, GAME_TO_ENGINE_BONES } from '../assets/engineAnimation.js';
 
 let _blobTex = null;
 function blobTexture() {
@@ -367,8 +368,14 @@ export function buildHumanoid(opts = {}) {
     blob.position.y = 0.035;
   }
 
+  // Cầu nối engine (bước 2): map khớp game <-> khớp engine, để retarget clip
+  // và dùng StateBlender của engine khi cần. Không đổi rig đang chạy.
+  let engineBoneMap = null;
+  try { engineBoneMap = buildBoneMap(group); } catch { engineBoneMap = null; }
+
   return {
     group, body, joints, weaponAnchor, trailBase, trailTip, mats, extra, saya, hairSway,
+    engineBoneMap, GAME_TO_ENGINE_BONES,
     sayaBase: [1.5, 0, -0.35],
     hasWeapon() { return (weaponGroup && weaponGroup.userData.style) || null; },
     height: 1.72 * (opts.scale || 1),

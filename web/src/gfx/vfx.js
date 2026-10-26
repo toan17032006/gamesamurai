@@ -1,6 +1,9 @@
-// Combat/world VFX: slash arcs, telegraphs, damage popups, lock-on marker, fire zones.
+// Combat/world VFX — PHIÊN BẢN ENGINE: arcs/telegraphs/popups giữ nguyên API,
+// thêm DecalProjector của engine: mỗi slashArc để lại 1 decal mặt đất (vết chém)
+// fade theo thời gian, update qua decals.update(dt).
 import * as THREE from 'three';
 import { G } from './materials.js';
+import { DecalProjector } from '../assets/engine-lib.js';
 
 function makeArcMesh() {
   const g = new THREE.Group();
@@ -30,6 +33,8 @@ export class Vfx {
     this.popups = [];
     this.zones = [];
     this.marker = null;
+    this.decals = new DecalProjector({ max: 32 });
+    scene.add(this.decals.group);
     for (let i = 0; i < 8; i++) {
       const m = makeArcMesh();
       m.visible = false;
@@ -66,6 +71,11 @@ export class Vfx {
     slot.mesh.position.set(pos.x, pos.y + 1.15, pos.z);
     slot.mesh.rotation.y = yaw + Math.PI * 0.075;
     slot.mesh.scale.setScalar(range * 0.62);
+    // Decal mặt đất của engine (vết chém, fade 3s)
+    try {
+      this.decals.project({ size: range * 1.2, orient: 'ground', fadeTime: 3, texture: '' },
+        new THREE.Vector3(pos.x, pos.y + 0.02, pos.z));
+    } catch { /* decal là hiệu ứng phụ, không được vỡ combat */ }
     return slot;
   }
 
@@ -110,6 +120,7 @@ export class Vfx {
   }
 
   update(dt) {
+    if (this.decals) this.decals.update(dt);
     for (const a of this.arcs) {
       if (a.t >= a.dur) { a.mesh.visible = false; continue; }
       a.t += dt;
