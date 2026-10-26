@@ -257,6 +257,7 @@ export class Player extends Character {
     if (input.wasPressed('quickItem')) game.inventory.quickUse();
     if (input.wasPressed('special')) this.toggleMeditate();
     if (input.wasPressed('aim')) this.toggleAim();
+    if (input.wasPressed('sheath') && this.sheath) this.sheath.toggle();
     if (input.wasTapped('sprint')) {
       const axis = input.moveAxis();
       const cam = game.cameraRig;

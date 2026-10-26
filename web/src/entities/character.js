@@ -7,34 +7,36 @@ import { buildHumanoid } from '../gfx/humanoid.js';
 import { angleWrap, clamp } from '../core/utils.js';
 import { stepWithSubsteps } from '../core/smoothMotion.js';
 import { Trail } from '../gfx/trail.js';
+import { WeaponSheath } from './weaponSheath.js';
 
 // Trọng lực: qua engine GravityEngine (g=18) trong core/smoothMotion.js, không còn hằng số riêng ở đây.
 const SWAY_STIFF = 85, SWAY_DAMP = 10.5, SWAY_MAX = 0.45;
 
-// Katana stance overlay (blended on top of idle/walk/run clips while out of combat).
-// Values are rotation targets per joint; null = leave the clip pose untouched.
-// Tuned live in-browser; exposed on window as __stance for future adjustments.
-// Combat clips are never modified — the stance fades out during attacks/blocks/hit reactions.
+// Tư thế vũ khí khi CẦM (chỉ áp khi đã rút ra, clip idle/walk — chạy/nhảy
+// đã tra kiếm vào nên không còn stance chạy nữa, tay vung tự nhiên theo clip).
+// Kiếm idle: tay phải buông sát bên, lưỡi dựng sát người (đo: tip (0.53,2.07,0.06)
+// với grip 0.5), tay trái buông gần bao ở hông trái — không chéo kiếm ngang người.
+// Cung: cung ở TAY TRÁI giơ trước, tay phải kéo dây về má (đảo ngược bản cũ).
 const WEAPON_STANCE = {
   idle: {
-    armR_sh: [-0.16, 0.16, -0.5], armR_el: [-0.45, 0, 0], armR_hand: [0.05, 0, -0.35],
-    armL_sh: [-0.3, 0.2, 0.5], armL_el: [-0.65, 0, 0], armL_hand: [0.02, 0, -0.15],
-    torso: [null, 0.04, null],
+    armR_sh: [-0.15, 0, -0.35], armR_el: [-0.55, 0, 0], armR_hand: [0, 0, 0],
+    armL_sh: [0.25, 0.15, 0.3], armL_el: [-0.7, 0, 0], armL_hand: [0, 0, 0],
+    torso: [null, 0.02, null],
   },
   move: {
-    armR_sh: [-0.2, 0.12, -0.45], armR_el: [-0.5, 0, 0], armR_hand: [0.05, 0, -0.3],
-    armL_sh: [0.05, 0.1, 0.3], armL_el: [-0.5, 0, 0],
-    torso: [null, 0.05, null],
-    moveBlend: 0.85, // giữ lưỡi kiếm ổn định hơn nhịp vung tay khi chạy
+    armR_sh: [-0.2, 0, -0.35], armR_el: [-0.55, 0, 0], armR_hand: [0, 0, 0],
+    armL_sh: [0.2, 0.1, 0.3], armL_el: [-0.6, 0, 0],
+    torso: [null, 0.03, null],
+    moveBlend: 0.8,
   },
   bowIdle: {
-    armR_sh: [-0.92, 0.02, -0.32], armR_el: [-0.45, 0, 0], armR_hand: [0.1, 0, 0],
-    armL_sh: [-0.82, -0.08, 0.5], armL_el: [-0.75, 0, 0],
+    armL_sh: [-0.85, -0.05, 0.35], armL_el: [-0.25, 0, 0], armL_hand: [0, 0, 0],
+    armR_sh: [-0.55, 0.35, -0.4], armR_el: [-1.3, 0, 0], armR_hand: [0.1, 0, 0],
     torso: [null, -0.14, null],
   },
   bowMove: {
-    armR_sh: [-0.62, 0, -0.26], armR_el: [-0.4, 0, 0],
-    armL_sh: [-0.3, 0.05, 0.3], armL_el: [-0.5, 0, 0],
+    armL_sh: [-0.6, 0, 0.3], armL_el: [-0.3, 0, 0],
+    armR_sh: [-0.3, 0.1, -0.3], armR_el: [-0.6, 0, 0],
     moveBlend: 0.75,
   },
 };
@@ -81,6 +83,8 @@ export class Character extends Entity {
     game.engine.scene.add(this.rig.group);
     this.anim = new Animator(this.rig, CLIPS);
     this.anim.play('idle');
+    // Tra/rút vũ khí (idle 3s -> tra, chạy/nhảy -> tra, đánh/đỡ/ngắm -> rút).
+    this.sheath = new WeaponSheath(this.rig);
 
     this.combat = {
       blocking: false, blockPressT: 99, parried: 0,
@@ -116,6 +120,7 @@ export class Character extends Entity {
     game.engine.scene.add(this.rig.group);
     this.anim = new Animator(this.rig, CLIPS);
     this.anim.play('idle');
+    this.sheath = new WeaponSheath(this.rig);
     this._sway = new SwayState();
     this._stanceW = 0;
     this._gripW = 0;
@@ -155,17 +160,20 @@ export class Character extends Entity {
     }
   }
 
-  // Tư thế vũ khí: kiếm/thương hai tay thấp, cung giương sẵn. Tắt dần khi ra đòn.
+  // Tư thế vũ khí khi cầm: chỉ khi đã rút ra + clip idle/walk. Chạy/nhảy/lăn
+  // đã tra kiếm nên stance không áp — tay chân vung tự nhiên theo clip chạy,
+  // không còn cảnh kiếm quét ngang khi chạy (đúng ảnh 2).
   _weaponStance(dt) {
     const style = this.rig.hasWeapon ? this.rig.hasWeapon() : null;
     const melee = style === 'katana' || style === 'nodachi' || style === 'club' || style === 'spear';
     const bow = style === 'bow';
     const eligible = melee || bow;
+    const drawn = !(this.rig.isSheathed && this.rig.isSheathed());
     const c = this.combat;
     const busy = !!c.attack || c.blocking || c.staggered > 0 || c.parried > 0 || c.dead;
     const clip = this.anim.name;
-    const moving = clip === 'walk' || clip === 'run' || clip === 'sprint' || clip === 'walkSlow';
-    const inStance = eligible && !busy && (clip === 'idle' || moving);
+    const moving = clip === 'walk' || clip === 'walkSlow';
+    const inStance = eligible && drawn && !busy && (clip === 'idle' || moving);
     if (!this._stanceW) this._stanceW = 0;
     this._stanceW += ((inStance ? 1 : 0) - this._stanceW) * Math.min(1, dt * 8);
     if (this._stanceW < 0.003 || dt <= 0) return;
@@ -191,7 +199,7 @@ export class Character extends Entity {
     const style = this.rig.hasWeapon ? this.rig.hasWeapon() : null;
     const twoHanded = style === 'katana' || style === 'nodachi' || style === 'club' || style === 'spear';
     const c = this.combat;
-    const active = twoHanded && (!!c.attack || c.blocking || c.parried > 0);
+    const active = twoHanded && !(this.rig.isSheathed && this.rig.isSheathed()) && (!!c.attack || c.blocking || c.parried > 0);
     if (!this._gripW) this._gripW = 0;
     this._gripW += ((active ? 1 : 0) - this._gripW) * Math.min(1, dt * 12);
     if (this._gripW < 0.01) return;
@@ -212,7 +220,10 @@ export class Character extends Entity {
   _updateTrail(dt) {
     if (!this._trail) return;
     const atk = this.combat.attack;
-    const active = !!atk && atk.t / atk.def.dur > 0.12 && atk.t / atk.def.dur < 0.85;
+    // Cung không có vệt lưỡi; kiếm đã tra vào cũng không vẽ vệt ở tay trống.
+    const style = this.rig.hasWeapon ? this.rig.hasWeapon() : null;
+    const active = !!atk && style !== 'bow' && !(this.rig.isSheathed && this.rig.isSheathed())
+      && atk.t / atk.def.dur > 0.12 && atk.t / atk.def.dur < 0.85;
     this._trail.update(active, this.rig, dt);
   }
 
@@ -359,6 +370,8 @@ export class Character extends Entity {
 
   startAttack(atkDef, opts = {}) {
     if (!this.canAct()) return false;
+    // Đánh = rút vũ khí ra (kể cả khi đang tra trong bao / đeo sau lưng).
+    if (this.sheath) this.sheath.draw();
     const clip = CLIPS[atkDef.anim] || CLIPS.light1;
     const speed = clip.dur / atkDef.dur;
     this.anim.play(atkDef.anim, { speed, restart: true, blend: 0.04 });
@@ -558,6 +571,22 @@ export class Character extends Entity {
       if (this.ghost && !on) this.rig.mats.cloth.emissive.copy(new THREE.Color(this.rig.mats.cloth.color).multiplyScalar(0.25));
     }
     this.anim.update(dt);
+    // Tra/rút vũ khí — suy trạng thái từ clip hiện tại + mặt đất + combat,
+    // nên player, NPC, boss đều dùng chung một luật, không cần code riêng.
+    if (this.sheath) {
+      const clip = this.anim.name;
+      this.sheath.update(dt, {
+        idle: clip === 'idle' && this.grounded,
+        running: clip === 'run' || clip === 'sprint',
+        jumping: clip === 'jump',
+        airborne: !this.grounded,
+        dodging: clip === 'dodge',
+        attacking: !!this.combat.attack,
+        blocking: this.combat.blocking,
+        aiming: !!(this.aimMode),
+        dead: this.combat.dead,
+      });
+    }
     this._animOverlay(dt);
     this._weaponStance(dt);
     this._twoHandGrip(dt);

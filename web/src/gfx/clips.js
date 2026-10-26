@@ -161,12 +161,15 @@ export const CLIPS = {
     [0.32, { armR_sh: [-1.15, 0.65, -0.2], armR_el: [-1.25, 0, 0], torso: [0.14, 0.15, 0], _pos: [0, -0.07, 0] }],
   ], [{ t: 0.14, name: 'clang' }]),
 
+  // Lăn: tay ôm sát thân, kiếm nằm trong mặt phẳng dọc thân (không dang
+  // ra hai bên — đo cũ: đầu kiếm lệch ngang 0.68m khỏi tay, quét ngang đất).
   dodge: C(0.52, false, [
     [0, { legR_hip: [-0.6, 0, 0.02], legR_knee: [1.3, 0, 0], legL_hip: [-0.6, 0, -0.02], legL_knee: [1.3, 0, 0],
-      armR_sh: [-1.4, 0, -0.7], armL_sh: [-1.4, 0, 0.7], torso: [0.3, 0, 0], _pos: [0, -0.3, 0], _root: [0, 0] }],
+      armR_sh: [-0.9, 0, -0.3], armR_el: [-1.4, 0, 0], armL_sh: [-0.9, 0, 0.3], armL_el: [-1.4, 0, 0], torso: [0.3, 0, 0], _pos: [0, -0.3, 0], _root: [0, 0] }],
     [0.2, { legR_knee: [1.7, 0, 0], legL_knee: [1.7, 0, 0], _pos: [0, -0.52, 0], _root: [1.8, 0] }],
     [0.38, { _pos: [0, -0.44, 0], _root: [4.6, 0] }],
-    [0.52, { legR_hip: [-0.3, 0, 0.02], legR_knee: [0.5, 0, 0], legL_hip: [0.1, 0, -0.02], legL_knee: [0.4, 0, 0], torso: [0.12, 0, 0], _pos: [0, -0.06, 0], _root: [6.28318, 0] }],
+    [0.52, { legR_hip: [-0.3, 0, 0.02], legR_knee: [0.5, 0, 0], legL_hip: [0.1, 0, -0.02], legL_knee: [0.4, 0, 0], torso: [0.12, 0, 0],
+      armR_sh: [-0.3, 0, -0.18], armR_el: [-0.35, 0, 0], armL_sh: [0.1, 0, 0.18], armL_el: [-0.35, 0, 0], _pos: [0, -0.06, 0], _root: [6.28318, 0] }],
   ], [{ t: 0.05, name: 'whoosh' }]),
 
   skill_iai: C(0.9, false, [

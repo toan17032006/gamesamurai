@@ -18,7 +18,7 @@
 import * as THREE from 'three';
 import {
   createSamuraiCharacter, enginePrimitives, createEngineAsset,
-  engineFindBone,
+  engineFindBone, EngineSocketBinder,
 } from '../assets/engineAssets.js';
 import { GAME_TO_ENGINE_BONES } from '../assets/engineAnimation.js';
 
@@ -107,10 +107,39 @@ export function buildHumanoid(opts = {}) {
     hairMesh.position.set(0, 0.02, -0.06);
     hairSway.add(hairMesh);
   }
-  const saya = new THREE.Group();
-  saya.position.set(-0.16, 0.02, -0.04);
-  saya.rotation.set(1.5, 0, -0.35);
-  if (joints.hips) joints.hips.add(saya);
+  // Toàn bộ móc gắn vũ khí đều qua engine SocketBinder (bind 1 lần vào
+  // socket của engine character: hand_r / hand_l / hips / spine), không tự
+  // tạo THREE.Group rồi gắn tay vào bone nữa. placeWeapon() sau đó chỉ
+  // attachAsset / đổi parent giữa các socket group của engine.
+  // Fallback: nếu bind thất bại (không tìm thấy bone), dùng group thủ công
+  // gắn vào joint tương ứng để game không mất vũ khí.
+  const socketBinder = new EngineSocketBinder();
+  const bindSocket = (socket, assetId, position, rotation, joint) => {
+    const handle = socketBinder.bind(engineRoot, {
+      socket, assetId, offset: { position, rotation },
+    });
+    if (handle) return { group: handle.group, handle };
+    const g = new THREE.Group();
+    g.position.set(position.x, position.y, position.z);
+    g.rotation.set(rotation.x, rotation.y, rotation.z);
+    if (joint) joint.add(g);
+    return { group: g, handle: null };
+  };
+  const attachTo = (slot, asset) => {
+    if (slot.handle) socketBinder.attachAsset(slot.handle, asset);
+    else slot.group.add(asset);
+  };
+  // Bao kiếm đeo hông trái, chéo ra sau-xuống (đo bằng smoke test: hướng
+  // (0.34,-0.29,-0.89) với góc cũ (1.5,0,-0.35) là chỉa thẳng về trước).
+  const sayaSlot = bindSocket('hips', 'saya',
+    { x: -0.18, y: 0.02, z: -0.04 }, { x: -1.88, y: 0, z: 0.35 }, joints.hips);
+  const saya = sayaSlot.group;
+
+  // Móc đeo sau lưng: vũ khí không phải kiếm khi tra vào sẽ nằm đây
+  // (cung chéo lưng, thương/chùy dựng dọc lưng), thay vì biến mất.
+  const backSlot = bindSocket('spine', 'back',
+    { x: 0.05, y: 0.15, z: -0.18 }, { x: 0.15, y: 0, z: 0 }, joints.torso);
+  const backAnchor = backSlot.group;
 
   const blobMat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.35, depthWrite: false });
   const blob = new THREE.Mesh(enginePrimitives.cubeBox(1.5, 0.02, 1.5), blobMat);
@@ -118,10 +147,14 @@ export function buildHumanoid(opts = {}) {
   blob.renderOrder = 1;
   group.add(blob);
 
-  const weaponAnchor = new THREE.Group();
-  weaponAnchor.position.set(0, -0.06, 0.02);
-  weaponAnchor.rotation.set(0.65, 0, 0);
-  if (joints.armR_hand) joints.armR_hand.add(weaponAnchor);
+  const weaponSlot = bindSocket('hand_r', 'weapon',
+    { x: 0, y: -0.06, z: 0.02 }, { x: 0.65, y: 0, z: 0 }, joints.armR_hand);
+  const weaponAnchor = weaponSlot.group;
+  // Cung cầm tay TRÁI (tay phải kéo dây) — trước đây cung gắn tay phải,
+  // sai giải phẫu và làm stance cung phải "vẽ" ngược tay.
+  const bowSlot = bindSocket('hand_l', 'bow',
+    { x: 0, y: -0.06, z: 0.02 }, { x: 0, y: 0, z: 0.1 }, joints.armL_hand);
+  const bowAnchor = bowSlot.group;
   const trailBase = new THREE.Group(), trailTip = new THREE.Group();
   weaponAnchor.add(trailBase, trailTip);
 
@@ -172,19 +205,55 @@ export function buildHumanoid(opts = {}) {
     ]);
   }
 
+  // Trạng thái tra/rút: 'drawn' = cầm tay, 'sheathed' = trong bao / sau lưng.
+  // Vũ khí không bao giờ biến mất: tra vào chỉ đổi parent của weaponGroup.
+  let weaponModel = null, sheathState = 'drawn';
+  function placeWeapon() {
+    if (!weaponGroup) return;
+    const style = weaponModel && weaponModel.style;
+    const len = (weaponModel && weaponModel.len) || 1.1;
+    if (sheathState === 'sheathed' && style) {
+      if (style === 'katana' || style === 'nodachi') {
+        // Lưỡi nằm trong bao: dọc theo trục bao, chuôi ở miệng bao.
+        weaponGroup.position.set(0, -0.05, 0);
+        weaponGroup.rotation.set(0, 0, 0);
+        if (weaponGroup.parent !== saya) attachTo(sayaSlot, weaponGroup);
+      } else {
+        // Cung/thương/chùy/móng: đeo sau lưng (cung chéo, còn lại dựng dọc).
+        weaponGroup.position.set(style === 'bow' ? 0.02 : 0.12, style === 'bow' ? 0.1 : -0.25, 0);
+        weaponGroup.rotation.set(0, 0, style === 'bow' ? 0.6 : 0.15);
+        if (weaponGroup.parent !== backAnchor) attachTo(backSlot, weaponGroup);
+      }
+      return;
+    }
+    weaponGroup.position.set(0, 0, 0);
+    weaponGroup.rotation.set(0, 0, 0);
+    if (style === 'bow') {
+      if (weaponGroup.parent !== bowAnchor) attachTo(bowSlot, weaponGroup);
+    } else if (weaponGroup.parent !== weaponAnchor) attachTo(weaponSlot, weaponGroup);
+  }
+  function sheathWeapon() { if (weaponModel) { sheathState = 'sheathed'; placeWeapon(); } }
+  function drawWeapon() { sheathState = 'drawn'; placeWeapon(); }
+  function isSheathed() { return sheathState === 'sheathed'; }
+
   function setWeapon(model) {
-    if (weaponGroup) weaponAnchor.remove(weaponGroup);
+    if (weaponGroup && weaponGroup.parent) weaponGroup.parent.remove(weaponGroup);
+    weaponModel = model || null;
     weaponGroup = new THREE.Group();
     trailBase.position.set(0, 0, 0);
     trailTip.position.set(0, 0, 0);
     saya.children.length = 0;
-    if (!model) { weaponAnchor.add(weaponGroup); return; }
+    if (!model) { attachTo(weaponSlot, weaponGroup); return; }
     weaponGroup.userData.style = model.style;
+    // Grip: đo bằng smoke test — grip kiếm cũ 1.15 làm lưỡi chỉa tới trước
+    // 0.9m (đúng ảnh chụp màn hình: kiếm chéo ngang người). Grip 0.5 giữ
+    // lưỡi dựng sát bên phải, đầu kiếm lên trên (tip ~ (0.53, 2.07, 0.06)).
     const grip = {
-      katana: [1.15, 0, 0.05], nodachi: [1.2, 0, 0.05], club: [1.15, 0, 0],
-      spear: [1.5, 0, 0], bow: [0, 0, 0.1], claw: [1.3, 0, 0],
-    }[model.style] || [1.25, 0, 0];
+      katana: [0.5, 0, 0.05], nodachi: [0.55, 0, 0.05], club: [0.5, 0, 0],
+      spear: [1.5, 0, 0], bow: [0, 0, 0.1], claw: [0.6, 0, 0],
+    }[model.style] || [0.6, 0, 0];
     weaponAnchor.rotation.set(grip[0], grip[1], grip[2]);
+    bowAnchor.rotation.set(0, 0, 0.1);
     const len = model.len || 1.1;
     const wg = engineWeaponMesh(model.style, len, model.color || 0xd8dee8);
     weaponGroup.add(wg);
@@ -198,7 +267,8 @@ export function buildHumanoid(opts = {}) {
     } else if (model.style === 'club') { trailBase.position.set(0, 0.1, 0); trailTip.position.set(0, 0.12 + len, 0); }
     else if (model.style === 'spear') { trailBase.position.set(0, len * 0.4, 0); trailTip.position.set(0, len, 0); }
     weaponGroup.traverse((o) => { if (o.isMesh) o.castShadow = true; });
-    weaponAnchor.add(weaponGroup);
+    // Đổi vũ khí khi đang tra vào: vũ khí mới vào thẳng bao/lưng, không tự rút.
+    placeWeapon();
   }
 
   function setArmor(armor) {
@@ -241,13 +311,14 @@ export function buildHumanoid(opts = {}) {
   blob.castShadow = false;
 
   return {
-    group, body, joints, weaponAnchor, trailBase, trailTip, mats, extra, saya, hairSway,
+    group, body, joints, weaponAnchor, bowAnchor, backAnchor, trailBase, trailTip, mats, extra, saya, hairSway,
     engineBoneMap: null, GAME_TO_ENGINE_BONES,
     hipsBaseY: height * 0.52,
-    sayaBase: [1.5, 0, -0.35],
+    sayaBase: [-1.88, 0, 0.35],
     hasWeapon() { return (weaponGroup && weaponGroup.userData.style) || null; },
     height,
     setWeapon, setArmor, setHelmet,
+    sheathWeapon, drawWeapon, isSheathed,
     setVisible(v) { group.visible = v; },
     dispose() { mats.dispose(); blobMat.dispose(); },
   };

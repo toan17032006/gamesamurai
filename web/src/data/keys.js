@@ -22,6 +22,7 @@ export const ACTIONS = {
   switch4: { label: 'Nhân vật 4', default: 'Digit4', group: 'Chiến đấu' },
   vision: { label: 'Thị giác nguyên tố (giữ)', default: 'Mouse1', group: 'Chiến đấu', mouse: true },
   block: { label: 'Đỡ / Parry', default: 'Mouse2', group: 'Chiến đấu', mouse: true },
+  sheath: { label: 'Tra / rút vũ khí', default: 'KeyX', group: 'Chiến đấu' },
   special: { label: 'Thiền định / cơ chế đặc biệt', default: 'KeyT', group: 'Chiến đấu' },
   quickItem: { label: 'Dùng vật phẩm nhanh', default: 'KeyZ', group: 'Chiến đấu' },
 
