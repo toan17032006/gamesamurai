@@ -220,15 +220,17 @@ export function buildHumanoid(opts = {}) {
     const style = weaponModel && weaponModel.style;
     const len = (weaponModel && weaponModel.len) || 1.1;
     if (sheathState === 'sheathed' && style) {
-      if (style === 'katana' || style === 'nodachi') {
-        // Lưỡi nằm trong bao: dọc theo trục bao, chuôi ở miệng bao.
+      if (style === 'katana') {
+        // Katana: lưỡi nằm trong bao hông, dọc theo trục bao, chuôi ở miệng bao.
         weaponGroup.position.set(0, -0.05, 0);
         weaponGroup.rotation.set(0, 0, 0);
         if (weaponGroup.parent !== saya) attachTo(sayaSlot, weaponGroup);
       } else {
-        // Cung/thương/chùy/móng: đeo sau lưng (cung chéo, còn lại dựng dọc).
-        weaponGroup.position.set(style === 'bow' ? 0.02 : 0.12, style === 'bow' ? 0.1 : -0.25, 0);
-        weaponGroup.rotation.set(0, 0, style === 'bow' ? 0.6 : 0.15);
+        // Nodachi KHÔNG đeo hông: đao dài 1.5–1.9m, bao hông dài 2m sẽ
+        // thành cây gậy chìa ra sau dù xoay góc nào. Nodachi tra vào đeo
+        // chéo lưng (socket spine), như cung; thương/chùy/móng dựng dọc lưng.
+        weaponGroup.position.set(style === 'bow' || style === 'nodachi' ? 0.02 : 0.12, style === 'bow' || style === 'nodachi' ? 0.1 : -0.25, 0);
+        weaponGroup.rotation.set(0, 0, style === 'bow' || style === 'nodachi' ? 0.6 : 0.15);
         if (weaponGroup.parent !== backAnchor) attachTo(backSlot, weaponGroup);
       }
       return;
@@ -268,6 +270,11 @@ export function buildHumanoid(opts = {}) {
       const wide = model.style === 'nodachi' ? 1.5 : 1.0;
       trailBase.position.set(0, 0.03 + len * 0.42, 0);
       trailTip.position.set(0, 0.05 + len, 0);
+    }
+    // Bao hông CHỈ cho katana. Nodachi không có bao hông (đeo lưng khi tra),
+    // nên khi cầm nodachi sẽ không còn cây gậy dài chìa ra hông nữa.
+    if (model.style === 'katana') {
+      const wide = 1.0;
       // Bao kiếm cũng là asset của engine (AssetFactory), không phải Mesh
       // tự tạo: gốc ở miệng bao (y = 0), thân chạy dọc +Y tới đầu bao,
       // nên khi socket xoay về SAYA_DIR thì bao ôm sát đùi, không chìa

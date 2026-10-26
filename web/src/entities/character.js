@@ -246,10 +246,10 @@ export class Character extends Entity {
     const s = this._sway;
     rig.hairSway.rotation.x = s.pitch;
     rig.hairSway.rotation.z = s.roll;
-    if (rig.saya) {
-      rig.saya.rotation.x = rig.sayaBase[0] + s.pitch * 0.55;
-      rig.saya.rotation.z = rig.sayaBase[2] + s.roll * 0.45;
-    }
+    // Bao KHÔNG sway: bao gắn cứng vào socket belt của engine, hướng của
+    // nó là hướng socket. Ghi đè rotation mỗi khung bằng sway (tới ±14°)
+    // làm bao lắc lệch khỏi hướng engine đã tính — đúng lỗi "bao vẫn lệch"
+    // khi nhân vật di chuyển. Tóc/búi tóc vẫn sway, bao thì không.
   }
 
   get maxHp() { return this.stats.maxHp; }
