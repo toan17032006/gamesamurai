@@ -1,15 +1,21 @@
-# Đạo Của Kẻ Vô Danh — Samurai 3D Action RPG
+# Samurai — Viết lại 100% bằng Engine
 
-Game samurai 3D Action RPG (Action RPG + Soulslike + Hack-and-slash + Survival) chạy trên web,
-xây bằng **Three.js** (frontend) và **FastAPI + SQLite** (backend). 15 chương campaign trên
-**15 bản đồ nền** phủ đủ các nhóm môi trường (làng, rừng tre, rừng ôn đới, đồi, núi, tuyết,
-sông/thác, hồ/lầy, đền, chiến trường/thành, hang, hẻm núi, núi lửa, siêu nhiên), **Thế Giới Vô Cực**
-ghép các bản đồ nền theo seed vô hạn, chiến đấu soulslike (stamina, né, đỡ, parry), AI NPC theo
-phe phái, sinh vật hoang dã + rồng, thời tiết động (bão sét, tuyết, lũ, sương ma, mưa linh khí),
-cấp độ 1–25 với phần thưởng theo cấp, chế tạo, kỹ năng, save/load.
+> **Bản viết lại (2026-10-26):** toàn bộ map, UI, nhân vật, quái, vật phẩm cũ đã bị xóa
+> khỏi `main` theo yêu cầu và viết lại từ đầu, bọc bằng **@aetheria/engine** (`engine/`,
+> vendored, không kèm `.git` của engine). Bản cũ vẫn còn trong lịch sử git ở commit
+> `fde8324` nếu cần khôi phục.
+>
+> Bản mới hiện có (mốc 1, chơi được ngay): 1 map engine (Terrain/Water/Foliage/
+> Atmosphere), 1 nhân vật `buildCharacter` + kiếm/bow qua `SocketBinder` + bao kiếm
+> (đứng yên 3s tự tra, chạy/nhảy tra ngay, đã tra không tự rút, X tra/rút), 4 quái
+> `buildMonster` có AI đuổi/đánh, vật phẩm nhặt (xu, hồi máu), combat chém + hạt
+> engine, camera thứ ba, HUD FPS/HP. Chưa có lại 15 chương, quest, inventory,
+> crafting, save — các hệ đó sẽ port dần lên nền engine.
 
-> Toàn bộ mô hình, hoạt ảnh, âm thanh và hiệu ứng đều là **procedural** (sinh bằng mã) —
-> dự án không cần tải asset ngoài nào và không kèm tài nguyên có bản quyền.
+Game samurai 3D chạy trên web, mọi render/tính toán/FPS đi qua API engine:
+vòng lặp `Ticker`, vật lý `GravityEngine`, địa hình/nước/cỏ/khí quyển, nhân vật/quái
+`buildCharacter`/`buildMonster`, vũ khí `AssetFactory` + `SocketBinder`, input `InputMap`,
+hiệu ứng `ParticleSystem`. HUD chỉ là chữ DOM vì engine không có hệ HUD 2D.
 
 ---
 

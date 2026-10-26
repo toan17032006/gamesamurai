@@ -7,9 +7,7 @@
   "scripts": {
     "build": "node build.mjs",
     "build:watch": "node build.mjs --watch",
-    "test": "node --test \"tests/framework/*.test.js\" \"tests/world/*.test.js\"",
-    "test:e2e": "node tests/e2e.mjs",
-    "test:levels": "node tests/e2e-levels.mjs",
+    "test": "node --test \"tests/game/*.test.js\"",
     "serve:dev": "node scripts/dev-server.mjs"
   },
   "dependencies": {
