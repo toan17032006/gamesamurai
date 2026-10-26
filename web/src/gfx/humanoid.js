@@ -129,10 +129,17 @@ export function buildHumanoid(opts = {}) {
     if (slot.handle) socketBinder.attachAsset(slot.handle, asset);
     else slot.group.add(asset);
   };
-  // Bao kiếm đeo hông trái, chéo ra sau-xuống (đo bằng smoke test: hướng
-  // (0.34,-0.29,-0.89) với góc cũ (1.5,0,-0.35) là chỉa thẳng về trước).
+  // Bao kiếm: hướng KHÔNG đoán bằng góc Euler nữa mà tính từ vector đích
+  // bằng engine (quaternion xoay trục +Y của bao về vector đích).
+  // Vector đích: nằm trong mặt phẳng dọc thân (x = 0, không lệch ngang),
+  // chéo ra sau-xuống — góc z = 0.35 cũ làm đầu bao lệch sang trái 0.43m
+  // so với đùi (tip x -0.61 trong khi hông trái x -0.18, đo bằng smoke test).
+  const SAYA_DIR = new THREE.Vector3(0, -0.30, -0.95).normalize();
+  const sayaEuler = new THREE.Euler().setFromQuaternion(
+    new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), SAYA_DIR));
+  const sayaBase = [sayaEuler.x, sayaEuler.y, sayaEuler.z];
   const sayaSlot = bindSocket('hips', 'saya',
-    { x: -0.18, y: 0.02, z: -0.04 }, { x: -1.88, y: 0, z: 0.35 }, joints.hips);
+    { x: -0.18, y: 0.02, z: -0.04 }, { x: sayaEuler.x, y: sayaEuler.y, z: sayaEuler.z }, joints.hips);
   const saya = sayaSlot.group;
 
   // Móc đeo sau lưng: vũ khí không phải kiếm khi tra vào sẽ nằm đây
@@ -261,9 +268,16 @@ export function buildHumanoid(opts = {}) {
       const wide = model.style === 'nodachi' ? 1.5 : 1.0;
       trailBase.position.set(0, 0.03 + len * 0.42, 0);
       trailTip.position.set(0, 0.05 + len, 0);
-      const sayaMesh = new THREE.Mesh(enginePrimitives.cubeBox(0.034 * wide, len + 0.1, 0.02 * wide), eng.accent);
-      sayaMesh.position.set(0, (len + 0.1) / 2 - 0.15, 0);
-      saya.add(sayaMesh);
+      // Bao kiếm cũng là asset của engine (AssetFactory), không phải Mesh
+      // tự tạo: gốc ở miệng bao (y = 0), thân chạy dọc +Y tới đầu bao,
+      // nên khi socket xoay về SAYA_DIR thì bao ôm sát đùi, không chìa
+      // ra trước hông như bản cũ (thân cũ bắt đầu từ y = -0.15).
+      const sayaAsset = createEngineAsset(`saya_${model.style}_${len.toFixed(2)}`, [
+        { shape: 'box', size: [0.05 * wide, len + 0.1, 0.03 * wide], position: [0, (len + 0.1) / 2, 0], rotation: [0, 0, 0], color: colors.accent, roughness: 0.6, metalness: 0.1 },
+        { shape: 'box', size: [0.07 * wide, 0.08, 0.05 * wide], position: [0, 0.04, 0], rotation: [0, 0, 0], color: 0x3a3a44, roughness: 0.3, metalness: 0.85 },
+        { shape: 'box', size: [0.05 * wide, 0.1, 0.03 * wide], position: [0, len + 0.05, 0], rotation: [0, 0, 0], color: colors.accent, roughness: 0.6, metalness: 0.1 },
+      ]);
+      attachTo(sayaSlot, sayaAsset);
     } else if (model.style === 'club') { trailBase.position.set(0, 0.1, 0); trailTip.position.set(0, 0.12 + len, 0); }
     else if (model.style === 'spear') { trailBase.position.set(0, len * 0.4, 0); trailTip.position.set(0, len, 0); }
     weaponGroup.traverse((o) => { if (o.isMesh) o.castShadow = true; });
@@ -314,7 +328,7 @@ export function buildHumanoid(opts = {}) {
     group, body, joints, weaponAnchor, bowAnchor, backAnchor, trailBase, trailTip, mats, extra, saya, hairSway,
     engineBoneMap: null, GAME_TO_ENGINE_BONES,
     hipsBaseY: height * 0.52,
-    sayaBase: [-1.88, 0, 0.35],
+    sayaBase,
     hasWeapon() { return (weaponGroup && weaponGroup.userData.style) || null; },
     height,
     setWeapon, setArmor, setHelmet,
