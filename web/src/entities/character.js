@@ -5,6 +5,7 @@ import { Animator } from '../gfx/animator.js';
 import { CLIPS } from '../gfx/clips.js';
 import { buildHumanoid } from '../gfx/humanoid.js';
 import { angleWrap, clamp } from '../core/utils.js';
+import { stepWithSubsteps } from '../core/smoothMotion.js';
 import { Trail } from '../gfx/trail.js';
 
 const GRAVITY = -18;
@@ -292,22 +293,23 @@ export class Character extends Entity {
   }
 
   applyPhysics(dt, game) {
-    // gravity & ground
-    const ground = game.world.groundAt(this.pos.x, this.pos.z);
-    if (this.grounded && this.pos.y <= ground + 0.02) this.pos.y = ground;
-    this.vel.y += GRAVITY * dt;
-    this.pos.y += this.vel.y * dt;
-    if (this.pos.y <= ground) {
-      if (!this.grounded && this.vel.y < -6) {
-        this.anim.play('land', { restart: true });
-        if (this.isPlayer) {
-          game.cameraRig.shake(0.12);
-          game.particles.spawn({ x: this.pos.x, y: this.pos.y + 0.1, z: this.pos.z },
-            { count: 10, color: [0xb0a48a, 0x8a8070], speed: 2.2, life: 0.5, gravity: -3, spread: 0.7 });
-        }
+    // gravity + vị trí qua smoothMotion: chia dt thành bước nhỏ
+    // tối đa 1/120s để không xuyên đất khi FPS tụt, vận tốc rơi
+    // kẹp ở -50. groundY lấy lại mỗi bước để đúng địa hình dốc.
+    const res = stepWithSubsteps(this, dt, (pos) => ({
+      groundY: game.world.groundAt(pos.x, pos.z),
+      collide: (p, r) => game.world.collideCircle(p, r),
+      radius: this.radius,
+      boundLimit: game.world.boundLimit,
+    }));
+    if (res.landed && res.impact < -6) {
+      this.anim.play('land', { restart: true });
+      if (this.isPlayer) {
+        game.cameraRig.shake(0.12);
+        game.particles.spawn({ x: this.pos.x, y: this.pos.y + 0.1, z: this.pos.z },
+          { count: 10, color: [0xb0a48a, 0x8a8070], speed: 2.2, life: 0.5, gravity: -3, spread: 0.7 });
       }
-      this.pos.y = ground; this.vel.y = 0; this.grounded = true;
-    } else this.grounded = false;
+    }
 
     // nước: lội (chậm) + ngập ngực không chìm sâu thêm
     const wl = game.world.waterLevelAt ? game.world.waterLevelAt(this.pos.x, this.pos.z) : -Infinity;
@@ -337,14 +339,8 @@ export class Character extends Entity {
       }
     }
 
-    // horizontal
-    this.pos.x += this.vel.x * dt;
-    this.pos.z += this.vel.z * dt;
-    // obstacles & bounds
-    game.world.collideCircle(this.pos, this.radius);
-    const lim = game.world.boundLimit;
-    if (Number.isFinite(lim)) this.pos.x = clamp(this.pos.x, -lim, lim);
-    if (Number.isFinite(lim)) this.pos.z = clamp(this.pos.z, -lim, lim);
+    // horizontal đã xử lý trong stepWithSubsteps ở trên
+    // (pos.x/z + collideCircle + kẹp biên, mỗi bước nhỏ).
   }
 
   faceToward(x, z, dt, rate = 12) {
