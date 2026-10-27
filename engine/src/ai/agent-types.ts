@@ -957,6 +957,102 @@ export interface AgentTrainingReport {
   qTableSize: number;
 }
 
+/**
+ * A negative reinforcement sample. `penalty` is a positive magnitude; the brain
+ * applies it as a negative reward with an asymmetric (faster) learning rate so
+ * harmful actions are suppressed more quickly than good actions are reinforced.
+ */
+export interface AgentNegativeSample {
+  /** Optional state override; defaults to the agent's last decision state. */
+  stateKey?: string;
+  actionId: string;
+  /** Positive penalty magnitude (clamped to `[0, 1000]`). */
+  penalty: number;
+  /** Optional multiplier in `[0.01, 10]` (defaults to 1). */
+  weight?: number;
+  /** Human-readable reason persisted in the negative history. */
+  reason?: string;
+  /** Optional stimulus that becomes an aversion. */
+  stimulusId?: string;
+  /** Optional next state used to bootstrap future punishment. */
+  nextStateKey?: string;
+  done?: boolean;
+  context?: Record<string, unknown>;
+}
+
+/** One negative sample recorded for audit/debugging and snapshot persistence. */
+export interface AgentNegativeRecord {
+  stateKey: string;
+  actionId: string;
+  penalty: number;
+  reason: string;
+  stimulusId?: string;
+  timestamp: number;
+}
+
+/** Result of one negative Q-table update. */
+export interface AgentNegativeLearningResult extends AgentLearningResult {
+  /** Positive penalty magnitude that was applied. */
+  penalty: number;
+  /** Aversion strength after the update, when a stimulus was supplied. */
+  aversionStrength?: number;
+  reason: string;
+}
+
+/** Aggregate result of a negative training batch. */
+export interface AgentNegativeTrainingReport {
+  samples: number;
+  totalPenalty: number;
+  meanPenalty: number;
+  updatedActions: number;
+  aversionCount: number;
+  qTableSize: number;
+}
+
+/**
+ * A paired preference sample: the preferred action should rank above the
+ * dispreferred action by at least `strength` Q-value margin.
+ */
+export interface AgentPreferencePair {
+  stateKey?: string;
+  preferredActionId: string;
+  dispreferredActionId: string;
+  /** Desired positive margin (defaults to 1, clamped to `[0, 1000]`). */
+  strength?: number;
+  context?: Record<string, unknown>;
+}
+
+/** Result of one preference-pair update. */
+export interface AgentPreferenceLearningResult {
+  agentId: string;
+  stateKey: string;
+  preferredActionId: string;
+  dispreferredActionId: string;
+  preferredQ: number;
+  dispreferredQ: number;
+  margin: number;
+  strength: number;
+}
+
+/** Learned aversion toward a stimulus (object, creature, place, sound, ...). */
+export interface AgentAversion {
+  stimulusId: string;
+  /** Aversion strength in `[0, 1]`. */
+  strength: number;
+  reason: string;
+  exposures: number;
+  firstSeenAt: number;
+  lastSeenAt: number;
+}
+
+/** Negative-learning counters exposed for HUD and diagnostics. */
+export interface AgentNegativeStats {
+  samples: number;
+  totalPenalty: number;
+  preferencePairs: number;
+  aversionCount: number;
+}
+
 /** Result of a skill check. */
 export interface AgentSkillCheck {
   agentId: string;
@@ -1035,5 +1131,11 @@ export interface AgentSnapshot {
   lastStateKey: string;
   randomState: number;
   episodeCounter: number;
+  /** Learned stimulus aversions (optional for backwards-compatible v1 snapshots). */
+  aversions?: AgentAversion[];
+  /** Bounded negative-sample audit log. */
+  negativeHistory?: AgentNegativeRecord[];
+  /** Negative-learning counters. */
+  negativeStats?: AgentNegativeStats;
   checksum: string;
 }

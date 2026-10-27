@@ -6,3 +6,4 @@ export * from './playcanvas-backend';
 export * from './raw-backend';
 export * from './webgpu-backend';
 export * from './registry';
+export * from './interop';

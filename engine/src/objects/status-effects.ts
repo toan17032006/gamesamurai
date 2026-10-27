@@ -17,16 +17,16 @@ export type CrowdControlType =
   | 'knockback'
   | 'slow';
 
-export interface StatusModifier<TValue = any> {
+export interface StatusModifier<TValue = unknown> {
   statKey: string;
   type: 'flat' | 'percent';
   value: TValue;
 }
 
-export interface PeriodicTickEffect<TTarget = any> {
+export interface PeriodicTickEffect<TTarget = unknown> {
   interval: number; // in seconds
   elapsed: number;
-  onTick: (target: TTarget, effect: StatusEffect<any>) => void;
+  onTick: (target: TTarget, effect: StatusEffect<StatusModifier>) => void;
 }
 
 /**
@@ -78,7 +78,7 @@ export class StatusEffect<TModifier = StatusModifier> {
     this.elapsed = 0;
   }
 
-  public tick(dt: number, target?: any): void {
+  public tick(dt: number, target?: unknown): void {
     if (this.duration > 0) {
       this.elapsed += dt;
     }
@@ -87,7 +87,7 @@ export class StatusEffect<TModifier = StatusModifier> {
       this.periodicTick.elapsed += dt;
       if (this.periodicTick.elapsed >= this.periodicTick.interval) {
         this.periodicTick.elapsed -= this.periodicTick.interval;
-        this.periodicTick.onTick(target, this);
+        this.periodicTick.onTick(target, this as unknown as StatusEffect<StatusModifier>);
       }
     }
   }
@@ -127,7 +127,7 @@ export class Debuff<TType = string> extends StatusEffect<StatusModifier> {
     debuffType: TType,
     duration = 10,
     dotDamagePerSec = 0,
-    onDamageTick?: (target: any, damage: number) => void
+    onDamageTick?: (target: unknown, damage: number) => void
   ) {
     super(id, name, 'debuff', duration);
     this.debuffType = debuffType;
@@ -139,8 +139,9 @@ export class Debuff<TType = string> extends StatusEffect<StatusModifier> {
         onTick: (target) => {
           if (onDamageTick) {
             onDamageTick(target, dotDamagePerSec);
-          } else if (target?.health?.damage) {
-            target.health.damage(dotDamagePerSec, name);
+          } else {
+            const health = (target as { health?: { damage?: (amount: number, source: string) => void } } | null)?.health;
+            if (typeof health?.damage === 'function') health.damage(dotDamagePerSec, name);
           }
         },
       };
@@ -272,7 +273,7 @@ export class StatusContainer {
     return dispelled;
   }
 
-  public tick(dt: number, target?: any): void {
+  public tick(dt: number, target?: unknown): void {
     for (const [id, eff] of this._effects.entries()) {
       eff.tick(dt, target);
       if (eff.isExpired) {
@@ -295,11 +296,11 @@ export class StatusContainer {
  */
 export class AnimationStateController {
   public currentState = 'idle';
-  private _parameters: Map<string, number | boolean | string> = new Map();
+  private _parameters: Map<string, unknown> = new Map();
   private _transitions: {
     from: string;
     to: string;
-    condition: (params: Map<string, any>) => boolean;
+    condition: (params: Map<string, unknown>) => boolean;
     fadeDuration: number;
   }[] = [];
   public currentFadeTime = 0.2;
@@ -323,7 +324,7 @@ export class AnimationStateController {
   public addTransition(
     from: string,
     to: string,
-    condition: (params: Map<string, any>) => boolean,
+    condition: (params: Map<string, unknown>) => boolean,
     fadeDuration = 0.2
   ): void {
     this._transitions.push({ from, to, condition, fadeDuration });

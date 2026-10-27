@@ -10,7 +10,7 @@ export type ColliderShape = 'box' | 'sphere' | 'capsule' | 'cylinder' | 'mesh' |
 /**
  * Generic Physics-enabled object integrating velocity, forces, and collisions.
  */
-export class PhysicsObject<TBody = any, TCollider = any> {
+export class PhysicsObject<TBody = unknown, TCollider = unknown> {
   public bodyType: PhysicsBodyType;
   public mass: number;
   public friction: number;

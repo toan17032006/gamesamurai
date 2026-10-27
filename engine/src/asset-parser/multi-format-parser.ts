@@ -197,7 +197,7 @@ export class MultiFormatParser {
   }
 
   /**
-   * Parse any supported model, scene, material, texture, motion or data asset
+   * Parse supported models, scenes, materials, textures, motion or data assets
    * into one unified structure.
    */
   public static async parse(

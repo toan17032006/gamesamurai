@@ -170,8 +170,8 @@ export interface AnimalBehaviorState {
   curiosity: number; // 0 to 100
   aggression: number; // 0 to 100
   socialDrive: number; // 0 to 100
-  activeThreat: any | null;
-  activeTarget: any | null;
+  activeThreat: unknown | null;
+  activeTarget: unknown | null;
 }
 
 export interface AnimalConfig {

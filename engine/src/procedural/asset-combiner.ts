@@ -37,7 +37,7 @@ export interface AssetCombinationResult {
 
 export class AssetCombiner {
   /**
-   * Combine a base asset with any number of attachments, resolving sockets, pivots, and scales.
+   * Combine a base asset with a variable number of attachments, resolving sockets, pivots, and scales.
    */
   public static combineAssets(
     base: THREE.Object3D,

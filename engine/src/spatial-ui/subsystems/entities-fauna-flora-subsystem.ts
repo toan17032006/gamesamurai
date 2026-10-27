@@ -55,6 +55,7 @@ import {
   entityForward,
   toVec3,
   num,
+  asRecord,
   distance3D,
   distance2D,
   normalize,
@@ -973,7 +974,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1101] calculateNPCPosition
    * Tính vị trí NPC.
    */
-  public calculateNPCPosition(a?: any, b?: any, options?: any): any {
+  public calculateNPCPosition(a?: unknown, b?: unknown, options?: unknown) {
     const entity = a ?? optVec3(options, 'entity') ?? b;
     const profile = resolveSpecies(entity, 'humanoid');
     const position = entityPosition(entity);
@@ -988,7 +989,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1102] calculateNPCVelocity
    * Tính vận tốc NPC.
    */
-  public calculateNPCVelocity(entity?: any, dt = 0.016): any {
+  public calculateNPCVelocity(entity?: unknown, dt = 0.016) {
     const velocity = entityVelocity(entity, dt);
     return directionResult('calculateNPCVelocity', velocity, { source: 'entity.velocity' });
   }
@@ -996,7 +997,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1103] calculateNPCAcceleration
    * Tính gia tốc NPC.
    */
-  public calculateNPCAcceleration(entity?: any, dt = 0.016): any {
+  public calculateNPCAcceleration(entity?: unknown, dt = 0.016) {
     const acceleration = entityAcceleration(entity, dt);
     return directionResult('calculateNPCAcceleration', acceleration, { source: 'entity.acceleration' });
   }
@@ -1004,14 +1005,14 @@ export class EntitiesFaunaFloraSubsystem {
    * [1104] calculateNPCFacingDirection
    * Tính hướng mặt NPC.
    */
-  public calculateNPCFacingDirection(a?: any, b?: any): any {
+  public calculateNPCFacingDirection(a?: unknown, b?: unknown) {
     return directionResult('calculateNPCFacingDirection', facingDirection(a, b));
   }
   /**
    * [1105] calculateNPCOrientation
    * Tính hướng quay NPC.
    */
-  public calculateNPCOrientation(entityOrAngle?: any, options?: any): any {
+  public calculateNPCOrientation(entityOrAngle?: unknown, options?: unknown) {
     return orientationResult('calculateNPCOrientation', entityQuaternion(entityOrAngle), {
       source: 'entity.quaternion',
     });
@@ -1020,7 +1021,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1106] calculateNPCDistanceToPlayer
    * Tính khoảng cách NPC đến người chơi.
    */
-  public calculateNPCDistanceToPlayer(a?: any, b?: any): any {
+  public calculateNPCDistanceToPlayer(a?: unknown, b?: unknown) {
     const from = pointOf(a);
     const to = pointOf(b);
     const resolved = from && to;
@@ -1031,7 +1032,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1107] calculateNPCDistanceToTarget
    * Tính khoảng cách NPC đến mục tiêu.
    */
-  public calculateNPCDistanceToTarget(a?: any, b?: any): any {
+  public calculateNPCDistanceToTarget(a?: unknown, b?: unknown) {
     const from = pointOf(a);
     const to = pointOf(b);
     const resolved = from && to;
@@ -1042,7 +1043,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1108] calculateNPCDistanceToWaypoint
    * Tính khoảng cách NPC đến điểm đường đi.
    */
-  public calculateNPCDistanceToWaypoint(a?: any, b?: any): any {
+  public calculateNPCDistanceToWaypoint(a?: unknown, b?: unknown) {
     const from = pointOf(a);
     const to = pointOf(b);
     const resolved = from && to;
@@ -1053,7 +1054,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1109] calculateNPCNearestNeighbor
    * Tìm NPC gần nhất.
    */
-  public calculateNPCNearestNeighbor(a?: any, b?: any, options?: any): any {
+  public calculateNPCNearestNeighbor(a?: unknown, b?: unknown, options?: unknown) {
     const origin = pointOf(a) ?? ZERO3;
     const neighbors = pointList(
       (options && typeof options === 'object' ? (options as Record<string, unknown>).neighbors : undefined)
@@ -1081,7 +1082,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1110] calculateNPCGroupCenter
    * Tính tâm nhóm NPC.
    */
-  public calculateNPCGroupCenter(a?: any, b?: any, options?: any): any {
+  public calculateNPCGroupCenter(a?: unknown, b?: unknown, options?: unknown) {
     const members = pointList(
       (options && typeof options === 'object' ? (options as Record<string, unknown>).members : undefined)
       ?? (Array.isArray(b) ? b : undefined)
@@ -1098,7 +1099,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1111] calculateNPCGroupRadius
    * Tính bán kính nhóm NPC.
    */
-  public calculateNPCGroupRadius(entity?: any, options?: any): any {
+  public calculateNPCGroupRadius(entity?: unknown, options?: unknown) {
     const members = pointList(
       options && typeof options === 'object' ? (options as Record<string, unknown>).members : undefined,
     );
@@ -1115,7 +1116,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1112] calculateNPCFormationOffset
    * Tính độ lệch đội hình NPC.
    */
-  public calculateNPCFormationOffset(a?: any, b?: any, options?: any): any {
+  public calculateNPCFormationOffset(a?: unknown, b?: unknown, options?: unknown) {
     const profile = resolveSpecies(a, 'humanoid');
     const index = Math.max(0, Math.round(optNumber(options, 'index', 0)));
     const count = Math.max(1, Math.round(optNumber(options, 'count', 1)));
@@ -1129,7 +1130,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1113] calculateNPCFormationPosition
    * Tính vị trí đội hình NPC.
    */
-  public calculateNPCFormationPosition(a?: any, b?: any, options?: any): any {
+  public calculateNPCFormationPosition(a?: unknown, b?: unknown, options?: unknown) {
     const formation = this.calculateNPCFormationOffset(a, b, options) as Record<string, unknown>;
     const offset = (formation.result as { offset: Vec3D }).offset;
     const base = entityPosition(a);
@@ -1140,14 +1141,14 @@ export class EntitiesFaunaFloraSubsystem {
    * [1114] calculateNPCFormationDirection
    * Tính hướng đội hình NPC.
    */
-  public calculateNPCFormationDirection(a?: any, b?: any): any {
+  public calculateNPCFormationDirection(a?: unknown, b?: unknown) {
     return directionResult('calculateNPCFormationDirection', facingDirection(a, b));
   }
   /**
    * [1115] calculateNPCFormationSpacing
    * Tính khoảng cách giữa NPC trong đội hình.
    */
-  public calculateNPCFormationSpacing(a?: any, b?: any, options?: any): any {
+  public calculateNPCFormationSpacing(a?: unknown, b?: unknown, options?: unknown) {
     const profile = resolveSpecies(a, 'humanoid');
     const count = Math.max(1, Math.round(optNumber(options, 'count', 1)));
     const spacing = optNumber(options, 'spacing', profile.radius * 3);
@@ -1169,7 +1170,7 @@ export class EntitiesFaunaFloraSubsystem {
    * chồng lên nhau). Lực đẩy tính trong mặt phẳng ngang — NPC đứng trên mặt
    * đất — và suy giảm tuyến tính khi khoảng cách tiến gần mép vùng cá nhân.
    */
-  public calculateNPCSeparationForce(entity?: any, dt = 0.016): any {
+  public calculateNPCSeparationForce(entity?: unknown, dt = 0.016) {
     const profile = resolveSpecies(entity, 'humanoid');
     const neighbors = neighborList(entity, dt);
     const origin = entityPosition(entity);
@@ -1201,7 +1202,7 @@ export class EntitiesFaunaFloraSubsystem {
    * Tham số thứ hai là `dt` theo hợp đồng, nhưng nếu truyền một **mảng** thì
    * được hiểu là danh sách NPC lân cận.
    */
-  public calculateNPCAlignmentForce(entity?: any, dt = 0.016): any {
+  public calculateNPCAlignmentForce(entity?: unknown, dt = 0.016) {
     const neighbors = neighborList(entity, dt);
     const self = entityPosition(entity);
     const average = neighbors.length > 0 ? centroidOf(neighbors) : self;
@@ -1215,7 +1216,7 @@ export class EntitiesFaunaFloraSubsystem {
    * Tham số thứ hai là `dt` theo hợp đồng, nhưng nếu truyền một **mảng** thì
    * được hiểu là danh sách NPC lân cận.
    */
-  public calculateNPCCohesionForce(entity?: any, dt = 0.016): any {
+  public calculateNPCCohesionForce(entity?: unknown, dt = 0.016) {
     const neighbors = neighborList(entity, dt);
     const self = entityPosition(entity);
     const center = neighbors.length > 0 ? centroidOf(neighbors) : self;
@@ -1226,7 +1227,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1119] calculateNPCSteeringForce
    * Tính lực điều hướng NPC.
    */
-  public calculateNPCSteeringForce(entity?: any, dt = 0.016): any {
+  public calculateNPCSteeringForce(entity?: unknown, dt = 0.016) {
     const profile = resolveSpecies(entity, 'humanoid');
     const desired = optVec3(
       entity && typeof entity === 'object'
@@ -1244,7 +1245,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1120] calculateNPCAvoidanceForce
    * Tính lực tránh vật cản NPC.
    */
-  public calculateNPCAvoidanceForce(entity?: any, dt = 0.016): any {
+  public calculateNPCAvoidanceForce(entity?: unknown, dt = 0.016) {
     const profile = resolveSpecies(entity, 'humanoid');
     const obstacles = pointList(
       entity && typeof entity === 'object'
@@ -1270,7 +1271,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1121] calculateNPCObstacleDistance
    * Tính khoảng cách NPC đến chướng ngại.
    */
-  public calculateNPCObstacleDistance(a?: any, b?: any): any {
+  public calculateNPCObstacleDistance(a?: unknown, b?: unknown) {
     const from = pointOf(a);
     const to = pointOf(b);
     const resolved = from && to;
@@ -1281,7 +1282,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1122] calculateNPCObstacleNormal
    * Tính pháp tuyến chướng ngại đối với NPC.
    */
-  public calculateNPCObstacleNormal(a?: any, b?: any): any {
+  public calculateNPCObstacleNormal(a?: unknown, b?: unknown) {
     const from = pointOf(a);
     const to = pointOf(b);
     let normal: Vec3D = { x: 0, y: 1, z: 0 };
@@ -1295,7 +1296,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1123] calculateNPCPathfindingCost
    * Tính chi phí tìm đường NPC.
    */
-  public calculateNPCPathfindingCost(entity?: any, options?: any): any {
+  public calculateNPCPathfindingCost(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'humanoid');
     const target = optVec3(options, 'target');
     const origin = entityPosition(entity);
@@ -1313,7 +1314,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1124] calculateNPCPathLength
    * Tính độ dài đường đi NPC.
    */
-  public calculateNPCPathLength(entity?: any, options?: any): any {
+  public calculateNPCPathLength(entity?: unknown, options?: unknown) {
     const path = pointList(
       options && typeof options === 'object' ? (options as Record<string, unknown>).path : undefined,
     );
@@ -1329,7 +1330,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1125] calculateNPCPathSmoothing
    * Tính đường đi mượt cho NPC.
    */
-  public calculateNPCPathSmoothing(a?: any, b?: any, options?: any): any {
+  public calculateNPCPathSmoothing(a?: unknown, b?: unknown, options?: unknown) {
     const path = pointList(
       options && typeof options === 'object' ? (options as Record<string, unknown>).path : undefined,
     );
@@ -1360,7 +1361,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1126] calculateNPCWaypointIndex
    * Xác định điểm đường đi hiện tại của NPC.
    */
-  public calculateNPCWaypointIndex(a?: any, b?: any, options?: any): any {
+  public calculateNPCWaypointIndex(a?: unknown, b?: unknown, options?: unknown) {
     const path = pointList(
       options && typeof options === 'object' ? (options as Record<string, unknown>).path : undefined,
     );
@@ -1385,7 +1386,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1127] calculateNPCWaypointDistance
    * Tính khoảng cách đến waypoint.
    */
-  public calculateNPCWaypointDistance(a?: any, b?: any): any {
+  public calculateNPCWaypointDistance(a?: unknown, b?: unknown) {
     const from = pointOf(a);
     const to = pointOf(b);
     const resolved = from && to;
@@ -1396,7 +1397,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1128] calculateNPCWaypointArrival
    * Xác định NPC đã đến waypoint.
    */
-  public calculateNPCWaypointArrival(a?: any, b?: any, options?: any): any {
+  public calculateNPCWaypointArrival(a?: unknown, b?: unknown, options?: unknown) {
     const from = pointOf(a);
     const to = pointOf(b);
     const resolved = from && to;
@@ -1413,7 +1414,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1129] calculateNPCPatrolRadius
    * Tính bán kính tuần tra NPC.
    */
-  public calculateNPCPatrolRadius(entity?: any, options?: any): any {
+  public calculateNPCPatrolRadius(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'humanoid');
     const explicit = optNumber(options, 'radius', Number.NaN);
     const radius = Number.isFinite(explicit) ? explicit : profile.senses.sight * 0.5;
@@ -1425,7 +1426,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1130] calculateNPCPatrolPosition
    * Tính vị trí tuần tra NPC.
    */
-  public calculateNPCPatrolPosition(a?: any, b?: any, options?: any): any {
+  public calculateNPCPatrolPosition(a?: unknown, b?: unknown, options?: unknown) {
     const origin = entityPosition(a);
     const radius = optNumber(options, 'radius', Number.NaN);
     const patrolRadius = Number.isFinite(radius)
@@ -1443,7 +1444,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1131] calculateNPCDetectionRange
    * Tính phạm vi phát hiện NPC.
    */
-  public calculateNPCDetectionRange(a?: any, b?: any, options?: any): any {
+  public calculateNPCDetectionRange(a?: unknown, b?: unknown, options?: unknown) {
     const profile = resolveSpecies(a, 'humanoid');
     const explicit = optNumber(options, 'range', Number.NaN);
     const range = Number.isFinite(explicit)
@@ -1460,7 +1461,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1132] calculateNPCFieldOfView
    * Tính góc nhìn NPC.
    */
-  public calculateNPCFieldOfView(a?: any, b?: any, options?: any): any {
+  public calculateNPCFieldOfView(a?: unknown, b?: unknown, options?: unknown) {
     const fov = optNumber(options, 'fov', 100 * (Math.PI / 180));
     return namedResult('calculateNPCFieldOfView', {
       fov,
@@ -1473,7 +1474,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1133] calculateNPCLineOfSight
    * Kiểm tra đường nhìn NPC.
    */
-  public calculateNPCLineOfSight(a?: any, b?: any, options?: any): any {
+  public calculateNPCLineOfSight(a?: unknown, b?: unknown, options?: unknown) {
     const profile = resolveSpecies(a, 'humanoid');
     const from = pointOf(a);
     const to = pointOf(b);
@@ -1497,7 +1498,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1134] calculateNPCVisibilityScore
    * Tính điểm khả năng nhìn thấy mục tiêu.
    */
-  public calculateNPCVisibilityScore(entity?: any, options?: any): any {
+  public calculateNPCVisibilityScore(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'humanoid');
     const target = optVec3(options, 'target');
     const origin = entityPosition(entity);
@@ -1510,7 +1511,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1135] calculateNPCThreatScore
    * Tính điểm đe dọa của NPC.
    */
-  public calculateNPCThreatScore(entity?: any, options?: any): any {
+  public calculateNPCThreatScore(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'humanoid');
     const target = optVec3(options, 'target');
     const distance = target ? distance3D(entityPosition(entity), target) : profile.radius;
@@ -1523,7 +1524,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1136] calculateNPCInterestScore
    * Tính điểm quan tâm NPC.
    */
-  public calculateNPCInterestScore(entity?: any, options?: any): any {
+  public calculateNPCInterestScore(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'humanoid');
     const target = optVec3(options, 'target');
     const distance = target ? distance3D(entityPosition(entity), target) : profile.radius;
@@ -1536,7 +1537,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1137] calculateNPCTargetPriority
    * Tính mức ưu tiên mục tiêu NPC.
    */
-  public calculateNPCTargetPriority(a?: any, b?: any, options?: any): any {
+  public calculateNPCTargetPriority(a?: unknown, b?: unknown, options?: unknown) {
     const profile = resolveSpecies(a, 'humanoid');
     const from = pointOf(a);
     const to = pointOf(b);
@@ -1550,7 +1551,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1138] calculateNPCAttackRange
    * Tính tầm đánh NPC.
    */
-  public calculateNPCAttackRange(a?: any, b?: any, options?: any): any {
+  public calculateNPCAttackRange(a?: unknown, b?: unknown, options?: unknown) {
     const profile = resolveSpecies(a, 'humanoid');
     const melee = profile.length * 0.6;
     const explicit = optNumber(options, 'range', Number.NaN);
@@ -1566,7 +1567,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1139] calculateNPCInteractionDistance
    * Tính khoảng cách tương tác NPC.
    */
-  public calculateNPCInteractionDistance(a?: any, b?: any): any {
+  public calculateNPCInteractionDistance(a?: unknown, b?: unknown) {
     const from = pointOf(a);
     const to = pointOf(b);
     const resolved = from && to;
@@ -1577,7 +1578,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1140] calculateNPCInteractionAngle
    * Tính góc tương tác NPC.
    */
-  public calculateNPCInteractionAngle(a?: any, b?: any): any {
+  public calculateNPCInteractionAngle(a?: unknown, b?: unknown) {
     const from = pointOf(a);
     const to = pointOf(b);
     const facing = facingDirection(a, b);
@@ -1589,7 +1590,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1141] calculateNPCApproachPosition
    * Tính vị trí NPC tiếp cận mục tiêu.
    */
-  public calculateNPCApproachPosition(a?: any, b?: any, options?: any): any {
+  public calculateNPCApproachPosition(a?: unknown, b?: unknown, options?: unknown) {
     const profile = resolveSpecies(a, 'humanoid');
     const from = pointOf(a);
     const to = pointOf(b);
@@ -1611,7 +1612,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1142] calculateNPCFleeDirection
    * Tính hướng chạy trốn NPC.
    */
-  public calculateNPCFleeDirection(a?: any, b?: any): any {
+  public calculateNPCFleeDirection(a?: unknown, b?: unknown) {
     const from = pointOf(a);
     const to = pointOf(b);
     let direction: Vec3D = entityForward(a);
@@ -1625,7 +1626,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1143] calculateNPCChaseDirection
    * Tính hướng đuổi bắt NPC.
    */
-  public calculateNPCChaseDirection(a?: any, b?: any): any {
+  public calculateNPCChaseDirection(a?: unknown, b?: unknown) {
     const from = pointOf(a);
     const to = pointOf(b);
     let direction: Vec3D = entityForward(a);
@@ -1639,7 +1640,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1144] calculateNPCInterceptPoint
    * Tính điểm chặn mục tiêu của NPC.
    */
-  public calculateNPCInterceptPoint(a?: any, b?: any, options?: any): any {
+  public calculateNPCInterceptPoint(a?: unknown, b?: unknown, options?: unknown) {
     const profile = resolveSpecies(a, 'humanoid');
     const from = entityPosition(a);
     const targetPosition = entityPosition(b);
@@ -1663,7 +1664,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1145] calculateNPCPredictionPosition
    * Dự đoán vị trí NPC.
    */
-  public calculateNPCPredictionPosition(a?: any, b?: any, options?: any): any {
+  public calculateNPCPredictionPosition(a?: unknown, b?: unknown, options?: unknown) {
     const time = optNumber(options, 'time', 1);
     const velocity = entityVelocity(a, optNumber(options, 'dt', 0.016));
     const base = entityPosition(a);
@@ -1678,7 +1679,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1146] calculateNPCTargetPrediction
    * Dự đoán vị trí mục tiêu của NPC.
    */
-  public calculateNPCTargetPrediction(a?: any, b?: any, options?: any): any {
+  public calculateNPCTargetPrediction(a?: unknown, b?: unknown, options?: unknown) {
     const time = optNumber(options, 'time', 1);
     const velocity = entityVelocity(b, optNumber(options, 'dt', 0.016));
     const base = entityPosition(b);
@@ -1693,7 +1694,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1147] calculateNPCDecisionScore
    * Tính điểm quyết định hành động NPC.
    */
-  public calculateNPCDecisionScore(entity?: any, options?: any): any {
+  public calculateNPCDecisionScore(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'humanoid');
     const base = optNumber(options, 'score', 0.5);
     const score = clamp01(base * 0.7 + clamp01(profile.senses.sight / 100) * 0.3);
@@ -1707,7 +1708,7 @@ export class EntitiesFaunaFloraSubsystem {
    * `alertLevel`, mục tiêu từ `target`. Điểm chuyển trạng thái là mức cảnh giác
    * kết hợp với độ gần của mục tiêu (so với tầm nhìn của loài).
    */
-  public calculateNPCStateTransition(a?: any, b?: any, options?: any): any {
+  public calculateNPCStateTransition(a?: unknown, b?: unknown, options?: unknown) {
     const source = npcSource(a, b, options);
     const profile = resolveSpecies(source, 'humanoid');
     const currentState = typeof source.npcState === 'string' ? source.npcState : source.state;
@@ -1752,7 +1753,7 @@ export class EntitiesFaunaFloraSubsystem {
    * thì suy ra từ tốc độ hiện tại so với tốc độ tối đa của loài. Hai pha được
    * lấy từ `blendFrom`/`blendTo`.
    */
-  public calculateNPCAnimationBlend(a?: any, b?: any, options?: any): any {
+  public calculateNPCAnimationBlend(a?: unknown, b?: unknown, options?: unknown) {
     const source = npcSource(a, b, options);
     const profile = resolveSpecies(source, 'humanoid');
     const fromName = typeof source.blendFrom === 'string' ? source.blendFrom : undefined;
@@ -1781,7 +1782,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1150] calculateNPCNavigationError
    * Tính sai lệch điều hướng NPC.
    */
-  public calculateNPCNavigationError(a?: any, b?: any, options?: any): any {
+  public calculateNPCNavigationError(a?: unknown, b?: unknown, options?: unknown) {
     const from = pointOf(a);
     const to = pointOf(b);
     const facing = facingDirection(a, b);
@@ -1799,14 +1800,14 @@ export class EntitiesFaunaFloraSubsystem {
    * [1151] getBossPosition
    * Lấy tọa độ boss.
    */
-  public getBossPosition(entity?: any, offset?: Vec3D): any {
+  public getBossPosition(entity?: unknown, offset?: Vec3D) {
     return anatomicalPosition(entity, ZERO3, offset);
   }
   /**
    * [1152] getBossCenter
    * Lấy tâm boss.
    */
-  public getBossCenter(entity?: any, offset?: Vec3D): any {
+  public getBossCenter(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'boss');
     return anatomicalPosition(entity, { x: 0, y: profile.height * 0.5, z: 0 }, offset);
   }
@@ -1814,7 +1815,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1153] getBossHeadPosition
    * Lấy tọa độ đầu boss.
    */
-  public getBossHeadPosition(entity?: any, offset?: Vec3D): any {
+  public getBossHeadPosition(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'boss');
     return anatomicalPosition(
       entity,
@@ -1826,7 +1827,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1154] getBossChestPosition
    * Lấy tọa độ ngực boss.
    */
-  public getBossChestPosition(entity?: any, offset?: Vec3D): any {
+  public getBossChestPosition(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'boss');
     return anatomicalPosition(
       entity,
@@ -1838,7 +1839,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1155] getBossCorePosition
    * Lấy tọa độ lõi boss.
    */
-  public getBossCorePosition(entity?: any, offset?: Vec3D): any {
+  public getBossCorePosition(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'boss');
     return anatomicalPosition(
       entity,
@@ -1850,7 +1851,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1156] getBossWeakPointPosition
    * Lấy tọa độ điểm yếu boss.
    */
-  public getBossWeakPointPosition(entity?: any, offset?: Vec3D): any {
+  public getBossWeakPointPosition(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'boss');
     return anatomicalPosition(
       entity,
@@ -1862,7 +1863,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1157] getBossHitboxCenter
    * Lấy tâm vùng trúng đòn boss.
    */
-  public getBossHitboxCenter(entity?: any, offset?: Vec3D): any {
+  public getBossHitboxCenter(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'boss');
     return anatomicalPosition(
       entity,
@@ -1874,7 +1875,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1158] getBossAttackOrigin
    * Lấy điểm xuất phát đòn đánh boss.
    */
-  public getBossAttackOrigin(a?: any, b?: any, options?: any): any {
+  public getBossAttackOrigin(a?: unknown, b?: unknown, options?: unknown) {
     const profile = resolveSpecies(a, 'boss');
     const direction = facingDirection(a, b);
     const origin = anatomicalPosition(a, {
@@ -1888,7 +1889,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1159] getBossTargetPosition
    * Lấy tọa độ mục tiêu boss.
    */
-  public getBossTargetPosition(entity?: any, offset?: Vec3D): any {
+  public getBossTargetPosition(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'boss');
     return anatomicalPosition(
       entity,
@@ -1900,7 +1901,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1160] calculateBossHeight
    * Tính chiều cao boss.
    */
-  public calculateBossHeight(entity?: any, options?: any): any {
+  public calculateBossHeight(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'boss');
     return measurement('calculateBossHeight', profile.height, 'm');
   }
@@ -1908,7 +1909,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1161] calculateBossWidth
    * Tính chiều rộng boss.
    */
-  public calculateBossWidth(entity?: any, options?: any): any {
+  public calculateBossWidth(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'boss');
     return measurement('calculateBossWidth', profile.width, 'm');
   }
@@ -1916,7 +1917,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1162] calculateBossDepth
    * Tính chiều sâu boss.
    */
-  public calculateBossDepth(entity?: any, options?: any): any {
+  public calculateBossDepth(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'boss');
     return measurement('calculateBossDepth', profile.length, 'm');
   }
@@ -1924,7 +1925,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1163] calculateBossBounds
    * Tính giới hạn không gian boss.
    */
-  public calculateBossBounds(entity?: any, size?: Vec3D): any {
+  public calculateBossBounds(entity?: unknown, size?: Vec3D) {
     const profile = resolveSpecies(entity, 'boss');
     const box = boundingBox(entityPosition(entity), {
       x: size?.x ?? profile.width,
@@ -1937,7 +1938,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1164] calculateBossBoundingBox
    * Tính hộp bao boss.
    */
-  public calculateBossBoundingBox(entity?: any, size?: Vec3D): any {
+  public calculateBossBoundingBox(entity?: unknown, size?: Vec3D) {
     const profile = resolveSpecies(entity, 'boss');
     const box = boundingBox(entityPosition(entity), {
       x: size?.x ?? profile.width,
@@ -1950,7 +1951,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1165] calculateBossBoundingSphere
    * Tính hình cầu bao boss.
    */
-  public calculateBossBoundingSphere(entity?: any, radius = 1.0): any {
+  public calculateBossBoundingSphere(entity?: unknown, radius = 1.0) {
     const profile = resolveSpecies(entity, 'boss');
     // `radius = 1.0` là giá trị mặc định (coi như "chưa truyền") → dùng bán kính theo loài.
     const effective = radius === 1.0 ? profile.radius : radius;
@@ -1964,7 +1965,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1166] calculateBossBoundingCapsule
    * Tính capsule bao boss.
    */
-  public calculateBossBoundingCapsule(entity?: any, height = 2.0, radius = 0.5): any {
+  public calculateBossBoundingCapsule(entity?: unknown, height = 2.0, radius = 0.5) {
     const profile = resolveSpecies(entity, 'boss');
     // `height = 2.0` / `radius = 0.5` là giá trị mặc định → dùng số đo theo loài.
     const effectiveHeight = height === 2.0 ? profile.height : height;
@@ -1981,7 +1982,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1167] calculateBossCenterOfMass
    * Tính tâm khối lượng boss.
    */
-  public calculateBossCenterOfMass(entity?: any, options?: any): any {
+  public calculateBossCenterOfMass(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'boss');
     return anatomicalPosition(entity, { x: 0, y: profile.height * 0.55, z: 0 });
   }
@@ -1989,7 +1990,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1168] calculateBossDistanceToPlayer
    * Tính khoảng cách boss đến người chơi.
    */
-  public calculateBossDistanceToPlayer(a?: any, b?: any): any {
+  public calculateBossDistanceToPlayer(a?: unknown, b?: unknown) {
     const from = pointOf(a);
     const to = pointOf(b);
     const resolved = from && to;
@@ -2000,7 +2001,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1169] calculateBossDistanceToWeakPoint
    * Tính khoảng cách đến điểm yếu boss.
    */
-  public calculateBossDistanceToWeakPoint(a?: any, b?: any): any {
+  public calculateBossDistanceToWeakPoint(a?: unknown, b?: unknown) {
     const from = pointOf(a);
     const to = pointOf(b);
     const resolved = from && to;
@@ -2011,14 +2012,14 @@ export class EntitiesFaunaFloraSubsystem {
    * [1170] calculateBossFacingDirection
    * Tính hướng mặt boss.
    */
-  public calculateBossFacingDirection(a?: any, b?: any): any {
+  public calculateBossFacingDirection(a?: unknown, b?: unknown) {
     return directionResult('calculateBossFacingDirection', facingDirection(a, b));
   }
   /**
    * [1171] calculateBossTurningAngle
    * Tính góc xoay boss.
    */
-  public calculateBossTurningAngle(a?: any, b?: any): any {
+  public calculateBossTurningAngle(a?: unknown, b?: unknown) {
     const from = pointOf(a);
     const to = pointOf(b);
     const facing = facingDirection(a, b);
@@ -2035,7 +2036,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1172] calculateBossMovementSpeed
    * Tính tốc độ di chuyển boss.
    */
-  public calculateBossMovementSpeed(entity?: any, options?: any): any {
+  public calculateBossMovementSpeed(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'boss');
     const explicit = optNumber(options, 'speed', Number.NaN);
     const speed = Number.isFinite(explicit) ? explicit : profile.speed;
@@ -2047,7 +2048,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1173] calculateBossAttackRange
    * Tính tầm đánh boss.
    */
-  public calculateBossAttackRange(a?: any, b?: any, options?: any): any {
+  public calculateBossAttackRange(a?: unknown, b?: unknown, options?: unknown) {
     const profile = resolveSpecies(a, 'boss');
     const melee = profile.length * 0.6;
     const explicit = optNumber(options, 'range', Number.NaN);
@@ -2063,7 +2064,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1174] calculateBossAttackAngle
    * Tính góc đánh boss.
    */
-  public calculateBossAttackAngle(a?: any, b?: any): any {
+  public calculateBossAttackAngle(a?: unknown, b?: unknown) {
     const from = pointOf(a);
     const to = pointOf(b);
     const facing = facingDirection(a, b);
@@ -2075,7 +2076,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1175] calculateBossAttackTrajectory
    * Tính quỹ đạo đòn đánh boss.
    */
-  public calculateBossAttackTrajectory(a?: any, b?: any, options?: any): any {
+  public calculateBossAttackTrajectory(a?: unknown, b?: unknown, options?: unknown) {
     const profile = resolveSpecies(a, 'boss');
     const origin = anatomicalPosition(a, {
       x: 0,
@@ -2107,7 +2108,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1176] calculateBossProjectileVelocity
    * Tính vận tốc đạn boss.
    */
-  public calculateBossProjectileVelocity(entity?: any, dt = 0.016): any {
+  public calculateBossProjectileVelocity(entity?: unknown, dt = 0.016) {
     const profile = resolveSpecies(entity, 'boss');
     const inherited = entityVelocity(entity, dt);
     const launch = scale(entityForward(entity), profile.speed * 2);
@@ -2120,14 +2121,14 @@ export class EntitiesFaunaFloraSubsystem {
    * [1177] calculateBossProjectileDirection
    * Tính hướng đạn boss.
    */
-  public calculateBossProjectileDirection(a?: any, b?: any): any {
+  public calculateBossProjectileDirection(a?: unknown, b?: unknown) {
     return directionResult('calculateBossProjectileDirection', facingDirection(a, b));
   }
   /**
    * [1178] calculateBossProjectileImpactPoint
    * Tính điểm va chạm đạn boss.
    */
-  public calculateBossProjectileImpactPoint(a?: any, b?: any, options?: any): any {
+  public calculateBossProjectileImpactPoint(a?: unknown, b?: unknown, options?: unknown) {
     const profile = resolveSpecies(a, 'boss');
     const origin = anatomicalPosition(a, {
       x: 0,
@@ -2155,7 +2156,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1179] calculateBossAreaAttackRadius
    * Tính bán kính đòn đánh diện rộng.
    */
-  public calculateBossAreaAttackRadius(entity?: any, options?: any): any {
+  public calculateBossAreaAttackRadius(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'boss');
     const explicit = optNumber(options, 'radius', Number.NaN);
     const radius = Number.isFinite(explicit) ? explicit : profile.radius * 2.5;
@@ -2167,7 +2168,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1180] calculateBossAreaAttackCenter
    * Tính tâm vùng đòn đánh diện rộng.
    */
-  public calculateBossAreaAttackCenter(entity?: any, options?: any): any {
+  public calculateBossAreaAttackCenter(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'boss');
     return anatomicalPosition(entity, { x: 0, y: profile.height * 0.35, z: 0 });
   }
@@ -2175,7 +2176,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1181] calculateBossAreaAttackOverlap
    * Kiểm tra vùng đòn đánh có chồng lấn mục tiêu.
    */
-  public calculateBossAreaAttackOverlap(a?: any, b?: any): any {
+  public calculateBossAreaAttackOverlap(a?: unknown, b?: unknown) {
     const profile = resolveSpecies(a, 'boss');
     const radius = profile.radius * 2.5;
     const center = anatomicalPosition(a, { x: 0, y: profile.height * 0.35, z: 0 });
@@ -2187,7 +2188,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1182] calculateBossHitboxOverlap
    * Kiểm tra vùng trúng đòn boss có chồng lấn.
    */
-  public calculateBossHitboxOverlap(a?: any, b?: any): any {
+  public calculateBossHitboxOverlap(a?: unknown, b?: unknown) {
     const boxA = bodyBox(a, resolveSpecies(a, 'boss'));
     const boxB = bodyBox(b, resolveSpecies(b, 'monster'));
     return aabbResult('calculateBossHitboxOverlap', boxA, boxB);
@@ -2196,7 +2197,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1183] calculateBossDamageDirection
    * Tính hướng nhận sát thương của boss.
    */
-  public calculateBossDamageDirection(a?: any, b?: any): any {
+  public calculateBossDamageDirection(a?: unknown, b?: unknown) {
     const from = pointOf(a);
     const to = pointOf(b);
     let direction: Vec3D = { x: 0, y: 0, z: 1 };
@@ -2210,14 +2211,14 @@ export class EntitiesFaunaFloraSubsystem {
    * [1184] calculateBossKnockbackDirection
    * Tính hướng đẩy lùi boss.
    */
-  public calculateBossKnockbackDirection(a?: any, b?: any): any {
+  public calculateBossKnockbackDirection(a?: unknown, b?: unknown) {
     return directionResult('calculateBossKnockbackDirection', facingDirection(a, b));
   }
   /**
    * [1185] calculateBossKnockbackDistance
    * Tính khoảng cách đẩy lùi boss.
    */
-  public calculateBossKnockbackDistance(a?: any, b?: any): any {
+  public calculateBossKnockbackDistance(a?: unknown, b?: unknown) {
     const attacker = resolveSpecies(a, 'monster');
     const boss = resolveSpecies(b, 'boss');
     const massRatio = attacker.mass / Math.max(attacker.mass + boss.mass, 1e-6);
@@ -2232,7 +2233,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1186] calculateBossStaggerAngle
    * Tính góc choáng boss.
    */
-  public calculateBossStaggerAngle(a?: any, b?: any): any {
+  public calculateBossStaggerAngle(a?: unknown, b?: unknown) {
     const from = pointOf(a);
     const to = pointOf(b);
     const facing = facingDirection(b, a);
@@ -2244,7 +2245,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1187] calculateBossStaggerDuration
    * Tính thời gian choáng boss.
    */
-  public calculateBossStaggerDuration(a?: any, b?: any, options?: any): any {
+  public calculateBossStaggerDuration(a?: unknown, b?: unknown, options?: unknown) {
     const boss = resolveSpecies(b, 'boss');
     const angle = this.calculateBossStaggerAngle(a, b) as Record<string, unknown>;
     const angleValue = num(angle.value);
@@ -2264,7 +2265,7 @@ export class EntitiesFaunaFloraSubsystem {
    * ngưỡng máu riêng nên `triggered` phản ánh việc boss đã đủ yếu để lên pha
    * kế tiếp hay chưa.
    */
-  public calculateBossPhaseTransition(entity?: any, options?: any): any {
+  public calculateBossPhaseTransition(entity?: unknown, options?: unknown) {
     const source = (entity ?? {}) as Record<string, unknown>;
     const health = clamp01(optNumber(options, 'health', num(source.bossHealth, num(source.health, 1))));
     const declaredPhase = Math.max(1, Math.round(optNumber(options, 'phase', num(source.bossPhase, 1))));
@@ -2285,7 +2286,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1189] calculateBossPhasePosition
    * Tính vị trí theo pha boss.
    */
-  public calculateBossPhasePosition(entity?: any, options?: any): any {
+  public calculateBossPhasePosition(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'boss');
     const phase = optNumber(options, 'phase', 1);
     const rise = profile.height * 0.1 * (phase - 1);
@@ -2295,7 +2296,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1190] calculateBossWeakPointExposure
    * Tính mức lộ điểm yếu boss.
    */
-  public calculateBossWeakPointExposure(a?: any, b?: any, options?: any): any {
+  public calculateBossWeakPointExposure(a?: unknown, b?: unknown, options?: unknown) {
     const profile = resolveSpecies(a, 'boss');
     const weakPoint = anatomicalPosition(a, {
       x: 0,
@@ -2319,7 +2320,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1191] calculateMonsterPosition
    * Lấy tọa độ quái vật.
    */
-  public calculateMonsterPosition(a?: any, b?: any, options?: any): any {
+  public calculateMonsterPosition(a?: unknown, b?: unknown, options?: unknown) {
     const profile = resolveSpecies(a, 'monster');
     const position = entityPosition(a);
     return namedResult('calculateMonsterPosition', {
@@ -2332,14 +2333,14 @@ export class EntitiesFaunaFloraSubsystem {
    * [1192] calculateMonsterMovementDirection
    * Tính hướng di chuyển quái vật.
    */
-  public calculateMonsterMovementDirection(a?: any, b?: any): any {
+  public calculateMonsterMovementDirection(a?: unknown, b?: unknown) {
     return directionResult('calculateMonsterMovementDirection', facingDirection(a, b));
   }
   /**
    * [1193] calculateMonsterSpeed
    * Tính tốc độ quái vật.
    */
-  public calculateMonsterSpeed(entity?: any, options?: any): any {
+  public calculateMonsterSpeed(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'monster');
     const explicit = optNumber(options, 'speed', Number.NaN);
     const speed = Number.isFinite(explicit) ? explicit : profile.speed;
@@ -2351,7 +2352,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1194] calculateMonsterAttackDistance
    * Tính khoảng cách đánh quái vật.
    */
-  public calculateMonsterAttackDistance(a?: any, b?: any): any {
+  public calculateMonsterAttackDistance(a?: unknown, b?: unknown) {
     const from = pointOf(a);
     const to = pointOf(b);
     const resolved = from && to;
@@ -2363,7 +2364,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1195] calculateMonsterDetectionRange
    * Tính phạm vi phát hiện quái vật.
    */
-  public calculateMonsterDetectionRange(a?: any, b?: any, options?: any): any {
+  public calculateMonsterDetectionRange(a?: unknown, b?: unknown, options?: unknown) {
     const profile = resolveSpecies(a, 'monster');
     const explicit = optNumber(options, 'range', Number.NaN);
     const range = Number.isFinite(explicit)
@@ -2380,7 +2381,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1196] calculateMonsterCollision
    * Kiểm tra va chạm quái vật.
    */
-  public calculateMonsterCollision(a?: any, b?: any): any {
+  public calculateMonsterCollision(a?: unknown, b?: unknown) {
     const boxA = bodyBox(a, resolveSpecies(a, 'monster'));
     const boxB = bodyBox(b, resolveSpecies(b, 'monster'));
     return aabbResult('calculateMonsterCollision', boxA, boxB);
@@ -2389,7 +2390,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1197] calculateMonsterBoundingBox
    * Tính hộp bao quái vật.
    */
-  public calculateMonsterBoundingBox(entity?: any, size?: Vec3D): any {
+  public calculateMonsterBoundingBox(entity?: unknown, size?: Vec3D) {
     const profile = resolveSpecies(entity, 'monster');
     const box = boundingBox(entityPosition(entity), {
       x: size?.x ?? profile.width,
@@ -2402,7 +2403,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1198] calculateMonsterBoundingSphere
    * Tính hình cầu bao quái vật.
    */
-  public calculateMonsterBoundingSphere(entity?: any, radius = 1.0): any {
+  public calculateMonsterBoundingSphere(entity?: unknown, radius = 1.0) {
     const profile = resolveSpecies(entity, 'monster');
     // `radius = 1.0` là giá trị mặc định (coi như "chưa truyền") → dùng bán kính theo loài.
     const effective = radius === 1.0 ? profile.radius : radius;
@@ -2416,7 +2417,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1199] calculateMonsterWeakPoint
    * Tính vị trí điểm yếu quái vật.
    */
-  public calculateMonsterWeakPoint(a?: any, b?: any, options?: any): any {
+  public calculateMonsterWeakPoint(a?: unknown, b?: unknown, options?: unknown) {
     const profile = resolveSpecies(a, 'monster');
     const position = anatomicalPosition(a, {
       x: 0,
@@ -2435,7 +2436,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1200] calculateMonsterThreatLevel
    * Tính mức độ đe dọa quái vật.
    */
-  public calculateMonsterThreatLevel(a?: any, b?: any, options?: any): any {
+  public calculateMonsterThreatLevel(a?: unknown, b?: unknown, options?: unknown) {
     const profile = resolveSpecies(a, 'monster');
     const from = pointOf(a);
     const to = pointOf(b);
@@ -2457,14 +2458,14 @@ export class EntitiesFaunaFloraSubsystem {
    * [1201] getAnimalPosition
    * Lấy tọa độ con vật.
    */
-  public getAnimalPosition(entity?: any, offset?: Vec3D): any {
+  public getAnimalPosition(entity?: unknown, offset?: Vec3D) {
     return anatomicalPosition(entity, ZERO3, offset);
   }
   /**
    * [1202] getAnimalCenter
    * Lấy tâm con vật.
    */
-  public getAnimalCenter(entity?: any, offset?: Vec3D): any {
+  public getAnimalCenter(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'animal');
     return anatomicalPosition(entity, { x: 0, y: profile.height * 0.5, z: 0 }, offset);
   }
@@ -2472,7 +2473,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1203] getAnimalHeadPosition
    * Lấy tọa độ đầu con vật.
    */
-  public getAnimalHeadPosition(entity?: any, offset?: Vec3D): any {
+  public getAnimalHeadPosition(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'animal');
     return anatomicalPosition(
       entity,
@@ -2484,7 +2485,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1204] getAnimalSnoutPosition
    * Lấy tọa độ mõm con vật.
    */
-  public getAnimalSnoutPosition(entity?: any, offset?: Vec3D): any {
+  public getAnimalSnoutPosition(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'animal');
     return anatomicalPosition(
       entity,
@@ -2496,7 +2497,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1205] getAnimalNosePosition
    * Lấy tọa độ mũi con vật.
    */
-  public getAnimalNosePosition(entity?: any, offset?: Vec3D): any {
+  public getAnimalNosePosition(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'animal');
     return anatomicalPosition(
       entity,
@@ -2508,7 +2509,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1206] getAnimalEyePosition
    * Lấy tọa độ mắt con vật.
    */
-  public getAnimalEyePosition(entity?: any, offset?: Vec3D): any {
+  public getAnimalEyePosition(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'animal');
     return anatomicalPosition(
       entity,
@@ -2524,7 +2525,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1207] getAnimalEarPosition
    * Lấy tọa độ tai con vật.
    */
-  public getAnimalEarPosition(entity?: any, offset?: Vec3D): any {
+  public getAnimalEarPosition(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'animal');
     return anatomicalPosition(
       entity,
@@ -2540,7 +2541,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1208] getAnimalNeckPosition
    * Lấy tọa độ cổ con vật.
    */
-  public getAnimalNeckPosition(entity?: any, offset?: Vec3D): any {
+  public getAnimalNeckPosition(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'animal');
     return anatomicalPosition(
       entity,
@@ -2552,7 +2553,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1209] getAnimalTorsoPosition
    * Lấy tọa độ thân con vật.
    */
-  public getAnimalTorsoPosition(entity?: any, offset?: Vec3D): any {
+  public getAnimalTorsoPosition(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'animal');
     return anatomicalPosition(entity, { x: 0, y: profile.height * 0.55, z: 0 }, offset);
   }
@@ -2560,7 +2561,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1210] getAnimalChestPosition
    * Lấy tọa độ ngực con vật.
    */
-  public getAnimalChestPosition(entity?: any, offset?: Vec3D): any {
+  public getAnimalChestPosition(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'animal');
     return anatomicalPosition(
       entity,
@@ -2572,7 +2573,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1211] getAnimalAbdomenPosition
    * Lấy tọa độ bụng con vật.
    */
-  public getAnimalAbdomenPosition(entity?: any, offset?: Vec3D): any {
+  public getAnimalAbdomenPosition(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'animal');
     return anatomicalPosition(
       entity,
@@ -2584,7 +2585,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1212] getAnimalHipPosition
    * Lấy tọa độ hông con vật.
    */
-  public getAnimalHipPosition(entity?: any, offset?: Vec3D): any {
+  public getAnimalHipPosition(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'animal');
     return anatomicalPosition(
       entity,
@@ -2596,7 +2597,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1213] getAnimalTailPosition
    * Lấy tọa độ đuôi con vật.
    */
-  public getAnimalTailPosition(entity?: any, offset?: Vec3D): any {
+  public getAnimalTailPosition(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'animal');
     return anatomicalPosition(
       entity,
@@ -2608,7 +2609,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1214] getAnimalTailTipPosition
    * Lấy tọa độ chóp đuôi con vật.
    */
-  public getAnimalTailTipPosition(entity?: any, offset?: Vec3D): any {
+  public getAnimalTailTipPosition(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'animal');
     return anatomicalPosition(
       entity,
@@ -2620,7 +2621,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1215] getAnimalFrontLeftLegPosition
    * Lấy tọa độ chân trước trái con vật.
    */
-  public getAnimalFrontLeftLegPosition(entity?: any, offset?: Vec3D): any {
+  public getAnimalFrontLeftLegPosition(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'animal');
     return anatomicalPosition(
       entity,
@@ -2636,7 +2637,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1216] getAnimalFrontRightLegPosition
    * Lấy tọa độ chân trước phải con vật.
    */
-  public getAnimalFrontRightLegPosition(entity?: any, offset?: Vec3D): any {
+  public getAnimalFrontRightLegPosition(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'animal');
     return anatomicalPosition(
       entity,
@@ -2652,7 +2653,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1217] getAnimalRearLeftLegPosition
    * Lấy tọa độ chân sau trái con vật.
    */
-  public getAnimalRearLeftLegPosition(entity?: any, offset?: Vec3D): any {
+  public getAnimalRearLeftLegPosition(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'animal');
     return anatomicalPosition(
       entity,
@@ -2668,7 +2669,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1218] getAnimalRearRightLegPosition
    * Lấy tọa độ chân sau phải con vật.
    */
-  public getAnimalRearRightLegPosition(entity?: any, offset?: Vec3D): any {
+  public getAnimalRearRightLegPosition(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'animal');
     return anatomicalPosition(
       entity,
@@ -2684,7 +2685,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1219] getAnimalPawPosition
    * Lấy tọa độ bàn chân con vật.
    */
-  public getAnimalPawPosition(entity?: any, offset?: Vec3D): any {
+  public getAnimalPawPosition(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'animal');
     return anatomicalPosition(
       entity,
@@ -2700,7 +2701,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1220] getAnimalClawPosition
    * Lấy tọa độ móng vuốt con vật.
    */
-  public getAnimalClawPosition(entity?: any, offset?: Vec3D): any {
+  public getAnimalClawPosition(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'animal');
     return anatomicalPosition(
       entity,
@@ -2716,7 +2717,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1221] calculateAnimalBodyLength
    * Tính chiều dài thân con vật.
    */
-  public calculateAnimalBodyLength(entity?: any, options?: any): any {
+  public calculateAnimalBodyLength(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'animal');
     return measurement('calculateAnimalBodyLength', profile.length, 'm');
   }
@@ -2724,7 +2725,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1222] calculateAnimalBodyHeight
    * Tính chiều cao thân con vật.
    */
-  public calculateAnimalBodyHeight(entity?: any, options?: any): any {
+  public calculateAnimalBodyHeight(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'animal');
     return measurement('calculateAnimalBodyHeight', profile.height, 'm');
   }
@@ -2732,7 +2733,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1223] calculateAnimalBodyWidth
    * Tính chiều rộng thân con vật.
    */
-  public calculateAnimalBodyWidth(entity?: any, options?: any): any {
+  public calculateAnimalBodyWidth(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'animal');
     return measurement('calculateAnimalBodyWidth', profile.width, 'm');
   }
@@ -2740,7 +2741,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1224] calculateAnimalCenterOfMass
    * Tính tâm khối lượng con vật.
    */
-  public calculateAnimalCenterOfMass(entity?: any, options?: any): any {
+  public calculateAnimalCenterOfMass(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'animal');
     return anatomicalPosition(entity, { x: 0, y: profile.height * 0.52, z: 0 });
   }
@@ -2748,7 +2749,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1225] calculateAnimalSpineCurvature
    * Tính độ cong cột sống con vật.
    */
-  public calculateAnimalSpineCurvature(entity?: any, options?: any): any {
+  public calculateAnimalSpineCurvature(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'animal');
     // Cột sống thú bố chân hơi cong lõm về bụng; góc cong tỉ lệ với chiều dài thân.
     const curvature = clamp(profile.length * 0.08, 0.02, 0.35);
@@ -2760,7 +2761,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1226] calculateAnimalNeckAngle
    * Tính góc cổ con vật.
    */
-  public calculateAnimalNeckAngle(a?: any, b?: any): any {
+  public calculateAnimalNeckAngle(a?: unknown, b?: unknown) {
     const euler = quaternionToEuler(entityQuaternion(a));
     const angle = Math.abs(euler.x);
     return measurement('calculateAnimalNeckAngle', angle, 'rad', { pitch: euler.x });
@@ -2769,7 +2770,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1227] calculateAnimalHeadAngle
    * Tính góc đầu con vật.
    */
-  public calculateAnimalHeadAngle(a?: any, b?: any): any {
+  public calculateAnimalHeadAngle(a?: unknown, b?: unknown) {
     const euler = quaternionToEuler(entityQuaternion(a));
     const angle = Math.abs(euler.z);
     return measurement('calculateAnimalHeadAngle', angle, 'rad', { roll: euler.z });
@@ -2778,7 +2779,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1228] calculateAnimalTailCurvature
    * Tính độ cong đuôi con vật.
    */
-  public calculateAnimalTailCurvature(entity?: any, options?: any): any {
+  public calculateAnimalTailCurvature(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'animal');
     const curvature = clamp(profile.length * 0.06, 0.02, 0.3);
     return measurement('calculateAnimalTailCurvature', curvature, 'rad', {
@@ -2789,7 +2790,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1229] calculateAnimalTailSwing
    * Tính độ vung đuôi con vật.
    */
-  public calculateAnimalTailSwing(a?: any, b?: any, options?: any): any {
+  public calculateAnimalTailSwing(a?: unknown, b?: unknown, options?: unknown) {
     const profile = resolveSpecies(a, 'animal');
     const velocity = entityVelocity(a, optNumber(options, 'dt', 0.016));
     const speed = magnitude(velocity);
@@ -2806,7 +2807,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1230] calculateAnimalLegLength
    * Tính chiều dài chân con vật.
    */
-  public calculateAnimalLegLength(entity?: any, options?: any): any {
+  public calculateAnimalLegLength(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'animal');
     const explicit = optNumber(options, 'length', Number.NaN);
     const length = Number.isFinite(explicit) ? explicit : profile.legLength;
@@ -2818,7 +2819,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1231] calculateAnimalStrideLength
    * Tính chiều dài bước con vật.
    */
-  public calculateAnimalStrideLength(entity?: any, options?: any): any {
+  public calculateAnimalStrideLength(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'animal');
     const stride = profile.legLength * 1.6;
     return measurement('calculateAnimalStrideLength', stride, 'm', { legLength: profile.legLength });
@@ -2827,7 +2828,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1232] calculateAnimalStrideFrequency
    * Tính tần số bước con vật.
    */
-  public calculateAnimalStrideFrequency(entity?: any, options?: any): any {
+  public calculateAnimalStrideFrequency(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'animal');
     const stride = profile.legLength * 1.6;
     const frequency = stride > 1e-6 ? profile.speed / stride : 0;
@@ -2840,7 +2841,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1233] calculateAnimalWalkingSpeed
    * Tính tốc độ đi con vật.
    */
-  public calculateAnimalWalkingSpeed(entity?: any, options?: any): any {
+  public calculateAnimalWalkingSpeed(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'animal');
     const speed = profile.speed * 0.3;
     return measurement('calculateAnimalWalkingSpeed', speed, 'm/s', { topSpeed: profile.speed });
@@ -2849,7 +2850,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1234] calculateAnimalRunningSpeed
    * Tính tốc độ chạy con vật.
    */
-  public calculateAnimalRunningSpeed(entity?: any, options?: any): any {
+  public calculateAnimalRunningSpeed(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'animal');
     const speed = profile.speed * 0.8;
     return measurement('calculateAnimalRunningSpeed', speed, 'm/s', { topSpeed: profile.speed });
@@ -2858,7 +2859,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1235] calculateAnimalJumpHeight
    * Tính độ cao nhảy con vật.
    */
-  public calculateAnimalJumpHeight(entity?: any, options?: any): any {
+  public calculateAnimalJumpHeight(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'animal');
     // Nhảy cao gần đúng bằng 35% chiều cao thân.
     const height = profile.height * 0.35;
@@ -2868,7 +2869,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1236] calculateAnimalLandingPosition
    * Tính vị trí tiếp đất con vật.
    */
-  public calculateAnimalLandingPosition(a?: any, b?: any, options?: any): any {
+  public calculateAnimalLandingPosition(a?: unknown, b?: unknown, options?: unknown) {
     const profile = resolveSpecies(a, 'animal');
     const origin = entityPosition(a);
     const velocity = entityVelocity(a, optNumber(options, 'dt', 0.016));
@@ -2889,7 +2890,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1237] calculateAnimalGroundContact
    * Kiểm tra chân con vật tiếp xúc mặt đất.
    */
-  public calculateAnimalGroundContact(a?: any, b?: any, options?: any): any {
+  public calculateAnimalGroundContact(a?: unknown, b?: unknown, options?: unknown) {
     const profile = resolveSpecies(a, 'animal');
     const origin = entityPosition(a);
     const ground = optNumber(options, 'groundY', 0);
@@ -2907,7 +2908,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1238] calculateAnimalFootPlacement
    * Tính vị trí đặt chân con vật.
    */
-  public calculateAnimalFootPlacement(a?: any, b?: any, options?: any): any {
+  public calculateAnimalFootPlacement(a?: unknown, b?: unknown, options?: unknown) {
     const profile = resolveSpecies(a, 'animal');
     const side = optNumber(options, 'side', -1);
     const phase = optNumber(options, 'phase', 0);
@@ -2924,7 +2925,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1239] calculateAnimalBalance
    * Tính độ cân bằng con vật.
    */
-  public calculateAnimalBalance(a?: any, b?: any, options?: any): any {
+  public calculateAnimalBalance(a?: unknown, b?: unknown, options?: unknown) {
     const profile = resolveSpecies(a, 'animal');
     const origin = entityPosition(a);
     const center = anatomicalPosition(a, { x: 0, y: profile.height * 0.5, z: 0 });
@@ -2941,7 +2942,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1240] calculateAnimalGaitPhase
    * Tính pha dáng đi con vật.
    */
-  public calculateAnimalGaitPhase(entity?: any, options?: any): any {
+  public calculateAnimalGaitPhase(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'animal');
     const stride = profile.legLength * 1.6;
     const frequency = stride > 1e-6 ? profile.speed / stride : 0;
@@ -2953,7 +2954,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1241] calculateAnimalHeadToGroundDistance
    * Tính khoảng cách đầu con vật đến mặt đất.
    */
-  public calculateAnimalHeadToGroundDistance(a?: any, b?: any): any {
+  public calculateAnimalHeadToGroundDistance(a?: unknown, b?: unknown) {
     const from = pointOf(a);
     const to = pointOf(b);
     const resolved = from && to;
@@ -2965,7 +2966,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1242] calculateAnimalNoseToTargetDistance
    * Tính khoảng cách mũi đến mục tiêu.
    */
-  public calculateAnimalNoseToTargetDistance(a?: any, b?: any): any {
+  public calculateAnimalNoseToTargetDistance(a?: unknown, b?: unknown) {
     const from = pointOf(a);
     const to = pointOf(b);
     const resolved = from && to;
@@ -2977,14 +2978,14 @@ export class EntitiesFaunaFloraSubsystem {
    * [1243] calculateAnimalSightDirection
    * Tính hướng nhìn con vật.
    */
-  public calculateAnimalSightDirection(a?: any, b?: any): any {
+  public calculateAnimalSightDirection(a?: unknown, b?: unknown) {
     return directionResult('calculateAnimalSightDirection', facingDirection(a, b));
   }
   /**
    * [1244] calculateAnimalFieldOfView
    * Tính trường nhìn con vật.
    */
-  public calculateAnimalFieldOfView(a?: any, b?: any, options?: any): any {
+  public calculateAnimalFieldOfView(a?: unknown, b?: unknown, options?: unknown) {
     const profile = resolveSpecies(a, 'animal');
     // Thú săn mồi có trường nhìn hẹp hơn con mồi.
     const fov = optNumber(options, 'fov', profile.speed > 10 ? 120 * (Math.PI / 180) : 200 * (Math.PI / 180));
@@ -2999,7 +3000,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1245] calculateAnimalHearingRange
    * Tính phạm vi nghe con vật.
    */
-  public calculateAnimalHearingRange(a?: any, b?: any, options?: any): any {
+  public calculateAnimalHearingRange(a?: unknown, b?: unknown, options?: unknown) {
     const profile = resolveSpecies(a, 'animal');
     const explicit = optNumber(options, 'range', Number.NaN);
     const range = Number.isFinite(explicit) ? explicit : profile.senses.hearing;
@@ -3009,7 +3010,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1246] calculateAnimalSmellRange
    * Tính phạm vi ngửi con vật.
    */
-  public calculateAnimalSmellRange(a?: any, b?: any, options?: any): any {
+  public calculateAnimalSmellRange(a?: unknown, b?: unknown, options?: unknown) {
     const profile = resolveSpecies(a, 'animal');
     const explicit = optNumber(options, 'range', Number.NaN);
     const range = Number.isFinite(explicit) ? explicit : profile.senses.smell;
@@ -3019,7 +3020,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1247] calculateAnimalAttackRange
    * Tính tầm tấn công con vật.
    */
-  public calculateAnimalAttackRange(a?: any, b?: any, options?: any): any {
+  public calculateAnimalAttackRange(a?: unknown, b?: unknown, options?: unknown) {
     const profile = resolveSpecies(a, 'animal');
     const melee = profile.length * 0.5;
     const explicit = optNumber(options, 'range', Number.NaN);
@@ -3039,7 +3040,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1248] calculateAnimalBitePoint
    * Tính điểm cắn con vật.
    */
-  public calculateAnimalBitePoint(a?: any, b?: any, options?: any): any {
+  public calculateAnimalBitePoint(a?: unknown, b?: unknown, options?: unknown) {
     const profile = resolveSpecies(a, 'animal');
     const point = anatomicalPosition(a, {
       x: 0,
@@ -3054,7 +3055,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1249] calculateAnimalBiteDirection
    * Tính hướng cắn con vật.
    */
-  public calculateAnimalBiteDirection(a?: any, b?: any): any {
+  public calculateAnimalBiteDirection(a?: unknown, b?: unknown) {
     const from = pointOf(a);
     const to = pointOf(b);
     let direction: Vec3D = entityForward(a);
@@ -3068,7 +3069,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1250] calculateAnimalCollision
    * Kiểm tra va chạm con vật.
    */
-  public calculateAnimalCollision(a?: any, b?: any): any {
+  public calculateAnimalCollision(a?: unknown, b?: unknown) {
     const boxA = bodyBox(a, resolveSpecies(a, 'animal'));
     const boxB = bodyBox(b, resolveSpecies(b, 'animal'));
     return aabbResult('calculateAnimalCollision', boxA, boxB);
@@ -3081,14 +3082,14 @@ export class EntitiesFaunaFloraSubsystem {
    * [1251] getBirdPosition
    * Lấy tọa độ chim.
    */
-  public getBirdPosition(entity?: any, offset?: Vec3D): any {
+  public getBirdPosition(entity?: unknown, offset?: Vec3D) {
     return anatomicalPosition(entity, ZERO3, offset);
   }
   /**
    * [1252] getBirdHeadPosition
    * Lấy tọa độ đầu chim.
    */
-  public getBirdHeadPosition(entity?: any, offset?: Vec3D): any {
+  public getBirdHeadPosition(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'bird');
     return anatomicalPosition(
       entity,
@@ -3100,7 +3101,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1253] getBirdBeakPosition
    * Lấy tọa độ mỏ chim.
    */
-  public getBirdBeakPosition(entity?: any, offset?: Vec3D): any {
+  public getBirdBeakPosition(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'bird');
     return anatomicalPosition(
       entity,
@@ -3116,7 +3117,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1254] getBirdEyePosition
    * Lấy tọa độ mắt chim.
    */
-  public getBirdEyePosition(entity?: any, offset?: Vec3D): any {
+  public getBirdEyePosition(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'bird');
     return anatomicalPosition(
       entity,
@@ -3132,7 +3133,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1255] getBirdBodyCenter
    * Lấy tâm thân chim.
    */
-  public getBirdBodyCenter(entity?: any, offset?: Vec3D): any {
+  public getBirdBodyCenter(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'bird');
     return anatomicalPosition(entity, { x: 0, y: profile.height * 0.5, z: 0 }, offset);
   }
@@ -3140,7 +3141,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1256] getBirdWingRootPosition
    * Lấy tọa độ gốc cánh chim.
    */
-  public getBirdWingRootPosition(entity?: any, offset?: Vec3D): any {
+  public getBirdWingRootPosition(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'bird');
     return anatomicalPosition(
       entity,
@@ -3156,7 +3157,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1257] getBirdLeftWingTip
    * Lấy tọa độ đầu cánh trái.
    */
-  public getBirdLeftWingTip(entity?: any, offset?: Vec3D): any {
+  public getBirdLeftWingTip(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'bird');
     return anatomicalPosition(
       entity,
@@ -3172,7 +3173,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1258] getBirdRightWingTip
    * Lấy tọa độ đầu cánh phải.
    */
-  public getBirdRightWingTip(entity?: any, offset?: Vec3D): any {
+  public getBirdRightWingTip(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'bird');
     return anatomicalPosition(
       entity,
@@ -3188,7 +3189,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1259] getBirdWingCenter
    * Lấy tâm cánh chim.
    */
-  public getBirdWingCenter(entity?: any, offset?: Vec3D): any {
+  public getBirdWingCenter(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'bird');
     return anatomicalPosition(
       entity,
@@ -3204,7 +3205,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1260] getBirdTailTipPosition
    * Lấy tọa độ chóp đuôi chim.
    */
-  public getBirdTailTipPosition(entity?: any, offset?: Vec3D): any {
+  public getBirdTailTipPosition(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'bird');
     return anatomicalPosition(
       entity,
@@ -3216,7 +3217,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1261] getBirdLeftFootPosition
    * Lấy tọa độ chân trái chim.
    */
-  public getBirdLeftFootPosition(entity?: any, offset?: Vec3D): any {
+  public getBirdLeftFootPosition(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'bird');
     return anatomicalPosition(
       entity,
@@ -3232,7 +3233,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1262] getBirdRightFootPosition
    * Lấy tọa độ chân phải chim.
    */
-  public getBirdRightFootPosition(entity?: any, offset?: Vec3D): any {
+  public getBirdRightFootPosition(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'bird');
     return anatomicalPosition(
       entity,
@@ -3253,14 +3254,14 @@ export class EntitiesFaunaFloraSubsystem {
    * trả số thuần thay vì bản ghi `measurement(...)`; bản ghi đầy đủ (name /
    * value / unit / valid / timestamp) nằm trong `birdWingspanMeasurement()`.
    */
-  public calculateBirdWingspan(entity?: any, options?: any): any {
+  public calculateBirdWingspan(entity?: unknown, options?: unknown) {
     return resolveSpecies(entity, 'bird').wingspan;
   }
   /**
    * [1264] calculateBirdWingLength
    * Tính chiều dài cánh chim.
    */
-  public calculateBirdWingLength(entity?: any, options?: any): any {
+  public calculateBirdWingLength(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'bird');
     return measurement('calculateBirdWingLength', profile.wingspan * 0.5, 'm', {
       wingspan: profile.wingspan,
@@ -3270,7 +3271,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1265] calculateBirdWingArea
    * Tính diện tích cánh chim.
    */
-  public calculateBirdWingArea(entity?: any, options?: any): any {
+  public calculateBirdWingArea(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'bird');
     return measurement('calculateBirdWingArea', wingAreaOf(profile), 'm²', {
       wingspan: profile.wingspan,
@@ -3280,7 +3281,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1266] calculateBirdWingAngle
    * Tính góc cánh chim.
    */
-  public calculateBirdWingAngle(a?: any, b?: any): any {
+  public calculateBirdWingAngle(a?: unknown, b?: unknown) {
     const euler = quaternionToEuler(entityQuaternion(a));
     const angle = Math.abs(euler.z);
     return measurement('calculateBirdWingAngle', angle, 'rad', { roll: euler.z });
@@ -3289,7 +3290,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1267] calculateBirdWingFlapAmplitude
    * Tính biên độ vỗ cánh.
    */
-  public calculateBirdWingFlapAmplitude(entity?: any, options?: any): any {
+  public calculateBirdWingFlapAmplitude(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'bird');
     // Chim nhỏ vỗ cánh rộng hơn chim lớn (biên độ giảm theo kích thước).
     const amplitude = clamp(1.1 - profile.length * 0.6, 0.25, 1.1);
@@ -3299,7 +3300,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1268] calculateBirdWingFlapFrequency
    * Tính tần số vỗ cánh.
    */
-  public calculateBirdWingFlapFrequency(entity?: any, options?: any): any {
+  public calculateBirdWingFlapFrequency(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'bird');
     const explicit = optNumber(options, 'frequency', Number.NaN);
     const frequency = Number.isFinite(explicit) ? explicit : profile.flapFrequency;
@@ -3311,7 +3312,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1269] calculateBirdWingFlapPhase
    * Tính pha vỗ cánh.
    */
-  public calculateBirdWingFlapPhase(entity?: any, options?: any): any {
+  public calculateBirdWingFlapPhase(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'bird');
     const time = simulationTime(entity, options);
     const phase = (time * profile.flapFrequency * Math.PI * 2) % (Math.PI * 2);
@@ -3323,7 +3324,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1270] calculateBirdWingVelocity
    * Tính vận tốc cánh chim.
    */
-  public calculateBirdWingVelocity(entity?: any, dt = 0.016): any {
+  public calculateBirdWingVelocity(entity?: unknown, dt = 0.016) {
     const profile = resolveSpecies(entity, 'bird');
     const body = entityVelocity(entity, dt);
     // Vận tốc riêng của đầu cánh do vỗ cánh sinh ra.
@@ -3338,7 +3339,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1271] calculateBirdWingAcceleration
    * Tính gia tốc cánh chim.
    */
-  public calculateBirdWingAcceleration(entity?: any, dt = 0.016): any {
+  public calculateBirdWingAcceleration(entity?: unknown, dt = 0.016) {
     const profile = resolveSpecies(entity, 'bird');
     const body = entityAcceleration(entity, dt);
     // Gia tốc hướng tâm của đầu cánh khi vỗ: a = ω²·r.
@@ -3354,14 +3355,14 @@ export class EntitiesFaunaFloraSubsystem {
    * [1272] calculateBirdFlightDirection
    * Tính hướng bay chim.
    */
-  public calculateBirdFlightDirection(a?: any, b?: any): any {
+  public calculateBirdFlightDirection(a?: unknown, b?: unknown) {
     return directionResult('calculateBirdFlightDirection', facingDirection(a, b));
   }
   /**
    * [1273] calculateBirdFlightSpeed
    * Tính tốc độ bay chim.
    */
-  public calculateBirdFlightSpeed(entity?: any, options?: any): any {
+  public calculateBirdFlightSpeed(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'bird');
     const explicit = optNumber(options, 'speed', Number.NaN);
     const speed = Number.isFinite(explicit) ? explicit : profile.speed;
@@ -3373,7 +3374,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1274] calculateBirdFlightAltitude
    * Tính độ cao bay chim.
    */
-  public calculateBirdFlightAltitude(a?: any, b?: any, options?: any): any {
+  public calculateBirdFlightAltitude(a?: unknown, b?: unknown, options?: unknown) {
     const ground = optNumber(options, 'groundY', 0);
     const origin = entityPosition(a);
     const altitude = origin.y - ground;
@@ -3389,7 +3390,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1275] calculateBirdFlightPath
    * Tính đường bay chim.
    */
-  public calculateBirdFlightPath(a?: any, b?: any, options?: any): any {
+  public calculateBirdFlightPath(a?: unknown, b?: unknown, options?: unknown) {
     const profile = resolveSpecies(a, 'bird');
     const origin = entityPosition(a);
     const target = pointOf(b) ?? entityPosition(b);
@@ -3417,7 +3418,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1276] calculateBirdGlideAngle
    * Tính góc lượn chim.
    */
-  public calculateBirdGlideAngle(a?: any, b?: any): any {
+  public calculateBirdGlideAngle(a?: unknown, b?: unknown) {
     const from = pointOf(a);
     const to = pointOf(b);
     if (from && to) {
@@ -3434,7 +3435,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1277] calculateBirdTurnRadius
    * Tính bán kính vòng lượn chim.
    */
-  public calculateBirdTurnRadius(entity?: any, options?: any): any {
+  public calculateBirdTurnRadius(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'bird');
     const bank = optNumber(options, 'bank', 30 * (Math.PI / 180));
     const radius = (profile.speed * profile.speed) / (GRAVITY * Math.max(Math.tan(bank), 1e-6));
@@ -3444,7 +3445,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1278] calculateBirdBankAngle
    * Tính góc nghiêng khi chim rẽ.
    */
-  public calculateBirdBankAngle(a?: any, b?: any): any {
+  public calculateBirdBankAngle(a?: unknown, b?: unknown) {
     const euler = quaternionToEuler(entityQuaternion(a));
     const from = pointOf(a);
     const to = pointOf(b);
@@ -3460,7 +3461,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1279] calculateBirdLiftForce
    * Tính lực nâng cánh chim.
    */
-  public calculateBirdLiftForce(entity?: any, dt = 0.016): any {
+  public calculateBirdLiftForce(entity?: unknown, dt = 0.016) {
     const profile = resolveSpecies(entity, 'bird');
     const lift = liftOf(profile);
     return directionResult('calculateBirdLiftForce', { x: 0, y: lift, z: 0 }, {
@@ -3473,7 +3474,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1280] calculateBirdDragForce
    * Tính lực cản không khí chim.
    */
-  public calculateBirdDragForce(entity?: any, dt = 0.016): any {
+  public calculateBirdDragForce(entity?: unknown, dt = 0.016) {
     const profile = resolveSpecies(entity, 'bird');
     const drag = dragOf(profile);
     const velocity = entityVelocity(entity, dt);
@@ -3488,7 +3489,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1281] calculateBirdHoverPosition
    * Tính vị trí chim bay lơ lửng.
    */
-  public calculateBirdHoverPosition(a?: any, b?: any, options?: any): any {
+  public calculateBirdHoverPosition(a?: unknown, b?: unknown, options?: unknown) {
     const origin = entityPosition(a);
     const hoverHeight = optNumber(options, 'height', Number.NaN);
     const height = Number.isFinite(hoverHeight) ? hoverHeight : 10;
@@ -3499,7 +3500,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1282] calculateBirdLandingPoint
    * Tính điểm hạ cánh chim.
    */
-  public calculateBirdLandingPoint(a?: any, b?: any, options?: any): any {
+  public calculateBirdLandingPoint(a?: unknown, b?: unknown, options?: unknown) {
     const ground = optNumber(options, 'groundY', 0);
     const target = pointOf(b);
     const position = target
@@ -3511,7 +3512,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1283] calculateBirdTakeoffVelocity
    * Tính vận tốc cất cánh chim.
    */
-  public calculateBirdTakeoffVelocity(entity?: any, dt = 0.016): any {
+  public calculateBirdTakeoffVelocity(entity?: unknown, dt = 0.016) {
     const profile = resolveSpecies(entity, 'bird');
     const inherited = entityVelocity(entity, dt);
     const takeoff = scale(entityForward(entity), profile.speed * 0.6);
@@ -3525,7 +3526,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1284] calculateBirdObstacleAvoidance
    * Tính hướng tránh vật cản khi bay.
    */
-  public calculateBirdObstacleAvoidance(a?: any, b?: any, options?: any): any {
+  public calculateBirdObstacleAvoidance(a?: unknown, b?: unknown, options?: unknown) {
     const profile = resolveSpecies(a, 'bird');
     const origin = entityPosition(a);
     const obstacle = pointOf(b);
@@ -3550,7 +3551,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1285] calculateBirdFormationPosition
    * Tính vị trí chim trong đội hình.
    */
-  public calculateBirdFormationPosition(a?: any, b?: any, options?: any): any {
+  public calculateBirdFormationPosition(a?: unknown, b?: unknown, options?: unknown) {
     const profile = resolveSpecies(a, 'bird');
     const index = Math.max(0, Math.round(optNumber(options, 'index', 0)));
     const count = Math.max(1, Math.round(optNumber(options, 'count', 1)));
@@ -3565,7 +3566,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1286] calculateBirdFormationSpacing
    * Tính khoảng cách giữa các chim.
    */
-  public calculateBirdFormationSpacing(a?: any, b?: any, options?: any): any {
+  public calculateBirdFormationSpacing(a?: unknown, b?: unknown, options?: unknown) {
     const profile = resolveSpecies(a, 'bird');
     const count = Math.max(1, Math.round(optNumber(options, 'count', 1)));
     const spacing = optNumber(options, 'spacing', Math.max(profile.length * 2, 0.5));
@@ -3579,7 +3580,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1287] calculateBirdTargetIntercept
    * Tính điểm chặn mục tiêu trên không.
    */
-  public calculateBirdTargetIntercept(a?: any, b?: any, options?: any): any {
+  public calculateBirdTargetIntercept(a?: unknown, b?: unknown, options?: unknown) {
     const profile = resolveSpecies(a, 'bird');
     const origin = entityPosition(a);
     const targetPosition = entityPosition(b);
@@ -3602,7 +3603,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1288] calculateBirdBeakDirection
    * Tính hướng mỏ chim.
    */
-  public calculateBirdBeakDirection(a?: any, b?: any): any {
+  public calculateBirdBeakDirection(a?: unknown, b?: unknown) {
     const from = pointOf(a);
     const to = pointOf(b);
     let direction: Vec3D = entityForward(a);
@@ -3616,7 +3617,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1289] calculateBirdTalonsPosition
    * Tính tọa độ móng vuốt chim.
    */
-  public calculateBirdTalonsPosition(a?: any, b?: any, options?: any): any {
+  public calculateBirdTalonsPosition(a?: unknown, b?: unknown, options?: unknown) {
     const profile = resolveSpecies(a, 'bird');
     const side = optNumber(options, 'side', -1);
     const position = anatomicalPosition(a, {
@@ -3630,7 +3631,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1290] calculateBirdCollision
    * Kiểm tra va chạm chim.
    */
-  public calculateBirdCollision(a?: any, b?: any): any {
+  public calculateBirdCollision(a?: unknown, b?: unknown) {
     const profileA = resolveSpecies(a, 'bird');
     const boxA = boundingBox(entityPosition(a), {
       x: profileA.wingspan > 0 ? profileA.wingspan : profileA.width,
@@ -3653,14 +3654,14 @@ export class EntitiesFaunaFloraSubsystem {
    * [1291] getPlantPosition
    * Lấy tọa độ cây hoặc thực vật.
    */
-  public getPlantPosition(entity?: any, offset?: Vec3D): any {
+  public getPlantPosition(entity?: unknown, offset?: Vec3D) {
     return anatomicalPosition(entity, ZERO3, offset);
   }
   /**
    * [1292] getPlantRootPosition
    * Lấy tọa độ gốc cây.
    */
-  public getPlantRootPosition(entity?: any, offset?: Vec3D): any {
+  public getPlantRootPosition(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'plant');
     // Gốc cây nằm dưới mặt đất, sâu bằng một phần độ sâu hệ rễ.
     return anatomicalPosition(entity, { x: 0, y: -profile.rootDepth * 0.3, z: 0 }, offset);
@@ -3669,7 +3670,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1293] getPlantStemPosition
    * Lấy tọa độ thân thực vật.
    */
-  public getPlantStemPosition(entity?: any, offset?: Vec3D): any {
+  public getPlantStemPosition(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'plant');
     return anatomicalPosition(entity, { x: 0, y: profile.height * 0.4, z: 0 }, offset);
   }
@@ -3677,7 +3678,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1294] getPlantStemBase
    * Lấy tọa độ gốc thân cây.
    */
-  public getPlantStemBase(entity?: any, offset?: Vec3D): any {
+  public getPlantStemBase(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'plant');
     return anatomicalPosition(entity, { x: 0, y: profile.height * 0.05, z: 0 }, offset);
   }
@@ -3685,7 +3686,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1295] getPlantStemTip
    * Lấy tọa độ ngọn thân cây.
    */
-  public getPlantStemTip(entity?: any, offset?: Vec3D): any {
+  public getPlantStemTip(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'plant');
     return anatomicalPosition(entity, { x: 0, y: profile.height * 0.95, z: 0 }, offset);
   }
@@ -3693,7 +3694,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1296] getTreeTrunkPosition
    * Lấy tọa độ thân cây gỗ.
    */
-  public getTreeTrunkPosition(entity?: any, offset?: Vec3D): any {
+  public getTreeTrunkPosition(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'plant');
     return anatomicalPosition(entity, { x: 0, y: profile.trunkHeight * 0.5, z: 0 }, offset);
   }
@@ -3701,7 +3702,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1297] getTreeTrunkCenter
    * Lấy tâm thân cây.
    */
-  public getTreeTrunkCenter(entity?: any, offset?: Vec3D): any {
+  public getTreeTrunkCenter(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'plant');
     return anatomicalPosition(entity, { x: 0, y: profile.trunkHeight * 0.5, z: 0 }, offset);
   }
@@ -3709,7 +3710,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1298] getTreeTrunkBase
    * Lấy tọa độ gốc thân cây.
    */
-  public getTreeTrunkBase(entity?: any, offset?: Vec3D): any {
+  public getTreeTrunkBase(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'plant');
     return anatomicalPosition(entity, { x: 0, y: profile.height * 0.02, z: 0 }, offset);
   }
@@ -3717,7 +3718,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1299] getTreeTrunkTop
    * Lấy tọa độ đỉnh thân cây.
    */
-  public getTreeTrunkTop(entity?: any, offset?: Vec3D): any {
+  public getTreeTrunkTop(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'plant');
     return anatomicalPosition(entity, { x: 0, y: profile.trunkHeight, z: 0 }, offset);
   }
@@ -3725,7 +3726,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1300] getTreeCanopyCenter
    * Lấy tâm tán cây.
    */
-  public getTreeCanopyCenter(entity?: any, offset?: Vec3D): any {
+  public getTreeCanopyCenter(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'plant');
     return anatomicalPosition(entity, { x: 0, y: profile.height * 0.78, z: 0 }, offset);
   }
@@ -3733,7 +3734,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1301] getTreeCanopyTop
    * Lấy tọa độ đỉnh tán cây.
    */
-  public getTreeCanopyTop(entity?: any, offset?: Vec3D): any {
+  public getTreeCanopyTop(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'plant');
     return anatomicalPosition(entity, { x: 0, y: profile.height, z: 0 }, offset);
   }
@@ -3741,7 +3742,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1302] getTreeCanopyBottom
    * Lấy tọa độ đáy tán cây.
    */
-  public getTreeCanopyBottom(entity?: any, offset?: Vec3D): any {
+  public getTreeCanopyBottom(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'plant');
     return anatomicalPosition(
       entity,
@@ -3753,7 +3754,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1303] getTreeCanopyLeft
    * Lấy tọa độ mép trái tán cây.
    */
-  public getTreeCanopyLeft(a?: any, b?: any, options?: any): any {
+  public getTreeCanopyLeft(a?: unknown, b?: unknown, options?: unknown) {
     const profile = resolveSpecies(a, 'plant');
     const position = anatomicalPosition(a, {
       x: -profile.canopyRadius,
@@ -3766,7 +3767,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1304] getTreeCanopyRight
    * Lấy tọa độ mép phải tán cây.
    */
-  public getTreeCanopyRight(a?: any, b?: any, options?: any): any {
+  public getTreeCanopyRight(a?: unknown, b?: unknown, options?: unknown) {
     const profile = resolveSpecies(a, 'plant');
     const position = anatomicalPosition(a, {
       x: profile.canopyRadius,
@@ -3779,7 +3780,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1305] getBranchPosition
    * Lấy tọa độ cành cây.
    */
-  public getBranchPosition(entity?: any, offset?: Vec3D): any {
+  public getBranchPosition(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'plant');
     return anatomicalPosition(
       entity,
@@ -3795,7 +3796,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1306] getBranchStartPosition
    * Lấy điểm đầu cành cây.
    */
-  public getBranchStartPosition(entity?: any, offset?: Vec3D): any {
+  public getBranchStartPosition(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'plant');
     return anatomicalPosition(entity, { x: 0, y: profile.height * 0.4, z: 0 }, offset);
   }
@@ -3803,7 +3804,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1307] getBranchEndPosition
    * Lấy điểm cuối cành cây.
    */
-  public getBranchEndPosition(entity?: any, offset?: Vec3D): any {
+  public getBranchEndPosition(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'plant');
     return anatomicalPosition(
       entity,
@@ -3819,7 +3820,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1308] getBranchJunctionPosition
    * Lấy tọa độ điểm phân nhánh.
    */
-  public getBranchJunctionPosition(entity?: any, offset?: Vec3D): any {
+  public getBranchJunctionPosition(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'plant');
     return anatomicalPosition(entity, { x: 0, y: profile.height * 0.35, z: 0 }, offset);
   }
@@ -3827,7 +3828,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1309] getLeafPosition
    * Lấy tọa độ lá.
    */
-  public getLeafPosition(entity?: any, offset?: Vec3D): any {
+  public getLeafPosition(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'plant');
     return anatomicalPosition(entity, { x: 0, y: profile.height * 0.85, z: 0 }, offset);
   }
@@ -3835,7 +3836,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1310] getLeafTipPosition
    * Lấy tọa độ chóp lá.
    */
-  public getLeafTipPosition(entity?: any, offset?: Vec3D): any {
+  public getLeafTipPosition(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'plant');
     return anatomicalPosition(
       entity,
@@ -3847,7 +3848,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1311] getLeafBasePosition
    * Lấy tọa độ gốc lá.
    */
-  public getLeafBasePosition(entity?: any, offset?: Vec3D): any {
+  public getLeafBasePosition(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'plant');
     return anatomicalPosition(entity, { x: 0, y: profile.height * 0.82, z: 0 }, offset);
   }
@@ -3855,7 +3856,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1312] getLeafCenter
    * Lấy tâm lá.
    */
-  public getLeafCenter(entity?: any, offset?: Vec3D): any {
+  public getLeafCenter(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'plant');
     return anatomicalPosition(
       entity,
@@ -3867,7 +3868,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1313] getFlowerPosition
    * Lấy tọa độ hoa.
    */
-  public getFlowerPosition(entity?: any, offset?: Vec3D): any {
+  public getFlowerPosition(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'plant');
     return anatomicalPosition(entity, { x: 0, y: profile.height * 0.9, z: 0 }, offset);
   }
@@ -3875,7 +3876,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1314] getFlowerCenter
    * Lấy tâm hoa.
    */
-  public getFlowerCenter(entity?: any, offset?: Vec3D): any {
+  public getFlowerCenter(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'plant');
     return anatomicalPosition(entity, { x: 0, y: profile.height * 0.95, z: 0 }, offset);
   }
@@ -3883,7 +3884,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1315] getFruitPosition
    * Lấy tọa độ quả.
    */
-  public getFruitPosition(entity?: any, offset?: Vec3D): any {
+  public getFruitPosition(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'plant');
     return anatomicalPosition(
       entity,
@@ -3895,7 +3896,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1316] getFruitCenter
    * Lấy tâm quả.
    */
-  public getFruitCenter(entity?: any, offset?: Vec3D): any {
+  public getFruitCenter(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'plant');
     return anatomicalPosition(
       entity,
@@ -3907,7 +3908,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1317] getSeedPosition
    * Lấy tọa độ hạt.
    */
-  public getSeedPosition(entity?: any, offset?: Vec3D): any {
+  public getSeedPosition(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'plant');
     return anatomicalPosition(entity, { x: 0, y: profile.height * 0.2, z: 0 }, offset);
   }
@@ -3915,7 +3916,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1318] calculatePlantHeight
    * Tính chiều cao thực vật.
    */
-  public calculatePlantHeight(entity?: any, options?: any): any {
+  public calculatePlantHeight(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'plant');
     return measurement('calculatePlantHeight', profile.height, 'm');
   }
@@ -3927,14 +3928,14 @@ export class EntitiesFaunaFloraSubsystem {
    * `tests/spatial-ui-system.test.ts` khẳng định `toBeGreaterThan(0)`. Vì vậy nó
    * trả số thuần thay vì bản ghi `measurement(...)`.
    */
-  public calculateTreeHeight(entity?: any, options?: any): any {
+  public calculateTreeHeight(entity?: unknown, options?: unknown) {
     return resolveSpecies(entity, 'plant').height;
   }
   /**
    * [1320] calculateTreeTrunkDiameter
    * Tính đường kính thân cây.
    */
-  public calculateTreeTrunkDiameter(entity?: any, options?: any): any {
+  public calculateTreeTrunkDiameter(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'plant');
     const diameter = profile.width;
     return measurement('calculateTreeTrunkDiameter', diameter, 'm');
@@ -3943,7 +3944,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1321] calculateTreeTrunkRadius
    * Tính bán kính thân cây.
    */
-  public calculateTreeTrunkRadius(entity?: any, options?: any): any {
+  public calculateTreeTrunkRadius(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'plant');
     const radius = profile.width * 0.5;
     return measurement('calculateTreeTrunkRadius', radius, 'm');
@@ -3952,7 +3953,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1322] calculateTreeCanopyRadius
    * Tính bán kính tán cây.
    */
-  public calculateTreeCanopyRadius(entity?: any, options?: any): any {
+  public calculateTreeCanopyRadius(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'plant');
     return measurement('calculateTreeCanopyRadius', profile.canopyRadius, 'm');
   }
@@ -3960,7 +3961,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1323] calculateTreeCanopyVolume
    * Tính thể tích tán cây.
    */
-  public calculateTreeCanopyVolume(entity?: any, options?: any): any {
+  public calculateTreeCanopyVolume(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'plant');
     const volume = (4 / 3) * Math.PI * profile.canopyRadius ** 3;
     return measurement('calculateTreeCanopyVolume', volume, 'm³', {
@@ -3971,7 +3972,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1324] calculateTreeCanopyBounds
    * Tính giới hạn tán cây.
    */
-  public calculateTreeCanopyBounds(entity?: any, size?: Vec3D): any {
+  public calculateTreeCanopyBounds(entity?: unknown, size?: Vec3D) {
     const profile = resolveSpecies(entity, 'plant');
     const center = anatomicalPosition(entity, { x: 0, y: profile.height * 0.78, z: 0 });
     const box = boundingBox(center, {
@@ -3985,7 +3986,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1325] calculateTreeBranchLength
    * Tính chiều dài cành cây.
    */
-  public calculateTreeBranchLength(entity?: any, options?: any): any {
+  public calculateTreeBranchLength(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'plant');
     return measurement('calculateTreeBranchLength', profile.branchLength, 'm');
   }
@@ -3993,7 +3994,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1326] calculateBranchAngle
    * Tính góc cành cây.
    */
-  public calculateBranchAngle(a?: any, b?: any): any {
+  public calculateBranchAngle(a?: unknown, b?: unknown) {
     const from = pointOf(a);
     const to = pointOf(b);
     const up = { x: 0, y: 1, z: 0 };
@@ -4011,7 +4012,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1327] calculateBranchCurvature
    * Tính độ cong cành cây.
    */
-  public calculateBranchCurvature(entity?: any, options?: any): any {
+  public calculateBranchCurvature(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'plant');
     const curvature = clamp(profile.branchLength * 0.05, 0.01, 0.3);
     return measurement('calculateBranchCurvature', curvature, 'rad', {
@@ -4022,7 +4023,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1328] calculateBranchTaper
    * Tính độ thuôn của cành cây.
    */
-  public calculateBranchTaper(a?: any, b?: any, options?: any): any {
+  public calculateBranchTaper(a?: unknown, b?: unknown, options?: unknown) {
     const profile = resolveSpecies(a, 'plant');
     const baseRadius = profile.width * 0.25;
     const tipRadius = baseRadius * 0.35;
@@ -4038,7 +4039,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1329] calculateLeafLength
    * Tính chiều dài lá.
    */
-  public calculateLeafLength(entity?: any, options?: any): any {
+  public calculateLeafLength(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'plant');
     return measurement('calculateLeafLength', profile.leafLength, 'm');
   }
@@ -4046,7 +4047,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1330] calculateLeafWidth
    * Tính chiều rộng lá.
    */
-  public calculateLeafWidth(entity?: any, options?: any): any {
+  public calculateLeafWidth(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'plant');
     return measurement('calculateLeafWidth', profile.leafWidth, 'm');
   }
@@ -4054,7 +4055,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1331] calculateLeafNormal
    * Tính pháp tuyến bề mặt lá.
    */
-  public calculateLeafNormal(a?: any, b?: any): any {
+  public calculateLeafNormal(a?: unknown, b?: unknown) {
     const quaternion = entityQuaternion(a);
     const normal = rotateVector(quaternion, { x: 0, y: 1, z: 0 });
     return directionResult('calculateLeafNormal', normal);
@@ -4063,7 +4064,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1332] calculateLeafOrientation
    * Tính hướng lá.
    */
-  public calculateLeafOrientation(entityOrAngle?: any, options?: any): any {
+  public calculateLeafOrientation(entityOrAngle?: unknown, options?: unknown) {
     return orientationResult('calculateLeafOrientation', entityQuaternion(entityOrAngle), {
       source: 'entity.quaternion',
     });
@@ -4072,7 +4073,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1333] calculateLeafCurvature
    * Tính độ cong lá.
    */
-  public calculateLeafCurvature(entity?: any, options?: any): any {
+  public calculateLeafCurvature(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'plant');
     const curvature = clamp(profile.leafLength * 0.6, 0.02, 0.8);
     return measurement('calculateLeafCurvature', curvature, 'rad', {
@@ -4083,7 +4084,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1334] calculateLeafArea
    * Tính diện tích lá.
    */
-  public calculateLeafArea(entity?: any, options?: any): any {
+  public calculateLeafArea(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'plant');
     const area = profile.leafLength * profile.leafWidth * 0.68;
     return measurement('calculateLeafArea', area, 'm²', {
@@ -4099,9 +4100,9 @@ export class EntitiesFaunaFloraSubsystem {
    * `flowerSize`) → cỡ hoa theo loài → nửa đường kính ngang của chính entity
    * (khi entity không có dữ liệu hoa riêng). Không có dữ liệu nào thì 0.
    */
-  public calculateFlowerRadius(entity?: any, options?: any): any {
+  public calculateFlowerRadius(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'plant');
-    const declared = optNumber(options, 'flowerRadius', num(entity?.flowerSize, Number.NaN));
+    const declared = optNumber(options, 'flowerRadius', num(asRecord(entity).flowerSize, Number.NaN));
     let radius = 0;
     let source = 'none';
     if (Number.isFinite(declared) && declared > 0) {
@@ -4124,9 +4125,9 @@ export class EntitiesFaunaFloraSubsystem {
    * `fruitSize`) → cỡ quả theo loài → nửa đường kính ngang của chính entity
    * (khi entity không có dữ liệu quả riêng). Không có dữ liệu nào thì 0.
    */
-  public calculateFruitRadius(entity?: any, options?: any): any {
+  public calculateFruitRadius(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'plant');
-    const declared = optNumber(options, 'fruitRadius', num(entity?.fruitSize, Number.NaN));
+    const declared = optNumber(options, 'fruitRadius', num(asRecord(entity).fruitSize, Number.NaN));
     let radius = 0;
     let source = 'none';
     if (Number.isFinite(declared) && declared > 0) {
@@ -4145,7 +4146,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1337] calculateRootDepth
    * Tính độ sâu rễ.
    */
-  public calculateRootDepth(entity?: any, options?: any): any {
+  public calculateRootDepth(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'plant');
     return measurement('calculateRootDepth', profile.rootDepth, 'm');
   }
@@ -4153,7 +4154,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1338] calculateRootSpread
    * Tính độ lan rộng rễ.
    */
-  public calculateRootSpread(entity?: any, options?: any): any {
+  public calculateRootSpread(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'plant');
     return measurement('calculateRootSpread', profile.rootSpread, 'm');
   }
@@ -4161,7 +4162,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1339] calculatePlantWindDeflection
    * Tính độ lệch cây do gió.
    */
-  public calculatePlantWindDeflection(a?: any, b?: any, options?: any): any {
+  public calculatePlantWindDeflection(a?: unknown, b?: unknown, options?: unknown) {
     const profile = resolveSpecies(a, 'plant');
     const windSpeed = optNumber(options, 'windSpeed', 5);
     // Độ lệch tăng theo chiều cao và độ mềm của thân (cây cao mềm lắc nhiều hơn).
@@ -4180,7 +4181,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1340] calculateTreeWindSway
    * Tính độ lắc cây do gió.
    */
-  public calculateTreeWindSway(a?: any, b?: any, options?: any): any {
+  public calculateTreeWindSway(a?: unknown, b?: unknown, options?: unknown) {
     const profile = resolveSpecies(a, 'plant');
     const windSpeed = optNumber(options, 'windSpeed', 5);
     const frequency = optNumber(options, 'frequency', 0.2);
@@ -4203,14 +4204,14 @@ export class EntitiesFaunaFloraSubsystem {
    * [1341] getObjectPosition
    * Lấy tọa độ vật thể.
    */
-  public getObjectPosition(entity?: any, offset?: Vec3D): any {
+  public getObjectPosition(entity?: unknown, offset?: Vec3D) {
     return anatomicalPosition(entity, ZERO3, offset);
   }
   /**
    * [1342] getObjectCenter
    * Lấy tâm vật thể.
    */
-  public getObjectCenter(entity?: any, offset?: Vec3D): any {
+  public getObjectCenter(entity?: unknown, offset?: Vec3D) {
     const profile = resolveSpecies(entity, 'object');
     return anatomicalPosition(entity, { x: 0, y: profile.height * 0.5, z: 0 }, offset);
   }
@@ -4218,7 +4219,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1343] getObjectRotation
    * Lấy góc quay vật thể.
    */
-  public getObjectRotation(entityOrAngle?: any, options?: any): any {
+  public getObjectRotation(entityOrAngle?: unknown, options?: unknown) {
     return orientationResult('getObjectRotation', entityQuaternion(entityOrAngle), {
       source: 'entity.quaternion',
     });
@@ -4227,7 +4228,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1344] getObjectScale
    * Lấy tỷ lệ kích thước vật thể.
    */
-  public getObjectScale(entity?: any, options?: any): any {
+  public getObjectScale(entity?: unknown, options?: unknown) {
     const scale = scaleOf(entity);
     const uniform = Math.max(scale.x, scale.y, scale.z);
     return measurement('getObjectScale', uniform, 'ratio', {
@@ -4244,7 +4245,7 @@ export class EntitiesFaunaFloraSubsystem {
    * — đúng như `get…Position` — để dùng trực tiếp cho phép tính ma trận.
    * Bản ghi chuẩn hoá `directionResult` được dùng cho nhóm `calculate…Direction`.
    */
-  public getObjectForwardVector(a?: any, b?: any): any {
+  public getObjectForwardVector(a?: unknown, b?: unknown) {
     return facingDirection(a, b);
   }
   /**
@@ -4253,7 +4254,7 @@ export class EntitiesFaunaFloraSubsystem {
    *
    * Quy ước: right = cross(up, forward) → với forward +Z, right là +X.
    */
-  public getObjectRightVector(a?: any, b?: any): any {
+  public getObjectRightVector(a?: unknown, b?: unknown) {
     const forward = facingDirection(a, b);
     const right = normalize(cross(UP3, forward));
     return right.x !== 0 || right.y !== 0 || right.z !== 0 ? right : RIGHT3;
@@ -4264,7 +4265,7 @@ export class EntitiesFaunaFloraSubsystem {
    *
    * Quy ước: up = cross(forward, right) → với forward +Z, right +X thì up là +Y.
    */
-  public getObjectUpVector(a?: any, b?: any): any {
+  public getObjectUpVector(a?: unknown, b?: unknown) {
     const forward = facingDirection(a, b);
     const right = normalize(cross(UP3, forward));
     const basis = right.x !== 0 || right.y !== 0 || right.z !== 0 ? right : RIGHT3;
@@ -4275,7 +4276,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1348] getObjectBoundingBox
    * Lấy hộp bao vật thể.
    */
-  public getObjectBoundingBox(entity?: any, size?: Vec3D): any {
+  public getObjectBoundingBox(entity?: unknown, size?: Vec3D) {
     const profile = resolveSpecies(entity, 'object');
     const box = boundingBox(entityPosition(entity), {
       x: size?.x ?? profile.width,
@@ -4288,7 +4289,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1349] getObjectBoundingSphere
    * Lấy hình cầu bao vật thể.
    */
-  public getObjectBoundingSphere(entity?: any, radius = 1.0): any {
+  public getObjectBoundingSphere(entity?: unknown, radius = 1.0) {
     const profile = resolveSpecies(entity, 'object');
     // `radius = 1.0` là giá trị mặc định (coi như "chưa truyền") → dùng bán kính theo loài.
     const effective = radius === 1.0 ? profile.radius : radius;
@@ -4302,7 +4303,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1350] getObjectBoundingCapsule
    * Lấy capsule bao vật thể.
    */
-  public getObjectBoundingCapsule(entity?: any, height = 2.0, radius = 0.5): any {
+  public getObjectBoundingCapsule(entity?: unknown, height = 2.0, radius = 0.5) {
     const profile = resolveSpecies(entity, 'object');
     // `height = 2.0` / `radius = 0.5` là giá trị mặc định → dùng số đo theo loài.
     const effectiveHeight = height === 2.0 ? profile.height : height;
@@ -4319,7 +4320,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1351] calculateObjectLength
    * Tính chiều dài vật thể.
    */
-  public calculateObjectLength(entity?: any, options?: any): any {
+  public calculateObjectLength(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'object');
     return measurement('calculateObjectLength', profile.length, 'm');
   }
@@ -4327,7 +4328,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1352] calculateObjectWidth
    * Tính chiều rộng vật thể.
    */
-  public calculateObjectWidth(entity?: any, options?: any): any {
+  public calculateObjectWidth(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'object');
     return measurement('calculateObjectWidth', profile.width, 'm');
   }
@@ -4335,7 +4336,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1353] calculateObjectHeight
    * Tính chiều cao vật thể.
    */
-  public calculateObjectHeight(entity?: any, options?: any): any {
+  public calculateObjectHeight(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'object');
     return measurement('calculateObjectHeight', profile.height, 'm');
   }
@@ -4343,7 +4344,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1354] calculateObjectDepth
    * Tính chiều sâu vật thể.
    */
-  public calculateObjectDepth(entity?: any, options?: any): any {
+  public calculateObjectDepth(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'object');
     return measurement('calculateObjectDepth', profile.length, 'm');
   }
@@ -4351,7 +4352,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1355] calculateObjectVolume
    * Tính thể tích vật thể.
    */
-  public calculateObjectVolume(entity?: any, options?: any): any {
+  public calculateObjectVolume(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'object');
     const volume = volumeOf(profile);
     return measurement('calculateObjectVolume', volume, 'm³', {
@@ -4362,7 +4363,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1356] calculateObjectSurfaceArea
    * Tính diện tích bề mặt vật thể.
    */
-  public calculateObjectSurfaceArea(entity?: any, options?: any): any {
+  public calculateObjectSurfaceArea(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'object');
     const area = 2 * (
       profile.width * profile.height
@@ -4375,7 +4376,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1357] calculateObjectCenterOfMass
    * Tính tâm khối lượng vật thể.
    */
-  public calculateObjectCenterOfMass(entity?: any, options?: any): any {
+  public calculateObjectCenterOfMass(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'object');
     return anatomicalPosition(entity, { x: 0, y: profile.height * 0.5, z: 0 });
   }
@@ -4383,7 +4384,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1358] calculateObjectDensity
    * Tính khối lượng riêng vật thể.
    */
-  public calculateObjectDensity(a?: any, b?: any, options?: any): any {
+  public calculateObjectDensity(a?: unknown, b?: unknown, options?: unknown) {
     const profile = resolveSpecies(a, 'object');
     const volume = volumeOf(profile);
     const mass = optNumber(options, 'mass', volume * profile.density);
@@ -4394,7 +4395,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1359] calculateObjectInertiaTensor
    * Tính tensor quán tính vật thể.
    */
-  public calculateObjectInertiaTensor(a?: any, b?: any, options?: any): any {
+  public calculateObjectInertiaTensor(a?: unknown, b?: unknown, options?: unknown) {
     const profile = resolveSpecies(a, 'object');
     const mass = optNumber(options, 'mass', profile.mass);
     // Hộp đồng nhất: I = m·(w² + h²)/12 quanh trục X, v.v.
@@ -4410,7 +4411,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1360] calculateObjectWorldTransform
    * Tính phép biến đổi thế giới vật thể.
    */
-  public calculateObjectWorldTransform(target?: any, options?: any): any {
+  public calculateObjectWorldTransform(target?: unknown, options?: unknown) {
     const entity = target ?? optVec3(options, 'entity');
     const position = entityPosition(entity);
     const quaternion = entityQuaternion(entity);
@@ -4421,7 +4422,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1361] calculateObjectLocalTransform
    * Tính phép biến đổi cục bộ vật thể.
    */
-  public calculateObjectLocalTransform(target?: any, options?: any): any {
+  public calculateObjectLocalTransform(target?: unknown, options?: unknown) {
     const entity = target ?? optVec3(options, 'entity');
     const scale = scaleOf(entity);
     return scaleMatrix(scale);
@@ -4430,7 +4431,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1362] calculateObjectPivotOffset
    * Tính độ lệch điểm xoay vật thể.
    */
-  public calculateObjectPivotOffset(a?: any, b?: any, options?: any): any {
+  public calculateObjectPivotOffset(a?: unknown, b?: unknown, options?: unknown) {
     const profile = resolveSpecies(a, 'object');
     const pivot = optVec3(options, 'pivot');
     const origin = entityPosition(a);
@@ -4443,7 +4444,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1363] calculateObjectOriginOffset
    * Tính độ lệch gốc vật thể.
    */
-  public calculateObjectOriginOffset(a?: any, b?: any, options?: any): any {
+  public calculateObjectOriginOffset(a?: unknown, b?: unknown, options?: unknown) {
     const profile = resolveSpecies(a, 'object');
     const origin = entityPosition(a);
     const offset = { x: 0, y: profile.height * 0.5, z: 0 };
@@ -4453,7 +4454,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1364] calculateObjectDistanceToGround
    * Tính khoảng cách vật thể đến mặt đất.
    */
-  public calculateObjectDistanceToGround(a?: any, b?: any): any {
+  public calculateObjectDistanceToGround(a?: unknown, b?: unknown) {
     const profile = resolveSpecies(a, 'object');
     const position = pointOf(a);
     const ground = pointOf(b)?.y ?? 0;
@@ -4466,7 +4467,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1365] calculateObjectDistanceToWall
    * Tính khoảng cách vật thể đến tường.
    */
-  public calculateObjectDistanceToWall(a?: any, b?: any): any {
+  public calculateObjectDistanceToWall(a?: unknown, b?: unknown) {
     const from = pointOf(a);
     const to = pointOf(b);
     const resolved = from && to;
@@ -4479,7 +4480,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1366] calculateObjectDistanceToCeiling
    * Tính khoảng cách vật thể đến trần.
    */
-  public calculateObjectDistanceToCeiling(a?: any, b?: any): any {
+  public calculateObjectDistanceToCeiling(a?: unknown, b?: unknown) {
     const from = pointOf(a);
     const to = pointOf(b);
     const resolved = from && to;
@@ -4492,7 +4493,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1367] calculateObjectDistanceToCamera
    * Tính khoảng cách vật thể đến camera.
    */
-  public calculateObjectDistanceToCamera(a?: any, b?: any): any {
+  public calculateObjectDistanceToCamera(a?: unknown, b?: unknown) {
     const from = pointOf(a);
     const to = pointOf(b);
     const resolved = from && to;
@@ -4505,7 +4506,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1368] calculateObjectDistanceToPlayer
    * Tính khoảng cách vật thể đến người chơi.
    */
-  public calculateObjectDistanceToPlayer(a?: any, b?: any): any {
+  public calculateObjectDistanceToPlayer(a?: unknown, b?: unknown) {
     const from = pointOf(a);
     const to = pointOf(b);
     const resolved = from && to;
@@ -4518,7 +4519,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1369] calculateObjectDistanceToTarget
    * Tính khoảng cách vật thể đến mục tiêu.
    */
-  public calculateObjectDistanceToTarget(a?: any, b?: any): any {
+  public calculateObjectDistanceToTarget(a?: unknown, b?: unknown) {
     const from = pointOf(a);
     const to = pointOf(b);
     const resolved = from && to;
@@ -4531,7 +4532,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1370] calculateObjectClosestPoint
    * Tính điểm gần nhất trên vật thể.
    */
-  public calculateObjectClosestPoint(a?: any, b?: any, options?: any): any {
+  public calculateObjectClosestPoint(a?: unknown, b?: unknown, options?: unknown) {
     const profile = resolveSpecies(a, 'object');
     const box = bodyBox(a, profile);
     const probe = pointOf(b) ?? entityPosition(a);
@@ -4543,7 +4544,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1371] calculateObjectFarthestPoint
    * Tính điểm xa nhất trên vật thể.
    */
-  public calculateObjectFarthestPoint(a?: any, b?: any, options?: any): any {
+  public calculateObjectFarthestPoint(a?: unknown, b?: unknown, options?: unknown) {
     const profile = resolveSpecies(a, 'object');
     const box = bodyBox(a, profile);
     const probe = pointOf(b) ?? entityPosition(a);
@@ -4555,7 +4556,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1372] calculateObjectSurfaceNormal
    * Tính pháp tuyến bề mặt vật thể.
    */
-  public calculateObjectSurfaceNormal(a?: any, b?: any): any {
+  public calculateObjectSurfaceNormal(a?: unknown, b?: unknown) {
     const profile = resolveSpecies(a, 'object');
     const box = bodyBox(a, profile);
     const probe = pointOf(b) ?? entityPosition(a);
@@ -4568,7 +4569,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1373] calculateObjectTangent
    * Tính tiếp tuyến bề mặt vật thể.
    */
-  public calculateObjectTangent(a?: any, b?: any): any {
+  public calculateObjectTangent(a?: unknown, b?: unknown) {
     const profile = resolveSpecies(a, 'object');
     const box = bodyBox(a, profile);
     const probe = pointOf(b) ?? entityPosition(a);
@@ -4582,7 +4583,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1374] calculateObjectCurvature
    * Tính độ cong bề mặt vật thể.
    */
-  public calculateObjectCurvature(entity?: any, options?: any): any {
+  public calculateObjectCurvature(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'object');
     // Hộp cầu tương đương: bán kính cong ≈ bán kính đường tròn ngoại tiếp.
     const curvature = profile.radius > 1e-6 ? 1 / profile.radius : 0;
@@ -4594,7 +4595,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1375] calculateObjectIntersection
    * Tính giao điểm vật thể.
    */
-  public calculateObjectIntersection(a?: any, b?: any): any {
+  public calculateObjectIntersection(a?: unknown, b?: unknown) {
     const boxA = bodyBox(a, resolveSpecies(a, 'object'));
     const boxB = bodyBox(b, resolveSpecies(b, 'object'));
     return aabbResult('calculateObjectIntersection', boxA, boxB);
@@ -4603,7 +4604,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1376] calculateObjectOverlap
    * Tính mức độ chồng lấn vật thể.
    */
-  public calculateObjectOverlap(a?: any, b?: any): any {
+  public calculateObjectOverlap(a?: unknown, b?: unknown) {
     const boxA = bodyBox(a, resolveSpecies(a, 'object'));
     const boxB = bodyBox(b, resolveSpecies(b, 'object'));
     const result = aabbResult('calculateObjectOverlap', boxA, boxB);
@@ -4616,7 +4617,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1377] calculateObjectCollision
    * Kiểm tra va chạm vật thể.
    */
-  public calculateObjectCollision(a?: any, b?: any): any {
+  public calculateObjectCollision(a?: unknown, b?: unknown) {
     const boxA = bodyBox(a, resolveSpecies(a, 'object'));
     const boxB = bodyBox(b, resolveSpecies(b, 'object'));
     return aabbResult('calculateObjectCollision', boxA, boxB);
@@ -4625,7 +4626,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1378] calculateObjectPenetrationDepth
    * Tính độ xuyên lấn vật thể.
    */
-  public calculateObjectPenetrationDepth(entity?: any, options?: any): any {
+  public calculateObjectPenetrationDepth(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'object');
     const other = optVec3(options, 'other') ?? optVec3(options, 'target');
     if (!other) {
@@ -4649,7 +4650,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1379] calculateObjectSeparationVector
    * Tính vector tách vật thể.
    */
-  public calculateObjectSeparationVector(a?: any, b?: any): any {
+  public calculateObjectSeparationVector(a?: unknown, b?: unknown) {
     const from = pointOf(a);
     const to = pointOf(b);
     let separation: Vec3D = { x: 0, y: 0, z: 1 };
@@ -4663,7 +4664,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1380] calculateObjectContactPoint
    * Tính điểm tiếp xúc vật thể.
    */
-  public calculateObjectContactPoint(a?: any, b?: any, options?: any): any {
+  public calculateObjectContactPoint(a?: unknown, b?: unknown, options?: unknown) {
     const profile = resolveSpecies(a, 'object');
     const boxA = bodyBox(a, profile);
     const boxB = bodyBox(b, resolveSpecies(b, 'object'));
@@ -4683,7 +4684,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1381] calculateObjectContactNormal
    * Tính pháp tuyến điểm tiếp xúc.
    */
-  public calculateObjectContactNormal(a?: any, b?: any): any {
+  public calculateObjectContactNormal(a?: unknown, b?: unknown) {
     const boxA = bodyBox(a, resolveSpecies(a, 'object'));
     const boxB = bodyBox(b, resolveSpecies(b, 'object'));
     return directionResult('calculateObjectContactNormal', calculateObjectNormalBetween(boxA, boxB));
@@ -4692,7 +4693,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1382] calculateObjectContactArea
    * Tính diện tích tiếp xúc vật thể.
    */
-  public calculateObjectContactArea(entity?: any, options?: any): any {
+  public calculateObjectContactArea(entity?: unknown, options?: unknown) {
     const profile = resolveSpecies(entity, 'object');
     const other = optVec3(options, 'other') ?? optVec3(options, 'target');
     if (!other) {
@@ -4715,7 +4716,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1383] calculateObjectFrictionForce
    * Tính lực ma sát vật thể.
    */
-  public calculateObjectFrictionForce(entity?: any, dt = 0.016): any {
+  public calculateObjectFrictionForce(entity?: unknown, dt = 0.016) {
     const profile = resolveSpecies(entity, 'object');
     const velocity = entityVelocity(entity, dt);
     const speed = magnitude(velocity);
@@ -4732,7 +4733,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1384] calculateObjectNormalForce
    * Tính lực pháp tuyến vật thể.
    */
-  public calculateObjectNormalForce(entity?: any, dt = 0.016): any {
+  public calculateObjectNormalForce(entity?: unknown, dt = 0.016) {
     const profile = resolveSpecies(entity, 'object');
     const normal = profile.mass * GRAVITY;
     return directionResult('calculateObjectNormalForce', { x: 0, y: normal, z: 0 }, {
@@ -4744,7 +4745,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1385] calculateObjectGravityForce
    * Tính lực hấp dẫn tác dụng lên vật thể.
    */
-  public calculateObjectGravityForce(entity?: any, dt = 0.016): any {
+  public calculateObjectGravityForce(entity?: unknown, dt = 0.016) {
     const profile = resolveSpecies(entity, 'object');
     const gravity = profile.mass * GRAVITY;
     return directionResult('calculateObjectGravityForce', { x: 0, y: -gravity, z: 0 }, {
@@ -4756,7 +4757,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1386] calculateObjectBuoyancyForce
    * Tính lực đẩy nổi vật thể.
    */
-  public calculateObjectBuoyancyForce(entity?: any, dt = 0.016): any {
+  public calculateObjectBuoyancyForce(entity?: unknown, dt = 0.016) {
     const profile = resolveSpecies(entity, 'object');
     const displaced = WATER_DENSITY * volumeOf(profile) * GRAVITY;
     return directionResult('calculateObjectBuoyancyForce', { x: 0, y: displaced, z: 0 }, {
@@ -4769,7 +4770,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1387] calculateObjectDragForce
    * Tính lực cản vật thể.
    */
-  public calculateObjectDragForce(entity?: any, dt = 0.016): any {
+  public calculateObjectDragForce(entity?: unknown, dt = 0.016) {
     const profile = resolveSpecies(entity, 'object');
     const velocity = entityVelocity(entity, dt);
     const speed = magnitude(velocity);
@@ -4786,7 +4787,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1388] calculateObjectLiftForce
    * Tính lực nâng vật thể.
    */
-  public calculateObjectLiftForce(entity?: any, dt = 0.016): any {
+  public calculateObjectLiftForce(entity?: unknown, dt = 0.016) {
     const profile = resolveSpecies(entity, 'object');
     // Chỉ vật thể có cánh mới sinh lực nâng; vật thể thường không có.
     const lift = profile.wingspan > 0 ? liftOf(profile) : 0;
@@ -4799,7 +4800,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1389] calculateObjectVelocity
    * Tính vận tốc vật thể.
    */
-  public calculateObjectVelocity(entity?: any, dt = 0.016): any {
+  public calculateObjectVelocity(entity?: unknown, dt = 0.016) {
     const velocity = entityVelocity(entity, dt);
     return directionResult('calculateObjectVelocity', velocity, { source: 'entity.velocity' });
   }
@@ -4807,7 +4808,7 @@ export class EntitiesFaunaFloraSubsystem {
    * [1390] calculateObjectAcceleration
    * Tính gia tốc vật thể.
    */
-  public calculateObjectAcceleration(entity?: any, dt = 0.016): any {
+  public calculateObjectAcceleration(entity?: unknown, dt = 0.016) {
     const acceleration = entityAcceleration(entity, dt);
     return directionResult('calculateObjectAcceleration', acceleration, {
       source: 'entity.acceleration',

@@ -205,6 +205,43 @@ import {
 } from '@aetheria/engine/physics';
 ```
 
+### Sweep-and-prune broadphase
+
+`PhysicsWorld` generates collision candidates with sweep-and-prune by default.
+Bodies are sorted by their AABB minimum X, the active list is compacted as
+intervals expire, and Y/Z overlaps are rejected before narrow-phase tests.
+
+```ts
+import { PhysicsWorld, SweepAndPruneBroadphase } from '@aetheria/engine/physics';
+
+const world = new PhysicsWorld({
+  broadphase: {
+    margin: 0.1,          // expand every AABB for near misses
+    skipStaticPairs: true // default
+  },
+});
+
+world.broadphaseStats;    // { bodies, candidatePairs, overlapChecks, expired, staticPairsSkipped }
+world.usesBroadphase;     // true
+
+// Exact legacy O(n²) behavior for debugging or differential tests:
+const reference = new PhysicsWorld({ broadphase: false });
+
+// Standalone pair generation:
+const broadphase = new SweepAndPruneBroadphase({ margin: 0 });
+const pairs = broadphase.computePairs(world.bodiesList);
+```
+
+Pairs are returned in the original body-index order `(0,1), (0,2), …, (1,2), …`
+so sequential impulse resolution stays deterministic. `bruteForcePairs(bodies)`
+provides the unfiltered legacy list.
+
+Static-static pairs are skipped unless `skipStaticPairs` is `false`. Because the
+candidate set is computed before sequential resolution, a dense pile can create
+a new overlap mid-step that was not present in the original list; use a margin
+or a second pass when exact dense-pile equivalence with the legacy loop is
+required. Sparse scenes step bit-identically with and without the broadphase.
+
 ---
 
 ## 4. Asset Forge
@@ -380,19 +417,33 @@ cd engine
 The suite covers spatial primitives, hull bounds, BVH/Octree queries, sweep
 time-of-impact, physics broadphase/queries, all format extensions, parser
 failure semantics, FBX corruption handling, the Asset Forge pipeline, combiner
-metadata and the combiner spatial bridge.
+metadata, the combiner spatial bridge, and world-subsystem hardening (weather,
+environmental dynamics, vegetation, physics/materials).
 
 Current status:
 
 - `tsc --noEmit`: 0 errors with `strict` and `noImplicitAny`.
-- Vitest: 33 files, 556 tests passing.
+- Vitest: 41 files, 691 tests passing, including
+  `tests/world-subsystems-hardening.test.ts` (56 focused cases for wind, fire,
+  particles, weathering, ecosystems, tool impacts, fractures, debris, LOD,
+  vegetation, rigid bodies, cloth, ropes, mechanisms and metal materials).
+  The suite also passes with shuffled test order across seeds 1, 42, 777 and
+  20261027.
+- Type-boundary audit (`node scripts/type-any-audit.mjs`): **0** `: any`, **0**
+  `as any`, and 0 affected files. The initial audit recorded 24,925 `: any` and
+  6,908 `as any`, so the hardening pass removed all explicit `any` escapes.
+  Runtime payloads now use `unknown` plus local `asRecord` guards and named
+  `*Like` interfaces; generic defaults use `unknown` or concrete interfaces.
+  The only remaining token matches are 7 intentional `'any'` string literals in
+  AI target requirements and interactive-prop trigger conditions.
 
 ---
 
 ## 7. Design guarantees
 
 - No placeholder scene is returned for unknown formats.
-- No `any` in the spatial, physics bridge, parser, forge or combiner mapper.
+- No TypeScript `any` in `src`; semantic `'any'` string literals are listed in
+  the verification section above.
 - All public spatial values are JSON-friendly tuples or explicit classes.
 - Spatial and physics bridge modules do not import renderer or scene code.
 - Existing combiner names and groups are preserved; metadata is additive.

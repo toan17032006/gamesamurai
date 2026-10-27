@@ -22,6 +22,34 @@ import {
 } from './types.js';
 
 /**
+ * Optional mutable fields the player may drive on an interacted world object.
+ * Interaction methods accept `unknown` so callers can pass engine objects, plain
+ * records or vectors; this view documents the fields that are read or written.
+ */
+interface InteractionTarget extends Partial<Vec3> {
+  position?: Vec3;
+  rotation?: Quat4;
+  on?: boolean;
+  isOn?: boolean;
+  intensity?: number;
+  worn?: boolean;
+  locked?: boolean;
+  isLocked?: boolean;
+  lockPosition?: Vec3;
+  button?: string;
+  amplitude?: number;
+  volume?: number;
+}
+
+/** Subset of player state accepted by `setPlayerState`. */
+interface PlayerStateInput {
+  position?: Vec3;
+  rotation?: Quat4;
+  posture?: BodyPosture;
+  isAlive?: boolean;
+}
+
+/**
  * Creates default finger state with anatomically natural neutral resting curl.
  */
 function createDefaultHandFingerState(): HandFingerState {
@@ -168,7 +196,7 @@ export class RealisticHumanPlayer {
   // --------------------------------------------------------------------------
   public leftHand: HandFingerState = createDefaultHandFingerState();
   public rightHand: HandFingerState = createDefaultHandFingerState();
-  public heldObjects: { left?: any; right?: any } = {};
+  public heldObjects: { left?: unknown; right?: unknown } = {};
 
   // --------------------------------------------------------------------------
   // Head, Eyes & Face
@@ -229,11 +257,11 @@ export class RealisticHumanPlayer {
   /** Trạng thái chuột vừa thao tác. */
   public lastMouseState: { x: number; y: number; button: string } | null = null;
   public currentTarget: PlayerInteractable | null = null;
-  public attachedCamera: any = null;
+  public attachedCamera: unknown = null;
   /** Vật đang tương tác hiện tại (ghế, thức ăn, ly, chai, vật cản…). */
-  public activeInteraction: any = null;
+  public activeInteraction: unknown = null;
   /** Vật ngồi hiện tại (null nếu đang đứng). */
-  public seatedOn: any = null;
+  public seatedOn: unknown = null;
   /** Biên độ lip-sync hiện tại (0..1) — 0 khi im lặng. */
   public lipSyncAmount = 0;
   /** Camera đã được đặt vị trí lần đầu — từ lần sau bám theo có nội suy. */
@@ -402,7 +430,7 @@ export class RealisticHumanPlayer {
     };
   }
 
-  public getPlayerState(): Record<string, any> {
+  public getPlayerState(): Record<string, unknown> {
     return {
       id: this.id,
       position: { ...this.position },
@@ -416,18 +444,19 @@ export class RealisticHumanPlayer {
     };
   }
 
-  public setPlayerState(state: Record<string, any>): void {
-    if (state.position) this.position = { ...state.position };
-    if (state.rotation) this.rotation = { ...state.rotation };
-    if (state.posture) this.currentPosture = state.posture;
-    if (typeof state.isAlive === 'boolean') this.isAlive = state.isAlive;
+  public setPlayerState(state: Record<string, unknown>): void {
+    const input = state as PlayerStateInput;
+    if (input.position) this.position = { ...input.position };
+    if (input.rotation) this.rotation = { ...input.rotation };
+    if (input.posture) this.currentPosture = input.posture;
+    if (typeof input.isAlive === 'boolean') this.isAlive = input.isAlive;
   }
 
   public savePlayerState(): string {
     return JSON.stringify(this.getPlayerState());
   }
 
-  public restorePlayerState(state: string | Record<string, any>): boolean {
+  public restorePlayerState(state: string | Record<string, unknown>): boolean {
     try {
       const parsed = typeof state === 'string' ? JSON.parse(state) : state;
       this.setPlayerState(parsed);
@@ -1534,7 +1563,7 @@ export class RealisticHumanPlayer {
   // 181–200. Cầm, nắm, chạm và thao tác bằng tay
   // ==========================================================================
 
-  public gripObject(object: any, hand: 'left' | 'right' = 'right'): boolean {
+  public gripObject(object: unknown, hand: 'left' | 'right' = 'right'): boolean {
     this.heldObjects[hand] = object;
     const h = hand === 'left' ? this.leftHand : this.rightHand;
     h.gripPressure = 1.0;
@@ -1552,7 +1581,7 @@ export class RealisticHumanPlayer {
    * Nếu truyền `object` thì chỉ thả đúng vật đó — trước đây tham số bị bỏ qua
    * và mọi lời gọi đều thả vật đang cầm ở tay tương ứng.
    */
-  public releaseObject(object?: any, hand: 'left' | 'right' = 'right'): any {
+  public releaseObject(object?: unknown, hand: 'left' | 'right' = 'right') {
     const held = this.heldObjects[hand];
     if (object !== undefined && held !== undefined && object !== held) {
       // Đang cầm vật khác — không thả nhầm.
@@ -1565,16 +1594,17 @@ export class RealisticHumanPlayer {
     return held;
   }
 
-  public pickUpObject(object: any): boolean {
-    this.reachWithRightHand(object.position ?? { x: 0, y: 0, z: 0 });
+  public pickUpObject(object: unknown): boolean {
+    const target = object as InteractionTarget;
+    this.reachWithRightHand(target.position ?? { x: 0, y: 0, z: 0 });
     return this.gripObject(object, 'right');
   }
 
-  public putDownObject(object?: any): any {
+  public putDownObject(object?: unknown) {
     return this.releaseObject(object, 'right');
   }
 
-  public holdObject(object: any): void {
+  public holdObject(object: unknown): void {
     this.heldObjects.right = object;
   }
 
@@ -1584,7 +1614,7 @@ export class RealisticHumanPlayer {
    * Nếu truyền `object` thì chỉ chuyển đúng vật đó; vật đang cầm ở tay phải
    * sang tay trái và ngược lại.
    */
-  public transferObjectBetweenHands(object?: any): boolean {
+  public transferObjectBetweenHands(object?: unknown): boolean {
     const source = this.heldObjects.right ? 'right' : this.heldObjects.left ? 'left' : null;
     if (!source) return false;
 
@@ -1601,67 +1631,71 @@ export class RealisticHumanPlayer {
     return true;
   }
 
-  public rotateObjectInHand(object: any, rotation: Quat4): void {
-    if (object) object.rotation = { ...rotation };
+  public rotateObjectInHand(object: unknown, rotation: Quat4): void {
+    if (object) (object as InteractionTarget).rotation = { ...rotation };
   }
 
-  public inspectObject(object: any): void {
+  public inspectObject(object: unknown): void {
     this.liftRightLeg(); // slight shift
     this.raiseRightArm(1.0);
     this.bendRightElbow(1.2);
     // Nhìn vào đối tượng đang kiểm tra — trước đây nhìn vào chính mình.
-    const pos = object?.position ?? object;
+    const target = object as InteractionTarget;
+    const pos = target?.position ?? target;
     if (pos && typeof pos === 'object') {
       this.lookAtTarget({ x: pos.x ?? this.position.x, y: pos.y ?? this.position.y, z: pos.z ?? this.position.z });
     }
   }
 
-  public pointAtObject(object: any): void {
+  public pointAtObject(object: unknown): void {
     this.extendRightArm();
     this.makeRightFist();
     this.extendIndexFinger('right');
     // Chỉ vào đúng vị trí đối tượng.
-    const pos = object?.position ?? object;
+    const target = object as InteractionTarget;
+    const pos = target?.position ?? target;
     if (pos && typeof pos === 'object') {
       this.lookAtTarget({ x: pos.x ?? this.position.x, y: pos.y ?? this.position.y, z: pos.z ?? this.position.z });
     }
   }
 
-  public touchObject(object: any): void {
-    this.reachWithRightHand(object.position ?? { x: 0, y: 0, z: 0 });
+  public touchObject(object: unknown): void {
+    const target = object as InteractionTarget;
+    this.reachWithRightHand(target.position ?? { x: 0, y: 0, z: 0 });
   }
 
-  public pressObject(object: any): void {
+  public pressObject(object: unknown): void {
     this.touchObject(object);
     this.adjustGripPressure(object, 0.8);
   }
 
-  public pullObjectWithHand(object: any): void {
+  public pullObjectWithHand(object: unknown): void {
     this.gripObject(object, 'right');
     this.bendRightElbow(0.5);
   }
 
-  public pushObjectWithHand(object: any): void {
+  public pushObjectWithHand(object: unknown): void {
     this.extendRightArm();
     this.openRightHand();
     // Đẩy theo hướng tới đối tượng thay vì chỉ duỗi tay.
-    const pos = object?.position ?? object;
+    const target = object as InteractionTarget;
+    const pos = target?.position ?? target;
     if (pos && typeof pos === 'object') {
       this.aimArmAt('right', { x: pos.x ?? this.position.x, y: pos.y ?? this.position.y, z: pos.z ?? this.position.z });
     }
   }
 
-  public turnDoorHandle(handle: any): void {
+  public turnDoorHandle(handle: unknown): void {
     this.gripObject(handle, 'right');
     this.rotateRightWrist(0.6);
   }
 
-  public openDoorWithHand(door: any): void {
+  public openDoorWithHand(door: unknown): void {
     this.turnDoorHandle(door);
     this.pullObjectWithHand(door);
   }
 
-  public closeDoorWithHand(door: any): void {
+  public closeDoorWithHand(door: unknown): void {
     this.pushObjectWithHand(door);
   }
 
@@ -1678,24 +1712,25 @@ export class RealisticHumanPlayer {
     this.extendIndexFinger('right');
   }
 
-  public operateMouse(mouse: any): void {
+  public operateMouse(mouse: unknown): void {
     this.relaxRightHand();
     this.bendIndexTipJoint('right', 15);
     // Ghi lại trạng thái chuột để tay điều khiển bám theo.
+    const input = mouse as InteractionTarget;
     this.lastMouseState = {
-      x: typeof mouse?.x === 'number' ? mouse.x : (mouse?.position?.x ?? 0),
-      y: typeof mouse?.y === 'number' ? mouse.y : (mouse?.position?.y ?? 0),
-      button: mouse?.button ?? 'left',
+      x: typeof input?.x === 'number' ? input.x : (input?.position?.x ?? 0),
+      y: typeof input?.y === 'number' ? input.y : (input?.position?.y ?? 0),
+      button: input?.button ?? 'left',
     };
   }
 
-  public adjustGripPressure(object: any, pressure: number): void {
+  public adjustGripPressure(object: unknown, pressure: number): void {
     const amount = Math.max(0, Math.min(1, pressure));
     this.rightHand.gripPressure = amount;
     // Nếu đang cầm đúng vật thì áp lực cũng áp cho vật đang cầm.
     const held = this.heldObjects.right;
     if (held && (object === undefined || object === held)) {
-      if (typeof held === 'object') held.gripPressure = amount;
+      if (typeof held === 'object') (held as { gripPressure?: number }).gripPressure = amount;
     }
   }
 
@@ -1813,14 +1848,14 @@ export class RealisticHumanPlayer {
     this.bendRightKnee(1.4);
   }
 
-  public sitOnChair(chair?: any): void {
+  public sitOnChair(chair?: unknown): void {
     this.currentPosture = 'sitting_chair';
     this.bendLeftKnee(1.57);
     this.bendRightKnee(1.57);
     this.seatedOn = chair ?? null;
     this.activeInteraction = chair ?? null;
     // Ngồi xuống ghế — dời người tới vị trí ghế nếu có.
-    const pos = chair?.position;
+    const pos = (chair as InteractionTarget | undefined)?.position;
     if (pos && typeof pos === 'object') {
       this.position.x = pos.x ?? this.position.x;
       this.position.y = pos.y ?? this.position.y;
@@ -1828,7 +1863,7 @@ export class RealisticHumanPlayer {
     }
   }
 
-  public standFromChair(chair?: any): void {
+  public standFromChair(chair?: unknown): void {
     this.standUp();
     this.seatedOn = null;
     if (this.activeInteraction === (chair ?? this.activeInteraction)) {
@@ -2232,7 +2267,7 @@ export class RealisticHumanPlayer {
    * `audioData` có thể là số biên độ (0..1) hoặc mảng mẫu — biên độ lớn thì
    * hàm mở rộng hơn. Trước đây tham số bị bỏ qua và miệng luôn mở cố định.
    */
-  public updateLipSync(audioData?: any): void {
+  public updateLipSync(audioData?: unknown): void {
     let amplitude = 0;
     if (typeof audioData === 'number' && Number.isFinite(audioData)) {
       amplitude = audioData;
@@ -2244,7 +2279,8 @@ export class RealisticHumanPlayer {
       }
       amplitude = sum / audioData.length;
     } else if (audioData && typeof audioData === 'object') {
-      const value = audioData.amplitude ?? audioData.volume;
+      const signal = audioData as InteractionTarget;
+      const value = signal.amplitude ?? signal.volume;
       if (typeof value === 'number' && Number.isFinite(value)) amplitude = value;
     }
 
@@ -2417,13 +2453,13 @@ export class RealisticHumanPlayer {
   // 321–340. Ăn uống, uống nước và thao tác với đồ vật
   // ==========================================================================
 
-  public pickUpFood(food: any): void {
+  public pickUpFood(food: unknown): void {
     this.pickUpObject(food);
   }
 
-  public bringFoodToMouth(food: any): void {
+  public bringFoodToMouth(food: unknown): void {
     // Đưa tay tới đúng vị trí thức ăn nếu có; không có thì đưa tới miệng.
-    const pos = food?.position;
+    const pos = (food as InteractionTarget | undefined)?.position;
     if (pos && typeof pos === 'object') {
       this.reachWithRightHand({
         x: pos.x ?? this.position.x,
@@ -2436,7 +2472,7 @@ export class RealisticHumanPlayer {
     this.activeInteraction = food ?? null;
   }
 
-  public takeBite(food: any): void {
+  public takeBite(food: unknown): void {
     this.openMouth();
     this.chew();
     this.activeInteraction = food ?? null;
@@ -2450,19 +2486,19 @@ export class RealisticHumanPlayer {
     this.swallow();
   }
 
-  public putDownFood(food: any): void {
+  public putDownFood(food: unknown): void {
     this.putDownObject(food);
   }
 
-  public pickUpCup(cup: any): void {
+  public pickUpCup(cup: unknown): void {
     this.pickUpObject(cup);
   }
 
-  public liftCupToMouth(cup: any): void {
+  public liftCupToMouth(cup: unknown): void {
     this.bringFoodToMouth(cup);
   }
 
-  public drinkFromCup(cup: any): void {
+  public drinkFromCup(cup: unknown): void {
     if (!this.heldObjects.right) {
       this.pickUpCup(cup);
     }
@@ -2471,14 +2507,14 @@ export class RealisticHumanPlayer {
     this.swallow();
   }
 
-  public tiltCupWhileDrinking(cup: any, angle = 0.4): void {
+  public tiltCupWhileDrinking(cup: unknown, angle = 0.4): void {
     this.rotateRightWrist(angle);
     // Cầm ly trước rồi mới nghiêng — nếu có ly.
     if (cup) this.gripObject(cup, 'right');
     this.activeInteraction = cup ?? null;
   }
 
-  public lowerCup(cup: any): void {
+  public lowerCup(cup: unknown): void {
     this.lowerRightArm();
     this.activeInteraction = cup ?? null;
   }
@@ -2487,30 +2523,31 @@ export class RealisticHumanPlayer {
     this.wipeForehead();
   }
 
-  public holdSpoon(spoon: any): void {
+  public holdSpoon(spoon: unknown): void {
     this.gripObject(spoon, 'right');
   }
 
-  public scoopFood(spoon: any): void {
+  public scoopFood(spoon: unknown): void {
     this.rotateRightWrist(-0.3);
     if (spoon) this.gripObject(spoon, 'right');
     this.activeInteraction = spoon ?? null;
   }
 
-  public useFork(fork: any): void {
+  public useFork(fork: unknown): void {
     this.gripObject(fork, 'right');
   }
 
-  public cutFoodWithKnife(food: any): void {
+  public cutFoodWithKnife(food: unknown): void {
     this.useFork(food);
     this.bendRightElbow(1.0);
   }
 
-  public pourLiquid(container: any, target: any): void {
+  public pourLiquid(container: unknown, target: unknown): void {
     this.gripObject(container, 'right');
     this.tiltCupWhileDrinking(container, 0.8);
     // Nghiêng về phía nơi rót — không rót vô hướng.
-    const pos = target?.position ?? target;
+    const destination = target as InteractionTarget;
+    const pos = destination?.position ?? destination;
     if (pos && typeof pos === 'object') {
       this.aimArmAt('right', {
         x: pos.x ?? this.position.x,
@@ -2521,7 +2558,7 @@ export class RealisticHumanPlayer {
     this.activeInteraction = container ?? null;
   }
 
-  public openBottle(bottle: any): void {
+  public openBottle(bottle: unknown): void {
     this.gripObject(bottle, 'left');
     this.twistBottleCap();
   }
@@ -2530,7 +2567,7 @@ export class RealisticHumanPlayer {
     this.rotateRightWrist(0.8);
   }
 
-  public closeBottle(bottle: any): void {
+  public closeBottle(bottle: unknown): void {
     this.twistBottleCap();
     if (bottle) this.gripObject(bottle, 'right');
     this.activeInteraction = bottle ?? null;
@@ -2606,8 +2643,9 @@ export class RealisticHumanPlayer {
    *
    * Hướng tránh được tính từ vị trí vật cản thật: đi về bên đối diện với nó.
    */
-  public avoidObstacle(obstacle: any): void {
-    const pos = obstacle?.position ?? obstacle;
+  public avoidObstacle(obstacle: unknown): void {
+    const target = obstacle as InteractionTarget;
+    const pos = target?.position ?? target;
     let angle = 0.4;
     if (pos && typeof pos === 'object') {
       const dx = (pos.x ?? 0) - this.position.x;
@@ -2624,11 +2662,11 @@ export class RealisticHumanPlayer {
     return [this.position, target];
   }
 
-  public openWindow(window: any): void {
+  public openWindow(window: unknown): void {
     this.pushObjectWithHand(window);
   }
 
-  public closeWindow(window: any): void {
+  public closeWindow(window: unknown): void {
     this.pullObjectWithHand(window);
   }
 
@@ -2639,9 +2677,10 @@ export class RealisticHumanPlayer {
    * Nay đưa tay tới đúng vị trí công tắc và cập nhật trạng thái của chính
    * đèn đó (nếu đèn là object có trạng thái).
    */
-  public turnLightOn(light: any): void {
+  public turnLightOn(light: unknown): void {
     this.pressKeyboardKey('light_switch');
-    const pos = light?.position ?? light;
+    const target = light as InteractionTarget;
+    const pos = target?.position ?? target;
     if (pos && typeof pos === 'object') {
       this.reachWithRightHand({
         x: pos.x ?? this.position.x,
@@ -2649,11 +2688,11 @@ export class RealisticHumanPlayer {
         z: pos.z ?? this.position.z,
       });
     }
-    if (light && typeof light === 'object') {
-      light.on = true;
-      light.isOn = true;
-      if (typeof light.intensity === 'number') {
-        light.intensity = light.intensity > 0 ? light.intensity : 1;
+    if (target && typeof target === 'object') {
+      target.on = true;
+      target.isOn = true;
+      if (typeof target.intensity === 'number') {
+        target.intensity = target.intensity > 0 ? target.intensity : 1;
       }
     }
     this.activeInteraction = light ?? null;
@@ -2662,9 +2701,10 @@ export class RealisticHumanPlayer {
   /**
    * Tắt đèn — đối xứng với {@link turnLightOn}.
    */
-  public turnLightOff(light: any): void {
+  public turnLightOff(light: unknown): void {
     this.pressKeyboardKey('light_switch');
-    const pos = light?.position ?? light;
+    const target = light as InteractionTarget;
+    const pos = target?.position ?? target;
     if (pos && typeof pos === 'object') {
       this.reachWithRightHand({
         x: pos.x ?? this.position.x,
@@ -2672,23 +2712,23 @@ export class RealisticHumanPlayer {
         z: pos.z ?? this.position.z,
       });
     }
-    if (light && typeof light === 'object') {
-      light.on = false;
-      light.isOn = false;
-      if (typeof light.intensity === 'number') light.intensity = 0;
+    if (target && typeof target === 'object') {
+      target.on = false;
+      target.isOn = false;
+      if (typeof target.intensity === 'number') target.intensity = 0;
     }
     this.activeInteraction = light ?? null;
   }
 
-  public pullDrawer(drawer: any): void {
+  public pullDrawer(drawer: unknown): void {
     this.pullObjectWithHand(drawer);
   }
 
-  public pushDrawer(drawer: any): void {
+  public pushDrawer(drawer: unknown): void {
     this.pushObjectWithHand(drawer);
   }
 
-  public pickUpBag(bag: any): void {
+  public pickUpBag(bag: unknown): void {
     this.pickUpObject(bag);
   }
 
@@ -2699,14 +2739,15 @@ export class RealisticHumanPlayer {
    * Nay đặt ba lô vào vị trí lưng (sau lưng, cao hơn thắt lưng) và ghi nhận
    * là vật đang tương tác.
    */
-  public putOnBackpack(backpack: any): void {
+  public putOnBackpack(backpack: unknown): void {
     this.heldObjects.left = undefined;
     this.heldObjects.right = undefined;
     this.relaxLeftHand();
     this.relaxRightHand();
-    if (backpack && typeof backpack === 'object') {
-      backpack.worn = true;
-      backpack.position = {
+    const target = backpack as InteractionTarget;
+    if (target && typeof target === 'object') {
+      target.worn = true;
+      target.position = {
         x: this.position.x,
         y: this.position.y + 1.15,
         z: this.position.z - 0.18,
@@ -2715,7 +2756,7 @@ export class RealisticHumanPlayer {
     this.activeInteraction = backpack ?? null;
   }
 
-  public removeBackpack(backpack: any): void {
+  public removeBackpack(backpack: unknown): void {
     this.pickUpBag(backpack);
   }
 
@@ -2726,11 +2767,12 @@ export class RealisticHumanPlayer {
    * thực sự được cầm lên và đưa tới ổ khóa, và trạng thái khóa của cửa được
    * cập nhật nếu cửa có trạng thái.
    */
-  public unlockDoor(door: any, key: any): void {
+  public unlockDoor(door: unknown, key: unknown): void {
     this.turnDoorHandle(door);
+    const target = door as InteractionTarget;
     if (key && typeof key === 'object') {
       this.gripObject(key, 'right');
-      const lockPos = door?.lockPosition ?? door?.position ?? door;
+      const lockPos = target?.lockPosition ?? target?.position ?? target;
       if (lockPos && typeof lockPos === 'object') {
         this.aimArmAt('right', {
           x: lockPos.x ?? this.position.x,
@@ -2739,9 +2781,9 @@ export class RealisticHumanPlayer {
         });
       }
     }
-    if (door && typeof door === 'object') {
-      door.locked = false;
-      door.isLocked = false;
+    if (target && typeof target === 'object') {
+      target.locked = false;
+      target.isLocked = false;
     }
     this.activeInteraction = key ?? door ?? null;
   }
@@ -2749,11 +2791,12 @@ export class RealisticHumanPlayer {
   /**
    * Khóa cửa — đối xứng với {@link unlockDoor}.
    */
-  public lockDoor(door: any, key: any): void {
+  public lockDoor(door: unknown, key: unknown): void {
     this.turnDoorHandle(door);
+    const target = door as InteractionTarget;
     if (key && typeof key === 'object') {
       this.gripObject(key, 'right');
-      const lockPos = door?.lockPosition ?? door?.position ?? door;
+      const lockPos = target?.lockPosition ?? target?.position ?? target;
       if (lockPos && typeof lockPos === 'object') {
         this.aimArmAt('right', {
           x: lockPos.x ?? this.position.x,
@@ -2762,9 +2805,9 @@ export class RealisticHumanPlayer {
         });
       }
     }
-    if (door && typeof door === 'object') {
-      door.locked = true;
-      door.isLocked = true;
+    if (target && typeof target === 'object') {
+      target.locked = true;
+      target.isLocked = true;
     }
     this.activeInteraction = key ?? door ?? null;
   }
@@ -2790,7 +2833,7 @@ export class RealisticHumanPlayer {
     this.physics.acceleration = { x: 0, y: 0, z: 0 };
   }
 
-  public createPlayerCollider(): any {
+  public createPlayerCollider() {
     return { type: 'capsule', radius: 0.35, height: 1.78 };
   }
 
@@ -3026,7 +3069,7 @@ export class RealisticHumanPlayer {
     return { ...this.position };
   }
 
-  public attachCamera(camera: any): void {
+  public attachCamera(camera: unknown): void {
     this.attachedCamera = camera;
   }
 
@@ -3039,7 +3082,8 @@ export class RealisticHumanPlayer {
    * toàn nên camera nhảy tức thời mỗi khung.
    */
   public updateCameraFollow(deltaTime: number): void {
-    if (!this.attachedCamera) return;
+    const camera = this.attachedCamera as { position?: Vec3 } | null;
+    if (!camera) return;
     const dt = Math.max(0, Math.min(1, deltaTime));
 
     const desired = {
@@ -3050,15 +3094,15 @@ export class RealisticHumanPlayer {
 
     if (!this.cameraFollowInitialized) {
       this.cameraFollowInitialized = true;
-      this.attachedCamera.position = { ...desired };
+      camera.position = { ...desired };
       return;
     }
 
     // Hệ số nội suy theo thời gian: bước càng dài càng bám sát.
     const factor = 1 - Math.exp(-12 * dt);
 
-    const current = this.attachedCamera.position ?? desired;
-    this.attachedCamera.position = {
+    const current = camera.position ?? desired;
+    camera.position = {
       x: current.x + (desired.x - current.x) * factor,
       y: current.y + (desired.y - current.y) * factor,
       z: current.z + (desired.z - current.z) * factor,

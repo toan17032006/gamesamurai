@@ -7,10 +7,10 @@
 export type NodeStatus = 'SUCCESS' | 'FAILURE' | 'RUNNING';
 
 export class Blackboard {
-  private data = new Map<string, any>();
+  private data = new Map<string, unknown>();
 
   public get<T>(key: string, defaultValue?: T): T {
-    return this.data.has(key) ? this.data.get(key) : (defaultValue as T);
+    return (this.data.has(key) ? this.data.get(key) : defaultValue) as T;
   }
 
   public set<T>(key: string, value: T): void {

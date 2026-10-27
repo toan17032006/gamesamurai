@@ -28,7 +28,7 @@ export class InvertebrateSubsystem {
   public coordinateArachnidGait(): void { recordSubsystemAction(this, 'coordinateArachnidGait', 'InvertebrateSubsystem'); }
   public climbUsingArachnidLegs(): void { recordSubsystemAction(this, 'climbUsingArachnidLegs', 'InvertebrateSubsystem'); }
   public detectVibrationThroughLegs(): number { return 0.75; }
-  public produceSilkThread(): any { return { tension: 10, length: 1.0 }; }
+  public produceSilkThread() { return { tension: 10, length: 1.0 }; }
   public attachSilkAnchor(): void { this.silkAnchorSet = true; }
   public constructSpiderWeb(): void { this.produceSilkThread(); this.attachSilkAnchor(); }
   public traverseSpiderWeb(): void { recordSubsystemAction(this, 'traverseSpiderWeb', 'InvertebrateSubsystem'); }

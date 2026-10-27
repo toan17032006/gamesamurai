@@ -29,6 +29,11 @@ export function num(value: unknown, fallback = 0): number {
   return typeof value === 'number' && Number.isFinite(value) ? value : fallback;
 }
 
+/** Đọc một bản ghi khóa chuỗi từ giá trị bất kỳ; trả về `{}` nếu không phải object. */
+export function asRecord(value: unknown): Record<string, unknown> {
+  return value !== null && typeof value === 'object' ? (value as Record<string, unknown>) : {};
+}
+
 /** Đọc một vector từ dữ liệu không kiểu (entity, plain object, mảng). */
 export function toVec3(value: unknown): Vec3D {
   if (!value || typeof value !== 'object') return { x: 0, y: 0, z: 0 };

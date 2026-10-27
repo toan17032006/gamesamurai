@@ -32,14 +32,14 @@ export interface SkillCost<TCost = number> {
   amount: TCost;
 }
 
-export interface SkillEffect<TEffect = any> {
+export interface SkillEffect<TEffect = unknown> {
   id: string;
   effectType: 'damage' | 'heal' | 'buff' | 'debuff' | 'cc' | 'teleport' | 'summon' | 'custom';
   potency: number;
   data?: TEffect;
 }
 
-export interface SkillDefinition<TCost = number, TEffect = any> {
+export interface SkillDefinition<TCost = number, TEffect = unknown> {
   id: string;
   name: string;
   description?: string;
@@ -64,7 +64,7 @@ export interface SkillNode<TSkill extends Skill = Skill> {
   unlocked?: boolean;
 }
 
-export interface ComboStep<TMove = any> {
+export interface ComboStep<TMove = unknown> {
   stepIndex: number;
   requiredInput: string;
   windowDuration: number; // time window to hit next step
@@ -75,7 +75,7 @@ export interface ComboStep<TMove = any> {
 /**
  * Generic Skill class with cooldown tracking, casting, and execution logic.
  */
-export class Skill<TCost = number, TEffect = any> {
+export class Skill<TCost = number, TEffect = unknown> {
   public readonly id: string;
   public name: string;
   public description: string;
@@ -92,9 +92,9 @@ export class Skill<TCost = number, TEffect = any> {
   private _castProgress = 0;
 
   /** Người thi triển lần gần nhất (null nếu không có). */
-  public lastCaster: any = null;
+  public lastCaster: unknown = null;
   /** Mục tiêu của lần thi triển gần nhất (null nếu không có). */
-  public lastTarget: any = null;
+  public lastTarget: unknown = null;
   /** Số lần đã thi triển — cho phép đếm thay vì suy đoán. */
   public lastExecutedAt = 0;
 
@@ -143,19 +143,23 @@ export class Skill<TCost = number, TEffect = any> {
     this._remainingCooldown = 0;
   }
 
-  public canActivate(caster: any): boolean {
+  public canActivate(caster: unknown): boolean {
     if (!this.isReady) return false;
     // Check cost against caster's pools if available
-    if (this.cost.type === 'mana' && caster?.mana) {
-      return caster.mana.canCast ? caster.mana.canCast(this.cost.amount) : true;
+    const resources = caster as {
+      mana?: { canCast?: (amount: TCost) => boolean };
+      energy?: { current: number };
+    } | null;
+    if (this.cost.type === 'mana' && resources?.mana) {
+      return resources.mana.canCast ? resources.mana.canCast(this.cost.amount) : true;
     }
-    if (this.cost.type === 'energy' && caster?.energy) {
-      return caster.energy.current >= Number(this.cost.amount);
+    if (this.cost.type === 'energy' && resources?.energy) {
+      return resources.energy.current >= Number(this.cost.amount);
     }
     return true;
   }
 
-  public startCast(caster: any, onComplete?: () => void): boolean {
+  public startCast(caster: unknown, onComplete?: () => void): boolean {
     if (!this.canActivate(caster)) return false;
 
     if (this.castTime <= 0) {
@@ -179,13 +183,17 @@ export class Skill<TCost = number, TEffect = any> {
    * đâu cũng không ai biết. Nay mục tiêu được ghi nhận và truyền vào hook
    * `onExecute` nếu kỹ năng có hook.
    */
-  public execute(caster?: any, target?: any): boolean {
+  public execute(caster?: unknown, target?: unknown): boolean {
     // Pay resource cost
     if (caster) {
-      if (this.cost.type === 'mana' && caster.mana?.consume) {
-        caster.mana.consume(this.cost.amount);
-      } else if (this.cost.type === 'energy' && caster.energy?.expend) {
-        caster.energy.expend(this.cost.amount);
+      const resources = caster as {
+        mana?: { consume?: (amount: TCost) => void };
+        energy?: { expend?: (amount: TCost) => void };
+      };
+      if (this.cost.type === 'mana' && resources.mana?.consume) {
+        resources.mana.consume(this.cost.amount);
+      } else if (this.cost.type === 'energy' && resources.energy?.expend) {
+        resources.energy.expend(this.cost.amount);
       }
     }
 
@@ -195,7 +203,7 @@ export class Skill<TCost = number, TEffect = any> {
     this.lastExecutedAt = this.lastExecutedAt + 1;
 
     // Hook tuỳ biến: nhận cả caster và target.
-    const hook = (this as unknown as { onExecute?: (caster: any, target: any) => void }).onExecute;
+    const hook = (this as unknown as { onExecute?: (caster: unknown, target: unknown) => void }).onExecute;
     if (typeof hook === 'function') hook(caster, target);
 
     this._isCasting = false;
@@ -248,7 +256,7 @@ export class SkillBar<TSkill extends Skill = Skill> {
     }
   }
 
-  public triggerSlot(index: number, caster?: any, target?: any): boolean {
+  public triggerSlot(index: number, caster?: unknown, target?: unknown): boolean {
     const skill = this.getSlot(index);
     if (!skill) return false;
     if (skill.canActivate(caster)) {
@@ -271,7 +279,7 @@ export class SkillBar<TSkill extends Skill = Skill> {
 /**
  * Skill Tree handling talent progression, pre-requisites, and node unlocking.
  */
-export class SkillTree<TSkill extends Skill = Skill, TNodeData = any> {
+export class SkillTree<TSkill extends Skill = Skill, TNodeData = unknown> {
   private _nodes: Map<string, SkillNode<TSkill>> = new Map();
 
   public addNode(node: SkillNode<TSkill>): void {
@@ -340,7 +348,7 @@ export class SkillTree<TSkill extends Skill = Skill, TNodeData = any> {
 /**
  * Timing-based Action Combo Chain (e.g. Light -> Light -> Heavy).
  */
-export class ComboChain<TMove = any> {
+export class ComboChain<TMove = unknown> {
   private _steps: ComboStep<TMove>[] = [];
   private _currentStepIndex = -1;
   private _windowTimer = 0;
@@ -403,13 +411,13 @@ export class ComboChain<TMove = any> {
 /**
  * Specialized Spell casting entity with elemental affinity and projectile velocity.
  */
-export class Spell<TElement extends SpellElement = SpellElement> extends Skill<number, any> {
+export class Spell<TElement extends SpellElement = SpellElement> extends Skill<number, unknown> {
   public element: TElement;
   public projectileSpeed: number;
   public areaOfEffectRadius: number;
 
   constructor(
-    def: SkillDefinition<number, any> & {
+    def: SkillDefinition<number, unknown> & {
       element: TElement;
       projectileSpeed?: number;
       areaOfEffectRadius?: number;
@@ -425,7 +433,7 @@ export class Spell<TElement extends SpellElement = SpellElement> extends Skill<n
 /**
  * Event-triggered passive ability (e.g., On-Hit, Low HP Enrage, Thorns).
  */
-export class PassiveAbility<TTrigger extends string = string, TEffect = any> {
+export class PassiveAbility<TTrigger extends string = string, TEffect = unknown> {
   public readonly id: string;
   public name: string;
   public triggerEvent: TTrigger;
@@ -434,7 +442,7 @@ export class PassiveAbility<TTrigger extends string = string, TEffect = any> {
   /** Sự kiện đã kích hoạt gần nhất. */
   public lastTriggeredEvent: TTrigger | null = null;
   /** Ngữ cảnh của lần kích hoạt gần nhất. */
-  public lastTriggerContext: any = null;
+  public lastTriggerContext: unknown = null;
   /** Số lần đã kích hoạt. */
   public triggerCount = 0;
 
@@ -452,13 +460,13 @@ export class PassiveAbility<TTrigger extends string = string, TEffect = any> {
    * điều gì đã xảy ra. Nay nếu hiệu ứng là hàm thì hàm đó được gọi với
    * `context`; nếu không thì `context` vẫn được ghi nhận để hệ thống khác đọc.
    */
-  public trigger(event: TTrigger, context?: any): TEffect | null {
+  public trigger(event: TTrigger, context?: unknown): TEffect | null {
     if (!this.isEnabled || event !== this.triggerEvent) return null;
     this.lastTriggeredEvent = event;
     this.lastTriggerContext = context ?? null;
     this.triggerCount += 1;
     if (typeof this.effect === 'function') {
-      return (this.effect as (ctx: any) => TEffect)(context);
+      return (this.effect as (ctx: unknown) => TEffect)(context);
     }
     return this.effect;
   }

@@ -47,7 +47,7 @@ export class BirdSubsystem {
   public adjustWingFrequency(freq = 4.0): void { this.wingFrequency = freq; }
   public glideForward(): void { this.isGliding = true; }
   public soarOnThermals(): void { this.isGliding = true; }
-  public diveTowardTarget(target: any): void { recordSubsystemAction(this, 'diveTowardTarget', 'BirdSubsystem'); }
+  public diveTowardTarget(target: unknown): void { recordSubsystemAction(this, 'diveTowardTarget', 'BirdSubsystem'); }
   public climbDuringFlight(): void { recordSubsystemAction(this, 'climbDuringFlight', 'BirdSubsystem'); }
   public bankLeftDuringFlight(): void { recordSubsystemAction(this, 'bankLeftDuringFlight', 'BirdSubsystem'); }
   public bankRightDuringFlight(): void { recordSubsystemAction(this, 'bankRightDuringFlight', 'BirdSubsystem'); }
@@ -56,20 +56,20 @@ export class BirdSubsystem {
   public takeOffFromGround(): void { this.isFlying = true; this.isPerched = false; this.spreadWings(); }
   public takeOffFromWater(): void { this.takeOffFromGround(); }
   public landOnGround(): void { this.isFlying = false; this.foldWings(); }
-  public landOnBranch(branch: any): void { this.landOnGround(); this.perchOnBranch(branch); }
+  public landOnBranch(branch: unknown): void { this.landOnGround(); this.perchOnBranch(branch); }
 
   // 321–340. Chim: đậu, đi, kiếm ăn và giao tiếp
-  public perchOnBranch(branch: any): void { this.isPerched = true; }
+  public perchOnBranch(branch: unknown): void { this.isPerched = true; }
   public releasePerchGrip(): void { this.isPerched = false; }
   public adjustPerchingBalance(): void { recordSubsystemAction(this, 'adjustPerchingBalance', 'BirdSubsystem'); }
   public walkLikeBird(): void { recordSubsystemAction(this, 'walkLikeBird', 'BirdSubsystem'); }
   public hopLikeBird(): void { recordSubsystemAction(this, 'hopLikeBird', 'BirdSubsystem'); }
   public runLikeBird(): void { recordSubsystemAction(this, 'runLikeBird', 'BirdSubsystem'); }
   public peckAtGround(): void { recordSubsystemAction(this, 'peckAtGround', 'BirdSubsystem'); }
-  public peckAtFood(food: any): void { recordSubsystemAction(this, 'peckAtFood', 'BirdSubsystem'); }
-  public probeWithBeak(target: any): void { recordSubsystemAction(this, 'probeWithBeak', 'BirdSubsystem'); }
-  public scoopFoodWithBeak(food: any): void { recordSubsystemAction(this, 'scoopFoodWithBeak', 'BirdSubsystem'); }
-  public swallowPrey(prey: any): void { recordSubsystemAction(this, 'swallowPrey', 'BirdSubsystem'); }
+  public peckAtFood(food: unknown): void { recordSubsystemAction(this, 'peckAtFood', 'BirdSubsystem'); }
+  public probeWithBeak(target: unknown): void { recordSubsystemAction(this, 'probeWithBeak', 'BirdSubsystem'); }
+  public scoopFoodWithBeak(food: unknown): void { recordSubsystemAction(this, 'scoopFoodWithBeak', 'BirdSubsystem'); }
+  public swallowPrey(prey: unknown): void { recordSubsystemAction(this, 'swallowPrey', 'BirdSubsystem'); }
   public drinkLikeBird(): void { recordSubsystemAction(this, 'drinkLikeBird', 'BirdSubsystem'); }
   public preenFeathers(): void { recordSubsystemAction(this, 'preenFeathers', 'BirdSubsystem'); }
   public cleanBeak(): void { recordSubsystemAction(this, 'cleanBeak', 'BirdSubsystem'); }

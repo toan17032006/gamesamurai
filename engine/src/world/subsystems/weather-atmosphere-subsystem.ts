@@ -65,6 +65,19 @@ const FIRE_RESISTANCE: Record<string, number> = Object.freeze({
 
 import { recordSubsystemAction } from '../../core/subsystem-activity.js';
 
+/** Đọc một giá trị bất kỳ dưới dạng bản ghi khoá–giá trị. */
+function asRecord(value: unknown): Record<string, unknown> | null {
+  return typeof value === 'object' && value !== null ? (value as Record<string, unknown>) : null;
+}
+
+/** Một khối mây trong khí quyển. */
+export interface CloudEntity {
+  id: string;
+  cloudType: string;
+  volume: number;
+  density: number;
+}
+
 export class WeatherAtmosphereSubsystem {
   public wind: WindState = {
     direction: { x: 1, y: 0, z: 0 },
@@ -86,17 +99,18 @@ export class WeatherAtmosphereSubsystem {
 
   public fires: Map<string, FireEntity> = new Map();
   public lightningBolts: LightningBolt[] = [];
-  public clouds: Map<string, any> = new Map();
+  public clouds: Map<string, CloudEntity> = new Map();
 
   // -------------------------------------------------------------------------
   // Helper đọc dữ liệu thật — thay cho giá trị đóng cứng
   // -------------------------------------------------------------------------
 
   /** Đọc số từ nhiều khoá, có giá trị thay thế khi dữ liệu thiếu. */
-  private numOf(source: any, keys: string[], fallback: number): number {
-    if (source && typeof source === 'object') {
+  private numOf(source: unknown, keys: string[], fallback: number): number {
+    const record = asRecord(source);
+    if (record) {
       for (const key of keys) {
-        const value = (source as Record<string, unknown>)[key];
+        const value = record[key];
         if (typeof value === 'number' && Number.isFinite(value)) return value;
       }
     }
@@ -104,9 +118,10 @@ export class WeatherAtmosphereSubsystem {
   }
 
   /** Vị trí thế giới của đối tượng. */
-  private positionOf(source: any): Vec3 {
-    const p = source?.position ?? source?.origin ?? source?.center;
-    if (p && typeof p === 'object') {
+  private positionOf(source: unknown): Vec3 {
+    const record = asRecord(source);
+    const p = asRecord(record?.position ?? record?.origin ?? record?.center);
+    if (p) {
       const x = Number(p.x ?? 0);
       const y = Number(p.y ?? 0);
       const z = Number(p.z ?? 0);
@@ -116,11 +131,13 @@ export class WeatherAtmosphereSubsystem {
   }
 
   /** Kích thước đặc trưng (bán kính / cạnh lớn nhất) của đối tượng. */
-  private extentOf(source: any, fallback = 1): number {
-    const size = source?.size ?? source?.radius ?? source?.scale;
+  private extentOf(source: unknown, fallback = 1): number {
+    const record = asRecord(source);
+    const size = record?.size ?? record?.radius ?? record?.scale;
     if (typeof size === 'number' && Number.isFinite(size) && size > 0) return size;
-    if (size && typeof size === 'object') {
-      const values = [size.x, size.y, size.z, size.max, size.width, size.height]
+    const sizeRecord = asRecord(size);
+    if (sizeRecord) {
+      const values = [sizeRecord.x, sizeRecord.y, sizeRecord.z, sizeRecord.max, sizeRecord.width, sizeRecord.height]
         .map((v) => Number(v))
         .filter((v) => Number.isFinite(v) && v > 0)
         .sort((a, b) => b - a);
@@ -136,7 +153,7 @@ export class WeatherAtmosphereSubsystem {
    * Trước đây luôn `{ active: true, dropCount: 5000 }`. Nay số giọt mưa tính từ
    * diện tích và cường độ mưa (tham số `config` hoặc trạng thái thời tiết).
    */
-  public createRainSystem(config?: any): any {
+  public createRainSystem(config?: unknown) {
     const area = this.numOf(config, ['area', 'size', 'surfaceArea'], 100);
     const intensity = this.numOf(
       config,
@@ -153,18 +170,18 @@ export class WeatherAtmosphereSubsystem {
     };
   }
 
-  public spawnRaindrops(area: any): void { recordSubsystemAction(this, 'spawnRaindrops', 'WeatherAtmosphereSubsystem'); }
-  public updateRaindropMotion(drop: any, deltaTime: number): void { recordSubsystemAction(this, 'updateRaindropMotion', 'WeatherAtmosphereSubsystem'); }
-  public applyWindToRaindrops(drops: any, wind: any): void { recordSubsystemAction(this, 'applyWindToRaindrops', 'WeatherAtmosphereSubsystem'); }
+  public spawnRaindrops(area: unknown): void { recordSubsystemAction(this, 'spawnRaindrops', 'WeatherAtmosphereSubsystem'); }
+  public updateRaindropMotion(drop: unknown, deltaTime: number): void { recordSubsystemAction(this, 'updateRaindropMotion', 'WeatherAtmosphereSubsystem'); }
+  public applyWindToRaindrops(drops: unknown, wind: unknown): void { recordSubsystemAction(this, 'applyWindToRaindrops', 'WeatherAtmosphereSubsystem'); }
   public createRainSplash(position: Vec3): void { recordSubsystemAction(this, 'createRainSplash', 'WeatherAtmosphereSubsystem'); }
-  public accumulateRainwater(surface: any, amount: number): void { recordSubsystemAction(this, 'accumulateRainwater', 'WeatherAtmosphereSubsystem'); }
+  public accumulateRainwater(surface: unknown, amount: number): void { recordSubsystemAction(this, 'accumulateRainwater', 'WeatherAtmosphereSubsystem'); }
   /**
    * Hệ tuyết rơi.
    *
    * Trước đây luôn `{ active: true, flakeCount: 2000 }`. Nay số bông tuyết và
    * tốc độ rơi tính từ cường độ tuyết và nhiệt độ.
    */
-  public createSnowfallSystem(config?: any): any {
+  public createSnowfallSystem(config?: unknown) {
     const area = this.numOf(config, ['area', 'size', 'surfaceArea'], 100);
     const intensity = this.numOf(
       config,
@@ -183,18 +200,18 @@ export class WeatherAtmosphereSubsystem {
     };
   }
 
-  public spawnSnowflakes(area: any): void { recordSubsystemAction(this, 'spawnSnowflakes', 'WeatherAtmosphereSubsystem'); }
-  public updateSnowflakeMotion(flake: any, deltaTime: number): void { recordSubsystemAction(this, 'updateSnowflakeMotion', 'WeatherAtmosphereSubsystem'); }
-  public accumulateSnow(surface: any, amount: number): void { recordSubsystemAction(this, 'accumulateSnow', 'WeatherAtmosphereSubsystem'); }
-  public compactSnow(snow: any, force: any): void { recordSubsystemAction(this, 'compactSnow', 'WeatherAtmosphereSubsystem'); }
-  public meltSnow(snow: any, temperature: number): void { recordSubsystemAction(this, 'meltSnow', 'WeatherAtmosphereSubsystem'); }
+  public spawnSnowflakes(area: unknown): void { recordSubsystemAction(this, 'spawnSnowflakes', 'WeatherAtmosphereSubsystem'); }
+  public updateSnowflakeMotion(flake: unknown, deltaTime: number): void { recordSubsystemAction(this, 'updateSnowflakeMotion', 'WeatherAtmosphereSubsystem'); }
+  public accumulateSnow(surface: unknown, amount: number): void { recordSubsystemAction(this, 'accumulateSnow', 'WeatherAtmosphereSubsystem'); }
+  public compactSnow(snow: unknown, force: unknown): void { recordSubsystemAction(this, 'compactSnow', 'WeatherAtmosphereSubsystem'); }
+  public meltSnow(snow: unknown, temperature: number): void { recordSubsystemAction(this, 'meltSnow', 'WeatherAtmosphereSubsystem'); }
   /**
    * Băng đầu (icicle) mọc trên bề mặt.
    *
    * Trước đây luôn `{ length: 0.3 }`. Nay chiều dài tính từ kích thước bề mặt
    * và nhiệt độ (càng lạnh càng dài).
    */
-  public createIcicle(surface: any): any {
+  public createIcicle(surface: unknown) {
     const extent = this.extentOf(surface, 0.5);
     const temperature = this.numOf(surface, ['temperature'], this.weather.temperature);
     const cold = Math.max(0, Math.min(1, (0 - temperature) / 20));
@@ -208,15 +225,18 @@ export class WeatherAtmosphereSubsystem {
     };
   }
 
-  public growIcicle(icicle: any, temperature: number): void {
-    if (icicle && temperature < 0) icicle.length += Math.max(0.25, Math.abs(temperature) * 0.05);
+  public growIcicle(icicle: unknown, temperature: number): void {
+    const record = asRecord(icicle);
+    if (!record || temperature >= 0) return;
+    const current = typeof record.length === 'number' ? record.length : 0;
+    record.length = current + Math.max(0.25, Math.abs(temperature) * 0.05);
   }
-  public breakIcicle(icicle: any, force: any): void { recordSubsystemAction(this, 'breakIcicle', 'WeatherAtmosphereSubsystem'); }
-  public freezeWetSurface(surface: any, temperature: number): void { recordSubsystemAction(this, 'freezeWetSurface', 'WeatherAtmosphereSubsystem'); }
-  public thawFrozenSurface(surface: any, temperature: number): void { recordSubsystemAction(this, 'thawFrozenSurface', 'WeatherAtmosphereSubsystem'); }
-  public createHailstone(size = 0.02): any { return { size }; }
-  public spawnHailstorm(area: any): void { recordSubsystemAction(this, 'spawnHailstorm', 'WeatherAtmosphereSubsystem'); }
-  public simulateHailImpact(hailstone: any, surface: any): void { recordSubsystemAction(this, 'simulateHailImpact', 'WeatherAtmosphereSubsystem'); }
+  public breakIcicle(icicle: unknown, force: unknown): void { recordSubsystemAction(this, 'breakIcicle', 'WeatherAtmosphereSubsystem'); }
+  public freezeWetSurface(surface: unknown, temperature: number): void { recordSubsystemAction(this, 'freezeWetSurface', 'WeatherAtmosphereSubsystem'); }
+  public thawFrozenSurface(surface: unknown, temperature: number): void { recordSubsystemAction(this, 'thawFrozenSurface', 'WeatherAtmosphereSubsystem'); }
+  public createHailstone(size = 0.02) { return { size }; }
+  public spawnHailstorm(area: unknown): void { recordSubsystemAction(this, 'spawnHailstorm', 'WeatherAtmosphereSubsystem'); }
+  public simulateHailImpact(hailstone: unknown, surface: unknown): void { recordSubsystemAction(this, 'simulateHailImpact', 'WeatherAtmosphereSubsystem'); }
 
   // 321–340. Gió, áp suất và khí quyển
   /**
@@ -226,7 +246,7 @@ export class WeatherAtmosphereSubsystem {
    * yêu cầu của người gọi. Nay các ghi đè trong `overrides` được áp dụng lên
    * trạng thái gió.
    */
-  public createWindField(overrides?: any): any {
+  public createWindField(overrides?: unknown) {
     const base = {
       direction: { ...this.wind.direction },
       speed: this.wind.speed,
@@ -234,42 +254,50 @@ export class WeatherAtmosphereSubsystem {
       pressure: this.wind.pressure,
     };
     if (!overrides || typeof overrides !== 'object') return base;
+    const record = asRecord(overrides);
     const speed = this.numOf(overrides, ['speed', 'windSpeed'], base.speed);
     const gustiness = this.numOf(overrides, ['gustiness'], base.gustiness);
     const pressure = this.numOf(overrides, ['pressure', 'airPressure'], base.pressure);
-    const direction = overrides.direction ?? overrides.windDirection;
+    const direction = asRecord(record?.direction ?? record?.windDirection);
+    const resolvedDirection = direction
+      ? {
+          x: Number.isFinite(Number(direction.x)) ? Number(direction.x) : base.direction.x,
+          y: Number.isFinite(Number(direction.y)) ? Number(direction.y) : base.direction.y,
+          z: Number.isFinite(Number(direction.z)) ? Number(direction.z) : base.direction.z,
+        }
+      : base.direction;
     return {
-      direction: direction && typeof direction === 'object' ? { ...direction } : base.direction,
+      direction: resolvedDirection,
       speed: Math.max(0, speed),
       gustiness: Math.max(0, gustiness),
       pressure,
     };
   }
 
-  public updateWindField(field: any, deltaTime: number): void { recordSubsystemAction(this, 'updateWindField', 'WeatherAtmosphereSubsystem'); }
+  public updateWindField(field: unknown, deltaTime: number): void { recordSubsystemAction(this, 'updateWindField', 'WeatherAtmosphereSubsystem'); }
   public setWindDirection(direction: Vec3): void { this.wind.direction = { ...direction }; }
   public setWindSpeed(speed: number): void { this.wind.speed = Math.max(0, speed); }
-  public calculateWindPressure(object: any, wind: any): number { return (wind?.speed ?? this.wind.speed) * 1.25; }
-  public calculateWindDrag(object: any, wind: any): number { return (wind?.speed ?? this.wind.speed) * 0.5; }
-  public simulateWindGust(gust: any): void { recordSubsystemAction(this, 'simulateWindGust', 'WeatherAtmosphereSubsystem'); }
-  public simulateWindTurbulence(field: any): void { recordSubsystemAction(this, 'simulateWindTurbulence', 'WeatherAtmosphereSubsystem'); }
-  public simulateThermalUpdraft(field: any): void { recordSubsystemAction(this, 'simulateThermalUpdraft', 'WeatherAtmosphereSubsystem'); }
-  public simulateDowndraft(field: any): void { recordSubsystemAction(this, 'simulateDowndraft', 'WeatherAtmosphereSubsystem'); }
-  public simulateWindShear(field: any): void { recordSubsystemAction(this, 'simulateWindShear', 'WeatherAtmosphereSubsystem'); }
+  public calculateWindPressure(object: unknown, wind: unknown): number { return this.numOf(wind, ['speed', 'windSpeed'], this.wind.speed) * 1.25; }
+  public calculateWindDrag(object: unknown, wind: unknown): number { return this.numOf(wind, ['speed', 'windSpeed'], this.wind.speed) * 0.5; }
+  public simulateWindGust(gust: unknown): void { recordSubsystemAction(this, 'simulateWindGust', 'WeatherAtmosphereSubsystem'); }
+  public simulateWindTurbulence(field: unknown): void { recordSubsystemAction(this, 'simulateWindTurbulence', 'WeatherAtmosphereSubsystem'); }
+  public simulateThermalUpdraft(field: unknown): void { recordSubsystemAction(this, 'simulateThermalUpdraft', 'WeatherAtmosphereSubsystem'); }
+  public simulateDowndraft(field: unknown): void { recordSubsystemAction(this, 'simulateDowndraft', 'WeatherAtmosphereSubsystem'); }
+  public simulateWindShear(field: unknown): void { recordSubsystemAction(this, 'simulateWindShear', 'WeatherAtmosphereSubsystem'); }
   public simulateDustDevil(position: Vec3): void { recordSubsystemAction(this, 'simulateDustDevil', 'WeatherAtmosphereSubsystem'); }
-  public simulateTornado(tornado: any): void { recordSubsystemAction(this, 'simulateTornado', 'WeatherAtmosphereSubsystem'); }
-  public applyWindToParticles(particles: any, wind: any): void { recordSubsystemAction(this, 'applyWindToParticles', 'WeatherAtmosphereSubsystem'); }
-  public applyWindToCloth(cloth: any, wind: any): void { recordSubsystemAction(this, 'applyWindToCloth', 'WeatherAtmosphereSubsystem'); }
-  public applyWindToFlags(flags: any, wind: any): void { recordSubsystemAction(this, 'applyWindToFlags', 'WeatherAtmosphereSubsystem'); }
-  public applyWindToStructures(structures: any, wind: any): void { recordSubsystemAction(this, 'applyWindToStructures', 'WeatherAtmosphereSubsystem'); }
-  public calculateWindLoad(structure: any, wind: any): number { return (wind?.speed ?? this.wind.speed) * 10; }
+  public simulateTornado(tornado: unknown): void { recordSubsystemAction(this, 'simulateTornado', 'WeatherAtmosphereSubsystem'); }
+  public applyWindToParticles(particles: unknown, wind: unknown): void { recordSubsystemAction(this, 'applyWindToParticles', 'WeatherAtmosphereSubsystem'); }
+  public applyWindToCloth(cloth: unknown, wind: unknown): void { recordSubsystemAction(this, 'applyWindToCloth', 'WeatherAtmosphereSubsystem'); }
+  public applyWindToFlags(flags: unknown, wind: unknown): void { recordSubsystemAction(this, 'applyWindToFlags', 'WeatherAtmosphereSubsystem'); }
+  public applyWindToStructures(structures: unknown, wind: unknown): void { recordSubsystemAction(this, 'applyWindToStructures', 'WeatherAtmosphereSubsystem'); }
+  public calculateWindLoad(structure: unknown, wind: unknown): number { return this.numOf(wind, ['speed', 'windSpeed'], this.wind.speed) * 10; }
   /**
    * Vật thể có bị gió làm hư hại không.
    *
    * Trước đây chỉ so tốc độ gió với ngưỡng cứng. Nay tải gió (tốc độ × diện
    * tích chắn gió) được so với sức chịu gió của chính vật thể.
    */
-  public detectWindDamage(object: any, wind: any): boolean {
+  public detectWindDamage(object: unknown, wind: unknown): boolean {
     const speed = this.numOf(wind, ['speed', 'windSpeed'], this.wind.speed);
     const extent = this.extentOf(object, 1);
     const resistance = this.numOf(object, ['windResistance'], 0.5);
@@ -279,37 +307,37 @@ export class WeatherAtmosphereSubsystem {
     return load > resistanceForce;
   }
 
-  public updateAtmosphericPressure(field: any): void { recordSubsystemAction(this, 'updateAtmosphericPressure', 'WeatherAtmosphereSubsystem'); }
+  public updateAtmosphericPressure(field: unknown): void { recordSubsystemAction(this, 'updateAtmosphericPressure', 'WeatherAtmosphereSubsystem'); }
 
   // 341–360. Mây, sương mù và các hiện tượng bầu trời
-  public createCloud(cloudType = 'cumulus'): any {
+  public createCloud(cloudType = 'cumulus'): CloudEntity {
     const id = `cloud_${Date.now()}`;
-    const cloud = { id, cloudType, volume: 500, density: 0.8 };
+    const cloud: CloudEntity = { id, cloudType, volume: 500, density: 0.8 };
     this.clouds.set(id, cloud);
     return cloud;
   }
-  public generateCloudVolume(cloud: any): void { recordSubsystemAction(this, 'generateCloudVolume', 'WeatherAtmosphereSubsystem'); }
-  public updateCloudShape(cloud: any, deltaTime: number): void { recordSubsystemAction(this, 'updateCloudShape', 'WeatherAtmosphereSubsystem'); }
-  public moveCloudWithWind(cloud: any, wind: any): void { recordSubsystemAction(this, 'moveCloudWithWind', 'WeatherAtmosphereSubsystem'); }
-  public mergeClouds(cloudA: any, cloudB: any): void { recordSubsystemAction(this, 'mergeClouds', 'WeatherAtmosphereSubsystem'); }
-  public separateClouds(cloudA: any, cloudB: any): void { recordSubsystemAction(this, 'separateClouds', 'WeatherAtmosphereSubsystem'); }
-  public dissipateCloud(cloud: any, rate: number): void { recordSubsystemAction(this, 'dissipateCloud', 'WeatherAtmosphereSubsystem'); }
-  public condenseCloudVapor(cloud: any): void { recordSubsystemAction(this, 'condenseCloudVapor', 'WeatherAtmosphereSubsystem'); }
-  public simulateCumulusGrowth(cloud: any): void { recordSubsystemAction(this, 'simulateCumulusGrowth', 'WeatherAtmosphereSubsystem'); }
-  public simulateStormCloudGrowth(cloud: any): void { recordSubsystemAction(this, 'simulateStormCloudGrowth', 'WeatherAtmosphereSubsystem'); }
-  public createFogVolume(area: any): any { return { area, density: 0.6 }; }
-  public spreadFog(fog: any, wind: any): void { recordSubsystemAction(this, 'spreadFog', 'WeatherAtmosphereSubsystem'); }
-  public dissipateFog(fog: any, temperature: number): void { recordSubsystemAction(this, 'dissipateFog', 'WeatherAtmosphereSubsystem'); }
-  public simulateGroundFog(area: any): void { recordSubsystemAction(this, 'simulateGroundFog', 'WeatherAtmosphereSubsystem'); }
-  public simulateMistOverWater(water: any): void { recordSubsystemAction(this, 'simulateMistOverWater', 'WeatherAtmosphereSubsystem'); }
-  public simulateAtmosphericHaze(atmosphere: any): void { recordSubsystemAction(this, 'simulateAtmosphericHaze', 'WeatherAtmosphereSubsystem'); }
+  public generateCloudVolume(cloud: unknown): void { recordSubsystemAction(this, 'generateCloudVolume', 'WeatherAtmosphereSubsystem'); }
+  public updateCloudShape(cloud: unknown, deltaTime: number): void { recordSubsystemAction(this, 'updateCloudShape', 'WeatherAtmosphereSubsystem'); }
+  public moveCloudWithWind(cloud: unknown, wind: unknown): void { recordSubsystemAction(this, 'moveCloudWithWind', 'WeatherAtmosphereSubsystem'); }
+  public mergeClouds(cloudA: unknown, cloudB: unknown): void { recordSubsystemAction(this, 'mergeClouds', 'WeatherAtmosphereSubsystem'); }
+  public separateClouds(cloudA: unknown, cloudB: unknown): void { recordSubsystemAction(this, 'separateClouds', 'WeatherAtmosphereSubsystem'); }
+  public dissipateCloud(cloud: unknown, rate: number): void { recordSubsystemAction(this, 'dissipateCloud', 'WeatherAtmosphereSubsystem'); }
+  public condenseCloudVapor(cloud: unknown): void { recordSubsystemAction(this, 'condenseCloudVapor', 'WeatherAtmosphereSubsystem'); }
+  public simulateCumulusGrowth(cloud: unknown): void { recordSubsystemAction(this, 'simulateCumulusGrowth', 'WeatherAtmosphereSubsystem'); }
+  public simulateStormCloudGrowth(cloud: unknown): void { recordSubsystemAction(this, 'simulateStormCloudGrowth', 'WeatherAtmosphereSubsystem'); }
+  public createFogVolume(area: unknown) { return { area, density: 0.6 }; }
+  public spreadFog(fog: unknown, wind: unknown): void { recordSubsystemAction(this, 'spreadFog', 'WeatherAtmosphereSubsystem'); }
+  public dissipateFog(fog: unknown, temperature: number): void { recordSubsystemAction(this, 'dissipateFog', 'WeatherAtmosphereSubsystem'); }
+  public simulateGroundFog(area: unknown): void { recordSubsystemAction(this, 'simulateGroundFog', 'WeatherAtmosphereSubsystem'); }
+  public simulateMistOverWater(water: unknown): void { recordSubsystemAction(this, 'simulateMistOverWater', 'WeatherAtmosphereSubsystem'); }
+  public simulateAtmosphericHaze(atmosphere: unknown): void { recordSubsystemAction(this, 'simulateAtmosphericHaze', 'WeatherAtmosphereSubsystem'); }
   /**
    * Cầu vồng.
    *
    * Trước đây luôn `{ visible: true }`. Nay mức độ hiện và cường độ cầu vồng
    * phụ thuộc vị trí mặt trời, lượng mưa và độ ẩm.
    */
-  public createRainbow(atmosphere: any): any {
+  public createRainbow(atmosphere: unknown) {
     const sunElevation = this.numOf(atmosphere, ['sunElevation', 'elevation'], 45);
     const rain = this.numOf(
       atmosphere,
@@ -332,9 +360,9 @@ export class WeatherAtmosphereSubsystem {
     };
   }
 
-  public updateRainbowVisibility(rainbow: any): void { recordSubsystemAction(this, 'updateRainbowVisibility', 'WeatherAtmosphereSubsystem'); }
-  public simulateHeatShimmer(area: any): void { recordSubsystemAction(this, 'simulateHeatShimmer', 'WeatherAtmosphereSubsystem'); }
-  public updateSkyAtmosphere(atmosphere: any): void { recordSubsystemAction(this, 'updateSkyAtmosphere', 'WeatherAtmosphereSubsystem'); }
+  public updateRainbowVisibility(rainbow: unknown): void { recordSubsystemAction(this, 'updateRainbowVisibility', 'WeatherAtmosphereSubsystem'); }
+  public simulateHeatShimmer(area: unknown): void { recordSubsystemAction(this, 'simulateHeatShimmer', 'WeatherAtmosphereSubsystem'); }
+  public updateSkyAtmosphere(atmosphere: unknown): void { recordSubsystemAction(this, 'updateSkyAtmosphere', 'WeatherAtmosphereSubsystem'); }
 
   // 361–380. Sấm, chớp và bão
   /**
@@ -343,12 +371,12 @@ export class WeatherAtmosphereSubsystem {
    * Năng lượng bão lấy từ vùng khi có (mặc định 100) để `generateLightningBolt`
    * sinh tia sét theo năng lượng thật.
    */
-  public createThunderstorm(area: any): any {
-    const energy = Number(area?.energy ?? DEFAULT_STORM_ENERGY);
+  public createThunderstorm(area: unknown) {
+    const energy = Number(asRecord(area)?.energy ?? DEFAULT_STORM_ENERGY);
     return { area, energy: Number.isFinite(energy) ? energy : DEFAULT_STORM_ENERGY, active: true };
   }
 
-  public accumulateStormEnergy(storm: any): void { recordSubsystemAction(this, 'accumulateStormEnergy', 'WeatherAtmosphereSubsystem'); }
+  public accumulateStormEnergy(storm: unknown): void { recordSubsystemAction(this, 'accumulateStormEnergy', 'WeatherAtmosphereSubsystem'); }
   /**
    * Sinh tia sét từ cơn bão.
    *
@@ -356,15 +384,20 @@ export class WeatherAtmosphereSubsystem {
    * đích và cường độ. Nay năng lượng bão quyết định cường độ tia sét, còn
    * vị trí và bán kính bão quyết định điểm phóng.
    */
-  public generateLightningBolt(storm: any): LightningBolt {
-    const info = storm ?? {};
+  public generateLightningBolt(storm: unknown): LightningBolt {
+    const info = asRecord(storm) ?? {};
     const energy = Number(info.energy ?? DEFAULT_STORM_ENERGY);
+    const cloudBase = Number(info.cloudBase ?? CLOUD_BASE_HEIGHT);
     const center = this.stormCenter(info);
     const radius = this.stormRadius(info);
     const bolt: LightningBolt = {
       id: `bolt_${Date.now()}`,
       // Tia sét phát ra từ đáy mây, đúng tâm bão.
-      origin: { x: center.x, y: Number(info.cloudBase ?? CLOUD_BASE_HEIGHT), z: center.z },
+      origin: {
+        x: center.x,
+        y: Number.isFinite(cloudBase) ? cloudBase : CLOUD_BASE_HEIGHT,
+        z: center.z,
+      },
       // Điểm đích nằm trong vùng bão, cách tâm một phần bán kính.
       target: { x: center.x + radius * 0.6, y: 0, z: center.z + radius * 0.6 },
       intensity:
@@ -375,9 +408,10 @@ export class WeatherAtmosphereSubsystem {
   }
 
   /** Tâm của bão — suy ra từ vị trí, vùng hoặc tâm đã biết. */
-  private stormCenter(storm: any): { x: number; z: number } {
-    const candidate = storm?.position ?? storm?.center ?? storm?.area ?? storm?.target;
-    if (candidate && typeof candidate === 'object') {
+  private stormCenter(storm: unknown): { x: number; z: number } {
+    const record = asRecord(storm);
+    const candidate = asRecord(record?.position ?? record?.center ?? record?.area ?? record?.target);
+    if (candidate) {
       const x = Number(candidate.x ?? 0);
       const z = Number(candidate.z ?? 0);
       if (Number.isFinite(x) && Number.isFinite(z)) return { x, z };
@@ -386,13 +420,14 @@ export class WeatherAtmosphereSubsystem {
   }
 
   /** Bán kính bão — suy ra từ vùng bão hoặc bán kính cho sẵn. */
-  private stormRadius(storm: any): number {
-    const area = storm?.area;
-    if (area && typeof area === 'object') {
+  private stormRadius(storm: unknown): number {
+    const record = asRecord(storm);
+    const area = asRecord(record?.area);
+    if (area) {
       const radius = Number(area.radius ?? area.size ?? 0);
       if (Number.isFinite(radius) && radius > 0) return radius;
     }
-    const radius = Number(storm?.radius ?? 0);
+    const radius = Number(record?.radius ?? 0);
     return Number.isFinite(radius) && radius > 0 ? radius : DEFAULT_STORM_RADIUS;
   }
   public branchLightningBolt(bolt: LightningBolt): void { recordSubsystemAction(this, 'branchLightningBolt', 'WeatherAtmosphereSubsystem'); }
@@ -404,7 +439,7 @@ export class WeatherAtmosphereSubsystem {
    * Trước đây luôn `{ x: 0, y: 0, z: 0 }`. Nay điểm đánh nằm trong vùng bão,
    * lệch theo năng lượng bão (tất định — không dùng `Math.random`).
    */
-  public calculateLightningStrikeTarget(storm: any): Vec3 {
+  public calculateLightningStrikeTarget(storm: unknown): Vec3 {
     const center = this.positionOf(storm);
     const energy = this.numOf(storm, ['energy', 'intensity'], DEFAULT_STORM_ENERGY);
     const radius = this.numOf(storm, ['radius'], DEFAULT_STORM_RADIUS);
@@ -417,26 +452,26 @@ export class WeatherAtmosphereSubsystem {
     };
   }
 
-  public strikeLightningTarget(target: any): void { recordSubsystemAction(this, 'strikeLightningTarget', 'WeatherAtmosphereSubsystem'); }
-  public applyLightningDamage(target: any): void { recordSubsystemAction(this, 'applyLightningDamage', 'WeatherAtmosphereSubsystem'); }
+  public strikeLightningTarget(target: unknown): void { recordSubsystemAction(this, 'strikeLightningTarget', 'WeatherAtmosphereSubsystem'); }
+  public applyLightningDamage(target: unknown): void { recordSubsystemAction(this, 'applyLightningDamage', 'WeatherAtmosphereSubsystem'); }
   public createThunderSound(bolt: LightningBolt): void { recordSubsystemAction(this, 'createThunderSound', 'WeatherAtmosphereSubsystem'); }
   public propagateThunderWave(position: Vec3): void { recordSubsystemAction(this, 'propagateThunderWave', 'WeatherAtmosphereSubsystem'); }
-  public createStormWind(storm: any): void { recordSubsystemAction(this, 'createStormWind', 'WeatherAtmosphereSubsystem'); }
-  public generateStormRain(storm: any): void { recordSubsystemAction(this, 'generateStormRain', 'WeatherAtmosphereSubsystem'); }
-  public spawnStormDebris(storm: any): void { recordSubsystemAction(this, 'spawnStormDebris', 'WeatherAtmosphereSubsystem'); }
-  public simulateStormSurge(coast: any): void { recordSubsystemAction(this, 'simulateStormSurge', 'WeatherAtmosphereSubsystem'); }
+  public createStormWind(storm: unknown): void { recordSubsystemAction(this, 'createStormWind', 'WeatherAtmosphereSubsystem'); }
+  public generateStormRain(storm: unknown): void { recordSubsystemAction(this, 'generateStormRain', 'WeatherAtmosphereSubsystem'); }
+  public spawnStormDebris(storm: unknown): void { recordSubsystemAction(this, 'spawnStormDebris', 'WeatherAtmosphereSubsystem'); }
+  public simulateStormSurge(coast: unknown): void { recordSubsystemAction(this, 'simulateStormSurge', 'WeatherAtmosphereSubsystem'); }
   /**
    * Sát thương của cơn bão lên công trình.
    *
    * Trước đây luôn `150`. Nay tính từ năng lượng bão, tốc độ gió, diện tích
    * vùng chịu ảnh hưởng, số công trình và áp suất khí quyển.
    */
-  public calculateStormDamage(structures: any): number {
+  public calculateStormDamage(structures: unknown): number {
     const energy = this.numOf(structures, ['energy', 'stormEnergy'], DEFAULT_STORM_ENERGY);
     const windSpeed = this.numOf(structures, ['windSpeed', 'speed'], this.wind.speed);
     const area = this.numOf(structures, ['area', 'surfaceArea'], 100);
-    const count = Array.isArray(structures?.structures)
-      ? structures.structures.length
+    const count = Array.isArray(asRecord(structures)?.structures)
+      ? (asRecord(structures)!.structures as unknown[]).length
       : this.numOf(structures, ['structureCount'], 1);
     const pressure = this.numOf(structures, ['pressure', 'airPressure'], this.wind.pressure);
     const base = (energy * 0.5 + windSpeed * 2) * (area / 100) * count;
@@ -444,19 +479,25 @@ export class WeatherAtmosphereSubsystem {
     return Math.max(0, base * pressureFactor);
   }
 
-  public dissipateThunderstorm(storm: any): void { recordSubsystemAction(this, 'dissipateThunderstorm', 'WeatherAtmosphereSubsystem'); }
-  public simulateHurricane(hurricane: any): void { recordSubsystemAction(this, 'simulateHurricane', 'WeatherAtmosphereSubsystem'); }
-  public simulateCyclone(cyclone: any): void { recordSubsystemAction(this, 'simulateCyclone', 'WeatherAtmosphereSubsystem'); }
-  public updateStormRecovery(area: any): void { recordSubsystemAction(this, 'updateStormRecovery', 'WeatherAtmosphereSubsystem'); }
+  public dissipateThunderstorm(storm: unknown): void { recordSubsystemAction(this, 'dissipateThunderstorm', 'WeatherAtmosphereSubsystem'); }
+  public simulateHurricane(hurricane: unknown): void { recordSubsystemAction(this, 'simulateHurricane', 'WeatherAtmosphereSubsystem'); }
+  public simulateCyclone(cyclone: unknown): void { recordSubsystemAction(this, 'simulateCyclone', 'WeatherAtmosphereSubsystem'); }
+  public updateStormRecovery(area: unknown): void { recordSubsystemAction(this, 'updateStormRecovery', 'WeatherAtmosphereSubsystem'); }
 
   // 381–400. Lửa, khói và nhiệt
-  public createFire(source: any): FireEntity {
+  public createFire(source: unknown): FireEntity {
     // Id có hậu tố ngẫu nhiên để nhiều ngọn lửa tạo trong cùng mili-giây
     // không ghi đè lên nhau trong sổ đăng ký.
     const id = `fire_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+    const sourceRecord = asRecord(source);
     const fire: FireEntity = {
       id,
-      targetId: typeof source === 'string' ? source : (source?.id ?? 'object'),
+      targetId:
+        typeof source === 'string'
+          ? source
+          : typeof sourceRecord?.id === 'string'
+            ? sourceRecord.id
+            : 'object',
       temperature: 650,
       intensity: 1.0,
       spreadRate: 0.2,
@@ -472,7 +513,7 @@ export class WeatherAtmosphereSubsystem {
    * nhiệt độ, cường độ và tốc độ lan. Nay nguồn lửa quyết định các đại lượng
    * đó cho ngọn lửa mới.
    */
-  public igniteObject(object: any, ignitionSource: any): FireEntity {
+  public igniteObject(object: unknown, ignitionSource: unknown): FireEntity {
     const fire = this.createFire(object);
     const profile = this.ignitionProfile(ignitionSource);
     fire.temperature = profile.temperature;
@@ -483,7 +524,7 @@ export class WeatherAtmosphereSubsystem {
   }
 
   /** Đặc trưng nhiệt độ / cường độ / tốc độ lan của một nguồn lửa. */
-  private ignitionProfile(source: any): {
+  private ignitionProfile(source: unknown): {
     id: string;
     temperature: number;
     intensity: number;
@@ -495,14 +536,17 @@ export class WeatherAtmosphereSubsystem {
       const known = IGNITION_SOURCES[key];
       return known ? { id: key, ...known } : { id: key, ...DEFAULT_FIRE_PROFILE };
     }
-    if (typeof source === 'object') {
-      const known =
-        typeof source.type === 'string' ? IGNITION_SOURCES[source.type.toLowerCase()] : undefined;
-      const temperature = Number(source.temperature ?? source.heat ?? NaN);
-      const intensity = Number(source.intensity ?? NaN);
-      const spreadRate = Number(source.spreadRate ?? NaN);
+    const record = asRecord(source);
+    if (record) {
+      const typeName = typeof record.type === 'string' ? record.type : undefined;
+      const known = typeName ? IGNITION_SOURCES[typeName.toLowerCase()] : undefined;
+      const temperature = Number(record.temperature ?? record.heat ?? NaN);
+      const intensity = Number(record.intensity ?? NaN);
+      const spreadRate = Number(record.spreadRate ?? NaN);
+      const id =
+        typeof record.id === 'string' ? record.id : typeName ?? 'unknown';
       return {
-        id: source.id ?? source.type ?? 'unknown',
+        id,
         temperature: Number.isFinite(temperature) ? temperature : (known?.temperature ?? DEFAULT_FIRE_PROFILE.temperature),
         intensity: Number.isFinite(intensity) ? intensity : (known?.intensity ?? DEFAULT_FIRE_PROFILE.intensity),
         spreadRate: Number.isFinite(spreadRate) ? spreadRate : (known?.spreadRate ?? DEFAULT_FIRE_PROFILE.spreadRate),
@@ -524,11 +568,12 @@ export class WeatherAtmosphereSubsystem {
    * thừa hưởng nhiệt độ, cường độ và tốc độ lan của nguồn, điều chỉnh theo
    * khả năng cháy của vật đích.
    */
-  public spreadFire(fire: FireEntity | string, target: any): void {
+  public spreadFire(fire: FireEntity | string, target: unknown): void {
     const source = typeof fire === 'string' ? this.fires.get(fire) : fire;
     const newFire = this.createFire(target);
     if (!source) return;
-    const flammability = Number(target?.flammability ?? target?.fuelLoad ?? 1);
+    const targetRecord = asRecord(target);
+    const flammability = Number(targetRecord?.flammability ?? targetRecord?.fuelLoad ?? 1);
     const factor = Number.isFinite(flammability) && flammability > 0 ? flammability : 1;
     newFire.temperature = source.temperature;
     newFire.intensity = Math.max(0.05, source.intensity * factor);
@@ -546,8 +591,9 @@ export class WeatherAtmosphereSubsystem {
    * Trước đây luôn `0.5`. Nay tính từ độ dễ cháy của vật liệu, độ ẩm (vật ẩm
    * cháy chậm), nhiệt độ và nồng độ oxy.
    */
-  public calculateCombustionRate(object: any): number {
-    const material = String(object?.material ?? object?.type ?? 'wood');
+  public calculateCombustionRate(object: unknown): number {
+    const record = asRecord(object);
+    const material = String(record?.material ?? record?.type ?? 'wood');
     const flammability = FLAMMABILITY[material] ?? 0.5;
     const moisture = this.numOf(object, ['moisture', 'humidity'], 0.2);
     const temperature = this.numOf(object, ['temperature'], this.weather.temperature);
@@ -570,7 +616,7 @@ export class WeatherAtmosphereSubsystem {
    * Trước đây luôn `{ density: 0.8 }`. Nay mật độ khói tính từ cường độ và
    * nhiệt độ của lửa cùng kích thước vùng cháy.
    */
-  public generateSmoke(fire: FireEntity | string): any {
+  public generateSmoke(fire: FireEntity | string) {
     const f = typeof fire === 'string' ? this.fires.get(fire) : fire;
     const temperature = this.numOf(f, ['temperature'], 0);
     const intensity = this.numOf(f, ['intensity'], 0);
@@ -588,8 +634,8 @@ export class WeatherAtmosphereSubsystem {
       particleCount: Math.round(density * 200),
     };
   }
-  public spreadSmoke(smoke: any, wind: any): void { recordSubsystemAction(this, 'spreadSmoke', 'WeatherAtmosphereSubsystem'); }
-  public dissipateSmoke(smoke: any, rate: number): void { recordSubsystemAction(this, 'dissipateSmoke', 'WeatherAtmosphereSubsystem'); }
+  public spreadSmoke(smoke: unknown, wind: unknown): void { recordSubsystemAction(this, 'spreadSmoke', 'WeatherAtmosphereSubsystem'); }
+  public dissipateSmoke(smoke: unknown, rate: number): void { recordSubsystemAction(this, 'dissipateSmoke', 'WeatherAtmosphereSubsystem'); }
 
   /**
    * Tia lửa bắn ra từ nguồn lửa.
@@ -597,7 +643,7 @@ export class WeatherAtmosphereSubsystem {
    * Trước đây luôn `{ temp: 400 }`. Nay nhiệt độ, khối lượng, kích thước và
    * thời gian sống suy từ nguồn.
    */
-  public createEmber(emberSource: any): any {
+  public createEmber(emberSource: unknown) {
     const temperature = this.numOf(emberSource, ['temperature', 'temp'], 400);
     const mass = this.numOf(emberSource, ['mass', 'weight'], 0.001);
     const size = this.extentOf(emberSource, 0.01);
@@ -612,22 +658,23 @@ export class WeatherAtmosphereSubsystem {
     };
   }
 
-  public scatterEmbers(embers: any, wind: any): void { recordSubsystemAction(this, 'scatterEmbers', 'WeatherAtmosphereSubsystem'); }
-  public igniteDryVegetation(plant: any): void { this.createFire(plant); }
-  public charObjectSurface(object: any, heat: number): void { recordSubsystemAction(this, 'charObjectSurface', 'WeatherAtmosphereSubsystem'); }
-  public burnObjectMaterial(object: any, rate: number): void { recordSubsystemAction(this, 'burnObjectMaterial', 'WeatherAtmosphereSubsystem'); }
-  public deformObjectByHeat(object: any, heat: number): void { recordSubsystemAction(this, 'deformObjectByHeat', 'WeatherAtmosphereSubsystem'); }
-  public meltObjectMaterial(object: any, temperature: number): void { recordSubsystemAction(this, 'meltObjectMaterial', 'WeatherAtmosphereSubsystem'); }
-  public coolBurningObject(object: any, rate: number): void { recordSubsystemAction(this, 'coolBurningObject', 'WeatherAtmosphereSubsystem'); }
+  public scatterEmbers(embers: unknown, wind: unknown): void { recordSubsystemAction(this, 'scatterEmbers', 'WeatherAtmosphereSubsystem'); }
+  public igniteDryVegetation(plant: unknown): void { this.createFire(plant); }
+  public charObjectSurface(object: unknown, heat: number): void { recordSubsystemAction(this, 'charObjectSurface', 'WeatherAtmosphereSubsystem'); }
+  public burnObjectMaterial(object: unknown, rate: number): void { recordSubsystemAction(this, 'burnObjectMaterial', 'WeatherAtmosphereSubsystem'); }
+  public deformObjectByHeat(object: unknown, heat: number): void { recordSubsystemAction(this, 'deformObjectByHeat', 'WeatherAtmosphereSubsystem'); }
+  public meltObjectMaterial(object: unknown, temperature: number): void { recordSubsystemAction(this, 'meltObjectMaterial', 'WeatherAtmosphereSubsystem'); }
+  public coolBurningObject(object: unknown, rate: number): void { recordSubsystemAction(this, 'coolBurningObject', 'WeatherAtmosphereSubsystem'); }
   /**
    * Mức sát thương do lửa (0..100).
    *
    * Trước đây luôn `50`. Nay tính từ nhiệt độ tiếp xúc, mức phơi nhiễm và sức
    * chịu lửa của vật liệu.
    */
-  public calculateFireDamage(object: any): number {
+  public calculateFireDamage(object: unknown): number {
     const temperature = this.numOf(object, ['temperature', 'fireTemperature'], 0);
-    const material = String(object?.material ?? object?.type ?? 'wood');
+    const record = asRecord(object);
+    const material = String(record?.material ?? record?.type ?? 'wood');
     const resistance = FIRE_RESISTANCE[material] ?? 0.5;
     const exposure = this.numOf(object, ['exposure', 'fireExposure'], 1);
     const heat = Math.max(0, Math.min(1, temperature / 1000));
@@ -636,17 +683,17 @@ export class WeatherAtmosphereSubsystem {
 
 
   // 401–420. Đá rơi, sạt lở và tuyết lở
-  public createRockfall(region: any): any { return { region, active: true }; }
-  public releaseRockFromSlope(rock: any, slope: any): void { recordSubsystemAction(this, 'releaseRockFromSlope', 'WeatherAtmosphereSubsystem'); }
+  public createRockfall(region: unknown) { return { region, active: true }; }
+  public releaseRockFromSlope(rock: unknown, slope: unknown): void { recordSubsystemAction(this, 'releaseRockFromSlope', 'WeatherAtmosphereSubsystem'); }
   /**
    * Quỹ đạo đá lăn từ sườn.
    *
    * Trước đây luôn trả hai điểm cố định. Nay quỹ đạo được tích phân từ vị trí
    * và vận tốc của đá dưới trọng trường.
    */
-  public calculateRockfallTrajectory(rock: any): Vec3[] {
+  public calculateRockfallTrajectory(rock: unknown): Vec3[] {
     const start = this.positionOf(rock);
-    const velocity = rock?.velocity ?? { x: 0, y: 0, z: 0 };
+    const velocity = asRecord(asRecord(rock)?.velocity) ?? { x: 0, y: 0, z: 0 };
     let vx = Number(velocity.x ?? 0);
     let vy = Number(velocity.y ?? 0);
     let vz = Number(velocity.z ?? 0);
@@ -670,17 +717,17 @@ export class WeatherAtmosphereSubsystem {
     return path;
   }
 
-  public simulateRockBouncing(rock: any, surface: any): void { recordSubsystemAction(this, 'simulateRockBouncing', 'WeatherAtmosphereSubsystem'); }
-  public simulateRockRolling(rock: any, slope: any): void { recordSubsystemAction(this, 'simulateRockRolling', 'WeatherAtmosphereSubsystem'); }
-  public simulateRockFragmentation(rock: any): void { recordSubsystemAction(this, 'simulateRockFragmentation', 'WeatherAtmosphereSubsystem'); }
-  public createLandslide(region: any): any { return { region, mass: 10000 }; }
+  public simulateRockBouncing(rock: unknown, surface: unknown): void { recordSubsystemAction(this, 'simulateRockBouncing', 'WeatherAtmosphereSubsystem'); }
+  public simulateRockRolling(rock: unknown, slope: unknown): void { recordSubsystemAction(this, 'simulateRockRolling', 'WeatherAtmosphereSubsystem'); }
+  public simulateRockFragmentation(rock: unknown): void { recordSubsystemAction(this, 'simulateRockFragmentation', 'WeatherAtmosphereSubsystem'); }
+  public createLandslide(region: unknown) { return { region, mass: 10000 }; }
   /**
    * Sườn có sạt lở không.
    *
    * Trước đây luôn `false`. Nay sạt lở xảy ra khi lực phá hoại (độ dốc + mưa
    * bão hoà) vượt quá sức chịu của sườn.
    */
-  public calculateSlopeFailure(region: any): boolean {
+  public calculateSlopeFailure(region: unknown): boolean {
     const steepness = this.numOf(region, ['steepness', 'slope'], 0);
     const stability = this.numOf(region, ['slopeStability', 'stability'], 1);
     const saturation = this.numOf(region, ['saturation', 'moisture'], 0);
@@ -688,21 +735,21 @@ export class WeatherAtmosphereSubsystem {
     return driving > 0.35;
   }
 
-  public displaceLandslideSoil(landslide: any): void { recordSubsystemAction(this, 'displaceLandslideSoil', 'WeatherAtmosphereSubsystem'); }
-  public simulateDebrisFlow(flow: any): void { recordSubsystemAction(this, 'simulateDebrisFlow', 'WeatherAtmosphereSubsystem'); }
-  public depositLandslideDebris(landslide: any): void { recordSubsystemAction(this, 'depositLandslideDebris', 'WeatherAtmosphereSubsystem'); }
-  public createAvalanche(region: any): any { return { region, snowVolume: 50000 }; }
-  public triggerSnowSlabFailure(snowpack: any): void { recordSubsystemAction(this, 'triggerSnowSlabFailure', 'WeatherAtmosphereSubsystem'); }
-  public simulateAvalancheMotion(avalanche: any): void { recordSubsystemAction(this, 'simulateAvalancheMotion', 'WeatherAtmosphereSubsystem'); }
-  public simulateAvalancheDebris(avalanche: any): void { recordSubsystemAction(this, 'simulateAvalancheDebris', 'WeatherAtmosphereSubsystem'); }
-  public buryObjectsInDebris(objects: any[], debris: any): void { recordSubsystemAction(this, 'buryObjectsInDebris', 'WeatherAtmosphereSubsystem'); }
+  public displaceLandslideSoil(landslide: unknown): void { recordSubsystemAction(this, 'displaceLandslideSoil', 'WeatherAtmosphereSubsystem'); }
+  public simulateDebrisFlow(flow: unknown): void { recordSubsystemAction(this, 'simulateDebrisFlow', 'WeatherAtmosphereSubsystem'); }
+  public depositLandslideDebris(landslide: unknown): void { recordSubsystemAction(this, 'depositLandslideDebris', 'WeatherAtmosphereSubsystem'); }
+  public createAvalanche(region: unknown) { return { region, snowVolume: 50000 }; }
+  public triggerSnowSlabFailure(snowpack: unknown): void { recordSubsystemAction(this, 'triggerSnowSlabFailure', 'WeatherAtmosphereSubsystem'); }
+  public simulateAvalancheMotion(avalanche: unknown): void { recordSubsystemAction(this, 'simulateAvalancheMotion', 'WeatherAtmosphereSubsystem'); }
+  public simulateAvalancheDebris(avalanche: unknown): void { recordSubsystemAction(this, 'simulateAvalancheDebris', 'WeatherAtmosphereSubsystem'); }
+  public buryObjectsInDebris(objects: unknown[], debris: unknown): void { recordSubsystemAction(this, 'buryObjectsInDebris', 'WeatherAtmosphereSubsystem'); }
   /**
    * Độ sâu vùi của vật thể trong khối vụn.
    *
    * Trước đây luôn `1.5`. Nay độ sâu vùi tính từ khối lượng vụn và kích
    * thước vật thể (vật càng lớn càng vùi sâu hơn).
    */
-  public calculateBurialDepth(object: any, debris: any): number {
+  public calculateBurialDepth(object: unknown, debris: unknown): number {
     const mass = this.numOf(debris, ['mass', 'totalMass', 'volume'], 1);
     const extent = this.extentOf(object, 0.5);
     const density = this.numOf(debris, ['density'], 1600);
@@ -710,7 +757,7 @@ export class WeatherAtmosphereSubsystem {
     return Math.max(0.1, volume / Math.max(0.05, extent * extent) + extent * 0.5);
   }
 
-  public stabilizeDamagedSlope(region: any): void { recordSubsystemAction(this, 'stabilizeDamagedSlope', 'WeatherAtmosphereSubsystem'); }
-  public erodeUnstableSlope(region: any): void { recordSubsystemAction(this, 'erodeUnstableSlope', 'WeatherAtmosphereSubsystem'); }
-  public updateSlopeAfterFailure(region: any): void { recordSubsystemAction(this, 'updateSlopeAfterFailure', 'WeatherAtmosphereSubsystem'); }
+  public stabilizeDamagedSlope(region: unknown): void { recordSubsystemAction(this, 'stabilizeDamagedSlope', 'WeatherAtmosphereSubsystem'); }
+  public erodeUnstableSlope(region: unknown): void { recordSubsystemAction(this, 'erodeUnstableSlope', 'WeatherAtmosphereSubsystem'); }
+  public updateSlopeAfterFailure(region: unknown): void { recordSubsystemAction(this, 'updateSlopeAfterFailure', 'WeatherAtmosphereSubsystem'); }
 }

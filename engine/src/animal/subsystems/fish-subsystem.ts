@@ -71,10 +71,10 @@ export class FishSubsystem {
   public detectWaterborneChemicals(): boolean { return true; }
   public schoolWithNearbyFish(): void { recordSubsystemAction(this, 'schoolWithNearbyFish', 'FishSubsystem'); }
   public maintainSchoolSpacing(): void { recordSubsystemAction(this, 'maintainSchoolSpacing', 'FishSubsystem'); }
-  public pursueAquaticPrey(prey: any): void { this.swimRapidly(); }
-  public captureAquaticPrey(prey: any): void { this.openFishMouth(); this.closeFishMouth(); }
-  public grazeAquaticPlants(plants: any): void { recordSubsystemAction(this, 'grazeAquaticPlants', 'FishSubsystem'); }
-  public inspectAquaticObject(object: any): void { recordSubsystemAction(this, 'inspectAquaticObject', 'FishSubsystem'); }
+  public pursueAquaticPrey(prey: unknown): void { this.swimRapidly(); }
+  public captureAquaticPrey(prey: unknown): void { this.openFishMouth(); this.closeFishMouth(); }
+  public grazeAquaticPlants(plants: unknown): void { recordSubsystemAction(this, 'grazeAquaticPlants', 'FishSubsystem'); }
+  public inspectAquaticObject(object: unknown): void { recordSubsystemAction(this, 'inspectAquaticObject', 'FishSubsystem'); }
   public restNearAquaticSubstrate(): void { this.hoverInWater(); }
   public performFishIdleMotion(): void { recordSubsystemAction(this, 'performFishIdleMotion', 'FishSubsystem'); }
 }

@@ -153,12 +153,12 @@ export class MotionParser {
         message: `Unsupported motion format: ${format}`,
         subsystem: 'MotionParser'
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
       return engineErr({
         code: 'MOTION_PARSE_FAILED',
-        message: `Failed to parse motion: ${err.message}`,
+        message: `Failed to parse motion: ${err instanceof Error ? err.message : String(err)}`,
         subsystem: 'MotionParser',
-        stack: err.stack
+        stack: err instanceof Error ? err.stack : undefined
       });
     }
   }

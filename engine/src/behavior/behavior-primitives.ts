@@ -18,7 +18,7 @@
  */
 
 import type { Vec3 } from '../types/transform.types.js';
-import { behaviorRandomFor } from './behavior-random.js';
+import { BehaviorRandom } from './behavior-random.js';
 
 /** Giai đoạn của một thao tác hành vi. */
 export type BehaviorStatus =
@@ -765,6 +765,18 @@ function candidateScore(candidate: unknown): number {
   return 0;
 }
 
+/** Danh tính ổn định của một phương án — dùng làm seed cho tie-break. */
+function candidateIdentity(candidate: unknown, index: number): string {
+  if (typeof candidate === 'string') return candidate;
+  if (typeof candidate === 'number' || typeof candidate === 'boolean') return String(candidate);
+  if (!candidate || typeof candidate !== 'object') return `#${index}`;
+  const record = candidate as Record<string, unknown>;
+  const identity = record.id ?? record.name ?? record.key ?? record.type;
+  return typeof identity === 'string' || typeof identity === 'number'
+    ? String(identity)
+    : `#${index}`;
+}
+
 /** Kết quả cho nhóm lựa chọn — có `action` và `selected`. */
 export function selectionResult(
   action: string,
@@ -783,16 +795,29 @@ export function selectionResult(
   const hasExplicitScores = scores.some((score) => score !== 0);
   const chosen = pool[bestIndex];
 
-  // Khi nhiều phương án cùng điểm, phá vỡ bằng luồng ngẫu nhiên CÓ SEED
-  // để vẫn tái lập được giữa các client (network-sync) và giữa các lần chạy.
+  // Khi nhiều phương án cùng điểm, phá vỡ bằng luồng ngẫu nhiên CÓ SEED.
+  // Seed được suy từ action + tick + danh tính ứng viên nên hai lần gọi cùng
+  // đầu vào luôn cho cùng kết quả và không phụ thuộc thứ tự gọi toàn cục.
+  const seedLabel = [
+    'selection',
+    action,
+    String(opts.tick ?? 0),
+    ...pool.map((candidate, index) => `${index}:${candidateIdentity(candidate, index)}`),
+  ].join(':');
+  const tieStream = new BehaviorRandom(seedLabel);
+
   let tieBreak = 'highest_score';
   if (!hasExplicitScores) {
+    bestIndex = tieStream.int(0, pool.length - 1);
     tieBreak = 'seeded_tie_break';
   } else {
-    const tied = scores.filter((score) => score === scores[bestIndex]).length;
-    if (tied > 1) {
-      const stream = behaviorRandomFor(`selection:${action}`);
-      bestIndex = stream.int(0, scores.length - 1);
+    const topScore = scores[bestIndex];
+    const tiedIndices: number[] = [];
+    for (let i = 0; i < scores.length; i++) {
+      if (scores[i] === topScore) tiedIndices.push(i);
+    }
+    if (tiedIndices.length > 1) {
+      bestIndex = tiedIndices[tieStream.int(0, tiedIndices.length - 1)];
       tieBreak = 'seeded_tie_break';
     }
   }
@@ -1010,11 +1035,11 @@ export class BehaviorSubsystemBase {
   public simulationTicks = 0;
   public lastUpdateTime = 0;
   public resetCounter = 0;
-  public state: Record<string, any> = {};
-  public context: Record<string, any> = {};
+  public state: Record<string, unknown> = {};
+  public context: Record<string, unknown> = {};
   public emotionLevels: Map<string, number> = new Map();
-  public actionHistory: Array<{ action: string; payload?: any; urgency: number; timestamp: number }> = [];
-  public knowledgeStore: Map<string, { key: string; data: any; retention: number }> = new Map();
+  public actionHistory: Array<{ action: string; payload?: unknown; urgency: number; timestamp: number }> = [];
+  public knowledgeStore: Map<string, { key: string; data: unknown; retention: number }> = new Map();
   public eventLog: Array<{ event: string; intensity: number; cause?: string; timestamp: number }> = [];
 
   /** Ghi một sự kiện hành vi vào nhật ký. */
@@ -1136,7 +1161,7 @@ export class BehaviorSubsystemBase {
   }
 
   /** Cập nhật trạng thái mô phỏng. */
-  protected applyUpdate(func: string, deltaTime = 0.016, context?: Record<string, any>): Record<string, unknown> {
+  protected applyUpdate(func: string, deltaTime = 0.016, context?: Record<string, unknown>): Record<string, unknown> {
     this.lastUpdateTime = Date.now();
     this.simulationTicks++;
     if (context) Object.assign(this.context, context);
@@ -1159,7 +1184,7 @@ export class BehaviorSubsystemBase {
    * cấu hình có gì — cấu hình chỉ được `Object.assign(this.state, config)`
    * (side-effect) chứ không hề có trong kết quả trả về.
    */
-  protected applyInitialization(func: string, config?: Record<string, any>): Record<string, unknown> {
+  protected applyInitialization(func: string, config?: Record<string, unknown>): Record<string, unknown> {
     this.isInitialized = true;
 
     // Ghi cấu hình vào trạng thái và ghi lại đúng những khoá đã áp dụng.
@@ -1196,7 +1221,7 @@ export class BehaviorSubsystemBase {
   }
 
   /** Chọn một phương án hành động. */
-  protected applySelection(action: string, candidates?: any[], criteria?: Record<string, any>): Record<string, unknown> {
+  protected applySelection(action: string, candidates?: unknown[], criteria?: Record<string, unknown>): Record<string, unknown> {
     return selectionResult(action, candidates, { tick: this.simulationTicks, context: criteria, criteria });
   }
 
@@ -1207,7 +1232,7 @@ export class BehaviorSubsystemBase {
   protected evaluateEstimate(
     operation: string,
     target?: unknown,
-    options?: Record<string, any>,
+    options?: Record<string, unknown>,
   ): BehaviorEvaluation {
     return evaluateEstimate(operation, target, options, { tick: this.simulationTicks });
   }
@@ -1246,7 +1271,7 @@ export class BehaviorSubsystemBase {
   }
 
   /** Đặt lại trạng thái. */
-  protected applyReset(func: string, options?: Record<string, any>): Record<string, unknown> {
+  protected applyReset(func: string, options?: Record<string, unknown>): Record<string, unknown> {
     this.resetCounter++;
     return {
       ...operationResult(func, {

@@ -50,6 +50,7 @@ import {
   IDENTITY_QUAT,
   toVec3,
   num,
+  asRecord,
   entityPosition,
   entityQuaternion,
   entityForward,
@@ -82,6 +83,9 @@ import {
   collisionResult,
   aabbResult
 } from '../spatial-primitives.js';
+
+/** Túi tùy chọn dùng chung cho các method sinh tự động trong subsystem này. */
+type SpatialOptionBag = Record<string, unknown>;
 
 // ---------------------------------------------------------------------------
 // Bảng dữ liệu giải phẫu dùng riêng cho subsystem này
@@ -343,7 +347,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0601] getHeldObjectPosition
    * Lấy tọa độ vật thể đang cầm.
    */
-  public getHeldObjectPosition(entity?: any, offset?: Vec3D): any {
+  public getHeldObjectPosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getHeldObjectPosition', entity, offset);
     return p;
   }
@@ -351,7 +355,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0602] getHeldObjectCenter
    * Lấy tâm vật thể đang cầm.
    */
-  public getHeldObjectCenter(entity?: any, offset?: Vec3D): any {
+  public getHeldObjectCenter(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getHeldObjectCenter', entity, offset);
     return p;
   }
@@ -359,7 +363,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0603] getHeldObjectRotation
    * Lấy góc quay vật thể đang cầm.
    */
-  public getHeldObjectRotation(entityOrAngle?: any, options?: any): any {
+  public getHeldObjectRotation(entityOrAngle?: unknown, options?: unknown) {
     const found = this.boneQuaternion(entityOrAngle, options, ['heldobject', 'hand', 'object']);
     return this.orientation('getHeldObjectRotation', found.q, { bone: found.bone });
   }
@@ -367,7 +371,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0604] getHeldObjectScale
    * Lấy tỷ lệ kích thước vật thể đang cầm.
    */
-  public getHeldObjectScale(entity?: any, options?: any): any {
+  public getHeldObjectScale(entity?: unknown, options?: unknown) {
     const subject = this.optEntity(options, entity);
     const size = this.heldObjectSize(subject);
     const value = Math.max(size.x, size.y, size.z) / REGION_SIZES.heldObject.x;
@@ -377,7 +381,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0605] getHeldObjectWorldPosition
    * Lấy tọa độ thế giới của vật thể đang cầm.
    */
-  public getHeldObjectWorldPosition(entity?: any, offset?: Vec3D): any {
+  public getHeldObjectWorldPosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getHeldObjectWorldPosition', entity, offset);
     return p;
   }
@@ -385,7 +389,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0606] getHeldObjectLocalPosition
    * Lấy tọa độ cục bộ của vật thể đang cầm.
    */
-  public getHeldObjectLocalPosition(entity?: any, offset?: Vec3D): any {
+  public getHeldObjectLocalPosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getHeldObjectLocalPosition', entity, offset);
     return p;
   }
@@ -393,7 +397,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0607] getHeldObjectAnchor
    * Lấy điểm neo vật thể đang cầm.
    */
-  public getHeldObjectAnchor(entity?: any, offset?: Vec3D): any {
+  public getHeldObjectAnchor(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getHeldObjectAnchor', entity, offset);
     return p;
   }
@@ -401,7 +405,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0608] getHeldObjectPivot
    * Lấy điểm xoay vật thể đang cầm.
    */
-  public getHeldObjectPivot(entity?: any, offset?: Vec3D): any {
+  public getHeldObjectPivot(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getHeldObjectPivot', entity, offset);
     return p;
   }
@@ -409,7 +413,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0609] getHeldObjectGripPoint
    * Lấy điểm nắm vật thể.
    */
-  public getHeldObjectGripPoint(a?: any, b?: any, options?: any): any {
+  public getHeldObjectGripPoint(a?: unknown, b?: unknown, options?: unknown) {
     const object = pointOf(a);
     const hand = this.isPoint(b) ? pointOf(b) : add(object, PAIR_LANDMARKS.hand);
     const grip = lerpVec3(object, hand, 0.5);
@@ -419,7 +423,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0610] getHeldObjectContactPoint
    * Lấy điểm tiếp xúc vật thể.
    */
-  public getHeldObjectContactPoint(a?: any, b?: any, options?: any): any {
+  public getHeldObjectContactPoint(a?: unknown, b?: unknown, options?: unknown) {
     const object = pointOf(a);
     const other = this.isPoint(b) ? pointOf(b) : add(object, PAIR_LANDMARKS.hand);
     const delta = subtract(other, object);
@@ -432,7 +436,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0611] getHeldObjectTipPosition
    * Lấy tọa độ đầu vật thể.
    */
-  public getHeldObjectTipPosition(entity?: any, offset?: Vec3D): any {
+  public getHeldObjectTipPosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getHeldObjectTipPosition', entity, offset);
     return p;
   }
@@ -440,7 +444,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0612] getHeldObjectBasePosition
    * Lấy tọa độ đáy vật thể.
    */
-  public getHeldObjectBasePosition(entity?: any, offset?: Vec3D): any {
+  public getHeldObjectBasePosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getHeldObjectBasePosition', entity, offset);
     return p;
   }
@@ -448,7 +452,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0613] getHeldObjectFrontPosition
    * Lấy tọa độ mặt trước vật thể.
    */
-  public getHeldObjectFrontPosition(entity?: any, offset?: Vec3D): any {
+  public getHeldObjectFrontPosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getHeldObjectFrontPosition', entity, offset);
     return p;
   }
@@ -456,7 +460,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0614] getHeldObjectBackPosition
    * Lấy tọa độ mặt sau vật thể.
    */
-  public getHeldObjectBackPosition(entity?: any, offset?: Vec3D): any {
+  public getHeldObjectBackPosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getHeldObjectBackPosition', entity, offset);
     return p;
   }
@@ -464,7 +468,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0615] getHeldObjectLeftPosition
    * Lấy tọa độ bên trái vật thể.
    */
-  public getHeldObjectLeftPosition(entity?: any, offset?: Vec3D): any {
+  public getHeldObjectLeftPosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getHeldObjectLeftPosition', entity, offset);
     return p;
   }
@@ -472,7 +476,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0616] getHeldObjectRightPosition
    * Lấy tọa độ bên phải vật thể.
    */
-  public getHeldObjectRightPosition(entity?: any, offset?: Vec3D): any {
+  public getHeldObjectRightPosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getHeldObjectRightPosition', entity, offset);
     return p;
   }
@@ -480,7 +484,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0617] getHeldObjectUpPosition
    * Lấy tọa độ phía trên vật thể.
    */
-  public getHeldObjectUpPosition(entity?: any, offset?: Vec3D): any {
+  public getHeldObjectUpPosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getHeldObjectUpPosition', entity, offset);
     return p;
   }
@@ -488,7 +492,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0618] getHeldObjectDownPosition
    * Lấy tọa độ phía dưới vật thể.
    */
-  public getHeldObjectDownPosition(entity?: any, offset?: Vec3D): any {
+  public getHeldObjectDownPosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getHeldObjectDownPosition', entity, offset);
     return p;
   }
@@ -496,7 +500,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0619] calculateHeldObjectLength
    * Tính chiều dài vật thể đang cầm.
    */
-  public calculateHeldObjectLength(entity?: any, options?: any): any {
+  public calculateHeldObjectLength(entity?: unknown, options?: unknown) {
     const size = this.heldObjectSize(this.optEntity(options, entity));
     return this.measureWith('calculateHeldObjectLength', Math.max(size.x, size.y, size.z), 'm', options, { size });
   }
@@ -504,7 +508,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0620] calculateHeldObjectWidth
    * Tính chiều rộng vật thể đang cầm.
    */
-  public calculateHeldObjectWidth(entity?: any, options?: any): any {
+  public calculateHeldObjectWidth(entity?: unknown, options?: unknown) {
     const size = this.heldObjectSize(this.optEntity(options, entity));
     return this.measureWith('calculateHeldObjectWidth', size.x, 'm', options, { size });
   }
@@ -512,7 +516,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0621] calculateHeldObjectHeight
    * Tính chiều cao vật thể đang cầm.
    */
-  public calculateHeldObjectHeight(entity?: any, options?: any): any {
+  public calculateHeldObjectHeight(entity?: unknown, options?: unknown) {
     const size = this.heldObjectSize(this.optEntity(options, entity));
     return this.measureWith('calculateHeldObjectHeight', size.y, 'm', options, { size });
   }
@@ -520,7 +524,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0622] calculateHeldObjectVolume
    * Tính thể tích vật thể đang cầm.
    */
-  public calculateHeldObjectVolume(entity?: any, options?: any): any {
+  public calculateHeldObjectVolume(entity?: unknown, options?: unknown) {
     const size = this.heldObjectSize(this.optEntity(options, entity));
     return this.measureWith('calculateHeldObjectVolume', size.x * size.y * size.z, 'm^3', options, { size });
   }
@@ -528,7 +532,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0623] calculateHeldObjectSurfaceArea
    * Tính diện tích bề mặt vật thể.
    */
-  public calculateHeldObjectSurfaceArea(entity?: any, options?: any): any {
+  public calculateHeldObjectSurfaceArea(entity?: unknown, options?: unknown) {
     const size = this.heldObjectSize(this.optEntity(options, entity));
     const area = 2 * (size.x * size.y + size.x * size.z + size.y * size.z);
     return this.measureWith('calculateHeldObjectSurfaceArea', area, 'm^2', options, { size });
@@ -537,7 +541,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0624] calculateHeldObjectMass
    * Tính khối lượng vật thể.
    */
-  public calculateHeldObjectMass(entity?: any, options?: any): any {
+  public calculateHeldObjectMass(entity?: unknown, options?: SpatialOptionBag) {
     const size = this.heldObjectSize(entity);
     const density = num(options?.density, 1000);
     const mass = size.x * size.y * size.z * density;
@@ -547,7 +551,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0625] calculateHeldObjectCenterOfMass
    * Tính tâm khối lượng vật thể.
    */
-  public calculateHeldObjectCenterOfMass(entity?: any, options?: any): any {
+  public calculateHeldObjectCenterOfMass(entity?: unknown, options?: unknown) {
     const subject = this.optEntity(options, entity);
     const size = scale(this.heldObjectSize(subject), this.optScale(options));
     const center = add(entityPosition(subject), { x: 0, y: 0, z: 0 });
@@ -558,7 +562,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0626] calculateHeldObjectInertiaTensor
    * Tính tensor quán tính vật thể.
    */
-  public calculateHeldObjectInertiaTensor(a?: any, b?: any, options?: any): any {
+  public calculateHeldObjectInertiaTensor(a?: unknown, b?: unknown, options?: SpatialOptionBag) {
     const subject = this.optEntity(options, a);
     const size = this.heldObjectSize(subject);
     const mass = size.x * size.y * size.z * num(options?.density, 1000);
@@ -596,7 +600,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0627] calculateHeldObjectBoundingBox
    * Tính hộp bao vật thể.
    */
-  public calculateHeldObjectBoundingBox(entity?: any, size?: Vec3D): any {
+  public calculateHeldObjectBoundingBox(entity?: unknown, size?: Vec3D) {
     const box = this.regionBox('heldObject', entity, size);
     return boundsResult('calculateHeldObjectBoundingBox', box);
   }
@@ -604,7 +608,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0628] calculateHeldObjectBoundingSphere
    * Tính hình cầu bao vật thể.
    */
-  public calculateHeldObjectBoundingSphere(entity?: any, radius = 1.0): any {
+  public calculateHeldObjectBoundingSphere(entity?: unknown, radius = 1.0) {
     const regionSize = this.regionSize('heldObject');
     return sphereResult('calculateHeldObjectBoundingSphere', entityPosition(entity), this.autoRadius(radius, regionSize));
   }
@@ -612,7 +616,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0629] calculateHeldObjectBoundingCapsule
    * Tính capsule bao vật thể.
    */
-  public calculateHeldObjectBoundingCapsule(entity?: any, height = 2.0, radius = 0.5): any {
+  public calculateHeldObjectBoundingCapsule(entity?: unknown, height = 2.0, radius = 0.5) {
     const regionSize = this.regionSize('heldObject');
     const capsuleHeight = this.autoValue(height, 2.0, regionSize.y);
     const capsuleRadius = this.autoValue(radius, 0.5, Math.min(regionSize.x, regionSize.z) * 0.5);
@@ -622,7 +626,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0630] calculateHeldObjectBoundingCylinder
    * Tính hình trụ bao vật thể.
    */
-  public calculateHeldObjectBoundingCylinder(a?: any, b?: any, options?: any): any {
+  public calculateHeldObjectBoundingCylinder(a?: unknown, b?: unknown, options?: unknown) {
     const subject = this.optEntity(options, a);
     const regionSize = this.regionSize('heldObject');
     const factor = this.optScale(options);
@@ -643,35 +647,35 @@ export class AnatomicalLowerBodySubsystem {
    * [0631] calculateHeldObjectDistanceToHand
    * Tính khoảng cách vật thể đến bàn tay.
    */
-  public calculateHeldObjectDistanceToHand(a?: any, b?: any): any {
+  public calculateHeldObjectDistanceToHand(a?: unknown, b?: unknown) {
     return this.measure('calculateHeldObjectDistanceToHand', this.heldObjectDistance(a, b, 'hand'), 'm');
   }
   /**
    * [0632] calculateHeldObjectDistanceToWrist
    * Tính khoảng cách vật thể đến cổ tay.
    */
-  public calculateHeldObjectDistanceToWrist(a?: any, b?: any): any {
+  public calculateHeldObjectDistanceToWrist(a?: unknown, b?: unknown) {
     return this.measure('calculateHeldObjectDistanceToWrist', this.heldObjectDistance(a, b, 'wrist'), 'm');
   }
   /**
    * [0633] calculateHeldObjectDistanceToCamera
    * Tính khoảng cách vật thể đến camera.
    */
-  public calculateHeldObjectDistanceToCamera(a?: any, b?: any): any {
+  public calculateHeldObjectDistanceToCamera(a?: unknown, b?: unknown) {
     return this.measure('calculateHeldObjectDistanceToCamera', this.heldObjectDistance(a, b, 'camera'), 'm');
   }
   /**
    * [0634] calculateHeldObjectDistanceToTarget
    * Tính khoảng cách vật thể đến mục tiêu.
    */
-  public calculateHeldObjectDistanceToTarget(a?: any, b?: any): any {
+  public calculateHeldObjectDistanceToTarget(a?: unknown, b?: unknown) {
     return this.measure('calculateHeldObjectDistanceToTarget', this.heldObjectDistance(a, b, 'target'), 'm');
   }
   /**
    * [0635] calculateHeldObjectGripAlignment
    * Tính độ thẳng hàng giữa tay và điểm nắm.
    */
-  public calculateHeldObjectGripAlignment(a?: any, b?: any, options?: any): any {
+  public calculateHeldObjectGripAlignment(a?: unknown, b?: unknown, options?: unknown) {
     const object = pointOf(a);
     const hand = this.isPoint(b) ? pointOf(b) : add(object, PAIR_LANDMARKS.hand);
     const gripDirection = normalize(subtract(object, hand));
@@ -690,7 +694,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0636] calculateHeldObjectGripOffset
    * Tính độ lệch điểm nắm.
    */
-  public calculateHeldObjectGripOffset(a?: any, b?: any, options?: any): any {
+  public calculateHeldObjectGripOffset(a?: unknown, b?: unknown, options?: unknown) {
     const object = pointOf(a);
     const hand = this.isPoint(b) ? pointOf(b) : add(object, PAIR_LANDMARKS.hand);
     const offset = subtract(object, hand);
@@ -706,7 +710,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0637] calculateHeldObjectGripRotation
    * Tính góc xoay khi cầm.
    */
-  public calculateHeldObjectGripRotation(entityOrAngle?: any, options?: any): any {
+  public calculateHeldObjectGripRotation(entityOrAngle?: unknown, options?: unknown) {
     const found = this.boneQuaternion(entityOrAngle, options, ['hand', 'wrist']);
     return this.orientation('calculateHeldObjectGripRotation', found.q, { bone: found.bone });
   }
@@ -714,7 +718,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0638] calculateHeldObjectGripStability
    * Tính độ ổn định khi cầm.
    */
-  public calculateHeldObjectGripStability(a?: any, b?: any, options?: any): any {
+  public calculateHeldObjectGripStability(a?: unknown, b?: unknown, options?: unknown) {
     const object = pointOf(a);
     const hand = this.isPoint(b) ? pointOf(b) : add(object, PAIR_LANDMARKS.hand);
     const offset = subtract(object, hand);
@@ -734,7 +738,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0639] calculateHeldObjectHandPose
    * Tính tư thế bàn tay khi cầm.
    */
-  public calculateHeldObjectHandPose(a?: any, b?: any, options?: any): any {
+  public calculateHeldObjectHandPose(a?: unknown, b?: unknown, options?: SpatialOptionBag) {
     const object = pointOf(a);
     const hand = b !== undefined && b !== null ? pointOf(b) : add(object, PAIR_LANDMARKS.hand);
     const found = this.boneQuaternion(options?.hand ?? options, options, ['hand']);
@@ -750,7 +754,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0640] calculateHeldObjectFingerContact
    * Tính tiếp xúc giữa ngón tay và vật thể.
    */
-  public calculateHeldObjectFingerContact(a?: any, b?: any, options?: any): any {
+  public calculateHeldObjectFingerContact(a?: unknown, b?: unknown, options?: unknown) {
     const object = pointOf(a);
     const hand = this.isPoint(b) ? pointOf(b) : add(object, PAIR_LANDMARKS.hand);
     const regionSize = this.regionSize('heldObject');
@@ -770,7 +774,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0641] calculateHeldObjectCollision
    * Kiểm tra va chạm vật thể đang cầm.
    */
-  public calculateHeldObjectCollision(a?: any, b?: any): any {
+  public calculateHeldObjectCollision(a?: unknown, b?: unknown) {
     const boxA = this.regionBox('heldObject', a);
     const boxB = this.regionBox('heldObject', b);
     return aabbResult('calculateHeldObjectCollision', boxA, boxB);
@@ -779,7 +783,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0642] calculateHeldObjectPenetrationDepth
    * Tính độ xuyên lấn khi va chạm.
    */
-  public calculateHeldObjectPenetrationDepth(entity?: any, options?: any): any {
+  public calculateHeldObjectPenetrationDepth(entity?: unknown, options?: SpatialOptionBag) {
     const box = this.regionBox('heldObject', entity);
     const ground = num(options?.groundY, 0);
     const depth = Math.max(0, ground - box.min.y);
@@ -789,7 +793,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0643] calculateHeldObjectVelocity
    * Tính vận tốc vật thể đang cầm.
    */
-  public calculateHeldObjectVelocity(entity?: any, dt = 0.016): any {
+  public calculateHeldObjectVelocity(entity?: unknown, dt = 0.016) {
     const velocity = this.velocityFrom(entity, dt);
     return this.vector('calculateHeldObjectVelocity', velocity);
   }
@@ -797,7 +801,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0644] calculateHeldObjectAcceleration
    * Tính gia tốc vật thể đang cầm.
    */
-  public calculateHeldObjectAcceleration(entity?: any, dt = 0.016): any {
+  public calculateHeldObjectAcceleration(entity?: unknown, dt = 0.016) {
     const acceleration = this.accelerationFrom(entity, dt);
     return this.vector('calculateHeldObjectAcceleration', acceleration);
   }
@@ -805,7 +809,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0645] calculateHeldObjectAngularVelocity
    * Tính vận tốc góc vật thể.
    */
-  public calculateHeldObjectAngularVelocity(entity?: any, dt = 0.016): any {
+  public calculateHeldObjectAngularVelocity(entity?: unknown, dt = 0.016) {
     const angular = this.angularVelocityFrom(entity, dt);
     return this.vector('calculateHeldObjectAngularVelocity', angular);
   }
@@ -813,7 +817,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0646] calculateHeldObjectAngularAcceleration
    * Tính gia tốc góc vật thể.
    */
-  public calculateHeldObjectAngularAcceleration(entity?: any, dt = 0.016): any {
+  public calculateHeldObjectAngularAcceleration(entity?: unknown, dt = 0.016) {
     const angular = this.angularAccelerationFrom(entity, dt);
     return this.vector('calculateHeldObjectAngularAcceleration', angular);
   }
@@ -821,7 +825,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0647] calculateHeldObjectTrajectory
    * Tính quỹ đạo vật thể đang cầm.
    */
-  public calculateHeldObjectTrajectory(a?: any, b?: any, options?: any): any {
+  public calculateHeldObjectTrajectory(a?: unknown, b?: unknown, options?: SpatialOptionBag) {
     const start = pointOf(a);
     const end = b !== undefined && b !== null ? pointOf(b) : add(start, scale(entityForward(a), 1));
     const steps = Math.max(2, Math.round(num(options?.steps, 16)));
@@ -833,7 +837,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0648] calculateHeldObjectThrowVelocity
    * Tính vận tốc ném vật thể.
    */
-  public calculateHeldObjectThrowVelocity(entity?: any, dt = 0.016): any {
+  public calculateHeldObjectThrowVelocity(entity?: unknown, dt = 0.016) {
     const velocity = this.velocityFrom(entity, dt);
     const speed = magnitude(velocity) > 1e-6 ? magnitude(velocity) * 1.5 : 6;
     const direction = magnitude(velocity) > 1e-6 ? normalize(velocity) : scale(entityForward(entity), 1);
@@ -843,7 +847,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0649] calculateHeldObjectReleasePosition
    * Tính vị trí thả vật thể.
    */
-  public calculateHeldObjectReleasePosition(a?: any, b?: any, options?: any): any {
+  public calculateHeldObjectReleasePosition(a?: unknown, b?: unknown, options?: unknown) {
     const object = pointOf(a);
     const hand = this.isPoint(b) ? pointOf(b) : add(object, PAIR_LANDMARKS.hand);
     const away = normalize(subtract(object, hand));
@@ -854,7 +858,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0650] calculateHeldObjectReleaseRotation
    * Tính góc quay lúc thả vật thể.
    */
-  public calculateHeldObjectReleaseRotation(entityOrAngle?: any, options?: any): any {
+  public calculateHeldObjectReleaseRotation(entityOrAngle?: unknown, options?: unknown) {
     const found = this.boneQuaternion(entityOrAngle, options, ['hand', 'wrist']);
     return this.orientation('calculateHeldObjectReleaseRotation', found.q, { bone: found.bone });
   }
@@ -866,7 +870,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0651] getTorsoPosition
    * Lấy tọa độ thân.
    */
-  public getTorsoPosition(entity?: any, offset?: Vec3D): any {
+  public getTorsoPosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getTorsoPosition', entity, offset);
     return p;
   }
@@ -874,7 +878,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0652] getTorsoCenter
    * Lấy tâm thân.
    */
-  public getTorsoCenter(entity?: any, offset?: Vec3D): any {
+  public getTorsoCenter(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getTorsoCenter', entity, offset);
     return p;
   }
@@ -882,7 +886,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0653] getTorsoTopPosition
    * Lấy tọa độ đỉnh thân.
    */
-  public getTorsoTopPosition(entity?: any, offset?: Vec3D): any {
+  public getTorsoTopPosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getTorsoTopPosition', entity, offset);
     return p;
   }
@@ -890,7 +894,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0654] getTorsoBottomPosition
    * Lấy tọa độ đáy thân.
    */
-  public getTorsoBottomPosition(entity?: any, offset?: Vec3D): any {
+  public getTorsoBottomPosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getTorsoBottomPosition', entity, offset);
     return p;
   }
@@ -898,7 +902,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0655] getTorsoFrontPosition
    * Lấy tọa độ mặt trước thân.
    */
-  public getTorsoFrontPosition(entity?: any, offset?: Vec3D): any {
+  public getTorsoFrontPosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getTorsoFrontPosition', entity, offset);
     return p;
   }
@@ -906,7 +910,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0656] getTorsoBackPosition
    * Lấy tọa độ mặt sau thân.
    */
-  public getTorsoBackPosition(entity?: any, offset?: Vec3D): any {
+  public getTorsoBackPosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getTorsoBackPosition', entity, offset);
     return p;
   }
@@ -914,7 +918,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0657] getTorsoLeftPosition
    * Lấy tọa độ bên trái thân.
    */
-  public getTorsoLeftPosition(entity?: any, offset?: Vec3D): any {
+  public getTorsoLeftPosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getTorsoLeftPosition', entity, offset);
     return p;
   }
@@ -922,7 +926,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0658] getTorsoRightPosition
    * Lấy tọa độ bên phải thân.
    */
-  public getTorsoRightPosition(entity?: any, offset?: Vec3D): any {
+  public getTorsoRightPosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getTorsoRightPosition', entity, offset);
     return p;
   }
@@ -930,7 +934,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0659] getChestPosition
    * Lấy tọa độ ngực.
    */
-  public getChestPosition(entity?: any, offset?: Vec3D): any {
+  public getChestPosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getChestPosition', entity, offset);
     return p;
   }
@@ -938,7 +942,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0660] getChestCenter
    * Lấy tâm ngực.
    */
-  public getChestCenter(entity?: any, offset?: Vec3D): any {
+  public getChestCenter(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getChestCenter', entity, offset);
     return p;
   }
@@ -946,7 +950,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0661] getChestFrontPosition
    * Lấy tọa độ phía trước ngực.
    */
-  public getChestFrontPosition(entity?: any, offset?: Vec3D): any {
+  public getChestFrontPosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getChestFrontPosition', entity, offset);
     return p;
   }
@@ -954,7 +958,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0662] getChestBackPosition
    * Lấy tọa độ phía sau ngực.
    */
-  public getChestBackPosition(entity?: any, offset?: Vec3D): any {
+  public getChestBackPosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getChestBackPosition', entity, offset);
     return p;
   }
@@ -962,7 +966,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0663] getRibcageCenter
    * Lấy tâm lồng ngực.
    */
-  public getRibcageCenter(entity?: any, offset?: Vec3D): any {
+  public getRibcageCenter(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getRibcageCenter', entity, offset);
     return p;
   }
@@ -970,7 +974,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0664] getSternumPosition
    * Lấy tọa độ xương ức.
    */
-  public getSternumPosition(entity?: any, offset?: Vec3D): any {
+  public getSternumPosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getSternumPosition', entity, offset);
     return p;
   }
@@ -978,7 +982,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0665] getSpinePosition
    * Lấy tọa độ cột sống.
    */
-  public getSpinePosition(entity?: any, offset?: Vec3D): any {
+  public getSpinePosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getSpinePosition', entity, offset);
     return p;
   }
@@ -986,7 +990,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0666] getUpperSpinePosition
    * Lấy tọa độ cột sống trên.
    */
-  public getUpperSpinePosition(entity?: any, offset?: Vec3D): any {
+  public getUpperSpinePosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getUpperSpinePosition', entity, offset);
     return p;
   }
@@ -994,7 +998,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0667] getMiddleSpinePosition
    * Lấy tọa độ cột sống giữa.
    */
-  public getMiddleSpinePosition(entity?: any, offset?: Vec3D): any {
+  public getMiddleSpinePosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getMiddleSpinePosition', entity, offset);
     return p;
   }
@@ -1002,7 +1006,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0668] getLowerSpinePosition
    * Lấy tọa độ cột sống dưới.
    */
-  public getLowerSpinePosition(entity?: any, offset?: Vec3D): any {
+  public getLowerSpinePosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getLowerSpinePosition', entity, offset);
     return p;
   }
@@ -1010,7 +1014,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0669] calculateTorsoLength
    * Tính chiều dài thân.
    */
-  public calculateTorsoLength(entity?: any, options?: any): any {
+  public calculateTorsoLength(entity?: unknown, options?: unknown) {
     const size = this.regionSizeFor(this.optEntity(options, entity), 'torso');
     const diagonal = Math.hypot(size.x, size.y, size.z);
     return this.measureWith('calculateTorsoLength', diagonal, 'm', options, { size });
@@ -1019,7 +1023,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0670] calculateTorsoWidth
    * Tính chiều rộng thân.
    */
-  public calculateTorsoWidth(entity?: any, options?: any): any {
+  public calculateTorsoWidth(entity?: unknown, options?: unknown) {
     const size = this.regionSizeFor(this.optEntity(options, entity), 'torso');
     return this.measureWith('calculateTorsoWidth', size.x, 'm', options, { size });
   }
@@ -1027,7 +1031,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0671] calculateTorsoHeight
    * Tính chiều cao thân.
    */
-  public calculateTorsoHeight(entity?: any, options?: any): any {
+  public calculateTorsoHeight(entity?: unknown, options?: unknown) {
     const size = this.regionSizeFor(this.optEntity(options, entity), 'torso');
     return this.measureWith('calculateTorsoHeight', size.y, 'm', options, { size });
   }
@@ -1035,7 +1039,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0672] calculateTorsoDepth
    * Tính chiều sâu thân.
    */
-  public calculateTorsoDepth(entity?: any, options?: any): any {
+  public calculateTorsoDepth(entity?: unknown, options?: unknown) {
     const size = this.regionSizeFor(this.optEntity(options, entity), 'torso');
     return this.measureWith('calculateTorsoDepth', size.z, 'm', options, { size });
   }
@@ -1043,7 +1047,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0673] calculateTorsoVolume
    * Tính thể tích thân.
    */
-  public calculateTorsoVolume(entity?: any, options?: any): any {
+  public calculateTorsoVolume(entity?: unknown, options?: unknown) {
     const size = this.regionSizeFor(this.optEntity(options, entity), 'torso');
     return this.measureWith('calculateTorsoVolume', size.x * size.y * size.z, 'm^3', options, { size });
   }
@@ -1051,7 +1055,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0674] calculateTorsoSurfaceArea
    * Tính diện tích bề mặt thân.
    */
-  public calculateTorsoSurfaceArea(entity?: any, options?: any): any {
+  public calculateTorsoSurfaceArea(entity?: unknown, options?: unknown) {
     const size = this.regionSizeFor(this.optEntity(options, entity), 'torso');
     const area = 2 * (size.x * size.y + size.x * size.z + size.y * size.z);
     return this.measureWith('calculateTorsoSurfaceArea', area, 'm^2', options, { size });
@@ -1060,7 +1064,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0675] calculateTorsoBoundingBox
    * Tính hộp bao thân.
    */
-  public calculateTorsoBoundingBox(entity?: any, size?: Vec3D): any {
+  public calculateTorsoBoundingBox(entity?: unknown, size?: Vec3D) {
     const box = this.regionBox('torso', entity, size);
     return boundsResult('calculateTorsoBoundingBox', box);
   }
@@ -1068,7 +1072,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0676] calculateTorsoBoundingSphere
    * Tính hình cầu bao thân.
    */
-  public calculateTorsoBoundingSphere(entity?: any, radius = 1.0): any {
+  public calculateTorsoBoundingSphere(entity?: unknown, radius = 1.0) {
     const size = this.regionSize('torso');
     return sphereResult('calculateTorsoBoundingSphere', entityPosition(entity), this.autoRadius(radius, size));
   }
@@ -1076,7 +1080,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0677] calculateTorsoCenterOfMass
    * Tính tâm khối lượng thân.
    */
-  public calculateTorsoCenterOfMass(entity?: any, options?: any): any {
+  public calculateTorsoCenterOfMass(entity?: unknown, options?: unknown) {
     const subject = this.optEntity(options, entity);
     const size = this.regionSizeFor(subject, 'torso');
     const center = this.pointWith(this.centerOfMassPoint(subject, 0, size.y), subject, options);
@@ -1086,7 +1090,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0678] calculateTorsoOrientation
    * Tính hướng thân.
    */
-  public calculateTorsoOrientation(entityOrAngle?: any, options?: any): any {
+  public calculateTorsoOrientation(entityOrAngle?: unknown, options?: unknown) {
     const found = this.boneQuaternion(entityOrAngle, options, ['torso', 'spine', 'chest']);
     return this.orientation('calculateTorsoOrientation', found.q, { bone: found.bone });
   }
@@ -1094,7 +1098,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0679] calculateTorsoRotation
    * Tính góc quay thân.
    */
-  public calculateTorsoRotation(entityOrAngle?: any, options?: any): any {
+  public calculateTorsoRotation(entityOrAngle?: unknown, options?: unknown) {
     const found = this.boneQuaternion(entityOrAngle, options, ['torso', 'spine', 'chest']);
     return this.orientation('calculateTorsoRotation', found.q, { bone: found.bone });
   }
@@ -1102,7 +1106,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0680] calculateTorsoTilt
    * Tính độ nghiêng thân.
    */
-  public calculateTorsoTilt(a?: any, b?: any): any {
+  public calculateTorsoTilt(a?: unknown, b?: unknown) {
     const e = this.jointEuler(a, b, ['torso', 'spine']);
     return this.measure('calculateTorsoTilt', e.x, 'rad');
   }
@@ -1110,7 +1114,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0681] calculateTorsoTwist
    * Tính góc xoắn thân.
    */
-  public calculateTorsoTwist(a?: any, b?: any): any {
+  public calculateTorsoTwist(a?: unknown, b?: unknown) {
     const e = this.jointEuler(a, b, ['torso', 'spine']);
     return this.measure('calculateTorsoTwist', e.y, 'rad');
   }
@@ -1118,7 +1122,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0682] calculateTorsoBend
    * Tính độ gập thân.
    */
-  public calculateTorsoBend(a?: any, b?: any): any {
+  public calculateTorsoBend(a?: unknown, b?: unknown) {
     const e = this.jointEuler(a, b, ['torso', 'spine']);
     return this.measure('calculateTorsoBend', e.z, 'rad');
   }
@@ -1126,7 +1130,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0683] calculateTorsoLeanAngle
    * Tính góc nghiêng người.
    */
-  public calculateTorsoLeanAngle(a?: any, b?: any): any {
+  public calculateTorsoLeanAngle(a?: unknown, b?: unknown) {
     const e = this.jointEuler(a, b, ['torso', 'spine']);
     return this.measure('calculateTorsoLeanAngle', Math.hypot(e.x, e.z), 'rad');
   }
@@ -1134,7 +1138,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0684] calculateTorsoFlexion
    * Tính góc gập thân về trước.
    */
-  public calculateTorsoFlexion(a?: any, b?: any): any {
+  public calculateTorsoFlexion(a?: unknown, b?: unknown) {
     const e = this.jointEuler(a, b, ['torso', 'spine']);
     return this.measure('calculateTorsoFlexion', Math.max(0, e.x), 'rad');
   }
@@ -1142,7 +1146,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0685] calculateTorsoExtension
    * Tính góc ngả thân về sau.
    */
-  public calculateTorsoExtension(a?: any, b?: any): any {
+  public calculateTorsoExtension(a?: unknown, b?: unknown) {
     const e = this.jointEuler(a, b, ['torso', 'spine']);
     return this.measure('calculateTorsoExtension', Math.max(0, -e.x), 'rad');
   }
@@ -1150,7 +1154,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0686] calculateTorsoLateralBend
    * Tính góc nghiêng thân sang bên.
    */
-  public calculateTorsoLateralBend(a?: any, b?: any): any {
+  public calculateTorsoLateralBend(a?: unknown, b?: unknown) {
     const e = this.jointEuler(a, b, ['torso', 'spine']);
     return this.measure('calculateTorsoLateralBend', e.z, 'rad');
   }
@@ -1158,7 +1162,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0687] calculateTorsoVelocity
    * Tính vận tốc thân.
    */
-  public calculateTorsoVelocity(entity?: any, dt = 0.016): any {
+  public calculateTorsoVelocity(entity?: unknown, dt = 0.016) {
     const velocity = this.velocityFrom(entity, dt);
     return this.vector('calculateTorsoVelocity', velocity);
   }
@@ -1166,7 +1170,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0688] calculateTorsoAcceleration
    * Tính gia tốc thân.
    */
-  public calculateTorsoAcceleration(entity?: any, dt = 0.016): any {
+  public calculateTorsoAcceleration(entity?: unknown, dt = 0.016) {
     const acceleration = this.accelerationFrom(entity, dt);
     return this.vector('calculateTorsoAcceleration', acceleration);
   }
@@ -1174,7 +1178,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0689] calculateTorsoAngularVelocity
    * Tính vận tốc góc thân.
    */
-  public calculateTorsoAngularVelocity(entity?: any, dt = 0.016): any {
+  public calculateTorsoAngularVelocity(entity?: unknown, dt = 0.016) {
     const angular = this.angularVelocityFrom(entity, dt);
     return this.vector('calculateTorsoAngularVelocity', angular);
   }
@@ -1182,7 +1186,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0690] calculateTorsoAngularAcceleration
    * Tính gia tốc góc thân.
    */
-  public calculateTorsoAngularAcceleration(entity?: any, dt = 0.016): any {
+  public calculateTorsoAngularAcceleration(entity?: unknown, dt = 0.016) {
     const angular = this.angularAccelerationFrom(entity, dt);
     return this.vector('calculateTorsoAngularAcceleration', angular);
   }
@@ -1190,28 +1194,28 @@ export class AnatomicalLowerBodySubsystem {
    * [0691] calculateTorsoToHeadDistance
    * Tính khoảng cách thân đến đầu.
    */
-  public calculateTorsoToHeadDistance(a?: any, b?: any): any {
+  public calculateTorsoToHeadDistance(a?: unknown, b?: unknown) {
     return this.measure('calculateTorsoToHeadDistance', this.pairDistance(a, b, 'torso', 'head'), 'm');
   }
   /**
    * [0692] calculateTorsoToHipDistance
    * Tính khoảng cách thân đến hông.
    */
-  public calculateTorsoToHipDistance(a?: any, b?: any): any {
+  public calculateTorsoToHipDistance(a?: unknown, b?: unknown) {
     return this.measure('calculateTorsoToHipDistance', this.pairDistance(a, b, 'torso', 'hip'), 'm');
   }
   /**
    * [0693] calculateTorsoToShoulderDistance
    * Tính khoảng cách thân đến vai.
    */
-  public calculateTorsoToShoulderDistance(a?: any, b?: any): any {
+  public calculateTorsoToShoulderDistance(a?: unknown, b?: unknown) {
     return this.measure('calculateTorsoToShoulderDistance', this.pairDistance(a, b, 'torso', 'shoulder'), 'm');
   }
   /**
    * [0694] calculateTorsoSymmetry
    * Tính độ đối xứng thân.
    */
-  public calculateTorsoSymmetry(a?: any, b?: any, options?: any): any {
+  public calculateTorsoSymmetry(a?: unknown, b?: unknown, options?: unknown) {
     const score = this.symmetryScore(a, b, this.regionSizeFor(a, 'torso').x);
     return namedResult('calculateTorsoSymmetry', this.applyOptions(score, options, { numeric: ['symmetry', 'difference'], points: ['left', 'right'] }, a));
   }
@@ -1219,7 +1223,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0695] calculateTorsoPoseError
    * Tính sai lệch tư thế thân.
    */
-  public calculateTorsoPoseError(a?: any, b?: any, options?: any): any {
+  public calculateTorsoPoseError(a?: unknown, b?: unknown, options?: unknown) {
     const error = this.poseError(a, b);
     return namedResult('calculateTorsoPoseError', this.applyOptions(error, options, { numeric: ['positionError', 'rotationError'] }, a));
   }
@@ -1227,7 +1231,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0696] calculateTorsoMotionSmoothness
    * Tính độ mượt chuyển động thân.
    */
-  public calculateTorsoMotionSmoothness(a?: any, b?: any, options?: any): any {
+  public calculateTorsoMotionSmoothness(a?: unknown, b?: unknown, options?: unknown) {
     // `b` là nguồn chuyển động thay thế cho `a`.
     const source = b !== undefined && b !== null ? b : a;
     const smoothness = this.motionSmoothness(source);
@@ -1237,7 +1241,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0697] calculateTorsoSurfaceNormal
    * Tính pháp tuyến bề mặt thân.
    */
-  public calculateTorsoSurfaceNormal(a?: any, b?: any): any {
+  public calculateTorsoSurfaceNormal(a?: unknown, b?: unknown) {
     const normal = this.surfaceNormal(a, b, entityForward(a));
     return this.vector('calculateTorsoSurfaceNormal', normal);
   }
@@ -1245,7 +1249,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0698] calculateTorsoCollision
    * Kiểm tra va chạm thân.
    */
-  public calculateTorsoCollision(a?: any, b?: any): any {
+  public calculateTorsoCollision(a?: unknown, b?: unknown) {
     const boxA = this.regionBox('torso', a);
     const boxB = this.regionBox('torso', b);
     return aabbResult('calculateTorsoCollision', boxA, boxB);
@@ -1254,7 +1258,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0699] calculateTorsoGroundClearance
    * Tính khoảng cách thân đến mặt đất.
    */
-  public calculateTorsoGroundClearance(entity?: any, options?: any): any {
+  public calculateTorsoGroundClearance(entity?: unknown, options?: unknown) {
     const size = this.regionSize('torso');
     const clearance = this.groundClearance(entity, -size.y * 0.5, options);
     return this.measure('calculateTorsoGroundClearance', clearance, 'm');
@@ -1263,7 +1267,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0700] calculateTorsoJointChain
    * Tính chuỗi khớp thân.
    */
-  public calculateTorsoJointChain(a?: any, b?: any, options?: any): any {
+  public calculateTorsoJointChain(a?: unknown, b?: unknown, options?: unknown) {
     const chain = ['getPelvisPosition', 'getLowerSpinePosition', 'getMiddleSpinePosition', 'getUpperSpinePosition', 'getChestPosition'];
     return this.jointChainWith('calculateTorsoJointChain', a, b, chain, options);
   }
@@ -1275,7 +1279,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0701] getAbdomenPosition
    * Lấy tọa độ bụng.
    */
-  public getAbdomenPosition(entity?: any, offset?: Vec3D): any {
+  public getAbdomenPosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getAbdomenPosition', entity, offset);
     return p;
   }
@@ -1283,7 +1287,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0702] getAbdomenCenter
    * Lấy tâm bụng.
    */
-  public getAbdomenCenter(entity?: any, offset?: Vec3D): any {
+  public getAbdomenCenter(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getAbdomenCenter', entity, offset);
     return p;
   }
@@ -1291,7 +1295,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0703] getUpperAbdomenPosition
    * Lấy tọa độ bụng trên.
    */
-  public getUpperAbdomenPosition(entity?: any, offset?: Vec3D): any {
+  public getUpperAbdomenPosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getUpperAbdomenPosition', entity, offset);
     return p;
   }
@@ -1299,7 +1303,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0704] getLowerAbdomenPosition
    * Lấy tọa độ bụng dưới.
    */
-  public getLowerAbdomenPosition(entity?: any, offset?: Vec3D): any {
+  public getLowerAbdomenPosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getLowerAbdomenPosition', entity, offset);
     return p;
   }
@@ -1307,7 +1311,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0705] getNavelPosition
    * Lấy tọa độ rốn.
    */
-  public getNavelPosition(entity?: any, offset?: Vec3D): any {
+  public getNavelPosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getNavelPosition', entity, offset);
     return p;
   }
@@ -1315,7 +1319,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0706] getPelvisPosition
    * Lấy tọa độ xương chậu.
    */
-  public getPelvisPosition(entity?: any, offset?: Vec3D): any {
+  public getPelvisPosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getPelvisPosition', entity, offset);
     return p;
   }
@@ -1323,7 +1327,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0707] getPelvisCenter
    * Lấy tâm xương chậu.
    */
-  public getPelvisCenter(entity?: any, offset?: Vec3D): any {
+  public getPelvisCenter(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getPelvisCenter', entity, offset);
     return p;
   }
@@ -1331,7 +1335,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0708] getPelvisFrontPosition
    * Lấy tọa độ phía trước xương chậu.
    */
-  public getPelvisFrontPosition(entity?: any, offset?: Vec3D): any {
+  public getPelvisFrontPosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getPelvisFrontPosition', entity, offset);
     return p;
   }
@@ -1339,7 +1343,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0709] getPelvisBackPosition
    * Lấy tọa độ phía sau xương chậu.
    */
-  public getPelvisBackPosition(entity?: any, offset?: Vec3D): any {
+  public getPelvisBackPosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getPelvisBackPosition', entity, offset);
     return p;
   }
@@ -1347,7 +1351,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0710] getLeftHipPosition
    * Lấy tọa độ hông trái.
    */
-  public getLeftHipPosition(entity?: any, offset?: Vec3D): any {
+  public getLeftHipPosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getLeftHipPosition', entity, offset);
     return p;
   }
@@ -1355,7 +1359,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0711] getRightHipPosition
    * Lấy tọa độ hông phải.
    */
-  public getRightHipPosition(entity?: any, offset?: Vec3D): any {
+  public getRightHipPosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getRightHipPosition', entity, offset);
     return p;
   }
@@ -1363,7 +1367,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0712] getHipCenter
    * Lấy tâm hai hông.
    */
-  public getHipCenter(entity?: any, offset?: Vec3D): any {
+  public getHipCenter(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getHipCenter', entity, offset);
     return p;
   }
@@ -1371,7 +1375,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0713] getHipJointPosition
    * Lấy tọa độ khớp hông.
    */
-  public getHipJointPosition(entity?: any, offset?: Vec3D): any {
+  public getHipJointPosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getHipJointPosition', entity, offset);
     return p;
   }
@@ -1379,7 +1383,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0714] getSacrumPosition
    * Lấy tọa độ xương cùng.
    */
-  public getSacrumPosition(entity?: any, offset?: Vec3D): any {
+  public getSacrumPosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getSacrumPosition', entity, offset);
     return p;
   }
@@ -1387,7 +1391,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0715] getTailbonePosition
    * Lấy tọa độ xương cụt.
    */
-  public getTailbonePosition(entity?: any, offset?: Vec3D): any {
+  public getTailbonePosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getTailbonePosition', entity, offset);
     return p;
   }
@@ -1395,7 +1399,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0716] calculateAbdomenWidth
    * Tính chiều rộng bụng.
    */
-  public calculateAbdomenWidth(entity?: any, options?: any): any {
+  public calculateAbdomenWidth(entity?: unknown, options?: unknown) {
     const size = this.regionSizeFor(this.optEntity(options, entity), 'abdomen');
     return this.measureWith('calculateAbdomenWidth', size.x, 'm', options, { size });
   }
@@ -1403,7 +1407,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0717] calculateAbdomenHeight
    * Tính chiều cao bụng.
    */
-  public calculateAbdomenHeight(entity?: any, options?: any): any {
+  public calculateAbdomenHeight(entity?: unknown, options?: unknown) {
     const size = this.regionSizeFor(this.optEntity(options, entity), 'abdomen');
     return this.measureWith('calculateAbdomenHeight', size.y, 'm', options, { size });
   }
@@ -1411,7 +1415,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0718] calculateAbdomenDepth
    * Tính chiều sâu bụng.
    */
-  public calculateAbdomenDepth(entity?: any, options?: any): any {
+  public calculateAbdomenDepth(entity?: unknown, options?: unknown) {
     const size = this.regionSizeFor(this.optEntity(options, entity), 'abdomen');
     return this.measureWith('calculateAbdomenDepth', size.z, 'm', options, { size });
   }
@@ -1419,7 +1423,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0719] calculateAbdomenVolume
    * Tính thể tích bụng.
    */
-  public calculateAbdomenVolume(entity?: any, options?: any): any {
+  public calculateAbdomenVolume(entity?: unknown, options?: unknown) {
     const size = this.regionSizeFor(this.optEntity(options, entity), 'abdomen');
     return this.measureWith('calculateAbdomenVolume', size.x * size.y * size.z, 'm^3', options, { size });
   }
@@ -1427,7 +1431,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0720] calculateAbdomenCenterOfMass
    * Tính tâm khối lượng bụng.
    */
-  public calculateAbdomenCenterOfMass(entity?: any, options?: any): any {
+  public calculateAbdomenCenterOfMass(entity?: unknown, options?: unknown) {
     const subject = this.optEntity(options, entity);
     const size = this.regionSizeFor(subject, 'abdomen');
     const center = this.pointWith(this.centerOfMassPoint(subject, 0.02, size.y), subject, options);
@@ -1437,7 +1441,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0721] calculatePelvisWidth
    * Tính chiều rộng xương chậu.
    */
-  public calculatePelvisWidth(entity?: any, options?: any): any {
+  public calculatePelvisWidth(entity?: unknown, options?: unknown) {
     const size = this.regionSizeFor(this.optEntity(options, entity), 'pelvis');
     return this.measureWith('calculatePelvisWidth', size.x, 'm', options, { size });
   }
@@ -1445,7 +1449,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0722] calculatePelvisHeight
    * Tính chiều cao xương chậu.
    */
-  public calculatePelvisHeight(entity?: any, options?: any): any {
+  public calculatePelvisHeight(entity?: unknown, options?: unknown) {
     const size = this.regionSizeFor(this.optEntity(options, entity), 'pelvis');
     return this.measureWith('calculatePelvisHeight', size.y, 'm', options, { size });
   }
@@ -1453,7 +1457,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0723] calculatePelvisDepth
    * Tính chiều sâu xương chậu.
    */
-  public calculatePelvisDepth(entity?: any, options?: any): any {
+  public calculatePelvisDepth(entity?: unknown, options?: unknown) {
     const size = this.regionSizeFor(this.optEntity(options, entity), 'pelvis');
     return this.measureWith('calculatePelvisDepth', size.z, 'm', options, { size });
   }
@@ -1461,7 +1465,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0724] calculatePelvisOrientation
    * Tính hướng xương chậu.
    */
-  public calculatePelvisOrientation(entityOrAngle?: any, options?: any): any {
+  public calculatePelvisOrientation(entityOrAngle?: unknown, options?: unknown) {
     const found = this.boneQuaternion(entityOrAngle, options, ['pelvis', 'hip']);
     return this.orientation('calculatePelvisOrientation', found.q, { bone: found.bone });
   }
@@ -1469,7 +1473,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0725] calculatePelvisRotation
    * Tính góc quay xương chậu.
    */
-  public calculatePelvisRotation(entityOrAngle?: any, options?: any): any {
+  public calculatePelvisRotation(entityOrAngle?: unknown, options?: unknown) {
     const found = this.boneQuaternion(entityOrAngle, options, ['pelvis', 'hip']);
     return this.orientation('calculatePelvisRotation', found.q, { bone: found.bone });
   }
@@ -1477,7 +1481,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0726] calculatePelvisTilt
    * Tính độ nghiêng xương chậu.
    */
-  public calculatePelvisTilt(a?: any, b?: any): any {
+  public calculatePelvisTilt(a?: unknown, b?: unknown) {
     const e = this.jointEuler(a, b, ['pelvis', 'hip']);
     return this.measure('calculatePelvisTilt', e.x, 'rad');
   }
@@ -1485,7 +1489,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0727] calculatePelvisTwist
    * Tính góc xoay xương chậu.
    */
-  public calculatePelvisTwist(a?: any, b?: any): any {
+  public calculatePelvisTwist(a?: unknown, b?: unknown) {
     const e = this.jointEuler(a, b, ['pelvis', 'hip']);
     return this.measure('calculatePelvisTwist', e.y, 'rad');
   }
@@ -1493,7 +1497,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0728] calculateHipWidth
    * Tính chiều rộng hông.
    */
-  public calculateHipWidth(entity?: any, options?: any): any {
+  public calculateHipWidth(entity?: unknown, options?: unknown) {
     const subject = this.optEntity(options, entity);
     const width = this.declaredNumber(subject, 'hipWidth', BODY_DIMENSIONS.hipWidth);
     return this.measureWith('calculateHipWidth', width, 'm');
@@ -1502,7 +1506,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0729] calculateHipSymmetry
    * Tính độ đối xứng hông.
    */
-  public calculateHipSymmetry(a?: any, b?: any, options?: any): any {
+  public calculateHipSymmetry(a?: unknown, b?: unknown, options?: unknown) {
     const score = this.symmetryScore(a, b, BODY_DIMENSIONS.hipWidth);
     return namedResult('calculateHipSymmetry', this.applyOptions(score, options, { numeric: ['symmetry', 'difference'], points: ['left', 'right'] }, a));
   }
@@ -1510,7 +1514,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0730] calculateHipJointAngle
    * Tính góc khớp hông.
    */
-  public calculateHipJointAngle(a?: any, b?: any): any {
+  public calculateHipJointAngle(a?: unknown, b?: unknown) {
     const hip = this.landmarkPosition('getHipJointPosition', a);
     // `b` là vị trí đầu gối tùy chọn (entity khác hoặc điểm tọa độ).
     const knee = this.landmarkFrom(b, 'getKneePosition') ?? this.landmarkPosition('getKneePosition', a);
@@ -1522,7 +1526,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0731] calculateHipFlexion
    * Tính góc gập hông.
    */
-  public calculateHipFlexion(a?: any, b?: any): any {
+  public calculateHipFlexion(a?: unknown, b?: unknown) {
     const e = this.jointEuler(a, b, ['thigh', 'hip']);
     return this.measure('calculateHipFlexion', Math.max(0, e.x), 'rad');
   }
@@ -1530,7 +1534,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0732] calculateHipExtension
    * Tính góc duỗi hông.
    */
-  public calculateHipExtension(a?: any, b?: any): any {
+  public calculateHipExtension(a?: unknown, b?: unknown) {
     const e = this.jointEuler(a, b, ['thigh', 'hip']);
     return this.measure('calculateHipExtension', Math.max(0, -e.x), 'rad');
   }
@@ -1538,7 +1542,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0733] calculateHipAbduction
    * Tính góc dạng hông.
    */
-  public calculateHipAbduction(a?: any, b?: any): any {
+  public calculateHipAbduction(a?: unknown, b?: unknown) {
     const e = this.jointEuler(a, b, ['thigh', 'hip']);
     return this.measure('calculateHipAbduction', Math.max(0, e.z), 'rad');
   }
@@ -1546,7 +1550,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0734] calculateHipAdduction
    * Tính góc khép hông.
    */
-  public calculateHipAdduction(a?: any, b?: any): any {
+  public calculateHipAdduction(a?: unknown, b?: unknown) {
     const e = this.jointEuler(a, b, ['thigh', 'hip']);
     return this.measure('calculateHipAdduction', Math.max(0, -e.z), 'rad');
   }
@@ -1554,7 +1558,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0735] calculateHipInternalRotation
    * Tính góc xoay trong hông.
    */
-  public calculateHipInternalRotation(entityOrAngle?: any, options?: any): any {
+  public calculateHipInternalRotation(entityOrAngle?: unknown, options?: unknown) {
     const found = this.boneQuaternion(entityOrAngle, options, ['thigh', 'hip']);
     return this.orientation('calculateHipInternalRotation', found.q, { bone: found.bone });
   }
@@ -1562,7 +1566,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0736] calculateHipExternalRotation
    * Tính góc xoay ngoài hông.
    */
-  public calculateHipExternalRotation(entityOrAngle?: any, options?: any): any {
+  public calculateHipExternalRotation(entityOrAngle?: unknown, options?: unknown) {
     const found = this.boneQuaternion(entityOrAngle, options, ['thigh', 'hip']);
     return this.orientation('calculateHipExternalRotation', found.q, { bone: found.bone });
   }
@@ -1570,7 +1574,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0737] calculateHipVelocity
    * Tính vận tốc hông.
    */
-  public calculateHipVelocity(entity?: any, dt = 0.016): any {
+  public calculateHipVelocity(entity?: unknown, dt = 0.016) {
     const velocity = this.velocityFrom(entity, dt);
     return this.vector('calculateHipVelocity', velocity);
   }
@@ -1578,7 +1582,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0738] calculateHipAcceleration
    * Tính gia tốc hông.
    */
-  public calculateHipAcceleration(entity?: any, dt = 0.016): any {
+  public calculateHipAcceleration(entity?: unknown, dt = 0.016) {
     const acceleration = this.accelerationFrom(entity, dt);
     return this.vector('calculateHipAcceleration', acceleration);
   }
@@ -1586,7 +1590,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0739] calculateHipBoundingBox
    * Tính hộp bao hông.
    */
-  public calculateHipBoundingBox(entity?: any, size?: Vec3D): any {
+  public calculateHipBoundingBox(entity?: unknown, size?: Vec3D) {
     const box = this.regionBox('hip', entity, size);
     return boundsResult('calculateHipBoundingBox', box);
   }
@@ -1594,7 +1598,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0740] calculateHipCenterOfMass
    * Tính tâm khối lượng hông.
    */
-  public calculateHipCenterOfMass(entity?: any, options?: any): any {
+  public calculateHipCenterOfMass(entity?: unknown, options?: unknown) {
     const subject = this.optEntity(options, entity);
     const size = this.regionSizeFor(subject, 'hip');
     const center = this.pointWith(this.centerOfMassPoint(subject, -size.y * 0.5, size.y), subject, options);
@@ -1604,28 +1608,28 @@ export class AnatomicalLowerBodySubsystem {
    * [0741] calculateHipToKneeDistance
    * Tính khoảng cách hông đến đầu gối.
    */
-  public calculateHipToKneeDistance(a?: any, b?: any): any {
+  public calculateHipToKneeDistance(a?: unknown, b?: unknown) {
     return this.measure('calculateHipToKneeDistance', this.pairDistance(a, b, 'hip', 'knee'), 'm');
   }
   /**
    * [0742] calculateHipToAnkleDistance
    * Tính khoảng cách hông đến mắt cá.
    */
-  public calculateHipToAnkleDistance(a?: any, b?: any): any {
+  public calculateHipToAnkleDistance(a?: unknown, b?: unknown) {
     return this.measure('calculateHipToAnkleDistance', this.pairDistance(a, b, 'hip', 'ankle'), 'm');
   }
   /**
    * [0743] calculateHipToFootDistance
    * Tính khoảng cách hông đến bàn chân.
    */
-  public calculateHipToFootDistance(a?: any, b?: any): any {
+  public calculateHipToFootDistance(a?: unknown, b?: unknown) {
     return this.measure('calculateHipToFootDistance', this.pairDistance(a, b, 'hip', 'foot'), 'm');
   }
   /**
    * [0744] calculatePelvisGroundClearance
    * Tính khoảng cách xương chậu đến mặt đất.
    */
-  public calculatePelvisGroundClearance(entity?: any, options?: any): any {
+  public calculatePelvisGroundClearance(entity?: unknown, options?: unknown) {
     const size = this.regionSize('pelvis');
     const clearance = this.groundClearance(entity, -size.y * 0.5, options);
     return this.measure('calculatePelvisGroundClearance', clearance, 'm');
@@ -1634,7 +1638,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0745] calculatePelvisMotionVector
    * Tính vector chuyển động xương chậu.
    */
-  public calculatePelvisMotionVector(a?: any, b?: any): any {
+  public calculatePelvisMotionVector(a?: unknown, b?: unknown) {
     const motion = this.motionVector(a, b);
     return this.vector('calculatePelvisMotionVector', motion);
   }
@@ -1642,7 +1646,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0746] calculatePelvisPoseError
    * Tính sai lệch tư thế xương chậu.
    */
-  public calculatePelvisPoseError(a?: any, b?: any, options?: any): any {
+  public calculatePelvisPoseError(a?: unknown, b?: unknown, options?: unknown) {
     const error = this.poseError(a, b);
     return namedResult('calculatePelvisPoseError', this.applyOptions(error, options, { numeric: ['positionError', 'rotationError'] }, a));
   }
@@ -1650,7 +1654,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0747] calculatePelvisStability
    * Tính độ ổn định xương chậu.
    */
-  public calculatePelvisStability(a?: any, b?: any, options?: any): any {
+  public calculatePelvisStability(a?: unknown, b?: unknown, options?: unknown) {
     const e = this.jointEuler(a, b, ['pelvis', 'hip']);
     const tilt = Math.abs(e.x);
     const twist = Math.abs(e.y);
@@ -1661,7 +1665,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0748] calculatePelvisCollision
    * Kiểm tra va chạm xương chậu.
    */
-  public calculatePelvisCollision(a?: any, b?: any): any {
+  public calculatePelvisCollision(a?: unknown, b?: unknown) {
     const boxA = this.regionBox('pelvis', a);
     const boxB = this.regionBox('pelvis', b);
     return aabbResult('calculatePelvisCollision', boxA, boxB);
@@ -1670,7 +1674,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0749] calculateHipJointAxis
    * Tính trục khớp hông.
    */
-  public calculateHipJointAxis(a?: any, b?: any, options?: any): any {
+  public calculateHipJointAxis(a?: unknown, b?: unknown, options?: unknown) {
     const subject = this.optEntity(options, a);
     const hip = this.landmarkPosition('getHipJointPosition', subject);
     // `b` là vị trí đầu gối tùy chọn (entity khác hoặc điểm tọa độ).
@@ -1690,7 +1694,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0750] calculateHipJointNormal
    * Tính pháp tuyến khớp hông.
    */
-  public calculateHipJointNormal(a?: any, b?: any): any {
+  public calculateHipJointNormal(a?: unknown, b?: unknown) {
     const hip = this.markerPosition(a, ['hip', 'pelvis'], 'getHipJointPosition');
     // `b` là vị trí đầu gối tùy chọn (entity khác hoặc điểm tọa độ).
     const knee = this.markerFrom(b, ['knee'], 'getKneePosition') ?? this.markerPosition(a, ['knee'], 'getKneePosition');
@@ -1706,7 +1710,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0751] getLeftLegPosition
    * Lấy tọa độ chân trái.
    */
-  public getLeftLegPosition(entity?: any, offset?: Vec3D): any {
+  public getLeftLegPosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getLeftLegPosition', entity, offset);
     return p;
   }
@@ -1714,7 +1718,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0752] getRightLegPosition
    * Lấy tọa độ chân phải.
    */
-  public getRightLegPosition(entity?: any, offset?: Vec3D): any {
+  public getRightLegPosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getRightLegPosition', entity, offset);
     return p;
   }
@@ -1722,7 +1726,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0753] getLeftLegCenter
    * Lấy tâm chân trái.
    */
-  public getLeftLegCenter(entity?: any, offset?: Vec3D): any {
+  public getLeftLegCenter(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getLeftLegCenter', entity, offset);
     return p;
   }
@@ -1730,7 +1734,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0754] getRightLegCenter
    * Lấy tâm chân phải.
    */
-  public getRightLegCenter(entity?: any, offset?: Vec3D): any {
+  public getRightLegCenter(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getRightLegCenter', entity, offset);
     return p;
   }
@@ -1738,7 +1742,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0755] getLeftThighPosition
    * Lấy tọa độ đùi trái.
    */
-  public getLeftThighPosition(entity?: any, offset?: Vec3D): any {
+  public getLeftThighPosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getLeftThighPosition', entity, offset);
     return p;
   }
@@ -1746,7 +1750,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0756] getRightThighPosition
    * Lấy tọa độ đùi phải.
    */
-  public getRightThighPosition(entity?: any, offset?: Vec3D): any {
+  public getRightThighPosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getRightThighPosition', entity, offset);
     return p;
   }
@@ -1754,7 +1758,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0757] getLeftThighCenter
    * Lấy tâm đùi trái.
    */
-  public getLeftThighCenter(entity?: any, offset?: Vec3D): any {
+  public getLeftThighCenter(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getLeftThighCenter', entity, offset);
     return p;
   }
@@ -1762,7 +1766,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0758] getRightThighCenter
    * Lấy tâm đùi phải.
    */
-  public getRightThighCenter(entity?: any, offset?: Vec3D): any {
+  public getRightThighCenter(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getRightThighCenter', entity, offset);
     return p;
   }
@@ -1770,35 +1774,35 @@ export class AnatomicalLowerBodySubsystem {
    * [0759] getLeftThighStart
    * Lấy điểm đầu đùi trái.
    */
-  public getLeftThighStart(a?: any, b?: any, options?: any): any {
+  public getLeftThighStart(a?: unknown, b?: unknown, options?: unknown) {
     return this.landmarkWith('getLeftThighStart', a, b, options, 'left');
   }
   /**
    * [0760] getRightThighStart
    * Lấy điểm đầu đùi phải.
    */
-  public getRightThighStart(a?: any, b?: any, options?: any): any {
+  public getRightThighStart(a?: unknown, b?: unknown, options?: unknown) {
     return this.landmarkWith('getRightThighStart', a, b, options, 'right');
   }
   /**
    * [0761] getLeftThighEnd
    * Lấy điểm cuối đùi trái.
    */
-  public getLeftThighEnd(a?: any, b?: any, options?: any): any {
+  public getLeftThighEnd(a?: unknown, b?: unknown, options?: unknown) {
     return this.landmarkWith('getLeftThighEnd', a, b, options, 'left');
   }
   /**
    * [0762] getRightThighEnd
    * Lấy điểm cuối đùi phải.
    */
-  public getRightThighEnd(a?: any, b?: any, options?: any): any {
+  public getRightThighEnd(a?: unknown, b?: unknown, options?: unknown) {
     return this.landmarkWith('getRightThighEnd', a, b, options, 'right');
   }
   /**
    * [0763] calculateThighLength
    * Tính chiều dài đùi.
    */
-  public calculateThighLength(entity?: any, options?: any): any {
+  public calculateThighLength(entity?: unknown, options?: unknown) {
     const subject = this.optEntity(options, entity);
     const length = this.declaredNumber(subject, 'thighLength', BODY_DIMENSIONS.thighLength);
     return this.measureWith('calculateThighLength', length, 'm');
@@ -1807,7 +1811,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0764] calculateThighWidth
    * Tính chiều rộng đùi.
    */
-  public calculateThighWidth(entity?: any, options?: any): any {
+  public calculateThighWidth(entity?: unknown, options?: unknown) {
     const subject = this.optEntity(options, entity);
     const radius = this.declaredNumber(subject, 'thighRadius', BODY_DIMENSIONS.thighRadius);
     return this.measureWith('calculateThighWidth', radius * 2, 'm');
@@ -1816,14 +1820,14 @@ export class AnatomicalLowerBodySubsystem {
    * [0765] calculateThighThickness
    * Tính độ dày đùi.
    */
-  public calculateThighThickness(a?: any, b?: any, options?: any): any {
+  public calculateThighThickness(a?: unknown, b?: unknown, options?: unknown) {
     return this.thickness('calculateThighThickness', a, b, 'thigh', options);
   }
   /**
    * [0766] calculateThighVolume
    * Tính thể tích đùi.
    */
-  public calculateThighVolume(entity?: any, options?: any): any {
+  public calculateThighVolume(entity?: unknown, options?: unknown) {
     const subject = this.optEntity(options, entity);
     const r = this.declaredNumber(subject, 'thighRadius', BODY_DIMENSIONS.thighRadius);
     const l = this.declaredNumber(subject, 'thighLength', BODY_DIMENSIONS.thighLength);
@@ -1834,7 +1838,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0767] calculateThighSurfaceArea
    * Tính diện tích bề mặt đùi.
    */
-  public calculateThighSurfaceArea(entity?: any, options?: any): any {
+  public calculateThighSurfaceArea(entity?: unknown, options?: unknown) {
     const subject = this.optEntity(options, entity);
     const r = this.declaredNumber(subject, 'thighRadius', BODY_DIMENSIONS.thighRadius);
     const l = this.declaredNumber(subject, 'thighLength', BODY_DIMENSIONS.thighLength);
@@ -1845,7 +1849,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0768] calculateThighDirection
    * Tính hướng đùi.
    */
-  public calculateThighDirection(a?: any, b?: any): any {
+  public calculateThighDirection(a?: unknown, b?: unknown) {
     const hip = this.landmarkPosition('getHipPosition', a);
     // `b` là vị trí đầu gối tùy chọn (entity khác hoặc điểm tọa độ).
     const knee = this.landmarkFrom(b, 'getKneePosition') ?? this.landmarkPosition('getKneePosition', a);
@@ -1856,7 +1860,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0769] calculateThighOrientation
    * Tính hướng quay đùi.
    */
-  public calculateThighOrientation(entityOrAngle?: any, options?: any): any {
+  public calculateThighOrientation(entityOrAngle?: unknown, options?: unknown) {
     const found = this.boneQuaternion(entityOrAngle, options, ['thigh']);
     return this.orientation('calculateThighOrientation', found.q, { bone: found.bone });
   }
@@ -1864,7 +1868,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0770] calculateThighRotation
    * Tính góc quay đùi.
    */
-  public calculateThighRotation(entityOrAngle?: any, options?: any): any {
+  public calculateThighRotation(entityOrAngle?: unknown, options?: unknown) {
     const found = this.boneQuaternion(entityOrAngle, options, ['thigh']);
     return this.orientation('calculateThighRotation', found.q, { bone: found.bone });
   }
@@ -1872,7 +1876,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0771] calculateThighVelocity
    * Tính vận tốc đùi.
    */
-  public calculateThighVelocity(entity?: any, dt = 0.016): any {
+  public calculateThighVelocity(entity?: unknown, dt = 0.016) {
     const velocity = this.velocityFrom(entity, dt);
     return this.vector('calculateThighVelocity', velocity);
   }
@@ -1880,7 +1884,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0772] calculateThighAcceleration
    * Tính gia tốc đùi.
    */
-  public calculateThighAcceleration(entity?: any, dt = 0.016): any {
+  public calculateThighAcceleration(entity?: unknown, dt = 0.016) {
     const acceleration = this.accelerationFrom(entity, dt);
     return this.vector('calculateThighAcceleration', acceleration);
   }
@@ -1888,7 +1892,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0773] calculateThighBoundingBox
    * Tính hộp bao đùi.
    */
-  public calculateThighBoundingBox(entity?: any, size?: Vec3D): any {
+  public calculateThighBoundingBox(entity?: unknown, size?: Vec3D) {
     const box = this.regionBox('thigh', entity, size);
     return boundsResult('calculateThighBoundingBox', box);
   }
@@ -1896,7 +1900,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0774] calculateThighBoundingSphere
    * Tính hình cầu bao đùi.
    */
-  public calculateThighBoundingSphere(entity?: any, radius = 1.0): any {
+  public calculateThighBoundingSphere(entity?: unknown, radius = 1.0) {
     const size = this.regionSize('thigh');
     return sphereResult('calculateThighBoundingSphere', entityPosition(entity), this.autoRadius(radius, size));
   }
@@ -1904,7 +1908,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0775] calculateThighCenterOfMass
    * Tính tâm khối lượng đùi.
    */
-  public calculateThighCenterOfMass(entity?: any, options?: any): any {
+  public calculateThighCenterOfMass(entity?: unknown, options?: unknown) {
     const subject = this.optEntity(options, entity);
     const length = this.declaredNumber(subject, 'thighLength', BODY_DIMENSIONS.thighLength);
     const center = this.pointWith(this.centerOfMassPoint(subject, -length, length), subject, options);
@@ -1914,21 +1918,21 @@ export class AnatomicalLowerBodySubsystem {
    * [0776] calculateThighToHipDistance
    * Tính khoảng cách đùi đến hông.
    */
-  public calculateThighToHipDistance(a?: any, b?: any): any {
+  public calculateThighToHipDistance(a?: unknown, b?: unknown) {
     return this.measure('calculateThighToHipDistance', this.pairDistance(a, b, 'thigh', 'hip'), 'm');
   }
   /**
    * [0777] calculateThighToKneeDistance
    * Tính khoảng cách đùi đến đầu gối.
    */
-  public calculateThighToKneeDistance(a?: any, b?: any): any {
+  public calculateThighToKneeDistance(a?: unknown, b?: unknown) {
     return this.measure('calculateThighToKneeDistance', this.pairDistance(a, b, 'thigh', 'knee'), 'm');
   }
   /**
    * [0778] calculateThighSymmetry
    * Tính độ đối xứng đùi.
    */
-  public calculateThighSymmetry(a?: any, b?: any, options?: any): any {
+  public calculateThighSymmetry(a?: unknown, b?: unknown, options?: unknown) {
     const score = this.symmetryScore(a, b, BODY_DIMENSIONS.hipWidth);
     return namedResult('calculateThighSymmetry', this.applyOptions(score, options, { numeric: ['symmetry', 'difference'], points: ['left', 'right'] }, a));
   }
@@ -1936,7 +1940,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0779] calculateThighFlexion
    * Tính góc gập đùi.
    */
-  public calculateThighFlexion(a?: any, b?: any): any {
+  public calculateThighFlexion(a?: unknown, b?: unknown) {
     const e = this.jointEuler(a, b, ['thigh']);
     return this.measure('calculateThighFlexion', Math.max(0, e.x), 'rad');
   }
@@ -1944,7 +1948,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0780] calculateThighExtension
    * Tính góc duỗi đùi.
    */
-  public calculateThighExtension(a?: any, b?: any): any {
+  public calculateThighExtension(a?: unknown, b?: unknown) {
     const e = this.jointEuler(a, b, ['thigh']);
     return this.measure('calculateThighExtension', Math.max(0, -e.x), 'rad');
   }
@@ -1952,7 +1956,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0781] calculateThighAbduction
    * Tính góc dạng đùi.
    */
-  public calculateThighAbduction(a?: any, b?: any): any {
+  public calculateThighAbduction(a?: unknown, b?: unknown) {
     const e = this.jointEuler(a, b, ['thigh']);
     return this.measure('calculateThighAbduction', Math.max(0, e.z), 'rad');
   }
@@ -1960,7 +1964,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0782] calculateThighAdduction
    * Tính góc khép đùi.
    */
-  public calculateThighAdduction(a?: any, b?: any): any {
+  public calculateThighAdduction(a?: unknown, b?: unknown) {
     const e = this.jointEuler(a, b, ['thigh']);
     return this.measure('calculateThighAdduction', Math.max(0, -e.z), 'rad');
   }
@@ -1968,7 +1972,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0783] calculateThighInternalRotation
    * Tính góc xoay trong đùi.
    */
-  public calculateThighInternalRotation(entityOrAngle?: any, options?: any): any {
+  public calculateThighInternalRotation(entityOrAngle?: unknown, options?: unknown) {
     const found = this.boneQuaternion(entityOrAngle, options, ['thigh']);
     return this.orientation('calculateThighInternalRotation', found.q, { bone: found.bone });
   }
@@ -1976,7 +1980,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0784] calculateThighExternalRotation
    * Tính góc xoay ngoài đùi.
    */
-  public calculateThighExternalRotation(entityOrAngle?: any, options?: any): any {
+  public calculateThighExternalRotation(entityOrAngle?: unknown, options?: unknown) {
     const found = this.boneQuaternion(entityOrAngle, options, ['thigh']);
     return this.orientation('calculateThighExternalRotation', found.q, { bone: found.bone });
   }
@@ -1984,7 +1988,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0785] calculateLegLength
    * Tính chiều dài chân.
    */
-  public calculateLegLength(entity?: any, options?: any): any {
+  public calculateLegLength(entity?: unknown, options?: unknown) {
     const subject = this.optEntity(options, entity);
     const length = this.declaredNumber(subject, 'thighLength', BODY_DIMENSIONS.thighLength)
       + this.declaredNumber(subject, 'shinLength', BODY_DIMENSIONS.shinLength);
@@ -1994,7 +1998,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0786] calculateLegDirection
    * Tính hướng chân.
    */
-  public calculateLegDirection(a?: any, b?: any): any {
+  public calculateLegDirection(a?: unknown, b?: unknown) {
     const hip = this.landmarkPosition('getHipPosition', a);
     // `b` là vị trí bàn chân tùy chọn (entity khác hoặc điểm tọa độ).
     const foot = this.landmarkFrom(b, 'getFootCenter') ?? this.landmarkPosition('getFootCenter', a);
@@ -2005,7 +2009,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0787] calculateLegOrientation
    * Tính hướng quay chân.
    */
-  public calculateLegOrientation(entityOrAngle?: any, options?: any): any {
+  public calculateLegOrientation(entityOrAngle?: unknown, options?: unknown) {
     const found = this.boneQuaternion(entityOrAngle, options, ['leg', 'thigh']);
     return this.orientation('calculateLegOrientation', found.q, { bone: found.bone });
   }
@@ -2013,7 +2017,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0788] calculateLegVelocity
    * Tính vận tốc chân.
    */
-  public calculateLegVelocity(entity?: any, dt = 0.016): any {
+  public calculateLegVelocity(entity?: unknown, dt = 0.016) {
     const velocity = this.velocityFrom(entity, dt);
     return this.vector('calculateLegVelocity', velocity);
   }
@@ -2021,7 +2025,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0789] calculateLegAcceleration
    * Tính gia tốc chân.
    */
-  public calculateLegAcceleration(entity?: any, dt = 0.016): any {
+  public calculateLegAcceleration(entity?: unknown, dt = 0.016) {
     const acceleration = this.accelerationFrom(entity, dt);
     return this.vector('calculateLegAcceleration', acceleration);
   }
@@ -2029,7 +2033,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0790] calculateLegBoundingBox
    * Tính hộp bao chân.
    */
-  public calculateLegBoundingBox(entity?: any, size?: Vec3D): any {
+  public calculateLegBoundingBox(entity?: unknown, size?: Vec3D) {
     const box = this.regionBox('leg', entity, size);
     return boundsResult('calculateLegBoundingBox', box);
   }
@@ -2037,7 +2041,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0791] calculateLegCenterOfMass
    * Tính tâm khối lượng chân.
    */
-  public calculateLegCenterOfMass(entity?: any, options?: any): any {
+  public calculateLegCenterOfMass(entity?: unknown, options?: unknown) {
     const subject = this.optEntity(options, entity);
     const length = this.declaredNumber(subject, 'thighLength', BODY_DIMENSIONS.thighLength)
       + this.declaredNumber(subject, 'shinLength', BODY_DIMENSIONS.shinLength);
@@ -2048,7 +2052,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0792] calculateLegSwingAngle
    * Tính góc vung chân.
    */
-  public calculateLegSwingAngle(a?: any, b?: any): any {
+  public calculateLegSwingAngle(a?: unknown, b?: unknown) {
     const hip = this.landmarkPosition('getHipPosition', a);
     // `b` là vị trí bàn chân tùy chọn (entity khác hoặc điểm tọa độ).
     const foot = this.landmarkFrom(b, 'getFootCenter') ?? this.landmarkPosition('getFootCenter', a);
@@ -2060,7 +2064,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0793] calculateLegStrideLength
    * Tính chiều dài bước chân.
    */
-  public calculateLegStrideLength(entity?: any, options?: any): any {
+  public calculateLegStrideLength(entity?: unknown, options?: unknown) {
     const subject = this.optEntity(options, entity);
     const legLength = this.declaredNumber(subject, 'thighLength', BODY_DIMENSIONS.thighLength)
       + this.declaredNumber(subject, 'shinLength', BODY_DIMENSIONS.shinLength);
@@ -2071,7 +2075,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0794] calculateLegStrideFrequency
    * Tính tần số bước chân.
    */
-  public calculateLegStrideFrequency(entity?: any, options?: any): any {
+  public calculateLegStrideFrequency(entity?: unknown, options?: unknown) {
     const subject = this.optEntity(options, entity);
     const legLength = this.declaredNumber(subject, 'thighLength', BODY_DIMENSIONS.thighLength)
       + this.declaredNumber(subject, 'shinLength', BODY_DIMENSIONS.shinLength);
@@ -2083,7 +2087,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0795] calculateLegGroundClearance
    * Tính khoảng cách chân đến mặt đất.
    */
-  public calculateLegGroundClearance(entity?: any, options?: any): any {
+  public calculateLegGroundClearance(entity?: unknown, options?: unknown) {
     const clearance = this.groundClearance(entity, -0.93, options);
     return this.measure('calculateLegGroundClearance', clearance, 'm');
   }
@@ -2091,7 +2095,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0796] calculateLegContactPoint
    * Tính điểm tiếp xúc chân.
    */
-  public calculateLegContactPoint(a?: any, b?: any, options?: any): any {
+  public calculateLegContactPoint(a?: unknown, b?: unknown, options?: unknown) {
     const foot = this.landmarkPosition('getFootSolePosition', a);
     const contact = b !== undefined && b !== null ? pointOf(b) : { x: foot.x, y: 0, z: foot.z };
     const payload = this.applyOptions({ point: contact, contact: contact, sole: foot }, options, { points: ['point', 'contact', 'sole'] }, a);
@@ -2101,7 +2105,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0797] calculateLegContactNormal
    * Tính pháp tuyến điểm tiếp xúc chân.
    */
-  public calculateLegContactNormal(a?: any, b?: any): any {
+  public calculateLegContactNormal(a?: unknown, b?: unknown) {
     const normal = this.surfaceNormal(a, b, { x: 0, y: 1, z: 0 });
     return this.vector('calculateLegContactNormal', normal);
   }
@@ -2109,7 +2113,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0798] calculateLegPoseError
    * Tính sai lệch tư thế chân.
    */
-  public calculateLegPoseError(a?: any, b?: any, options?: any): any {
+  public calculateLegPoseError(a?: unknown, b?: unknown, options?: unknown) {
     const error = this.poseError(a, b);
     return namedResult('calculateLegPoseError', this.applyOptions(error, options, { numeric: ['positionError', 'rotationError'] }, a));
   }
@@ -2117,7 +2121,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0799] calculateLegMotionSmoothness
    * Tính độ mượt chuyển động chân.
    */
-  public calculateLegMotionSmoothness(a?: any, b?: any, options?: any): any {
+  public calculateLegMotionSmoothness(a?: unknown, b?: unknown, options?: unknown) {
     // `b` là nguồn chuyển động thay thế cho `a`.
     const source = b !== undefined && b !== null ? b : a;
     const smoothness = this.motionSmoothness(source);
@@ -2127,7 +2131,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0800] calculateLegInverseKinematics
    * Tính động học ngược chân.
    */
-  public calculateLegInverseKinematics(a?: any, b?: any, options?: any): any {
+  public calculateLegInverseKinematics(a?: unknown, b?: unknown, options?: unknown) {
     const chain = ['getHipPosition', 'getKneePosition', 'getAnklePosition', 'getFootCenter'];
     return this.inverseKinematics('calculateLegInverseKinematics', a, b, options, chain);
   }
@@ -2139,7 +2143,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0801] getLeftKneePosition
    * Lấy tọa độ đầu gối trái.
    */
-  public getLeftKneePosition(entity?: any, offset?: Vec3D): any {
+  public getLeftKneePosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getLeftKneePosition', entity, offset);
     return p;
   }
@@ -2147,7 +2151,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0802] getRightKneePosition
    * Lấy tọa độ đầu gối phải.
    */
-  public getRightKneePosition(entity?: any, offset?: Vec3D): any {
+  public getRightKneePosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getRightKneePosition', entity, offset);
     return p;
   }
@@ -2155,7 +2159,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0803] getLeftKneeCenter
    * Lấy tâm đầu gối trái.
    */
-  public getLeftKneeCenter(entity?: any, offset?: Vec3D): any {
+  public getLeftKneeCenter(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getLeftKneeCenter', entity, offset);
     return p;
   }
@@ -2163,7 +2167,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0804] getRightKneeCenter
    * Lấy tâm đầu gối phải.
    */
-  public getRightKneeCenter(entity?: any, offset?: Vec3D): any {
+  public getRightKneeCenter(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getRightKneeCenter', entity, offset);
     return p;
   }
@@ -2171,7 +2175,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0805] getLeftKneeCapPosition
    * Lấy tọa độ xương bánh chè trái.
    */
-  public getLeftKneeCapPosition(entity?: any, offset?: Vec3D): any {
+  public getLeftKneeCapPosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getLeftKneeCapPosition', entity, offset);
     return p;
   }
@@ -2179,7 +2183,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0806] getRightKneeCapPosition
    * Lấy tọa độ xương bánh chè phải.
    */
-  public getRightKneeCapPosition(entity?: any, offset?: Vec3D): any {
+  public getRightKneeCapPosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getRightKneeCapPosition', entity, offset);
     return p;
   }
@@ -2187,7 +2191,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0807] calculateKneeWidth
    * Tính chiều rộng đầu gối.
    */
-  public calculateKneeWidth(entity?: any, options?: any): any {
+  public calculateKneeWidth(entity?: unknown, options?: unknown) {
     const size = this.regionSizeFor(this.optEntity(options, entity), 'knee');
     return this.measureWith('calculateKneeWidth', size.x, 'm', options, { size });
   }
@@ -2195,14 +2199,14 @@ export class AnatomicalLowerBodySubsystem {
    * [0808] calculateKneeThickness
    * Tính độ dày đầu gối.
    */
-  public calculateKneeThickness(a?: any, b?: any, options?: any): any {
+  public calculateKneeThickness(a?: unknown, b?: unknown, options?: unknown) {
     return this.thickness('calculateKneeThickness', a, b, 'knee', options);
   }
   /**
    * [0809] calculateKneeFlexion
    * Tính góc gập đầu gối.
    */
-  public calculateKneeFlexion(a?: any, b?: any): any {
+  public calculateKneeFlexion(a?: unknown, b?: unknown) {
     const e = this.jointEuler(a, b, ['knee', 'shin']);
     return this.measure('calculateKneeFlexion', Math.max(0, e.x), 'rad');
   }
@@ -2210,7 +2214,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0810] calculateKneeExtension
    * Tính góc duỗi đầu gối.
    */
-  public calculateKneeExtension(a?: any, b?: any): any {
+  public calculateKneeExtension(a?: unknown, b?: unknown) {
     const e = this.jointEuler(a, b, ['knee', 'shin']);
     return this.measure('calculateKneeExtension', Math.max(0, -e.x), 'rad');
   }
@@ -2218,7 +2222,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0811] calculateKneeRotation
    * Tính góc quay đầu gối.
    */
-  public calculateKneeRotation(entityOrAngle?: any, options?: any): any {
+  public calculateKneeRotation(entityOrAngle?: unknown, options?: unknown) {
     const found = this.boneQuaternion(entityOrAngle, options, ['knee']);
     return this.orientation('calculateKneeRotation', found.q, { bone: found.bone });
   }
@@ -2226,7 +2230,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0812] calculateKneeJointAxis
    * Tính trục khớp gối.
    */
-  public calculateKneeJointAxis(a?: any, b?: any, options?: any): any {
+  public calculateKneeJointAxis(a?: unknown, b?: unknown, options?: unknown) {
     const subject = this.optEntity(options, a);
     const knee = this.landmarkPosition('getKneePosition', subject);
     // `b` là vị trí mắt cái tùy chọn (entity khác hoặc điểm tọa độ).
@@ -2246,7 +2250,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0813] calculateKneeJointNormal
    * Tính pháp tuyến khớp gối.
    */
-  public calculateKneeJointNormal(a?: any, b?: any): any {
+  public calculateKneeJointNormal(a?: unknown, b?: unknown) {
     const knee = this.markerPosition(a, ['knee'], 'getKneePosition');
     // `b` là vị trí mắt cái tùy chọn (entity khác hoặc điểm tọa độ).
     const ankle = this.markerFrom(b, ['ankle'], 'getAnklePosition') ?? this.markerPosition(a, ['ankle'], 'getAnklePosition');
@@ -2259,7 +2263,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0814] calculateKneeVelocity
    * Tính vận tốc đầu gối.
    */
-  public calculateKneeVelocity(entity?: any, dt = 0.016): any {
+  public calculateKneeVelocity(entity?: unknown, dt = 0.016) {
     const velocity = this.velocityFrom(entity, dt);
     return this.vector('calculateKneeVelocity', velocity);
   }
@@ -2267,7 +2271,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0815] calculateKneeAcceleration
    * Tính gia tốc đầu gối.
    */
-  public calculateKneeAcceleration(entity?: any, dt = 0.016): any {
+  public calculateKneeAcceleration(entity?: unknown, dt = 0.016) {
     const acceleration = this.accelerationFrom(entity, dt);
     return this.vector('calculateKneeAcceleration', acceleration);
   }
@@ -2275,7 +2279,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0816] calculateKneeBoundingBox
    * Tính hộp bao đầu gối.
    */
-  public calculateKneeBoundingBox(entity?: any, size?: Vec3D): any {
+  public calculateKneeBoundingBox(entity?: unknown, size?: Vec3D) {
     const box = this.regionBox('knee', entity, size);
     return boundsResult('calculateKneeBoundingBox', box);
   }
@@ -2283,7 +2287,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0817] calculateKneeBoundingSphere
    * Tính hình cầu bao đầu gối.
    */
-  public calculateKneeBoundingSphere(entity?: any, radius = 1.0): any {
+  public calculateKneeBoundingSphere(entity?: unknown, radius = 1.0) {
     const size = this.regionSize('knee');
     return sphereResult('calculateKneeBoundingSphere', entityPosition(entity), this.autoRadius(radius, size));
   }
@@ -2291,21 +2295,21 @@ export class AnatomicalLowerBodySubsystem {
    * [0818] calculateKneeToHipDistance
    * Tính khoảng cách đầu gối đến hông.
    */
-  public calculateKneeToHipDistance(a?: any, b?: any): any {
+  public calculateKneeToHipDistance(a?: unknown, b?: unknown) {
     return this.measure('calculateKneeToHipDistance', this.pairDistance(a, b, 'knee', 'hip'), 'm');
   }
   /**
    * [0819] calculateKneeToAnkleDistance
    * Tính khoảng cách đầu gối đến mắt cá.
    */
-  public calculateKneeToAnkleDistance(a?: any, b?: any): any {
+  public calculateKneeToAnkleDistance(a?: unknown, b?: unknown) {
     return this.measure('calculateKneeToAnkleDistance', this.pairDistance(a, b, 'knee', 'ankle'), 'm');
   }
   /**
    * [0820] calculateKneeSymmetry
    * Tính độ đối xứng đầu gối.
    */
-  public calculateKneeSymmetry(a?: any, b?: any, options?: any): any {
+  public calculateKneeSymmetry(a?: unknown, b?: unknown, options?: unknown) {
     const score = this.symmetryScore(a, b, BODY_DIMENSIONS.hipWidth);
     return namedResult('calculateKneeSymmetry', this.applyOptions(score, options, { numeric: ['symmetry', 'difference'], points: ['left', 'right'] }, a));
   }
@@ -2313,7 +2317,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0821] getLeftShinPosition
    * Lấy tọa độ cẳng chân trái.
    */
-  public getLeftShinPosition(entity?: any, offset?: Vec3D): any {
+  public getLeftShinPosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getLeftShinPosition', entity, offset);
     return p;
   }
@@ -2321,7 +2325,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0822] getRightShinPosition
    * Lấy tọa độ cẳng chân phải.
    */
-  public getRightShinPosition(entity?: any, offset?: Vec3D): any {
+  public getRightShinPosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getRightShinPosition', entity, offset);
     return p;
   }
@@ -2329,7 +2333,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0823] getLeftShinCenter
    * Lấy tâm cẳng chân trái.
    */
-  public getLeftShinCenter(entity?: any, offset?: Vec3D): any {
+  public getLeftShinCenter(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getLeftShinCenter', entity, offset);
     return p;
   }
@@ -2337,7 +2341,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0824] getRightShinCenter
    * Lấy tâm cẳng chân phải.
    */
-  public getRightShinCenter(entity?: any, offset?: Vec3D): any {
+  public getRightShinCenter(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getRightShinCenter', entity, offset);
     return p;
   }
@@ -2345,35 +2349,35 @@ export class AnatomicalLowerBodySubsystem {
    * [0825] getLeftShinStart
    * Lấy điểm đầu cẳng chân trái.
    */
-  public getLeftShinStart(a?: any, b?: any, options?: any): any {
+  public getLeftShinStart(a?: unknown, b?: unknown, options?: unknown) {
     return this.landmarkWith('getLeftShinStart', a, b, options, 'left');
   }
   /**
    * [0826] getRightShinStart
    * Lấy điểm đầu cẳng chân phải.
    */
-  public getRightShinStart(a?: any, b?: any, options?: any): any {
+  public getRightShinStart(a?: unknown, b?: unknown, options?: unknown) {
     return this.landmarkWith('getRightShinStart', a, b, options, 'right');
   }
   /**
    * [0827] getLeftShinEnd
    * Lấy điểm cuối cẳng chân trái.
    */
-  public getLeftShinEnd(a?: any, b?: any, options?: any): any {
+  public getLeftShinEnd(a?: unknown, b?: unknown, options?: unknown) {
     return this.landmarkWith('getLeftShinEnd', a, b, options, 'left');
   }
   /**
    * [0828] getRightShinEnd
    * Lấy điểm cuối cẳng chân phải.
    */
-  public getRightShinEnd(a?: any, b?: any, options?: any): any {
+  public getRightShinEnd(a?: unknown, b?: unknown, options?: unknown) {
     return this.landmarkWith('getRightShinEnd', a, b, options, 'right');
   }
   /**
    * [0829] calculateShinLength
    * Tính chiều dài cẳng chân.
    */
-  public calculateShinLength(entity?: any, options?: any): any {
+  public calculateShinLength(entity?: unknown, options?: unknown) {
     const subject = this.optEntity(options, entity);
     const length = this.declaredNumber(subject, 'shinLength', BODY_DIMENSIONS.shinLength);
     return this.measureWith('calculateShinLength', length, 'm');
@@ -2382,7 +2386,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0830] calculateShinWidth
    * Tính chiều rộng cẳng chân.
    */
-  public calculateShinWidth(entity?: any, options?: any): any {
+  public calculateShinWidth(entity?: unknown, options?: unknown) {
     const subject = this.optEntity(options, entity);
     const radius = this.declaredNumber(subject, 'shinRadius', BODY_DIMENSIONS.shinRadius);
     return this.measureWith('calculateShinWidth', radius * 2, 'm');
@@ -2391,14 +2395,14 @@ export class AnatomicalLowerBodySubsystem {
    * [0831] calculateShinThickness
    * Tính độ dày cẳng chân.
    */
-  public calculateShinThickness(a?: any, b?: any, options?: any): any {
+  public calculateShinThickness(a?: unknown, b?: unknown, options?: unknown) {
     return this.thickness('calculateShinThickness', a, b, 'shin', options);
   }
   /**
    * [0832] calculateShinVolume
    * Tính thể tích cẳng chân.
    */
-  public calculateShinVolume(entity?: any, options?: any): any {
+  public calculateShinVolume(entity?: unknown, options?: unknown) {
     const subject = this.optEntity(options, entity);
     const r = this.declaredNumber(subject, 'shinRadius', BODY_DIMENSIONS.shinRadius);
     const l = this.declaredNumber(subject, 'shinLength', BODY_DIMENSIONS.shinLength);
@@ -2409,7 +2413,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0833] calculateShinDirection
    * Tính hướng cẳng chân.
    */
-  public calculateShinDirection(a?: any, b?: any): any {
+  public calculateShinDirection(a?: unknown, b?: unknown) {
     const knee = this.markerPosition(a, ['knee'], 'getKneePosition');
     // `b` là vị trí mắt cái tùy chọn (entity khác hoặc điểm tọa độ).
     const ankle = this.markerFrom(b, ['ankle'], 'getAnklePosition') ?? this.markerPosition(a, ['ankle'], 'getAnklePosition');
@@ -2420,7 +2424,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0834] calculateShinOrientation
    * Tính hướng quay cẳng chân.
    */
-  public calculateShinOrientation(entityOrAngle?: any, options?: any): any {
+  public calculateShinOrientation(entityOrAngle?: unknown, options?: unknown) {
     const found = this.boneQuaternion(entityOrAngle, options, ['shin', 'calf']);
     return this.orientation('calculateShinOrientation', found.q, { bone: found.bone });
   }
@@ -2428,7 +2432,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0835] calculateShinVelocity
    * Tính vận tốc cẳng chân.
    */
-  public calculateShinVelocity(entity?: any, dt = 0.016): any {
+  public calculateShinVelocity(entity?: unknown, dt = 0.016) {
     const velocity = this.velocityFrom(entity, dt);
     return this.vector('calculateShinVelocity', velocity);
   }
@@ -2436,7 +2440,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0836] calculateShinAcceleration
    * Tính gia tốc cẳng chân.
    */
-  public calculateShinAcceleration(entity?: any, dt = 0.016): any {
+  public calculateShinAcceleration(entity?: unknown, dt = 0.016) {
     const acceleration = this.accelerationFrom(entity, dt);
     return this.vector('calculateShinAcceleration', acceleration);
   }
@@ -2444,7 +2448,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0837] calculateShinBoundingBox
    * Tính hộp bao cẳng chân.
    */
-  public calculateShinBoundingBox(entity?: any, size?: Vec3D): any {
+  public calculateShinBoundingBox(entity?: unknown, size?: Vec3D) {
     const box = this.regionBox('shin', entity, size);
     return boundsResult('calculateShinBoundingBox', box);
   }
@@ -2452,7 +2456,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0838] calculateShinCenterOfMass
    * Tính tâm khối lượng cẳng chân.
    */
-  public calculateShinCenterOfMass(entity?: any, options?: any): any {
+  public calculateShinCenterOfMass(entity?: unknown, options?: unknown) {
     const subject = this.optEntity(options, entity);
     const length = this.declaredNumber(subject, 'shinLength', BODY_DIMENSIONS.shinLength);
     const center = this.pointWith(this.centerOfMassPoint(subject, -length, length), subject, options);
@@ -2462,21 +2466,21 @@ export class AnatomicalLowerBodySubsystem {
    * [0839] calculateShinToKneeDistance
    * Tính khoảng cách cẳng chân đến đầu gối.
    */
-  public calculateShinToKneeDistance(a?: any, b?: any): any {
+  public calculateShinToKneeDistance(a?: unknown, b?: unknown) {
     return this.measure('calculateShinToKneeDistance', this.pairDistance(a, b, 'shin', 'knee'), 'm');
   }
   /**
    * [0840] calculateShinToAnkleDistance
    * Tính khoảng cách cẳng chân đến mắt cá.
    */
-  public calculateShinToAnkleDistance(a?: any, b?: any): any {
+  public calculateShinToAnkleDistance(a?: unknown, b?: unknown) {
     return this.measure('calculateShinToAnkleDistance', this.pairDistance(a, b, 'shin', 'ankle'), 'm');
   }
   /**
    * [0841] calculateShinRotation
    * Tính góc quay cẳng chân.
    */
-  public calculateShinRotation(entityOrAngle?: any, options?: any): any {
+  public calculateShinRotation(entityOrAngle?: unknown, options?: unknown) {
     const found = this.boneQuaternion(entityOrAngle, options, ['shin', 'calf']);
     return this.orientation('calculateShinRotation', found.q, { bone: found.bone });
   }
@@ -2484,7 +2488,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0842] calculateShinTwist
    * Tính góc xoắn cẳng chân.
    */
-  public calculateShinTwist(a?: any, b?: any): any {
+  public calculateShinTwist(a?: unknown, b?: unknown) {
     const e = this.jointEuler(a, b, ['shin', 'calf']);
     return this.measure('calculateShinTwist', e.y, 'rad');
   }
@@ -2492,7 +2496,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0843] calculateShinSurfaceNormal
    * Tính pháp tuyến bề mặt cẳng chân.
    */
-  public calculateShinSurfaceNormal(a?: any, b?: any): any {
+  public calculateShinSurfaceNormal(a?: unknown, b?: unknown) {
     const normal = this.surfaceNormal(a, b, entityForward(a));
     return this.vector('calculateShinSurfaceNormal', normal);
   }
@@ -2500,7 +2504,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0844] calculateShinGroundClearance
    * Tính khoảng cách cẳng chân đến mặt đất.
    */
-  public calculateShinGroundClearance(entity?: any, options?: any): any {
+  public calculateShinGroundClearance(entity?: unknown, options?: unknown) {
     const clearance = this.groundClearance(entity, -0.85, options);
     return this.measure('calculateShinGroundClearance', clearance, 'm');
   }
@@ -2508,7 +2512,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0845] calculateShinCollision
    * Kiểm tra va chạm cẳng chân.
    */
-  public calculateShinCollision(a?: any, b?: any): any {
+  public calculateShinCollision(a?: unknown, b?: unknown) {
     const boxA = this.regionBox('shin', a);
     const boxB = this.regionBox('shin', b);
     return aabbResult('calculateShinCollision', boxA, boxB);
@@ -2517,7 +2521,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0846] calculateShinPoseError
    * Tính sai lệch tư thế cẳng chân.
    */
-  public calculateShinPoseError(a?: any, b?: any, options?: any): any {
+  public calculateShinPoseError(a?: unknown, b?: unknown, options?: unknown) {
     const error = this.poseError(a, b);
     return namedResult('calculateShinPoseError', this.applyOptions(error, options, { numeric: ['positionError', 'rotationError'] }, a));
   }
@@ -2525,7 +2529,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0847] calculateShinMotionSmoothness
    * Tính độ mượt chuyển động cẳng chân.
    */
-  public calculateShinMotionSmoothness(a?: any, b?: any, options?: any): any {
+  public calculateShinMotionSmoothness(a?: unknown, b?: unknown, options?: unknown) {
     // `b` là nguồn chuyển động thay thế cho `a`.
     const source = b !== undefined && b !== null ? b : a;
     const smoothness = this.motionSmoothness(source);
@@ -2535,7 +2539,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0848] calculateShinSegmentAlignment
    * Tính độ thẳng hàng cẳng chân.
    */
-  public calculateShinSegmentAlignment(a?: any, b?: any, options?: any): any {
+  public calculateShinSegmentAlignment(a?: unknown, b?: unknown, options?: unknown) {
     const knee = this.landmarkPosition('getKneePosition', a);
     // `b` là vị trí mắt cái tùy chọn (entity khác hoặc điểm tọa độ).
     const ankle = this.landmarkFrom(b, 'getAnklePosition') ?? this.landmarkPosition('getAnklePosition', a);
@@ -2549,7 +2553,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0849] calculateShinJointChain
    * Tính chuỗi khớp cẳng chân.
    */
-  public calculateShinJointChain(a?: any, b?: any, options?: any): any {
+  public calculateShinJointChain(a?: unknown, b?: unknown, options?: unknown) {
     const chain = ['getKneePosition', 'getShinPosition', 'getAnklePosition'];
     return this.jointChainWith('calculateShinJointChain', a, b, chain, options);
   }
@@ -2557,7 +2561,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0850] calculateShinInverseKinematics
    * Tính động học ngược cẳng chân.
    */
-  public calculateShinInverseKinematics(a?: any, b?: any, options?: any): any {
+  public calculateShinInverseKinematics(a?: unknown, b?: unknown, options?: unknown) {
     const chain = ['getKneePosition', 'getShinPosition', 'getAnklePosition'];
     return this.inverseKinematics('calculateShinInverseKinematics', a, b, options, chain);
   }
@@ -2569,7 +2573,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0851] getLeftAnklePosition
    * Lấy tọa độ mắt cá trái.
    */
-  public getLeftAnklePosition(entity?: any, offset?: Vec3D): any {
+  public getLeftAnklePosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getLeftAnklePosition', entity, offset);
     return p;
   }
@@ -2577,7 +2581,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0852] getRightAnklePosition
    * Lấy tọa độ mắt cá phải.
    */
-  public getRightAnklePosition(entity?: any, offset?: Vec3D): any {
+  public getRightAnklePosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getRightAnklePosition', entity, offset);
     return p;
   }
@@ -2585,7 +2589,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0853] getLeftAnkleCenter
    * Lấy tâm mắt cá trái.
    */
-  public getLeftAnkleCenter(entity?: any, offset?: Vec3D): any {
+  public getLeftAnkleCenter(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getLeftAnkleCenter', entity, offset);
     return p;
   }
@@ -2593,7 +2597,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0854] getRightAnkleCenter
    * Lấy tâm mắt cá phải.
    */
-  public getRightAnkleCenter(entity?: any, offset?: Vec3D): any {
+  public getRightAnkleCenter(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getRightAnkleCenter', entity, offset);
     return p;
   }
@@ -2601,7 +2605,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0855] getLeftHeelPosition
    * Lấy tọa độ gót chân trái.
    */
-  public getLeftHeelPosition(entity?: any, offset?: Vec3D): any {
+  public getLeftHeelPosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getLeftHeelPosition', entity, offset);
     return p;
   }
@@ -2609,7 +2613,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0856] getRightHeelPosition
    * Lấy tọa độ gót chân phải.
    */
-  public getRightHeelPosition(entity?: any, offset?: Vec3D): any {
+  public getRightHeelPosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getRightHeelPosition', entity, offset);
     return p;
   }
@@ -2617,7 +2621,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0857] getLeftFootPosition
    * Lấy tọa độ bàn chân trái.
    */
-  public getLeftFootPosition(entity?: any, offset?: Vec3D): any {
+  public getLeftFootPosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getLeftFootPosition', entity, offset);
     return p;
   }
@@ -2625,7 +2629,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0858] getRightFootPosition
    * Lấy tọa độ bàn chân phải.
    */
-  public getRightFootPosition(entity?: any, offset?: Vec3D): any {
+  public getRightFootPosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getRightFootPosition', entity, offset);
     return p;
   }
@@ -2633,7 +2637,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0859] getLeftFootCenter
    * Lấy tâm bàn chân trái.
    */
-  public getLeftFootCenter(entity?: any, offset?: Vec3D): any {
+  public getLeftFootCenter(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getLeftFootCenter', entity, offset);
     return p;
   }
@@ -2641,7 +2645,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0860] getRightFootCenter
    * Lấy tâm bàn chân phải.
    */
-  public getRightFootCenter(entity?: any, offset?: Vec3D): any {
+  public getRightFootCenter(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getRightFootCenter', entity, offset);
     return p;
   }
@@ -2649,7 +2653,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0861] getFootToePosition
    * Lấy tọa độ đầu bàn chân.
    */
-  public getFootToePosition(entity?: any, offset?: Vec3D): any {
+  public getFootToePosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getFootToePosition', entity, offset);
     return p;
   }
@@ -2657,7 +2661,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0862] getFootHeelPosition
    * Lấy tọa độ gót bàn chân.
    */
-  public getFootHeelPosition(entity?: any, offset?: Vec3D): any {
+  public getFootHeelPosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getFootHeelPosition', entity, offset);
     return p;
   }
@@ -2665,7 +2669,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0863] getFootArchPosition
    * Lấy tọa độ vòm bàn chân.
    */
-  public getFootArchPosition(entity?: any, offset?: Vec3D): any {
+  public getFootArchPosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getFootArchPosition', entity, offset);
     return p;
   }
@@ -2673,7 +2677,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0864] getFootSolePosition
    * Lấy tọa độ lòng bàn chân.
    */
-  public getFootSolePosition(entity?: any, offset?: Vec3D): any {
+  public getFootSolePosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getFootSolePosition', entity, offset);
     return p;
   }
@@ -2681,7 +2685,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0865] getFootTopPosition
    * Lấy tọa độ mu bàn chân.
    */
-  public getFootTopPosition(entity?: any, offset?: Vec3D): any {
+  public getFootTopPosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getFootTopPosition', entity, offset);
     return p;
   }
@@ -2689,7 +2693,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0866] getFootInnerEdge
    * Lấy tọa độ mép trong bàn chân.
    */
-  public getFootInnerEdge(entity?: any, offset?: Vec3D): any {
+  public getFootInnerEdge(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getFootInnerEdge', entity, offset);
     return p;
   }
@@ -2697,7 +2701,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0867] getFootOuterEdge
    * Lấy tọa độ mép ngoài bàn chân.
    */
-  public getFootOuterEdge(entity?: any, offset?: Vec3D): any {
+  public getFootOuterEdge(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getFootOuterEdge', entity, offset);
     return p;
   }
@@ -2705,7 +2709,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0868] calculateAnkleWidth
    * Tính chiều rộng mắt cá.
    */
-  public calculateAnkleWidth(entity?: any, options?: any): any {
+  public calculateAnkleWidth(entity?: unknown, options?: unknown) {
     const size = this.regionSizeFor(this.optEntity(options, entity), 'ankle');
     return this.measureWith('calculateAnkleWidth', size.x, 'm', options, { size });
   }
@@ -2713,7 +2717,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0869] calculateAnkleFlexion
    * Tính góc gập mắt cá.
    */
-  public calculateAnkleFlexion(a?: any, b?: any): any {
+  public calculateAnkleFlexion(a?: unknown, b?: unknown) {
     const e = this.jointEuler(a, b, ['ankle', 'foot']);
     return this.measure('calculateAnkleFlexion', Math.max(0, e.x), 'rad');
   }
@@ -2721,7 +2725,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0870] calculateAnkleExtension
    * Tính góc duỗi mắt cá.
    */
-  public calculateAnkleExtension(a?: any, b?: any): any {
+  public calculateAnkleExtension(a?: unknown, b?: unknown) {
     const e = this.jointEuler(a, b, ['ankle', 'foot']);
     return this.measure('calculateAnkleExtension', Math.max(0, -e.x), 'rad');
   }
@@ -2729,7 +2733,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0871] calculateAnkleInversion
    * Tính góc nghiêng lòng bàn chân vào trong.
    */
-  public calculateAnkleInversion(a?: any, b?: any, options?: any): any {
+  public calculateAnkleInversion(a?: unknown, b?: unknown, options?: unknown) {
     const e = this.jointEuler(a, b, ['ankle', 'foot']);
     const angle = Math.max(0, e.z);
     const payload = this.applyOptions({ angle: angle, axis: { x: 0, y: 0, z: 1 } }, options, { numeric: ['angle'] }, a);
@@ -2739,7 +2743,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0872] calculateAnkleEversion
    * Tính góc nghiêng lòng bàn chân ra ngoài.
    */
-  public calculateAnkleEversion(a?: any, b?: any, options?: any): any {
+  public calculateAnkleEversion(a?: unknown, b?: unknown, options?: unknown) {
     const e = this.jointEuler(a, b, ['ankle', 'foot']);
     const angle = Math.max(0, -e.z);
     const payload = this.applyOptions({ angle: angle, axis: { x: 0, y: 0, z: 1 } }, options, { numeric: ['angle'] }, a);
@@ -2749,7 +2753,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0873] calculateAnkleRotation
    * Tính góc quay mắt cá.
    */
-  public calculateAnkleRotation(entityOrAngle?: any, options?: any): any {
+  public calculateAnkleRotation(entityOrAngle?: unknown, options?: unknown) {
     const found = this.boneQuaternion(entityOrAngle, options, ['ankle', 'foot']);
     return this.orientation('calculateAnkleRotation', found.q, { bone: found.bone });
   }
@@ -2757,7 +2761,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0874] calculateAnkleVelocity
    * Tính vận tốc mắt cá.
    */
-  public calculateAnkleVelocity(entity?: any, dt = 0.016): any {
+  public calculateAnkleVelocity(entity?: unknown, dt = 0.016) {
     const velocity = this.velocityFrom(entity, dt);
     return this.vector('calculateAnkleVelocity', velocity);
   }
@@ -2765,7 +2769,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0875] calculateAnkleAcceleration
    * Tính gia tốc mắt cá.
    */
-  public calculateAnkleAcceleration(entity?: any, dt = 0.016): any {
+  public calculateAnkleAcceleration(entity?: unknown, dt = 0.016) {
     const acceleration = this.accelerationFrom(entity, dt);
     return this.vector('calculateAnkleAcceleration', acceleration);
   }
@@ -2773,7 +2777,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0876] calculateFootLength
    * Tính chiều dài bàn chân.
    */
-  public calculateFootLength(entity?: any, options?: any): any {
+  public calculateFootLength(entity?: unknown, options?: unknown) {
     const subject = this.optEntity(options, entity);
     const length = this.declaredNumber(subject, 'footLength', BODY_DIMENSIONS.footLength);
     return this.measureWith('calculateFootLength', length, 'm');
@@ -2782,7 +2786,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0877] calculateFootWidth
    * Tính chiều rộng bàn chân.
    */
-  public calculateFootWidth(entity?: any, options?: any): any {
+  public calculateFootWidth(entity?: unknown, options?: unknown) {
     const subject = this.optEntity(options, entity);
     const width = this.declaredNumber(subject, 'footWidth', BODY_DIMENSIONS.footWidth);
     return this.measureWith('calculateFootWidth', width, 'm');
@@ -2791,7 +2795,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0878] calculateFootHeight
    * Tính chiều cao bàn chân.
    */
-  public calculateFootHeight(entity?: any, options?: any): any {
+  public calculateFootHeight(entity?: unknown, options?: unknown) {
     const size = this.regionSizeFor(this.optEntity(options, entity), 'foot');
     return this.measureWith('calculateFootHeight', size.y, 'm', options, { size });
   }
@@ -2799,14 +2803,14 @@ export class AnatomicalLowerBodySubsystem {
    * [0879] calculateFootThickness
    * Tính độ dày bàn chân.
    */
-  public calculateFootThickness(a?: any, b?: any, options?: any): any {
+  public calculateFootThickness(a?: unknown, b?: unknown, options?: unknown) {
     return this.thickness('calculateFootThickness', a, b, 'foot', options);
   }
   /**
    * [0880] calculateFootVolume
    * Tính thể tích bàn chân.
    */
-  public calculateFootVolume(entity?: any, options?: any): any {
+  public calculateFootVolume(entity?: unknown, options?: unknown) {
     const size = this.regionSizeFor(this.optEntity(options, entity), 'foot');
     return this.measureWith('calculateFootVolume', size.x * size.y * size.z, 'm^3', options, { size });
   }
@@ -2814,7 +2818,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0881] calculateFootSurfaceArea
    * Tính diện tích bề mặt bàn chân.
    */
-  public calculateFootSurfaceArea(entity?: any, options?: any): any {
+  public calculateFootSurfaceArea(entity?: unknown, options?: unknown) {
     const size = this.regionSizeFor(this.optEntity(options, entity), 'foot');
     const area = 2 * (size.x * size.y + size.x * size.z + size.y * size.z);
     return this.measureWith('calculateFootSurfaceArea', area, 'm^2', options, { size });
@@ -2823,7 +2827,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0882] calculateFootOrientation
    * Tính hướng bàn chân.
    */
-  public calculateFootOrientation(entityOrAngle?: any, options?: any): any {
+  public calculateFootOrientation(entityOrAngle?: unknown, options?: unknown) {
     const found = this.boneQuaternion(entityOrAngle, options, ['foot', 'ankle']);
     return this.orientation('calculateFootOrientation', found.q, { bone: found.bone });
   }
@@ -2831,7 +2835,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0883] calculateFootDirection
    * Tính hướng di chuyển của bàn chân.
    */
-  public calculateFootDirection(a?: any, b?: any): any {
+  public calculateFootDirection(a?: unknown, b?: unknown) {
     const heel = this.landmarkPosition('getFootHeelPosition', a);
     // `b` là vị trí ngón chân tùy chọn (entity khác hoặc điểm tọa độ).
     const toe = this.landmarkFrom(b, 'getFootToePosition') ?? this.landmarkPosition('getFootToePosition', a);
@@ -2842,7 +2846,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0884] calculateFootRotation
    * Tính góc quay bàn chân.
    */
-  public calculateFootRotation(entityOrAngle?: any, options?: any): any {
+  public calculateFootRotation(entityOrAngle?: unknown, options?: unknown) {
     const found = this.boneQuaternion(entityOrAngle, options, ['foot', 'ankle']);
     return this.orientation('calculateFootRotation', found.q, { bone: found.bone });
   }
@@ -2850,7 +2854,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0885] calculateFootPitch
    * Tính góc chúi/ngẩng bàn chân.
    */
-  public calculateFootPitch(a?: any, b?: any): any {
+  public calculateFootPitch(a?: unknown, b?: unknown) {
     const e = this.jointEuler(a, b, ['foot', 'ankle']);
     return this.measure('calculateFootPitch', e.x, 'rad');
   }
@@ -2858,7 +2862,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0886] calculateFootRoll
    * Tính góc lăn bàn chân.
    */
-  public calculateFootRoll(a?: any, b?: any): any {
+  public calculateFootRoll(a?: unknown, b?: unknown) {
     const e = this.jointEuler(a, b, ['foot', 'ankle']);
     return this.measure('calculateFootRoll', e.z, 'rad');
   }
@@ -2866,7 +2870,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0887] calculateFootYaw
    * Tính góc quay ngang bàn chân.
    */
-  public calculateFootYaw(a?: any, b?: any): any {
+  public calculateFootYaw(a?: unknown, b?: unknown) {
     const e = this.jointEuler(a, b, ['foot', 'ankle']);
     return this.measure('calculateFootYaw', e.y, 'rad');
   }
@@ -2874,7 +2878,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0888] calculateFootVelocity
    * Tính vận tốc bàn chân.
    */
-  public calculateFootVelocity(entity?: any, dt = 0.016): any {
+  public calculateFootVelocity(entity?: unknown, dt = 0.016) {
     const velocity = this.velocityFrom(entity, dt);
     return this.vector('calculateFootVelocity', velocity);
   }
@@ -2882,7 +2886,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0889] calculateFootAcceleration
    * Tính gia tốc bàn chân.
    */
-  public calculateFootAcceleration(entity?: any, dt = 0.016): any {
+  public calculateFootAcceleration(entity?: unknown, dt = 0.016) {
     const acceleration = this.accelerationFrom(entity, dt);
     return this.vector('calculateFootAcceleration', acceleration);
   }
@@ -2890,7 +2894,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0890] calculateFootAngularVelocity
    * Tính vận tốc góc bàn chân.
    */
-  public calculateFootAngularVelocity(entity?: any, dt = 0.016): any {
+  public calculateFootAngularVelocity(entity?: unknown, dt = 0.016) {
     const angular = this.angularVelocityFrom(entity, dt);
     return this.vector('calculateFootAngularVelocity', angular);
   }
@@ -2898,7 +2902,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0891] calculateFootBoundingBox
    * Tính hộp bao bàn chân.
    */
-  public calculateFootBoundingBox(entity?: any, size?: Vec3D): any {
+  public calculateFootBoundingBox(entity?: unknown, size?: Vec3D) {
     const box = this.regionBox('foot', entity, size);
     return boundsResult('calculateFootBoundingBox', box);
   }
@@ -2906,7 +2910,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0892] calculateFootBoundingSphere
    * Tính hình cầu bao bàn chân.
    */
-  public calculateFootBoundingSphere(entity?: any, radius = 1.0): any {
+  public calculateFootBoundingSphere(entity?: unknown, radius = 1.0) {
     const size = this.regionSize('foot');
     return sphereResult('calculateFootBoundingSphere', entityPosition(entity), this.autoRadius(radius, size));
   }
@@ -2914,7 +2918,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0893] calculateFootCenterOfMass
    * Tính tâm khối lượng bàn chân.
    */
-  public calculateFootCenterOfMass(entity?: any, options?: any): any {
+  public calculateFootCenterOfMass(entity?: unknown, options?: unknown) {
     const subject = this.optEntity(options, entity);
     const center = this.pointWith(add(entityPosition(subject), { x: 0, y: -0.04, z: 0.014 }), subject, options);
     return { ...namedResult('calculateFootCenterOfMass', center), center: center, position: center };
@@ -2923,14 +2927,14 @@ export class AnatomicalLowerBodySubsystem {
    * [0894] calculateFootGroundContact
    * Kiểm tra bàn chân tiếp xúc mặt đất.
    */
-  public calculateFootGroundContact(a?: any, b?: any, options?: any): any {
+  public calculateFootGroundContact(a?: unknown, b?: unknown, options?: unknown) {
     return this.footGroundContact('calculateFootGroundContact', a, b, options);
   }
   /**
    * [0895] calculateFootGroundClearance
    * Tính khoảng cách bàn chân đến mặt đất.
    */
-  public calculateFootGroundClearance(entity?: any, options?: any): any {
+  public calculateFootGroundClearance(entity?: unknown, options?: unknown) {
     const clearance = this.groundClearance(entity, -0.93, options);
     return this.measure('calculateFootGroundClearance', clearance, 'm');
   }
@@ -2938,7 +2942,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0896] calculateFootPressureCenter
    * Tính tâm áp lực bàn chân.
    */
-  public calculateFootPressureCenter(a?: any, b?: any, options?: any): any {
+  public calculateFootPressureCenter(a?: unknown, b?: unknown, options?: unknown) {
     const contact = this.footGroundContact('calculateFootPressureCenter', a, b, options);
     const pressure = REFERENCE.bodyMass * REFERENCE.gravity / Math.max(1e-6, num(contact.area, 0.01));
     const payload = this.applyOptions({ center: contact.contact, pressure: pressure, area: contact.area }, options, { numeric: ['pressure', 'area'], points: ['center'] }, a);
@@ -2948,7 +2952,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0897] calculateFootContactArea
    * Tính diện tích tiếp xúc bàn chân.
    */
-  public calculateFootContactArea(entity?: any, options?: any): any {
+  public calculateFootContactArea(entity?: unknown, options?: unknown) {
     const size = this.regionSizeFor(this.optEntity(options, entity), 'foot');
     const area = size.x * size.z * 0.25;
     return this.measureWith('calculateFootContactArea', area, 'm^2', options, { size });
@@ -2957,7 +2961,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0898] calculateFootSlipVelocity
    * Tính vận tốc trượt bàn chân.
    */
-  public calculateFootSlipVelocity(entity?: any, dt = 0.016): any {
+  public calculateFootSlipVelocity(entity?: unknown, dt = 0.016) {
     const velocity = this.velocityFrom(entity, dt);
     const slip = { x: velocity.x, y: 0, z: velocity.z };
     return this.vector('calculateFootSlipVelocity', slip);
@@ -2966,7 +2970,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0899] calculateFootStrideLength
    * Tính chiều dài bước chân.
    */
-  public calculateFootStrideLength(entity?: any, options?: any): any {
+  public calculateFootStrideLength(entity?: unknown, options?: unknown) {
     const subject = this.optEntity(options, entity);
     const legLength = this.declaredNumber(subject, 'thighLength', BODY_DIMENSIONS.thighLength)
       + this.declaredNumber(subject, 'shinLength', BODY_DIMENSIONS.shinLength);
@@ -2977,7 +2981,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0900] calculateFootInverseKinematics
    * Tính động học ngược bàn chân.
    */
-  public calculateFootInverseKinematics(a?: any, b?: any, options?: any): any {
+  public calculateFootInverseKinematics(a?: unknown, b?: unknown, options?: unknown) {
     const chain = ['getAnklePosition', 'getFootCenter', 'getToeTipPosition'];
     return this.inverseKinematics('calculateFootInverseKinematics', a, b, options, chain);
   }
@@ -2989,7 +2993,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0901] getBigToePosition
    * Lấy tọa độ ngón chân cái.
    */
-  public getBigToePosition(entity?: any, offset?: Vec3D): any {
+  public getBigToePosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getBigToePosition', entity, offset);
     return p;
   }
@@ -2997,7 +3001,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0902] getSecondToePosition
    * Lấy tọa độ ngón chân thứ hai.
    */
-  public getSecondToePosition(entity?: any, offset?: Vec3D): any {
+  public getSecondToePosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getSecondToePosition', entity, offset);
     return p;
   }
@@ -3005,7 +3009,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0903] getThirdToePosition
    * Lấy tọa độ ngón chân thứ ba.
    */
-  public getThirdToePosition(entity?: any, offset?: Vec3D): any {
+  public getThirdToePosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getThirdToePosition', entity, offset);
     return p;
   }
@@ -3013,7 +3017,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0904] getFourthToePosition
    * Lấy tọa độ ngón chân thứ tư.
    */
-  public getFourthToePosition(entity?: any, offset?: Vec3D): any {
+  public getFourthToePosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getFourthToePosition', entity, offset);
     return p;
   }
@@ -3021,7 +3025,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0905] getLittleToePosition
    * Lấy tọa độ ngón chân út.
    */
-  public getLittleToePosition(entity?: any, offset?: Vec3D): any {
+  public getLittleToePosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getLittleToePosition', entity, offset);
     return p;
   }
@@ -3029,7 +3033,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0906] getToeTipPosition
    * Lấy tọa độ đầu ngón chân.
    */
-  public getToeTipPosition(entity?: any, offset?: Vec3D): any {
+  public getToeTipPosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getToeTipPosition', entity, offset);
     return p;
   }
@@ -3037,7 +3041,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0907] getToeBasePosition
    * Lấy tọa độ gốc ngón chân.
    */
-  public getToeBasePosition(entity?: any, offset?: Vec3D): any {
+  public getToeBasePosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getToeBasePosition', entity, offset);
     return p;
   }
@@ -3045,7 +3049,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0908] getToeJointPosition
    * Lấy tọa độ khớp ngón chân.
    */
-  public getToeJointPosition(entity?: any, offset?: Vec3D): any {
+  public getToeJointPosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getToeJointPosition', entity, offset);
     return p;
   }
@@ -3053,7 +3057,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0909] getToeNailPosition
    * Lấy tọa độ móng ngón chân.
    */
-  public getToeNailPosition(entity?: any, offset?: Vec3D): any {
+  public getToeNailPosition(entity?: unknown, offset?: Vec3D) {
     const p = this.landmarkPosition('getToeNailPosition', entity, offset);
     return p;
   }
@@ -3061,7 +3065,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0910] calculateToeLength
    * Tính chiều dài ngón chân.
    */
-  public calculateToeLength(entity?: any, options?: any): any {
+  public calculateToeLength(entity?: unknown, options?: unknown) {
     const size = this.regionSizeFor(this.optEntity(options, entity), 'toe');
     return this.measureWith('calculateToeLength', size.z, 'm', options, { size });
   }
@@ -3069,7 +3073,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0911] calculateToeWidth
    * Tính chiều rộng ngón chân.
    */
-  public calculateToeWidth(entity?: any, options?: any): any {
+  public calculateToeWidth(entity?: unknown, options?: unknown) {
     const subject = this.optEntity(options, entity);
     const width = this.declaredNumber(subject, 'toeWidth', 0.025);
     return this.measureWith('calculateToeWidth', width, 'm');
@@ -3078,7 +3082,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0912] calculateToeFlexion
    * Tính góc gập ngón chân.
    */
-  public calculateToeFlexion(a?: any, b?: any): any {
+  public calculateToeFlexion(a?: unknown, b?: unknown) {
     const e = this.jointEuler(a, b, ['toe']);
     return this.measure('calculateToeFlexion', Math.max(0, e.x), 'rad');
   }
@@ -3086,7 +3090,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0913] calculateToeExtension
    * Tính góc duỗi ngón chân.
    */
-  public calculateToeExtension(a?: any, b?: any): any {
+  public calculateToeExtension(a?: unknown, b?: unknown) {
     const e = this.jointEuler(a, b, ['toe']);
     return this.measure('calculateToeExtension', Math.max(0, -e.x), 'rad');
   }
@@ -3094,7 +3098,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0914] calculateToeSpread
    * Tính độ xòe ngón chân.
    */
-  public calculateToeSpread(entity?: any, options?: any): any {
+  public calculateToeSpread(entity?: unknown, options?: unknown) {
     const size = this.regionSizeFor(this.optEntity(options, entity), 'toe');
     return this.measureWith('calculateToeSpread', size.x, 'm', options, { size });
   }
@@ -3102,7 +3106,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0915] calculateToeCurl
    * Tính độ cuộn ngón chân.
    */
-  public calculateToeCurl(entity?: any, options?: any): any {
+  public calculateToeCurl(entity?: unknown, options?: unknown) {
     const subject = this.optEntity(options, entity);
     const e = this.jointEuler(subject, options, ['toe']);
     return this.measureWith('calculateToeCurl', Math.abs(e.x), 'rad', options);
@@ -3111,7 +3115,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0916] calculateToeDirection
    * Tính hướng ngón chân.
    */
-  public calculateToeDirection(a?: any, b?: any): any {
+  public calculateToeDirection(a?: unknown, b?: unknown) {
     // Gốc ngón chân là bàn chân; đầu ngón là xương ngón.
     const base = this.markerPosition(a, ['ankle', 'foot'], 'getToeBasePosition');
     // `b` là vị trí đầu ngón tùy chọn (entity khác hoặc điểm tọa độ).
@@ -3123,7 +3127,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0917] calculateToeVelocity
    * Tính vận tốc ngón chân.
    */
-  public calculateToeVelocity(entity?: any, dt = 0.016): any {
+  public calculateToeVelocity(entity?: unknown, dt = 0.016) {
     const velocity = this.velocityFrom(entity, dt);
     return this.vector('calculateToeVelocity', velocity);
   }
@@ -3131,7 +3135,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0918] calculateToeAcceleration
    * Tính gia tốc ngón chân.
    */
-  public calculateToeAcceleration(entity?: any, dt = 0.016): any {
+  public calculateToeAcceleration(entity?: unknown, dt = 0.016) {
     const acceleration = this.accelerationFrom(entity, dt);
     return this.vector('calculateToeAcceleration', acceleration);
   }
@@ -3139,7 +3143,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0919] calculateToeJointAngles
    * Tính các góc khớp ngón chân.
    */
-  public calculateToeJointAngles(a?: any, b?: any): any {
+  public calculateToeJointAngles(a?: unknown, b?: unknown) {
     const e = this.jointEuler(a, b, ['toe']);
     const angles = {
     metatarsophalangeal: e.x,
@@ -3152,7 +3156,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0920] calculateToeBoundingBox
    * Tính hộp bao ngón chân.
    */
-  public calculateToeBoundingBox(entity?: any, size?: Vec3D): any {
+  public calculateToeBoundingBox(entity?: unknown, size?: Vec3D) {
     const box = this.regionBox('toe', entity, size);
     return boundsResult('calculateToeBoundingBox', box);
   }
@@ -3160,7 +3164,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0921] calculateStandingHeight
    * Tính chiều cao khi đứng.
    */
-  public calculateStandingHeight(entity?: any, options?: any): any {
+  public calculateStandingHeight(entity?: unknown, options?: unknown) {
     const subject = this.optEntity(options, entity);
     const height = this.declaredNumber(subject, 'bodyHeight', BODY_DIMENSIONS.height);
     return this.measureWith('calculateStandingHeight', height, 'm', options);
@@ -3169,7 +3173,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0922] calculateBodyBalance
    * Tính độ cân bằng cơ thể.
    */
-  public calculateBodyBalance(a?: any, b?: any, options?: any): any {
+  public calculateBodyBalance(a?: unknown, b?: unknown, options?: unknown) {
     // `b` là entity chân đế (vùng đỡ) thay thế cho `a`.
     const stance = b !== undefined && b !== null ? b : a;
     const support = this.baseOfSupportBox(stance);
@@ -3195,7 +3199,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0923] calculateCenterOfGravity
    * Tính trọng tâm cơ thể.
    */
-  public calculateCenterOfGravity(a?: any, b?: any, options?: any): any {
+  public calculateCenterOfGravity(a?: unknown, b?: unknown, options?: unknown) {
     // `b` là entity chân đế (vùng đỡ) thay thế cho `a`.
     const stance = b !== undefined && b !== null ? b : a;
     const gravity = this.centerOfGravityPoint(a);
@@ -3217,7 +3221,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0924] calculateCenterOfMass
    * Tính tâm khối lượng cơ thể.
    */
-  public calculateCenterOfMass(entity?: any, options?: any): any {
+  public calculateCenterOfMass(entity?: unknown, options?: unknown) {
     const subject = this.optEntity(options, entity);
     const center = this.pointWith(this.centerOfGravityPoint(subject), subject, options);
     return {
@@ -3231,7 +3235,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0925] calculateBaseOfSupport
    * Tính vùng chân đế hỗ trợ cơ thể.
    */
-  public calculateBaseOfSupport(a?: any, b?: any, options?: any): any {
+  public calculateBaseOfSupport(a?: unknown, b?: unknown, options?: unknown) {
     // `b` là entity chân đế (vùng đỡ) thay thế cho `a`.
     const stance = b !== undefined && b !== null ? b : a;
     const support = this.baseOfSupportBox(stance);
@@ -3250,7 +3254,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0926] calculateBalanceMargin
    * Tính biên an toàn cân bằng.
    */
-  public calculateBalanceMargin(a?: any, b?: any, options?: any): any {
+  public calculateBalanceMargin(a?: unknown, b?: unknown, options?: unknown) {
     // `b` là entity chân đế (vùng đỡ) thay thế cho `a`.
     const stance = b !== undefined && b !== null ? b : a;
     const gravity = this.centerOfGravityPoint(a);
@@ -3266,7 +3270,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0927] calculateBodySway
    * Tính độ lắc cơ thể.
    */
-  public calculateBodySway(a?: any, b?: any, options?: any): any {
+  public calculateBodySway(a?: unknown, b?: unknown, options?: unknown) {
     // `b` là entity chân đế (vùng đỡ) thay thế cho `a`.
     const stance = b !== undefined && b !== null ? b : a;
     const gravity = this.centerOfGravityPoint(a);
@@ -3280,7 +3284,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0928] calculateBodyLean
    * Tính độ nghiêng cơ thể.
    */
-  public calculateBodyLean(a?: any, b?: any, options?: any): any {
+  public calculateBodyLean(a?: unknown, b?: unknown, options?: unknown) {
     const e = this.jointEuler(a, b, ['torso', 'spine']);
     const lean = Math.hypot(e.x, e.z);
     const direction = normalize({ x: Math.sin(e.z), y: 0, z: Math.sin(e.x) });
@@ -3291,7 +3295,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0929] calculatePostureStability
    * Tính độ ổn định tư thế.
    */
-  public calculatePostureStability(a?: any, b?: any, options?: any): any {
+  public calculatePostureStability(a?: unknown, b?: unknown, options?: unknown) {
     const torso = this.jointEuler(a, b, ['torso', 'spine']);
     const leg = this.jointEuler(a, b, ['thigh']);
     const deviation = Math.hypot(torso.x, torso.y, torso.z) + Math.hypot(leg.x, leg.y, leg.z);
@@ -3303,7 +3307,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0930] calculateStandingPoseError
    * Tính sai lệch tư thế đứng.
    */
-  public calculateStandingPoseError(a?: any, b?: any, options?: any): any {
+  public calculateStandingPoseError(a?: unknown, b?: unknown, options?: unknown) {
     const error = this.poseError(a, b);
     return namedResult('calculateStandingPoseError', this.applyOptions(error, options, { numeric: ['positionError', 'rotationError'] }, a));
   }
@@ -3311,7 +3315,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0931] calculateSittingHeight
    * Tính chiều cao khi ngồi.
    */
-  public calculateSittingHeight(entity?: any, options?: any): any {
+  public calculateSittingHeight(entity?: unknown, options?: unknown) {
     const subject = this.optEntity(options, entity);
     const height = this.declaredNumber(subject, 'bodyHeight', BODY_DIMENSIONS.height) * 0.52;
     return this.measureWith('calculateSittingHeight', height, 'm', options);
@@ -3320,7 +3324,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0932] calculateSittingPose
    * Tính tư thế ngồi.
    */
-  public calculateSittingPose(a?: any, b?: any, options?: any): any {
+  public calculateSittingPose(a?: unknown, b?: unknown, options?: unknown) {
     const hip = this.jointEuler(a, b, ['thigh']);
     const knee = this.jointEuler(a, b, ['knee', 'shin']);
     const ankle = this.jointEuler(a, b, ['ankle', 'foot']);
@@ -3337,7 +3341,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0933] calculateSquatDepth
    * Tính độ sâu động tác ngồi xổm.
    */
-  public calculateSquatDepth(entity?: any, options?: any): any {
+  public calculateSquatDepth(entity?: unknown, options?: unknown) {
     const subject = this.optEntity(options, entity);
     const legLength = this.declaredNumber(subject, 'thighLength', BODY_DIMENSIONS.thighLength)
       + this.declaredNumber(subject, 'shinLength', BODY_DIMENSIONS.shinLength);
@@ -3347,7 +3351,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0934] calculateJumpHeight
    * Tính độ cao nhảy.
    */
-  public calculateJumpHeight(entity?: any, options?: any): any {
+  public calculateJumpHeight(entity?: unknown, options?: unknown) {
     const subject = this.optEntity(options, entity);
     const velocity = this.entityVector(subject, 'velocity');
     const takeoff = Math.max(0, velocity.y);
@@ -3358,7 +3362,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0935] calculateLandingImpact
    * Ước lượng lực va chạm khi tiếp đất.
    */
-  public calculateLandingImpact(a?: any, b?: any, options?: any): any {
+  public calculateLandingImpact(a?: unknown, b?: unknown, options?: unknown) {
     // `b` là entity mang vận tốc tiếp đất thay thế cho `a`.
     const source = b !== undefined && b !== null ? b : a;
     const velocity = this.entityVector(source, 'velocity');
@@ -3378,7 +3382,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0936] calculateGroundReactionForce
    * Ước lượng phản lực mặt đất.
    */
-  public calculateGroundReactionForce(entity?: any, dt = 0.016): any {
+  public calculateGroundReactionForce(entity?: unknown, dt = 0.016) {
     const acceleration = this.accelerationFrom(entity, dt);
     const force = scale(add({ x: 0, y: REFERENCE.gravity, z: 0 }, acceleration), REFERENCE.bodyMass);
     return this.vector('calculateGroundReactionForce', force);
@@ -3387,7 +3391,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0937] calculateGaitCycle
    * Tính chu kỳ dáng đi.
    */
-  public calculateGaitCycle(a?: any, b?: any, options?: any): any {
+  public calculateGaitCycle(a?: unknown, b?: unknown, options?: unknown) {
     // `b` là entity mang vị trí thay thế cho `a`.
     const source = b !== undefined && b !== null ? b : a;
     const legLength = this.declaredNumber(source, 'thighLength', BODY_DIMENSIONS.thighLength)
@@ -3408,7 +3412,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0938] calculateGaitPhase
    * Xác định pha của chu kỳ dáng đi.
    */
-  public calculateGaitPhase(entity?: any, options?: any): any {
+  public calculateGaitPhase(entity?: unknown, options?: unknown) {
     const subject = this.optEntity(options, entity);
     const legLength = this.declaredNumber(subject, 'thighLength', BODY_DIMENSIONS.thighLength)
       + this.declaredNumber(subject, 'shinLength', BODY_DIMENSIONS.shinLength);
@@ -3423,7 +3427,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0939] calculateStepFrequency
    * Tính tần số bước chân.
    */
-  public calculateStepFrequency(entity?: any, options?: any): any {
+  public calculateStepFrequency(entity?: unknown, options?: unknown) {
     const subject = this.optEntity(options, entity);
     const legLength = this.declaredNumber(subject, 'thighLength', BODY_DIMENSIONS.thighLength)
       + this.declaredNumber(subject, 'shinLength', BODY_DIMENSIONS.shinLength);
@@ -3435,7 +3439,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0940] calculateWalkingSpeed
    * Tính tốc độ đi bộ.
    */
-  public calculateWalkingSpeed(entity?: any, options?: any): any {
+  public calculateWalkingSpeed(entity?: unknown, options?: unknown) {
     const subject = this.optEntity(options, entity);
     const velocity = this.entityVector(subject, 'velocity');
     const speed = Math.hypot(velocity.x, velocity.z);
@@ -3446,7 +3450,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0941] calculateRunningSpeed
    * Tính tốc độ chạy.
    */
-  public calculateRunningSpeed(entity?: any, options?: any): any {
+  public calculateRunningSpeed(entity?: unknown, options?: unknown) {
     const subject = this.optEntity(options, entity);
     const velocity = this.entityVector(subject, 'velocity');
     const speed = Math.hypot(velocity.x, velocity.z);
@@ -3457,7 +3461,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0942] calculateStrideWidth
    * Tính chiều rộng bước chân.
    */
-  public calculateStrideWidth(entity?: any, options?: any): any {
+  public calculateStrideWidth(entity?: unknown, options?: unknown) {
     const subject = this.optEntity(options, entity);
     const left = this.landmarkPosition('getLeftFootPosition', subject);
     const right = this.landmarkPosition('getRightFootPosition', subject);
@@ -3467,7 +3471,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0943] calculateStrideSymmetry
    * Tính độ đối xứng bước chân.
    */
-  public calculateStrideSymmetry(a?: any, b?: any, options?: any): any {
+  public calculateStrideSymmetry(a?: unknown, b?: unknown, options?: unknown) {
     const score = this.symmetryScore(a, b, BODY_DIMENSIONS.hipWidth);
     return namedResult('calculateStrideSymmetry', this.applyOptions(score, options, { numeric: ['symmetry', 'difference'], points: ['left', 'right'] }, a));
   }
@@ -3475,7 +3479,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0944] calculateFootPlacement
    * Tính vị trí đặt chân.
    */
-  public calculateFootPlacement(a?: any, b?: any, options?: any): any {
+  public calculateFootPlacement(a?: unknown, b?: unknown, options?: unknown) {
     const foot = this.landmarkPosition('getFootCenter', a);
     const target = b !== undefined && b !== null ? pointOf(b) : foot;
     const error = distance3D(foot, target);
@@ -3486,7 +3490,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0945] calculateFootPlacementError
    * Tính sai lệch vị trí đặt chân.
    */
-  public calculateFootPlacementError(a?: any, b?: any, options?: any): any {
+  public calculateFootPlacementError(a?: unknown, b?: unknown, options?: unknown) {
     const foot = this.landmarkPosition('getFootCenter', a);
     const target = b !== undefined && b !== null ? pointOf(b) : foot;
     const error = distance3D(foot, target);
@@ -3497,7 +3501,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0946] calculateGroundPenetration
    * Tính độ xuyên chân xuống mặt đất.
    */
-  public calculateGroundPenetration(a?: any, b?: any, options?: any): any {
+  public calculateGroundPenetration(a?: unknown, b?: unknown, options?: SpatialOptionBag) {
     // `b` là vị trí đế bàn chân tùy chọn (entity khác hoặc điểm tọa độ).
     const sole = this.landmarkFrom(b, 'getFootSolePosition') ?? this.landmarkPosition('getFootSolePosition', a);
     const ground = num(options?.groundY, 0);
@@ -3514,7 +3518,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0947] calculateGroundAlignment
    * Tính độ căn chỉnh chân với mặt đất.
    */
-  public calculateGroundAlignment(a?: any, b?: any, options?: any): any {
+  public calculateGroundAlignment(a?: unknown, b?: unknown, options?: unknown) {
     const heel = this.landmarkPosition('getFootHeelPosition', a);
     // `b` là vị trí ngón chân tùy chọn (entity khác hoặc điểm tọa độ).
     const toe = this.landmarkFrom(b, 'getFootToePosition') ?? this.landmarkPosition('getFootToePosition', a);
@@ -3527,7 +3531,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0948] calculateLegSupportPhase
    * Xác định pha chân trụ.
    */
-  public calculateLegSupportPhase(entity?: any, options?: any): any {
+  public calculateLegSupportPhase(entity?: unknown, options?: unknown) {
     const subject = this.optEntity(options, entity);
     const legLength = this.declaredNumber(subject, 'thighLength', BODY_DIMENSIONS.thighLength)
       + this.declaredNumber(subject, 'shinLength', BODY_DIMENSIONS.shinLength);
@@ -3542,7 +3546,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0949] calculateSwingPhase
    * Xác định pha chân vung.
    */
-  public calculateSwingPhase(entity?: any, options?: any): any {
+  public calculateSwingPhase(entity?: unknown, options?: unknown) {
     const subject = this.optEntity(options, entity);
     const legLength = this.declaredNumber(subject, 'thighLength', BODY_DIMENSIONS.thighLength)
       + this.declaredNumber(subject, 'shinLength', BODY_DIMENSIONS.shinLength);
@@ -3557,7 +3561,7 @@ export class AnatomicalLowerBodySubsystem {
    * [0950] calculateLocomotionDirection
    * Tính hướng di chuyển cơ thể.
    */
-  public calculateLocomotionDirection(a?: any, b?: any): any {
+  public calculateLocomotionDirection(a?: unknown, b?: unknown) {
     const motion = this.motionVector(a, b);
     return this.vector('calculateLocomotionDirection', normalize(motion));
   }
@@ -3597,7 +3601,7 @@ export class AnatomicalLowerBodySubsystem {
    * Dùng forward kinematics nên vị trí xương phản ánh TƯ THẾ thật, không phải
    * offset giải phẫu tĩnh.
    */
-  private boneWorldPosition(entity: any, boneNames: string[]): Vec3D | null {
+  private boneWorldPosition(entity: unknown, boneNames: string[]): Vec3D | null {
     const skeleton = buildSkeleton(entity);
     if (!skeleton) return null;
     const positions = forwardKinematics(skeleton);
@@ -3618,7 +3622,7 @@ export class AnatomicalLowerBodySubsystem {
    * Nhờ vậy hướng/pháp tuyến của khớp phản ánh tư thế thay vì luôn trả về
    * cùng một hằng số.
    */
-  private markerPosition(entity: any, boneNames: string[], landmark: string): Vec3D {
+  private markerPosition(entity: unknown, boneNames: string[], landmark: string): Vec3D {
     const fromBone = this.boneWorldPosition(entity, boneNames);
     if (fromBone) return fromBone;
     return this.landmarkPosition(landmark, entity);
@@ -3661,7 +3665,7 @@ export class AnatomicalLowerBodySubsystem {
   }
 
   /** Đọc một trường vector của entity (`velocity`, `acceleration`, `angularVelocity`…). */
-  private entityVector(entity: any, field: string): Vec3D {
+  private entityVector(entity: unknown, field: string): Vec3D {
     if (!entity || typeof entity !== 'object') return { x: 0, y: 0, z: 0 };
     const v = (entity as Record<string, unknown>)[field];
     return v && typeof v === 'object' ? toVec3(v) : { x: 0, y: 0, z: 0 };
@@ -3674,20 +3678,23 @@ export class AnatomicalLowerBodySubsystem {
    * nếu không có xương nào thì dùng quaternion của chính entity; cuối cùng là
    * quaternion đơn vị (`w = 1`).
    */
-  private boneQuaternion(entityOrAngle: any, options: any, boneNames: string[]): { q: QuatD; bone: string } {
-    const pool: any[] = [];
-    if (Array.isArray(options?.bones)) pool.push(...options.bones);
-    if (Array.isArray(entityOrAngle?.children)) pool.push(...entityOrAngle.children);
-    if (Array.isArray(options?.children)) pool.push(...options.children);
+  private boneQuaternion(entityOrAngle: unknown, options: unknown, boneNames: string[]): { q: QuatD; bone: string } {
+    const optionBag = asRecord(options);
+    const sourceBag = asRecord(entityOrAngle);
+    const pool: unknown[] = [];
+    if (Array.isArray(optionBag.bones)) pool.push(...optionBag.bones);
+    if (Array.isArray(sourceBag.children)) pool.push(...sourceBag.children);
+    if (Array.isArray(optionBag.children)) pool.push(...optionBag.children);
 
     // `options.bone` ghi đè xương mặc định của hàm.
     const wanted = this.optBone(options);
     const searchNames = wanted !== undefined ? [wanted, ...boneNames] : boneNames;
     for (const boneName of searchNames) {
-      const found = pool.find(
-        (b: any) => typeof b?.name === 'string' && b.name.toLowerCase().includes(boneName.toLowerCase()),
-      );
-      if (found) return { q: asQuaternion(found), bone: String(found.name) };
+      const found = pool.find((bone) => {
+        const record = asRecord(bone);
+        return typeof record.name === 'string' && record.name.toLowerCase().includes(boneName.toLowerCase());
+      });
+      if (found) return { q: asQuaternion(found), bone: String(asRecord(found).name) };
     }
 
     for (const src of [entityOrAngle, options]) {
@@ -3707,16 +3714,20 @@ export class AnatomicalLowerBodySubsystem {
    * Tìm xương khớp trong `children` của các đối số đầu vào; nếu không có thì
    * dùng quaternion của chính entity; không có dữ liệu ⇒ góc bằng 0.
    */
-  private jointEuler(a: any, b: any, boneNames: string[]): { x: number; y: number; z: number } {
+  private jointEuler(a: unknown, b: unknown, boneNames: string[]): { x: number; y: number; z: number } {
     for (const src of [a, b]) {
       if (!src || typeof src !== 'object') continue;
       const record = src as Record<string, unknown>;
       const children = record.children;
       if (Array.isArray(children)) {
         for (const boneName of boneNames) {
-          const found = children.find(
-            (c: any) => typeof c?.name === 'string' && c.name.toLowerCase().includes(boneName.toLowerCase()),
-          );
+          const found = children.find((bone) => {
+            const childRecord = asRecord(bone);
+            return (
+              typeof childRecord.name === 'string' &&
+              childRecord.name.toLowerCase().includes(boneName.toLowerCase())
+            );
+          });
           if (found) return quaternionToEuler(asQuaternion(found));
         }
       }
@@ -3732,7 +3743,7 @@ export class AnatomicalLowerBodySubsystem {
    *   ứng; điểm thô được dùng trực tiếp làm vị trí mốc.
    * - Thiếu một đối số: đo giữa hai mốc tính từ cùng một neo.
    */
-  private pairDistance(a: any, b: any, keyA: string, keyB: string): number {
+  private pairDistance(a: unknown, b: unknown, keyA: string, keyB: string): number {
     const hasA = a !== undefined && a !== null;
     const hasB = b !== undefined && b !== null;
     if (hasA && hasB) {
@@ -3745,21 +3756,22 @@ export class AnatomicalLowerBodySubsystem {
   }
 
   /** Khoảng cách từ vật thể đang cầm tới một mốc bên ngoài (tay, cổ tay, camera…). */
-  private heldObjectDistance(a: any, b: any, key: string): number {
+  private heldObjectDistance(a: unknown, b: unknown, key: string): number {
     const object = pointOf(a);
     const other = b !== undefined && b !== null ? pointOf(b) : add(object, PAIR_LANDMARKS[key]);
     return distance3D(object, other);
   }
 
   /** Kích thước vật thể đang cầm (theo `size`/`scale` của entity, mặc định 0.15³). */
-  private heldObjectSize(entity: any): Vec3D {
+  private heldObjectSize(entity: unknown): Vec3D {
     const base = REGION_SIZES.heldObject;
-    const source = entity?.size ?? entity?.dimensions ?? entity?.bounds;
+    const record = asRecord(entity);
+    const source = record.size ?? record.dimensions ?? record.bounds;
     if (source && typeof source === 'object') {
       const s = toVec3(source);
       if (s.x > 0 && s.y > 0 && s.z > 0) return s;
     }
-    const scalar = entity?.scale;
+    const scalar = record.scale;
     if (typeof scalar === 'number' && scalar > 0) {
       return { x: base.x * scalar, y: base.y * scalar, z: base.z * scalar };
     }
@@ -3787,7 +3799,7 @@ export class AnatomicalLowerBodySubsystem {
   }
 
   /** Pháp tuyến bề mặt: hướng từ `a` tới `b`, nếu không có dữ liệu thì dùng `fallback`. */
-  private surfaceNormal(a: any, b: any, fallback: Vec3D): Vec3D {
+  private surfaceNormal(a: unknown, b: unknown, fallback: Vec3D): Vec3D {
     if (b !== undefined && b !== null) {
       const n = normalize(subtract(pointOf(b), pointOf(a)));
       if (n.x !== 0 || n.y !== 0 || n.z !== 0) return n;
@@ -3796,7 +3808,7 @@ export class AnatomicalLowerBodySubsystem {
   }
 
   /** Vector chuyển động: độ dời `a → b`, nếu không có thì vận tốc của entity. */
-  private motionVector(a: any, b: any): Vec3D {
+  private motionVector(a: unknown, b: unknown): Vec3D {
     if (b !== undefined && b !== null) {
       const v = subtract(pointOf(b), pointOf(a));
       if (magnitude(v) > 1e-9) return v;
@@ -3844,8 +3856,8 @@ export class AnatomicalLowerBodySubsystem {
   }
 
   /** Khoảng cách từ điểm thấp nhất của vùng tới mặt đất (y = 0 nếu không chỉ định). */
-  private groundClearance(entity: unknown, lowestY: number, options?: any): number {
-    const ground = num(options?.groundY, 0);
+  private groundClearance(entity: unknown, lowestY: number, options?: unknown): number {
+    const ground = num(asRecord(options).groundY, 0);
     const position = entityPosition(entity);
     return Math.max(0, position.y + lowestY - ground);
   }
@@ -3856,7 +3868,7 @@ export class AnatomicalLowerBodySubsystem {
    * Một bên được phản chiếu qua trục giữa rồi so với bên còn lại; đối xứng
    * hoàn hảo ⇒ 1, lệch nhiều ⇒ 0.
    */
-  private symmetryScore(a: any, b: any, width: number): { symmetry: number; difference: number; left: Vec3D; right: Vec3D } {
+  private symmetryScore(a: unknown, b: unknown, width: number): { symmetry: number; difference: number; left: Vec3D; right: Vec3D } {
     const left = pointOf(a);
     const right = b !== undefined && b !== null ? pointOf(b) : { x: left.x + width, y: left.y, z: left.z };
     const midX = left.x + width * 0.5;
@@ -3867,7 +3879,7 @@ export class AnatomicalLowerBodySubsystem {
   }
 
   /** Sai lệch tư thế giữa tư thế đích (`a`) và tư thế hiện tại (`b`). */
-  private poseError(a: any, b: any): { positionError: number; rotationError: number } {
+  private poseError(a: unknown, b: unknown): { positionError: number; rotationError: number } {
     const target = pointOf(a);
     const current = b !== undefined && b !== null ? pointOf(b) : target;
     const ea = this.jointEuler(a, b, []);
@@ -3877,7 +3889,7 @@ export class AnatomicalLowerBodySubsystem {
   }
 
   /** Độ mượt của chuyển động, dựa trên gia tốc của entity. */
-  private motionSmoothness(entity: any): {
+  private motionSmoothness(entity: unknown): {
     smoothness: number;
     jerk: number;
     acceleration: number;
@@ -3895,7 +3907,7 @@ export class AnatomicalLowerBodySubsystem {
   }
 
   /** Chuỗi khớp: vị trí từng khớp và tổng chiều dài chuỗi. */
-  private jointChain(name: string, a: any, chainNames: string[]): Record<string, unknown> {
+  private jointChain(name: string, a: unknown, chainNames: string[]): Record<string, unknown> {
     const joints = chainNames.map((n) => this.landmarkPosition(n, a));
     let length = 0;
     for (let i = 1; i < joints.length; i++) length += distance3D(joints[i - 1], joints[i]);
@@ -3908,7 +3920,7 @@ export class AnatomicalLowerBodySubsystem {
    * `b` là mảng khớp tùy biến (điểm tọa độ hoặc tên mốc) ⇒ thay chuỗi mặc
    * định; `options.scale` nhân tổng chiều dài chuỗi.
    */
-  private jointChainWith(name: string, a: any, b: any, chainNames: string[], options?: any): Record<string, unknown> {
+  private jointChainWith(name: string, a: unknown, b: unknown, chainNames: string[], options?: unknown): Record<string, unknown> {
     if (Array.isArray(b)) {
       const joints = b.map((p) => (typeof p === 'string' ? this.landmarkPosition(p, a) : pointOf(p)));
       const names = b.map((p) => (typeof p === 'string' ? p : chainNames[chainNames.length - 1]));
@@ -3922,9 +3934,9 @@ export class AnatomicalLowerBodySubsystem {
   /** Giải pháp IK: vị trí đạt được, sai số tới đích và góc các khớp. */
   private inverseKinematics(
     name: string,
-    a: any,
-    b: any,
-    options: any,
+    a: unknown,
+    b: unknown,
+    options: unknown,
     chain: string[],
   ): Record<string, unknown> {
     const reached = this.landmarkPosition(chain[chain.length - 1], a);
@@ -3937,7 +3949,7 @@ export class AnatomicalLowerBodySubsystem {
         target,
         reached,
         error,
-        iterations: num(options?.iterations, 1),
+        iterations: num(asRecord(options).iterations, 1),
         angles: { hip: e.x, knee: e.y, ankle: e.z }
       },
       { chain },
@@ -3945,7 +3957,7 @@ export class AnatomicalLowerBodySubsystem {
   }
 
   /** Độ dày của vùng giữa hai mặt đối diện. */
-  private thickness(name: string, a: any, b: any, region: string, options?: any): Record<string, unknown> {
+  private thickness(name: string, a: unknown, b: unknown, region: string, options?: unknown): Record<string, unknown> {
     const size = this.regionSize(region);
     const from = pointOf(a);
     const to = b !== undefined && b !== null ? pointOf(b) : add(from, { x: 0, y: 0, z: size.z });
@@ -3959,7 +3971,7 @@ export class AnatomicalLowerBodySubsystem {
   }
 
   /** Tiếp xúc bàn chân – mặt đất: điểm, pháp tuyến, diện tích và độ xuyên lấn. */
-  private footGroundContact(name: string, a: any, b: any, options?: any): Record<string, unknown> {
+  private footGroundContact(name: string, a: unknown, b: unknown, options?: unknown): Record<string, unknown> {
     const foot = pointOf(a);
     const sole = add(foot, { x: 0, y: -0.04, z: 0.04 });
     const contact = b !== undefined && b !== null ? pointOf(b) : { x: sole.x, y: 0, z: sole.z };
@@ -3981,55 +3993,56 @@ export class AnatomicalLowerBodySubsystem {
   /**
    * Hệ số nhân `options.scale` — mặc định 1.
    */
-  private optScale(options: any): number {
-    const s = num(options?.scale, 1);
+  private optScale(options: unknown): number {
+    const s = num(asRecord(options).scale, 1);
     return Number.isFinite(s) ? s : 1;
   }
 
   /**
    * Đơn vị trả về `options.unit` — mặc định theo hợp đồng của hàm.
    */
-  private optUnit(options: any, fallback: string): string {
-    const u = options?.unit;
+  private optUnit(options: unknown, fallback: string): string {
+    const u = asRecord(options).unit;
     return typeof u === 'string' && u.length > 0 ? u : fallback;
   }
 
   /**
    * Khung tham chiếu `options.reference` — `'world'` (mặc định) | `'local'`.
    */
-  private optReference(options: any): 'world' | 'local' {
-    return options?.reference === 'local' ? 'local' : 'world';
+  private optReference(options: unknown): 'world' | 'local' {
+    return asRecord(options).reference === 'local' ? 'local' : 'world';
   }
 
   /**
    * Cờ đảo dấu `options.invert` — mặc định `false`.
    */
-  private optInvert(options: any): boolean {
-    return options?.invert === true;
+  private optInvert(options: unknown): boolean {
+    return asRecord(options).invert === true;
   }
 
   /**
    * Phía cơ thể `options.side` — mặc định là phía mà hàm đại diện.
    */
-  private optSide(options: any, fallback: 'left' | 'right' = 'left'): 'left' | 'right' {
-    if (options?.side === 'right') return 'right';
-    if (options?.side === 'left') return 'left';
+  private optSide(options: unknown, fallback: 'left' | 'right' = 'left'): 'left' | 'right' {
+    const side = asRecord(options).side;
+    if (side === 'right') return 'right';
+    if (side === 'left') return 'left';
     return fallback;
   }
 
   /**
    * Tên xương cụ thể `options.bone` — `undefined` nếu không chỉ định.
    */
-  private optBone(options: any): string | undefined {
-    const b = options?.bone;
+  private optBone(options: unknown): string | undefined {
+    const b = asRecord(options).bone;
     return typeof b === 'string' && b.length > 0 ? b : undefined;
   }
 
   /**
    * Entity thay thế `options.entity` — mặc định là chính tham số `entity`.
    */
-  private optEntity(options: any, fallback: any): any {
-    const e = options?.entity;
+  private optEntity(options: unknown, fallback: unknown) {
+    const e = asRecord(options).entity;
     return e !== undefined && e !== null ? e : fallback;
   }
 
@@ -4043,7 +4056,7 @@ export class AnatomicalLowerBodySubsystem {
     name: string,
     value: number,
     unit: string,
-    options?: any,
+    options?: unknown,
     extra?: Record<string, unknown>,
   ): Record<string, unknown> {
     const scaled = value * this.optScale(options);
@@ -4060,8 +4073,8 @@ export class AnatomicalLowerBodySubsystem {
   private vectorWith(
     name: string,
     v: Vec3D,
-    options: any,
-    entity?: any,
+    options: unknown,
+    entity?: unknown,
     extra?: Record<string, unknown>,
   ): Record<string, unknown> {
     let out = scale(v, this.optScale(options));
@@ -4078,7 +4091,7 @@ export class AnatomicalLowerBodySubsystem {
    * `options.scale` nhân khoảng cách từ neo của entity; `options.reference` =
    * `'local'` ⇒ trả về khoảng cách tương đối so với neo.
    */
-  private pointWith(p: Vec3D, entity: any, options: any): Vec3D {
+  private pointWith(p: Vec3D, entity: unknown, options: unknown): Vec3D {
     const anchor = entityPosition(entity);
     const offset = scale(subtract(p, anchor), this.optScale(options));
     return this.optReference(options) === 'local' ? offset : add(anchor, offset);
@@ -4098,7 +4111,7 @@ export class AnatomicalLowerBodySubsystem {
    */
   private applyOptions(
     payload: Record<string, unknown>,
-    options: any,
+    options: unknown,
     spec: {
     numeric?: string[];
     vectors?: string[];
@@ -4106,7 +4119,7 @@ export class AnatomicalLowerBodySubsystem {
     points?: string[];
     directions?: string[];
     },
-    entity?: any,
+    entity?: unknown,
   ): Record<string, unknown> {
     const factor = this.optScale(options);
     const invert = this.optInvert(options);
@@ -4149,7 +4162,7 @@ export class AnatomicalLowerBodySubsystem {
    * chuẩn `REGION_SIZES` (hành vi mặc định không đổi).
    */
   private regionSizeFor(entity: unknown, region: string): Vec3D {
-    const declared = (entity as any)?.regionSizes?.[region];
+    const declared = asRecord(asRecord(entity).regionSizes)[region];
     if (declared && typeof declared === 'object') {
       const v = toVec3(declared);
       if (v.x > 0 && v.y > 0 && v.z > 0) return v;
@@ -4164,7 +4177,7 @@ export class AnatomicalLowerBodySubsystem {
    * chuẩn (hành vi mặc định không đổi).
    */
   private declaredNumber(entity: unknown, key: string, fallback: number): number {
-    const v = (entity as any)?.[key];
+    const v = asRecord(entity)[key];
     return typeof v === 'number' && Number.isFinite(v) ? v : fallback;
   }
 
@@ -4183,7 +4196,7 @@ export class AnatomicalLowerBodySubsystem {
    * `b` là entity ⇒ lấy cùng mốc đó trên entity kia; `b` là điểm thô ⇒ dùng
    * trực tiếp; không truyền ⇒ `undefined` (giữ nguyên hành vi mặc định).
    */
-  private landmarkFrom(b: any, landmark: string): Vec3D | undefined {
+  private landmarkFrom(b: unknown, landmark: string): Vec3D | undefined {
     if (b === undefined || b === null) return undefined;
     if (isAnchored(b)) return this.landmarkPosition(landmark, b);
     if (this.isPoint(b)) return pointOf(b);
@@ -4191,7 +4204,7 @@ export class AnatomicalLowerBodySubsystem {
   }
 
   /** Mốc thứ hai lấy từ tham số `b` (có ưu tiên forward kinematics). */
-  private markerFrom(b: any, boneNames: string[], landmark: string): Vec3D | undefined {
+  private markerFrom(b: unknown, boneNames: string[], landmark: string): Vec3D | undefined {
     if (b === undefined || b === null) return undefined;
     if (isAnchored(b)) return this.markerPosition(b, boneNames, landmark);
     if (this.isPoint(b)) return pointOf(b);
@@ -4209,9 +4222,9 @@ export class AnatomicalLowerBodySubsystem {
    */
   private landmarkWith(
     name: string,
-    a: any,
-    b: any,
-    options: any,
+    a: unknown,
+    b: unknown,
+    options: unknown,
     side: 'left' | 'right' = 'left',
   ): Vec3D {
     const subject = this.optEntity(options, a);
@@ -4240,7 +4253,7 @@ export class AnatomicalLowerBodySubsystem {
   }
 
   /** Đọc trường lịch sử đầu tiên có mặt trong entity. */
-  private historyRaw(entity: any, keys: string[]): unknown {
+  private historyRaw(entity: unknown, keys: string[]): unknown {
     if (!entity || typeof entity !== 'object') return undefined;
     const rec = entity as Record<string, unknown>;
     for (const key of keys) {
@@ -4254,7 +4267,7 @@ export class AnatomicalLowerBodySubsystem {
    * Vận tốc: nếu entity lưu vị trí trước đó thì suy ra bằng Δvị trí / `dt`;
    * ngược lại dùng `entity.velocity` có sẵn (hành vi mặc định không đổi).
    */
-  private velocityFrom(entity: any, dt: number): Vec3D {
+  private velocityFrom(entity: unknown, dt: number): Vec3D {
     const prev = this.historyRaw(entity, ['previousPosition', 'prevPosition', 'lastPosition']);
     if (prev && typeof prev === 'object') {
       return scale(subtract(entityPosition(entity), toVec3(prev)), 1 / this.timeStep(dt));
@@ -4263,7 +4276,7 @@ export class AnatomicalLowerBodySubsystem {
   }
 
   /** Gia tốc: nếu entity lưu vận tốc trước đó thì suy ra bằng Δvận tốc / `dt`. */
-  private accelerationFrom(entity: any, dt: number): Vec3D {
+  private accelerationFrom(entity: unknown, dt: number): Vec3D {
     const prev = this.historyRaw(entity, ['previousVelocity', 'prevVelocity', 'lastVelocity']);
     if (prev && typeof prev === 'object') {
       return scale(subtract(this.entityVector(entity, 'velocity'), toVec3(prev)), 1 / this.timeStep(dt));
@@ -4272,7 +4285,7 @@ export class AnatomicalLowerBodySubsystem {
   }
 
   /** Vận tốc góc: nếu entity lưu quaternion trước đó thì suy ra từ Δquaternion / `dt`. */
-  private angularVelocityFrom(entity: any, dt: number): Vec3D {
+  private angularVelocityFrom(entity: unknown, dt: number): Vec3D {
     const prev = this.historyRaw(entity, ['previousQuaternion', 'previousRotation', 'prevQuaternion']);
     if (prev && typeof prev === 'object') {
       const axis = this.quaternionDeltaAxis(asQuaternion(entity), asQuaternion(prev));
@@ -4282,7 +4295,7 @@ export class AnatomicalLowerBodySubsystem {
   }
 
   /** Gia tốc góc: nếu entity lưu vận tốc góc trước đó thì suy ra bằng Δω / `dt`. */
-  private angularAccelerationFrom(entity: any, dt: number): Vec3D {
+  private angularAccelerationFrom(entity: unknown, dt: number): Vec3D {
     const prev = this.historyRaw(entity, ['previousAngularVelocity', 'prevAngularVelocity']);
     if (prev && typeof prev === 'object') {
       return scale(subtract(this.entityVector(entity, 'angularVelocity'), toVec3(prev)), 1 / this.timeStep(dt));
@@ -4306,7 +4319,7 @@ export class AnatomicalLowerBodySubsystem {
   }
 
   /** Đưa một vector hướng thế giới về khung cục bộ của entity. */
-  private toLocalDirection(entity: any, v: Vec3D): Vec3D {
+  private toLocalDirection(entity: unknown, v: Vec3D): Vec3D {
     const q = entityQuaternion(entity);
     return this.rotateByQuaternion({ x: -q.x, y: -q.y, z: -q.z, w: q.w }, v);
   }

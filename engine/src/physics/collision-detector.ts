@@ -25,13 +25,23 @@ export interface CapsuleRef {
   center: THREE.Vector3;
   radius: number;
   height: number;
+  /** Trục của capsule (mặc định 'y' — đứng). */
+  axis?: 'x' | 'y' | 'z';
 }
 
 export function capsuleSegment(c: CapsuleRef): { a: THREE.Vector3; b: THREE.Vector3 } {
   const halfCyl = Math.max(0, c.height / 2 - c.radius);
+  // Tôn trọng trục capsule: mặc định Y; axis x/z → đoạn chạy theo trục đó
+  // (capsule nằm ngang bị coi là đứng = lệch sườn khi va chạm).
+  const axisVec =
+    (c as { axis?: 'x' | 'y' | 'z' }).axis === 'x'
+      ? new THREE.Vector3(1, 0, 0)
+      : (c as { axis?: 'x' | 'y' | 'z' }).axis === 'z'
+        ? new THREE.Vector3(0, 0, 1)
+        : new THREE.Vector3(0, 1, 0);
   return {
-    a: new THREE.Vector3(c.center.x, c.center.y - halfCyl, c.center.z),
-    b: new THREE.Vector3(c.center.x, c.center.y + halfCyl, c.center.z),
+    a: new THREE.Vector3(c.center.x, c.center.y, c.center.z).addScaledVector(axisVec, -halfCyl),
+    b: new THREE.Vector3(c.center.x, c.center.y, c.center.z).addScaledVector(axisVec, halfCyl),
   };
 }
 
@@ -150,17 +160,23 @@ export function collideBodies(a: PhysicsBody, b: PhysicsBody): CollisionResult |
     return boxBox({ center: ca, half: toV3(a.shape.half) }, { center: cb, half: toV3(b.shape.half) });
   }
   if (a.shape.kind === 'sphere' && b.shape.kind === 'capsule') {
-    return sphereCapsule({ center: ca, radius: a.shape.radius }, { center: cb, radius: b.shape.radius, height: b.shape.height });
+    return sphereCapsule(
+      { center: ca, radius: a.shape.radius },
+      { center: cb, radius: b.shape.radius, height: b.shape.height, axis: b.shape.axis },
+    );
   }
   if (a.shape.kind === 'capsule' && b.shape.kind === 'sphere') {
-    const r = sphereCapsule({ center: cb, radius: b.shape.radius }, { center: ca, radius: a.shape.radius, height: a.shape.height });
+    const r = sphereCapsule(
+      { center: cb, radius: b.shape.radius },
+      { center: ca, radius: a.shape.radius, height: a.shape.height, axis: a.shape.axis },
+    );
     if (r.hit && r.normal) r.normal = { x: -r.normal.x, y: -r.normal.y, z: -r.normal.z };
     return r;
   }
   if (a.shape.kind === 'capsule' && b.shape.kind === 'capsule') {
     return capsuleCapsule(
-      { center: ca, radius: a.shape.radius, height: a.shape.height },
-      { center: cb, radius: b.shape.radius, height: b.shape.height },
+      { center: ca, radius: a.shape.radius, height: a.shape.height, axis: a.shape.axis },
+      { center: cb, radius: b.shape.radius, height: b.shape.height, axis: b.shape.axis },
     );
   }
   return null;

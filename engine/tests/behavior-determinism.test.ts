@@ -203,6 +203,25 @@ describe('Hành Vi — phát hiện & lựa chọn không còn phụ thuộc may
     const second = selectionResult('choose', candidates);
     expect((first.selected as any).id).toBe((second.selected as any).id);
   });
+
+  it('selectionResult chỉ tie-break trong nhóm điểm cao nhất và ổn định theo tick', () => {
+    const candidates = [
+      { id: 'low', score: 0.1 },
+      { id: 'tie_a', score: 0.9 },
+      { id: 'tie_b', score: 0.9 },
+    ];
+    const first = selectionResult('choose_tied', candidates, { tick: 7 });
+    const second = selectionResult('choose_tied', candidates, { tick: 7 });
+    const selectedId = (first.selected as { id: string }).id;
+    expect(selectedId).toBe((second.selected as { id: string }).id);
+    expect(['tie_a', 'tie_b']).toContain(selectedId);
+    expect(first.tieBreak).toBe('seeded_tie_break');
+
+    const defaultsA = selectionResult('defaults', []);
+    const defaultsB = selectionResult('defaults', []);
+    expect(defaultsA.selected).toBe(defaultsB.selected);
+    expect(defaultsA.tieBreak).toBe('seeded_tie_break');
+  });
 });
 
 describe('Hành Vi — trạng thái thao tác theo động từ', () => {

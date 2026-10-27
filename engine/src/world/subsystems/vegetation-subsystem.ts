@@ -25,12 +25,13 @@ import type { Vec3 } from '../../types/index.js';
  * Trước đây các method nhận `force` bỏ qua hoàn toàn và dùng hằng số
  * (`+0.1`, `+0.2`) — tức là "return có sẵn". Nay lực thật quyết định kết quả.
  */
-export function forceMagnitude(force: any): number {
+export function forceMagnitude(force: unknown): number {
   if (typeof force === 'number') return Number.isFinite(force) ? Math.abs(force) : 0;
   if (force && typeof force === 'object') {
-    const x = Number(force.x ?? 0);
-    const y = Number(force.y ?? 0);
-    const z = Number(force.z ?? 0);
+    const vector = force as Record<string, unknown>;
+    const x = Number(vector.x ?? 0);
+    const y = Number(vector.y ?? 0);
+    const z = Number(vector.z ?? 0);
     if (!Number.isFinite(x) || !Number.isFinite(y) || !Number.isFinite(z)) return 0;
     return Math.hypot(x, y, z);
   }
@@ -38,22 +39,77 @@ export function forceMagnitude(force: any): number {
 }
 
 /** Tốc độ gió (m/s) từ `{ speed }` hoặc vector hướng gió. */
-export function windSpeedOf(wind: any): number {
+export function windSpeedOf(wind: unknown): number {
   if (typeof wind === 'number') return Number.isFinite(wind) ? Math.abs(wind) : 0;
   if (!wind || typeof wind !== 'object') return 0;
-  if (typeof wind.speed === 'number') return Number.isFinite(wind.speed) ? Math.abs(wind.speed) : 0;
-  const x = Number(wind.x ?? 0);
-  const y = Number(wind.y ?? 0);
-  const z = Number(wind.z ?? 0);
+  const record = wind as Record<string, unknown>;
+  if (typeof record.speed === 'number') return Number.isFinite(record.speed) ? Math.abs(record.speed) : 0;
+  const x = Number(record.x ?? 0);
+  const y = Number(record.y ?? 0);
+  const z = Number(record.z ?? 0);
   if (!Number.isFinite(x) || !Number.isFinite(y) || !Number.isFinite(z)) return 0;
   return Math.hypot(x, y, z);
 }
 
+/** Đọc một giá trị bất kỳ dưới dạng bản ghi khoá–giá trị. */
+function asRecord(value: unknown): Record<string, unknown> | null {
+  return typeof value === 'object' && value !== null ? (value as Record<string, unknown>) : null;
+}
+
+/** Một đám cỏ trong thế giới. */
+export interface GrassPatch {
+  id: string;
+  area: unknown;
+  height: number;
+  initialHeight: number;
+  trampled: boolean;
+  isDry: boolean;
+  dryness: number;
+  /** Tổng độ nghiêng do gió (cộng dồn). */
+  sway?: number;
+}
+
+/** Một ngọn cỏ đơn lẻ (không nằm trong map). */
+export interface GrassBlade {
+  height?: number;
+  alive?: boolean;
+  bend?: number;
+  [key: string]: unknown;
+}
+
+/** Một bụi cây. */
+export interface Shrub {
+  id: string;
+  species: string;
+  size: number;
+  isCrushed: boolean;
+}
+
+/** Một dây leo bám vào cây/vật thể. */
+export interface Vine {
+  id: string;
+  length: number;
+  attachedTo: unknown;
+  plantId: string | null;
+}
+
+/** Dạng tối thiểu của một thực thể thực vật dùng trong các API công khai. */
+export interface PlantLike {
+  id?: string;
+  species?: string;
+  health?: number;
+  moisture?: number;
+  soil?: unknown;
+  size?: number;
+  [key: string]: unknown;
+}
+
 /** Diện tích chắn gió của một vật (m²) — suy từ kích thước nếu có. */
-export function windAreaOf(object: any): number {
-  if (!object || typeof object !== 'object') return 1;
-  const size = object.size ?? object.dimensions;
-  if (size && typeof size === 'object') {
+export function windAreaOf(object: unknown): number {
+  const record = asRecord(object);
+  if (!record) return 1;
+  const size = asRecord(record.size ?? record.dimensions);
+  if (size) {
     const sx = Math.abs(Number(size.x ?? 1));
     const sy = Math.abs(Number(size.y ?? 1));
     const sz = Math.abs(Number(size.z ?? 1));
@@ -61,25 +117,26 @@ export function windAreaOf(object: any): number {
       return Math.max(1e-6, sx * sy * sz);
     }
   }
-  if (typeof object.area === 'number' && Number.isFinite(object.area)) {
-    return Math.max(1e-6, object.area);
+  if (typeof record.area === 'number' && Number.isFinite(record.area)) {
+    return Math.max(1e-6, record.area);
   }
-  if (typeof object.radius === 'number' && Number.isFinite(object.radius)) {
-    return Math.max(1e-6, Math.PI * object.radius * object.radius);
+  if (typeof record.radius === 'number' && Number.isFinite(record.radius)) {
+    return Math.max(1e-6, Math.PI * record.radius * record.radius);
   }
   return 1;
 }
 
 /** Cánh tay lực (m) — nửa chiều cao vật, dùng cho mô-men xoắn. */
-function leverArmOf(object: any): number {
-  if (!object || typeof object !== 'object') return 0.5;
-  const size = object.size ?? object.dimensions;
-  if (size && typeof size === 'object') {
+function leverArmOf(object: unknown): number {
+  const record = asRecord(object);
+  if (!record) return 0.5;
+  const size = asRecord(record.size ?? record.dimensions);
+  if (size) {
     const sy = Math.abs(Number(size.y ?? 1));
     if (Number.isFinite(sy)) return Math.max(1e-6, sy / 2);
   }
-  if (typeof object.radius === 'number' && Number.isFinite(object.radius)) {
-    return Math.max(1e-6, object.radius);
+  if (typeof record.radius === 'number' && Number.isFinite(record.radius)) {
+    return Math.max(1e-6, record.radius);
   }
   return 0.5;
 }
@@ -99,35 +156,38 @@ export class VegetationSubsystem {
   public flowers: Map<string, FlowerEntity> = new Map();
   public fruits: Map<string, FruitEntity> = new Map();
   public seeds: Map<string, SeedEntity> = new Map();
-  public grassPatches: Map<string, any> = new Map();
-  public shrubs: Map<string, any> = new Map();
-  public vines: Map<string, any> = new Map();
+  public grassPatches: Map<string, GrassPatch> = new Map();
+  public shrubs: Map<string, Shrub> = new Map();
+  public vines: Map<string, Vine> = new Map();
 
   // -------------------------------------------------------------------------
   // Helper đọc dữ liệu thật — thay cho giá trị đóng cứng
   // -------------------------------------------------------------------------
 
   /** Kích thước đặc trưng (bán kính / cạnh lớn nhất) của đối tượng. */
-  private extentOf(source: any, fallback = 1): number {
-    const size = source?.size ?? source?.radius ?? source?.scale ?? source?.bounds;
+  private extentOf(source: unknown, fallback = 1): number {
+    const record = asRecord(source);
+    const size = record?.size ?? record?.radius ?? record?.scale ?? record?.bounds;
     if (typeof size === 'number' && Number.isFinite(size) && size > 0) return size;
-    if (size && typeof size === 'object') {
-      const values = [size.x, size.y, size.z, size.max, size.width, size.height]
+    const sizeRecord = asRecord(size);
+    if (sizeRecord) {
+      const values = [sizeRecord.x, sizeRecord.y, sizeRecord.z, sizeRecord.max, sizeRecord.width, sizeRecord.height]
         .map((v) => Number(v))
         .filter((v) => Number.isFinite(v) && v > 0)
         .sort((a, b) => b - a);
       if (values.length > 0) return values[0];
     }
-    const radius = Number(source?.canopyRadius ?? NaN);
+    const radius = Number(record?.canopyRadius ?? NaN);
     if (Number.isFinite(radius) && radius > 0) return radius;
     return fallback;
   }
 
   /** Đọc số từ nhiều khoá, có giá trị thay thế khi dữ liệu thiếu. */
-  private numOf(source: any, keys: string[], fallback: number): number {
-    if (source && typeof source === 'object') {
+  private numOf(source: unknown, keys: string[], fallback: number): number {
+    const record = asRecord(source);
+    if (record) {
       for (const key of keys) {
-        const value = (source as Record<string, unknown>)[key];
+        const value = record[key];
         if (typeof value === 'number' && Number.isFinite(value)) return value;
       }
     }
@@ -135,9 +195,10 @@ export class VegetationSubsystem {
   }
 
   /** Vị trí thế giới của đối tượng. */
-  private positionOf(source: any): Vec3 {
-    const p = source?.position;
-    if (p && typeof p === 'object') {
+  private positionOf(source: unknown): Vec3 {
+    const record = asRecord(source);
+    const p = asRecord(record?.position);
+    if (p) {
       const x = Number(p.x ?? 0);
       const y = Number(p.y ?? 0);
       const z = Number(p.z ?? 0);
@@ -231,13 +292,13 @@ export class VegetationSubsystem {
    * Trước đây `force` bị bỏ qua và `flexForce` luôn tăng đúng `0.1` — cành
    * uốn như nhau dù lực nhỏ hay lớn. Nay độ uốn tỉ lệ với lực thật.
    */
-  public bendTreeBranch(branch: BranchEntity | string, force: any): void {
+  public bendTreeBranch(branch: BranchEntity | string, force: unknown): void {
     const b = typeof branch === 'string' ? this.branches.get(branch) : branch;
     if (b) b.flexForce += forceMagnitude(force) * 0.1;
   }
 
   /** Xoắn cành — `torque` điều khiển góc xoay của cành. */
-  public twistTreeBranch(branch: BranchEntity | string, torque: any): void {
+  public twistTreeBranch(branch: BranchEntity | string, torque: unknown): void {
     const b = typeof branch === 'string' ? this.branches.get(branch) : branch;
     if (!b) return;
     const magnitude = forceMagnitude(torque);
@@ -294,7 +355,7 @@ export class VegetationSubsystem {
    *
    * Trước đây `force` bị bỏ qua và `flexForce` luôn tăng đúng `0.2`.
    */
-  public bendBranch(branch: BranchEntity | string, force: any): void {
+  public bendBranch(branch: BranchEntity | string, force: unknown): void {
     const b = typeof branch === 'string' ? this.branches.get(branch) : branch;
     if (b) b.flexForce += forceMagnitude(force) * 0.2;
   }
@@ -327,7 +388,7 @@ export class VegetationSubsystem {
   }
 
   /** Gán tải lên nhánh — `force` tích luỹ vào ứng lực. */
-  public applyBranchLoad(branch: BranchEntity | string, force: any): void {
+  public applyBranchLoad(branch: BranchEntity | string, force: unknown): void {
     const b = typeof branch === 'string' ? this.branches.get(branch) : branch;
     if (!b) return;
     b.flexForce += forceMagnitude(force) * 0.1;
@@ -348,7 +409,7 @@ export class VegetationSubsystem {
    * Lực (nếu có) được cộng vào ứng lực trước khi gãy — trước đây `force`
    * bị bỏ qua hoàn toàn nên mọi lần gọi cho kết quả giống hệt nhau.
    */
-  public breakBranch(branch: BranchEntity | string, force?: any): void {
+  public breakBranch(branch: BranchEntity | string, force?: unknown): void {
     const b = typeof branch === 'string' ? this.branches.get(branch) : branch;
     if (!b) return;
     b.flexForce += forceMagnitude(force);
@@ -360,14 +421,15 @@ export class VegetationSubsystem {
    *
    * Trước đây `joint` bị bỏ qua hoàn toàn.
    */
-  public snapBranchAtJoint(branch: BranchEntity | string, joint: any): void {
+  public snapBranchAtJoint(branch: BranchEntity | string, joint: unknown): void {
     const b = typeof branch === 'string' ? this.branches.get(branch) : branch;
     if (!b) return;
     // Khớp là điểm yếu: ứng lực dồn tại đó và nhánh gãy đúng chỗ.
     b.flexForce = Math.max(b.flexForce, 80);
     b.isBroken = true;
+    const jointRecord = asRecord(joint);
     const jointId =
-      joint && typeof joint === 'object' ? (joint.id ?? joint.name ?? joint.boneId ?? null) : joint ?? null;
+      jointRecord ? (jointRecord.id ?? jointRecord.name ?? jointRecord.boneId ?? null) : joint ?? null;
     (b as unknown as { brokenAtJoint?: unknown }).brokenAtJoint = jointId;
   }
 
@@ -375,14 +437,14 @@ export class VegetationSubsystem {
     this.breakBranch(branch);
   }
 
-  public fallBranch(branch: BranchEntity | string, gravity?: any): void { recordSubsystemAction(this, 'fallBranch', 'VegetationSubsystem'); }
+  public fallBranch(branch: BranchEntity | string, gravity?: unknown): void { recordSubsystemAction(this, 'fallBranch', 'VegetationSubsystem'); }
   public splitWoodGrain(branch: BranchEntity | string): void { recordSubsystemAction(this, 'splitWoodGrain', 'VegetationSubsystem'); }
   public crackWoodSurface(branch: BranchEntity | string): void { recordSubsystemAction(this, 'crackWoodSurface', 'VegetationSubsystem'); }
   public decayWood(branch: BranchEntity | string, rate: number): void { recordSubsystemAction(this, 'decayWood', 'VegetationSubsystem'); }
   public regenerateBranchMesh(branch: BranchEntity | string): void { recordSubsystemAction(this, 'regenerateBranchMesh', 'VegetationSubsystem'); }
 
   // 081–100. Lá cây và chuyển động từng chiếc lá
-  public createLeaf(plant: any): LeafEntity {
+  public createLeaf(plant: PlantLike | string): LeafEntity {
     const plantId = typeof plant === 'string' ? plant : (plant?.id ?? 'plant');
     const id = `leaf_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
     const leaf: LeafEntity = {
@@ -435,7 +497,7 @@ export class VegetationSubsystem {
     l.curl = 0;
     l.folded = false;
   }
-  public bendLeaf(leaf: LeafEntity | string, force: any): void {
+  public bendLeaf(leaf: LeafEntity | string, force: unknown): void {
     const l = typeof leaf === 'string' ? this.leaves.get(leaf) : leaf;
     if (!l) return;
     l.bend = (l.bend ?? 0) + forceMagnitude(force) * 0.05;
@@ -452,7 +514,7 @@ export class VegetationSubsystem {
    * Trước đây `wind` bị bỏ qua và `flutter` LUÔN bằng `1.0` — mọi gió, mọi lá
    * đều rung giống nhau. Nay độ rung tỉ lệ với tốc độ gió thật.
    */
-  public flutterLeaf(leaf: LeafEntity | string, wind: any): void {
+  public flutterLeaf(leaf: LeafEntity | string, wind: unknown): void {
     const l = typeof leaf === 'string' ? this.leaves.get(leaf) : leaf;
     if (!l) return;
     l.flutter = Math.max(0, Math.min(1, windSpeedOf(wind) / 10));
@@ -500,20 +562,20 @@ export class VegetationSubsystem {
     if (l) l.isAttached = false;
   }
 
-  public fallLeaf(leaf: LeafEntity | string, gravity?: any): void { recordSubsystemAction(this, 'fallLeaf', 'VegetationSubsystem'); }
-  public landLeaf(leaf: LeafEntity | string, surface?: any): void { recordSubsystemAction(this, 'landLeaf', 'VegetationSubsystem'); }
+  public fallLeaf(leaf: LeafEntity | string, gravity?: unknown): void { recordSubsystemAction(this, 'fallLeaf', 'VegetationSubsystem'); }
+  public landLeaf(leaf: LeafEntity | string, surface?: unknown): void { recordSubsystemAction(this, 'landLeaf', 'VegetationSubsystem'); }
 
   // 101–120. Gió tác động lên cây, cành và lá
-  public applyWindToTree(tree: TreeEntity | string, wind: any): void {
+  public applyWindToTree(tree: TreeEntity | string, wind: unknown): void {
     this.swayTreeTrunk(tree, wind);
     this.swayTreeCanopy(tree, wind);
   }
 
-  public applyWindToBranch(branch: BranchEntity | string, wind: any): void {
+  public applyWindToBranch(branch: BranchEntity | string, wind: unknown): void {
     this.oscillateBranch(branch, wind);
   }
 
-  public applyWindToLeaf(leaf: LeafEntity | string, wind: any): void {
+  public applyWindToLeaf(leaf: LeafEntity | string, wind: unknown): void {
     this.flutterLeaf(leaf, wind);
   }
 
@@ -523,24 +585,24 @@ export class VegetationSubsystem {
    * Trước đây `object` bị bỏ qua và kết quả chỉ phụ thuộc tốc độ gió qua
    * một hệ số cố định. Nay diện tích chắn gió của vật cũng quyết định kết quả.
    */
-  public calculateWindPressure(object: any, wind: any): number {
+  public calculateWindPressure(object: unknown, wind: unknown): number {
     const v = windSpeedOf(wind);
     return 0.5 * AIR_DENSITY * v * v * windAreaOf(object);
   }
 
   /** Lực cản gió: F = ½·ρ·v²·C_d·A. */
-  public calculateWindDrag(object: any, wind: any): number {
+  public calculateWindDrag(object: unknown, wind: unknown): number {
     const v = windSpeedOf(wind);
     return 0.5 * AIR_DENSITY * v * v * DRAG_COEFFICIENT * windAreaOf(object);
   }
 
   /** Mô-men xoắn do gió: τ = F·l (l = cánh tay lực). */
-  public calculateWindTorque(object: any, wind: any): number {
+  public calculateWindTorque(object: unknown, wind: unknown): number {
     return this.calculateWindDrag(object, wind) * leverArmOf(object);
   }
 
   /** Đung đưa thân cây theo gió — lực gió làm tăng ứng lực các cành. */
-  public swayTreeTrunk(tree: TreeEntity | string, wind: any): void {
+  public swayTreeTrunk(tree: TreeEntity | string, wind: unknown): void {
     const t = typeof tree === 'string' ? this.trees.get(tree) : tree;
     if (!t) return;
     const load = this.calculateWindDrag({ size: { x: t.thickness, y: t.height, z: t.thickness } }, wind);
@@ -552,7 +614,7 @@ export class VegetationSubsystem {
   }
 
   /** Đung đưa tán cây theo gió. */
-  public swayTreeCanopy(tree: TreeEntity | string, wind: any): void {
+  public swayTreeCanopy(tree: TreeEntity | string, wind: unknown): void {
     const t = typeof tree === 'string' ? this.trees.get(tree) : tree;
     if (!t) return;
     const speed = windSpeedOf(wind);
@@ -560,7 +622,7 @@ export class VegetationSubsystem {
   }
 
   /** Dao động cành theo gió. */
-  public oscillateBranch(branch: BranchEntity | string, wind: any): void {
+  public oscillateBranch(branch: BranchEntity | string, wind: unknown): void {
     const b = typeof branch === 'string' ? this.branches.get(branch) : branch;
     if (!b) return;
     const speed = windSpeedOf(wind);
@@ -568,20 +630,23 @@ export class VegetationSubsystem {
   }
 
   /** Rung cả nhóm lá theo gió. */
-  public flutterLeaves(leafGroup: any, wind: any): void {
-    const leaves = Array.isArray(leafGroup)
+  public flutterLeaves(leafGroup: unknown, wind: unknown): void {
+    const record = asRecord(leafGroup);
+    const leaves: unknown[] = Array.isArray(leafGroup)
       ? leafGroup
-      : Array.isArray(leafGroup?.leaves)
-        ? leafGroup.leaves
+      : Array.isArray(record?.leaves)
+        ? (record.leaves as unknown[])
         : [];
-    for (const leaf of leaves) this.flutterLeaf(leaf, wind);
+    for (const leaf of leaves) {
+      if (typeof leaf === 'string' || asRecord(leaf)) this.flutterLeaf(leaf as LeafEntity | string, wind);
+    }
   }
-  public simulateWindGust(gust: any): void { recordSubsystemAction(this, 'simulateWindGust', 'VegetationSubsystem'); }
-  public simulateTurbulentWind(wind: any): void { recordSubsystemAction(this, 'simulateTurbulentWind', 'VegetationSubsystem'); }
-  public simulateWindShear(wind: any): void { recordSubsystemAction(this, 'simulateWindShear', 'VegetationSubsystem'); }
-  public updateWindDirection(direction: any): void { recordSubsystemAction(this, 'updateWindDirection', 'VegetationSubsystem'); }
-  public updateWindStrength(strength: any): void { recordSubsystemAction(this, 'updateWindStrength', 'VegetationSubsystem'); }
-  public updateWindFrequency(frequency: any): void { recordSubsystemAction(this, 'updateWindFrequency', 'VegetationSubsystem'); }
+  public simulateWindGust(gust: unknown): void { recordSubsystemAction(this, 'simulateWindGust', 'VegetationSubsystem'); }
+  public simulateTurbulentWind(wind: unknown): void { recordSubsystemAction(this, 'simulateTurbulentWind', 'VegetationSubsystem'); }
+  public simulateWindShear(wind: unknown): void { recordSubsystemAction(this, 'simulateWindShear', 'VegetationSubsystem'); }
+  public updateWindDirection(direction: unknown): void { recordSubsystemAction(this, 'updateWindDirection', 'VegetationSubsystem'); }
+  public updateWindStrength(strength: unknown): void { recordSubsystemAction(this, 'updateWindStrength', 'VegetationSubsystem'); }
+  public updateWindFrequency(frequency: unknown): void { recordSubsystemAction(this, 'updateWindFrequency', 'VegetationSubsystem'); }
   /**
    * Vật thể có bị hư hại do gió không.
    *
@@ -589,23 +654,24 @@ export class VegetationSubsystem {
    * so với sức chịu gió của vật thể, tức là sức chịu suy ra từ kích thước
    * hoặc `windResistance` khai báo.
    */
-  public detectWindDamage(object: any): boolean {
-    if (!object) return false;
-    const wind = Number(object?.windSpeed ?? object?.windForce ?? object?.wind ?? 0);
+  public detectWindDamage(object: unknown): boolean {
+    const record = asRecord(object);
+    if (!record) return false;
+    const wind = Number(record.windSpeed ?? record.windForce ?? record.wind ?? 0);
     if (!Number.isFinite(wind) || wind <= 0) return false;
     const extent = this.extentOf(object, 1);
     const crossSection = extent * extent;
     const load = wind * crossSection;
-    const resistance = Number(object?.windResistance ?? extent * 12);
+    const resistance = Number(record.windResistance ?? extent * 12);
     const limit = Number.isFinite(resistance) && resistance > 0 ? resistance : 1;
-    const stress = Number(object?.flexForce ?? 0);
+    const stress = Number(record.flexForce ?? 0);
     return load > limit || (Number.isFinite(stress) && stress > limit);
   }
 
   public breakWindDamagedBranch(branch: BranchEntity | string): void {
     this.breakBranch(branch);
   }
-  public shedLeavesInWind(tree: TreeEntity | string, wind: any): void { recordSubsystemAction(this, 'shedLeavesInWind', 'VegetationSubsystem'); }
+  public shedLeavesInWind(tree: TreeEntity | string, wind: unknown): void { recordSubsystemAction(this, 'shedLeavesInWind', 'VegetationSubsystem'); }
   public stabilizeVegetationAfterWind(tree: TreeEntity | string): void { recordSubsystemAction(this, 'stabilizeVegetationAfterWind', 'VegetationSubsystem'); }
 
   // 121–140. Rễ cây, đất và sự phát triển
@@ -628,7 +694,7 @@ export class VegetationSubsystem {
     if (r) r.length += amount;
   }
 
-  public extendRootIntoSoil(root: RootEntity | string, direction: any): void { recordSubsystemAction(this, 'extendRootIntoSoil', 'VegetationSubsystem'); }
+  public extendRootIntoSoil(root: RootEntity | string, direction: unknown): void { recordSubsystemAction(this, 'extendRootIntoSoil', 'VegetationSubsystem'); }
   public thickenRoot(root: RootEntity | string, amount: number): void { recordSubsystemAction(this, 'thickenRoot', 'VegetationSubsystem'); }
   public branchRootSystem(root: RootEntity | string): void { recordSubsystemAction(this, 'branchRootSystem', 'VegetationSubsystem'); }
   /**
@@ -640,15 +706,15 @@ export class VegetationSubsystem {
   public detectRootObstacles(root: RootEntity | string): boolean {
     const r = typeof root === 'string' ? this.roots.get(root) : root;
     if (!r) return false;
-    const record = r as any;
+    const record = r as unknown as Record<string, unknown>;
     if (Array.isArray(record.obstacles) && record.obstacles.length > 0) return true;
     const depth = this.numOf(record, ['depth'], 0);
     const hardness = this.numOf(record.soil, ['hardness'], this.numOf(record, ['hardness'], 1));
     const maxDepth = 0.5 + hardness * 0.5;
     return depth > maxDepth;
   }
-  public wrapRootAroundObstacle(root: RootEntity | string, obstacle: any): void { recordSubsystemAction(this, 'wrapRootAroundObstacle', 'VegetationSubsystem'); }
-  public penetrateSoil(root: RootEntity | string, soil: any): void { recordSubsystemAction(this, 'penetrateSoil', 'VegetationSubsystem'); }
+  public wrapRootAroundObstacle(root: RootEntity | string, obstacle: unknown): void { recordSubsystemAction(this, 'wrapRootAroundObstacle', 'VegetationSubsystem'); }
+  public penetrateSoil(root: RootEntity | string, soil: unknown): void { recordSubsystemAction(this, 'penetrateSoil', 'VegetationSubsystem'); }
 
   /**
    * Lượng nước hấp thụ qua rễ (đơn vị lượng/giây).
@@ -658,7 +724,7 @@ export class VegetationSubsystem {
   public absorbWaterThroughRoots(root: RootEntity | string): number {
     const r = typeof root === 'string' ? this.roots.get(root) : root;
     if (!r) return 0;
-    const record = r as any;
+    const record = r as unknown as Record<string, unknown>;
     const moisture = this.numOf(record.soil, ['moisture'], this.numOf(record, ['moisture'], 0.4));
     const length = this.numOf(record, ['length'], 0);
     const porosity = this.numOf(record, ['porosity'], 0.35);
@@ -673,7 +739,7 @@ export class VegetationSubsystem {
   public absorbNutrientsThroughRoots(root: RootEntity | string): number {
     const r = typeof root === 'string' ? this.roots.get(root) : root;
     if (!r) return 0;
-    const record = r as any;
+    const record = r as unknown as Record<string, unknown>;
     const fertility = this.numOf(record.soil, ['fertility'], this.numOf(record, ['fertility'], 0.5));
     const length = this.numOf(record, ['length'], 0);
     const density = this.numOf(record, ['density'], 1.2);
@@ -689,12 +755,12 @@ export class VegetationSubsystem {
   public detectRootDamage(root: RootEntity | string): boolean {
     const r = typeof root === 'string' ? this.roots.get(root) : root;
     if (!r) return false;
-    const record = r as any;
+    const record = r as unknown as Record<string, unknown>;
     const integrity = this.numOf(record, ['integrity'], 1);
     const stress = this.numOf(record, ['stress'], 0);
     return integrity < 0.5 || stress > 0.5;
   }
-  public breakRoot(root: RootEntity | string, force?: any): void { recordSubsystemAction(this, 'breakRoot', 'VegetationSubsystem'); }
+  public breakRoot(root: RootEntity | string, force?: unknown): void { recordSubsystemAction(this, 'breakRoot', 'VegetationSubsystem'); }
   public decayRoot(root: RootEntity | string, rate: number): void { recordSubsystemAction(this, 'decayRoot', 'VegetationSubsystem'); }
   public anchorTreeWithRoots(tree: TreeEntity | string): void { recordSubsystemAction(this, 'anchorTreeWithRoots', 'VegetationSubsystem'); }
   public loosenRootAnchorage(tree: TreeEntity | string): void { recordSubsystemAction(this, 'loosenRootAnchorage', 'VegetationSubsystem'); }
@@ -708,7 +774,7 @@ export class VegetationSubsystem {
   public calculateRootStability(tree: TreeEntity | string): number {
     const t = typeof tree === 'string' ? this.trees.get(tree) : tree;
     if (!t) return 0;
-    const record = t as any;
+    const record = t as unknown as Record<string, unknown>;
     const rootIds = Array.isArray(record.roots) ? record.roots : [];
     let anchor = 0;
     for (const id of rootIds) {
@@ -720,13 +786,13 @@ export class VegetationSubsystem {
     const load = this.numOf(record, ['height'], 0) * 8;
     return Math.max(0, Math.min(100, (soilStability * 60 + anchor * 40) / (1 + load * 0.05)));
   }
-  public simulateRootCompetition(root: any, neighbor: any): void { recordSubsystemAction(this, 'simulateRootCompetition', 'VegetationSubsystem'); }
+  public simulateRootCompetition(root: unknown, neighbor: unknown): void { recordSubsystemAction(this, 'simulateRootCompetition', 'VegetationSubsystem'); }
   public updateRootGrowthDirection(root: RootEntity | string): void { recordSubsystemAction(this, 'updateRootGrowthDirection', 'VegetationSubsystem'); }
   public regenerateRootMesh(tree: TreeEntity | string): void { recordSubsystemAction(this, 'regenerateRootMesh', 'VegetationSubsystem'); }
   public updateRootSoilInteraction(tree: TreeEntity | string): void { recordSubsystemAction(this, 'updateRootSoilInteraction', 'VegetationSubsystem'); }
 
   // 141–160. Hoa, nụ hoa và cánh hoa
-  public createFlower(plant: any): FlowerEntity {
+  public createFlower(plant: PlantLike | string): FlowerEntity {
     const plantId = typeof plant === 'string' ? plant : (plant?.id ?? 'plant');
     const id = `flower_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
     const flower: FlowerEntity = {
@@ -765,8 +831,8 @@ export class VegetationSubsystem {
   }
 
   public rotateFlower(flower: FlowerEntity | string, angle: number): void { recordSubsystemAction(this, 'rotateFlower', 'VegetationSubsystem'); }
-  public swayFlower(flower: FlowerEntity | string, wind: any): void { recordSubsystemAction(this, 'swayFlower', 'VegetationSubsystem'); }
-  public flutterPetals(flower: FlowerEntity | string, wind: any): void { recordSubsystemAction(this, 'flutterPetals', 'VegetationSubsystem'); }
+  public swayFlower(flower: FlowerEntity | string, wind: unknown): void { recordSubsystemAction(this, 'swayFlower', 'VegetationSubsystem'); }
+  public flutterPetals(flower: FlowerEntity | string, wind: unknown): void { recordSubsystemAction(this, 'flutterPetals', 'VegetationSubsystem'); }
   public changePetalColor(flower: FlowerEntity | string, color: string): void {
     const f = typeof flower === 'string' ? this.flowers.get(flower) : flower;
     if (f) f.petalColor = color;
@@ -780,15 +846,15 @@ export class VegetationSubsystem {
   }
 
   public dryPetals(flower: FlowerEntity | string, rate: number): void { recordSubsystemAction(this, 'dryPetals', 'VegetationSubsystem'); }
-  public detachPetal(petal: any): void { recordSubsystemAction(this, 'detachPetal', 'VegetationSubsystem'); }
-  public scatterPetals(flower: FlowerEntity | string, force?: any): void { recordSubsystemAction(this, 'scatterPetals', 'VegetationSubsystem'); }
+  public detachPetal(petal: unknown): void { recordSubsystemAction(this, 'detachPetal', 'VegetationSubsystem'); }
+  public scatterPetals(flower: FlowerEntity | string, force?: unknown): void { recordSubsystemAction(this, 'scatterPetals', 'VegetationSubsystem'); }
   public dropWitheredFlower(flower: FlowerEntity | string): void {
     const id = typeof flower === 'string' ? flower : flower.id;
     this.flowers.delete(id);
   }
 
   // 161–180. Quả, hạt và vòng đời thực vật
-  public createFruit(plant: any): FruitEntity {
+  public createFruit(plant: PlantLike | string): FruitEntity {
     const plantId = typeof plant === 'string' ? plant : (plant?.id ?? 'plant');
     const id = `fruit_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
     const fruit: FruitEntity = {
@@ -816,24 +882,24 @@ export class VegetationSubsystem {
     if (f) f.isDetached = true;
   }
 
-  public fallFruit(fruit: FruitEntity | string, gravity?: any): void { recordSubsystemAction(this, 'fallFruit', 'VegetationSubsystem'); }
-  public bounceFruit(fruit: FruitEntity | string, surface?: any): void { recordSubsystemAction(this, 'bounceFruit', 'VegetationSubsystem'); }
-  public splitFruit(fruit: FruitEntity | string, force?: any): void { recordSubsystemAction(this, 'splitFruit', 'VegetationSubsystem'); }
+  public fallFruit(fruit: FruitEntity | string, gravity?: unknown): void { recordSubsystemAction(this, 'fallFruit', 'VegetationSubsystem'); }
+  public bounceFruit(fruit: FruitEntity | string, surface?: unknown): void { recordSubsystemAction(this, 'bounceFruit', 'VegetationSubsystem'); }
+  public splitFruit(fruit: FruitEntity | string, force?: unknown): void { recordSubsystemAction(this, 'splitFruit', 'VegetationSubsystem'); }
   public exposeSeeds(fruit: FruitEntity | string): void { recordSubsystemAction(this, 'exposeSeeds', 'VegetationSubsystem'); }
 
-  public createSeed(plant: any): SeedEntity {
+  public createSeed(plant: PlantLike | string): SeedEntity {
     const id = `seed_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
     const seed: SeedEntity = {
       id,
-      species: plant?.species ?? 'Oak',
+      species: typeof plant === 'string' ? 'Oak' : (plant?.species ?? 'Oak'),
       germinated: false,
     };
     this.seeds.set(id, seed);
     return seed;
   }
 
-  public disperseSeed(seed: SeedEntity | string, force?: any): void { recordSubsystemAction(this, 'disperseSeed', 'VegetationSubsystem'); }
-  public burySeed(seed: SeedEntity | string, soil?: any): void { recordSubsystemAction(this, 'burySeed', 'VegetationSubsystem'); }
+  public disperseSeed(seed: SeedEntity | string, force?: unknown): void { recordSubsystemAction(this, 'disperseSeed', 'VegetationSubsystem'); }
+  public burySeed(seed: SeedEntity | string, soil?: unknown): void { recordSubsystemAction(this, 'burySeed', 'VegetationSubsystem'); }
   public germinateSeed(seed: SeedEntity | string): boolean {
     const s = typeof seed === 'string' ? this.seeds.get(seed) : seed;
     if (s) { s.germinated = true; return true; }
@@ -841,20 +907,20 @@ export class VegetationSubsystem {
   }
 
   public sproutSeed(seed: SeedEntity | string): void { this.germinateSeed(seed); }
-  public developSeedling(seedling: any): void { recordSubsystemAction(this, 'developSeedling', 'VegetationSubsystem'); }
-  public maturePlant(plant: any): void { recordSubsystemAction(this, 'maturePlant', 'VegetationSubsystem'); }
-  public restartPlantGrowthCycle(plant: any): void { recordSubsystemAction(this, 'restartPlantGrowthCycle', 'VegetationSubsystem'); }
+  public developSeedling(seedling: unknown): void { recordSubsystemAction(this, 'developSeedling', 'VegetationSubsystem'); }
+  public maturePlant(plant: PlantLike | null | undefined): void { recordSubsystemAction(this, 'maturePlant', 'VegetationSubsystem'); }
+  public restartPlantGrowthCycle(plant: PlantLike | null | undefined): void { recordSubsystemAction(this, 'restartPlantGrowthCycle', 'VegetationSubsystem'); }
 
   // 181–200. Héo úa, chết, mục nát và tái sinh
-  public calculatePlantHealth(plant: any): number { return plant?.health ?? 100; }
-  public calculatePlantStress(plant: any): number { return 100 - (plant?.health ?? 100); }
+  public calculatePlantHealth(plant: PlantLike | null | undefined): number { return plant?.health ?? 100; }
+  public calculatePlantStress(plant: PlantLike | null | undefined): number { return 100 - (plant?.health ?? 100); }
   /**
    * Cây có bị hạn hán không.
    *
    * Trước đây luôn `false`. Nay hạn hán xảy ra khi độ ẩm đất thấp hơn ngưỡng
    * mà cây cần để duy trì.
    */
-  public detectPlantDrought(plant: any): boolean {
+  public detectPlantDrought(plant: PlantLike | null | undefined): boolean {
     if (!plant) return false;
     const moisture = this.numOf(plant.soil, ['moisture'], this.numOf(plant, ['moisture'], 0.4));
     const threshold = this.numOf(plant, ['droughtThreshold', 'waterDemand'], 0.5);
@@ -867,7 +933,7 @@ export class VegetationSubsystem {
    * Trước đây luôn `false`. Nay bệnh xuất hiện khi sức khoẻ thấp, độc tố
    * cao, có ký sinh trùng, hoặc cây đang chịu ứng suất lớn.
    */
-  public detectPlantDisease(plant: any): boolean {
+  public detectPlantDisease(plant: PlantLike | null | undefined): boolean {
     if (!plant) return false;
     const health = this.numOf(plant, ['health'], 100);
     const toxicity = this.numOf(plant, ['toxicity'], 0);
@@ -876,33 +942,33 @@ export class VegetationSubsystem {
     return health < 60 || toxicity > 0.5 || parasites > 0 || stress > 0.5;
   }
 
-  public detectPlantDamage(plant: any): boolean { return (plant?.health ?? 100) < 90; }
-  public reducePlantVitality(plant: any, amount: number): void {
+  public detectPlantDamage(plant: PlantLike | null | undefined): boolean { return (plant?.health ?? 100) < 90; }
+  public reducePlantVitality(plant: PlantLike | null | undefined, amount: number): void {
     if (plant && plant.health) plant.health = Math.max(0, plant.health - amount);
   }
 
-  public wiltPlant(plant: any, rate: number): void { this.reducePlantVitality(plant, rate); }
-  public dryPlantLeaves(plant: any, rate: number): void { recordSubsystemAction(this, 'dryPlantLeaves', 'VegetationSubsystem'); }
-  public discolorPlantLeaves(plant: any, color: string): void { recordSubsystemAction(this, 'discolorPlantLeaves', 'VegetationSubsystem'); }
-  public shedDeadLeaves(plant: any): void { recordSubsystemAction(this, 'shedDeadLeaves', 'VegetationSubsystem'); }
-  public killPlant(plant: any): void {
+  public wiltPlant(plant: PlantLike | null | undefined, rate: number): void { this.reducePlantVitality(plant, rate); }
+  public dryPlantLeaves(plant: PlantLike | null | undefined, rate: number): void { recordSubsystemAction(this, 'dryPlantLeaves', 'VegetationSubsystem'); }
+  public discolorPlantLeaves(plant: PlantLike | null | undefined, color: string): void { recordSubsystemAction(this, 'discolorPlantLeaves', 'VegetationSubsystem'); }
+  public shedDeadLeaves(plant: PlantLike | null | undefined): void { recordSubsystemAction(this, 'shedDeadLeaves', 'VegetationSubsystem'); }
+  public killPlant(plant: PlantLike | null | undefined): void {
     if (plant) plant.health = 0;
   }
 
-  public enterDormancy(plant: any): void { recordSubsystemAction(this, 'enterDormancy', 'VegetationSubsystem'); }
-  public resumePlantGrowth(plant: any): void { recordSubsystemAction(this, 'resumePlantGrowth', 'VegetationSubsystem'); }
-  public decayPlantTissue(plant: any, rate: number): void { recordSubsystemAction(this, 'decayPlantTissue', 'VegetationSubsystem'); }
-  public decomposeDeadPlant(plant: any): void { recordSubsystemAction(this, 'decomposeDeadPlant', 'VegetationSubsystem'); }
+  public enterDormancy(plant: PlantLike | null | undefined): void { recordSubsystemAction(this, 'enterDormancy', 'VegetationSubsystem'); }
+  public resumePlantGrowth(plant: PlantLike | null | undefined): void { recordSubsystemAction(this, 'resumePlantGrowth', 'VegetationSubsystem'); }
+  public decayPlantTissue(plant: PlantLike | null | undefined, rate: number): void { recordSubsystemAction(this, 'decayPlantTissue', 'VegetationSubsystem'); }
+  public decomposeDeadPlant(plant: PlantLike | null | undefined): void { recordSubsystemAction(this, 'decomposeDeadPlant', 'VegetationSubsystem'); }
   public detachDeadBranch(branch: BranchEntity | string): void { this.detachBranch(branch); }
   public collapseDeadTree(tree: TreeEntity | string): void { recordSubsystemAction(this, 'collapseDeadTree', 'VegetationSubsystem'); }
-  public spreadPlantDisease(plant: any, neighbor: any): void { recordSubsystemAction(this, 'spreadPlantDisease', 'VegetationSubsystem'); }
-  public regenerateDamagedPlant(plant: any): void {
+  public spreadPlantDisease(plant: PlantLike | null | undefined, neighbor: unknown): void { recordSubsystemAction(this, 'spreadPlantDisease', 'VegetationSubsystem'); }
+  public regenerateDamagedPlant(plant: PlantLike | null | undefined): void {
     if (plant) plant.health = 100;
   }
-  public recyclePlantNutrients(plant: any, soil: any): void { recordSubsystemAction(this, 'recyclePlantNutrients', 'VegetationSubsystem'); }
+  public recyclePlantNutrients(plant: PlantLike | null | undefined, soil: unknown): void { recordSubsystemAction(this, 'recyclePlantNutrients', 'VegetationSubsystem'); }
 
   // 201–220. Cỏ, bụi cây, dây leo và rêu
-  public createGrassPatch(area: any): any {
+  public createGrassPatch(area: unknown): GrassPatch {
     const id = `grass_${Date.now()}`;
     // `initialHeight` giữ chiều cao gốc để `restoreGrassPatch` phục hồi đúng.
     const patch = {
@@ -918,17 +984,17 @@ export class VegetationSubsystem {
     return patch;
   }
 
-  public growGrassBlade(blade: any): void {
+  public growGrassBlade(blade: GrassBlade | null | undefined): void {
     if (!blade) return;
     blade.height = Math.max(0, blade.height ?? 0) + 0.05;
     blade.alive = true;
   }
-  public bendGrassBlade(blade: any, wind: any): void {
+  public bendGrassBlade(blade: GrassBlade | null | undefined, wind: unknown): void {
     if (!blade) return;
     const speed = windSpeedOf(wind);
     blade.bend = (blade.bend ?? 0) + speed * 0.01;
   }
-  public swayGrassPatch(patch: any, wind: any): void {
+  public swayGrassPatch(patch: GrassPatch | string, wind: unknown): void {
     const p = typeof patch === 'string' ? this.grassPatches.get(patch) : patch;
     if (!p) return;
     const speed = windSpeedOf(wind);
@@ -940,7 +1006,7 @@ export class VegetationSubsystem {
    *
    * Trước đây `force` bị bỏ qua, mọi lần dập đều cho kết quả giống nhau.
    */
-  public flattenGrassPatch(patch: any, force?: any): void {
+  public flattenGrassPatch(patch: GrassPatch | string, force?: unknown): void {
     const p = typeof patch === 'string' ? this.grassPatches.get(patch) : patch;
     if (!p) return;
     const magnitude = forceMagnitude(force);
@@ -950,7 +1016,7 @@ export class VegetationSubsystem {
     p.trampled = true;
   }
 
-  public restoreGrassPatch(patch: any): void {
+  public restoreGrassPatch(patch: GrassPatch | string): void {
     const p = typeof patch === 'string' ? this.grassPatches.get(patch) : patch;
     if (!p) return;
     p.trampled = false;
@@ -959,15 +1025,15 @@ export class VegetationSubsystem {
     }
   }
 
-  public trampleGrassPatch(patch: any): void { this.flattenGrassPatch(patch); }
-  public regrowTrampledGrass(patch: any): void { this.restoreGrassPatch(patch); }
+  public trampleGrassPatch(patch: GrassPatch | string): void { this.flattenGrassPatch(patch); }
+  public regrowTrampledGrass(patch: GrassPatch | string): void { this.restoreGrassPatch(patch); }
 
   /**
    * Cỏ khô dần theo tốc độ `rate`.
    *
    * Trước đây `rate` bị bỏ qua và mọi lần đều khô hẳn ngay lập tức.
    */
-  public dryGrassPatch(patch: any, rate?: number): void {
+  public dryGrassPatch(patch: GrassPatch | string, rate?: number): void {
     const p = typeof patch === 'string' ? this.grassPatches.get(patch) : patch;
     if (!p) return;
     const step = Number.isFinite(rate) ? Math.max(0, rate as number) : 1;
@@ -975,24 +1041,24 @@ export class VegetationSubsystem {
     p.isDry = p.dryness >= 1;
   }
 
-  public igniteDryGrass(patch: any): boolean {
+  public igniteDryGrass(patch: GrassPatch | string): boolean {
     const p = typeof patch === 'string' ? this.grassPatches.get(patch) : patch;
     return p?.isDry ?? false;
   }
 
-  public createShrub(species = 'Berry'): any {
+  public createShrub(species = 'Berry') {
     const id = `shrub_${Date.now()}`;
     const shrub = { id, species, size: 1.0, isCrushed: false };
     this.shrubs.set(id, shrub);
     return shrub;
   }
 
-  public growShrub(shrub: any, amount: number): void {
+  public growShrub(shrub: Shrub | string, amount: number): void {
     const s = typeof shrub === 'string' ? this.shrubs.get(shrub) : shrub;
     if (s) s.size += amount;
   }
 
-  public trimShrub(shrub: any, amount: number): void {
+  public trimShrub(shrub: Shrub | string, amount: number): void {
     const s = typeof shrub === 'string' ? this.shrubs.get(shrub) : shrub;
     if (s) s.size = Math.max(0.2, s.size - amount);
   }
@@ -1002,7 +1068,7 @@ export class VegetationSubsystem {
    *
    * Trước đây `force` bị bỏ qua hoàn toàn.
    */
-  public crushShrub(shrub: any, force?: any): void {
+  public crushShrub(shrub: Shrub | string, force?: unknown): void {
     const s = typeof shrub === 'string' ? this.shrubs.get(shrub) : shrub;
     if (!s) return;
     const magnitude = forceMagnitude(force);
@@ -1017,7 +1083,7 @@ export class VegetationSubsystem {
    *
    * Trước đây `plant` bị bỏ qua — dây leo không biết mình bám vào cây nào.
    */
-  public createVine(plant: any): any {
+  public createVine(plant: PlantLike | string) {
     const id = `vine_${Date.now()}`;
     const plantId = typeof plant === 'string' ? plant : (plant?.id ?? null);
     const vine = { id, length: 1.0, attachedTo: plant ?? null, plantId };
@@ -1025,21 +1091,21 @@ export class VegetationSubsystem {
     return vine;
   }
 
-  public extendVine(vine: any, amount: number): void {
+  public extendVine(vine: Vine | string, amount: number): void {
     const v = typeof vine === 'string' ? this.vines.get(vine) : vine;
     if (v) v.length += amount;
   }
 
-  public wrapVineAroundObject(vine: any, object: any): void {
+  public wrapVineAroundObject(vine: Vine | string, object: unknown): void {
     const v = typeof vine === 'string' ? this.vines.get(vine) : vine;
     if (v) v.attachedTo = object;
   }
 
-  public detachVine(vine: any): void {
+  public detachVine(vine: Vine | string): void {
     const v = typeof vine === 'string' ? this.vines.get(vine) : vine;
     if (v) v.attachedTo = null;
   }
 
-  public growMoss(surface: any): any { return { surface, coverage: 0.5 }; }
-  public dryMoss(surface: any, rate?: number): void { recordSubsystemAction(this, 'dryMoss', 'VegetationSubsystem'); }
+  public growMoss(surface: unknown) { return { surface, coverage: 0.5 }; }
+  public dryMoss(surface: unknown, rate?: number): void { recordSubsystemAction(this, 'dryMoss', 'VegetationSubsystem'); }
 }

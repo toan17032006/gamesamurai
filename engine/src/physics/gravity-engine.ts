@@ -27,7 +27,8 @@ export class GravityEngine {
     }
     const drag = body.drag ?? 0;
     if (drag > 0) {
-      const f = Math.max(0, 1 - drag * dt);
+      // Kẹp về [0, 1]: drag*dt > 1 sẽ đảo dấu và khuếch đại vận tốc (bug).
+      const f = Math.max(0, Math.min(1, 1 - drag * dt));
       body.velocity.x *= f;
       body.velocity.y *= f;
       body.velocity.z *= f;

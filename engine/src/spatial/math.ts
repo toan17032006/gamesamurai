@@ -111,7 +111,7 @@ export class Vec3 implements Vec3Like {
   public static readonly forward = (): Vec3 => new Vec3(0, 0, -1);
   public static readonly back = (): Vec3 => new Vec3(0, 0, 1);
 
-  /** Build from any structural vector or tuple. */
+  /** Build from a structural vector or tuple. */
   public static from(value: Vec3Like | Vec3Tuple): Vec3 {
     if (Array.isArray(value)) {
       const tuple = value as Vec3Tuple;

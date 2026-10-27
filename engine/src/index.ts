@@ -29,6 +29,31 @@ export * from './objects/index.js';
 export * from './player/index.js';
 export * from './animal/index.js';
 export * from './world/index.js';
+export * from './navigation/index.js';
+export * from './open-world/index.js';
+
+// Sinh mệnh, tâm lý, học sâu, tri thức và văn minh
+export * as DeepLearning from './deeplearning/index.js';
+export * as Animation from './animation/index.js';
+export * as Learning from './learning/index.js';
+export * as Life from './life/index.js';
+export * as Psychology from './psychology/index.js';
+export * as Knowledge from './knowledge/index.js';
+export * as Civilization from './civilization/index.js';
+export * as Law from './law/index.js';
+export * as Research from './research/index.js';
+export * as UIProcedural from './ui-procedural/index.js';
+export * as WorldView from './worldview/index.js';
+export * as Training from './training/index.js';
+export { LifeSimulation, createLifeSimulation } from './life/simulation.js';
+export type {
+  LifeSimulationConfig,
+  LifeSimulationContext,
+  LifeSimulationReport,
+  EntitySimulationState,
+  SpawnOptions,
+  LifeActionResult,
+} from './life/simulation.js';
 
 // Explicit re-exports to resolve ambiguity between player and animal
 export {
@@ -60,6 +85,8 @@ export type { WorldObject } from './world/index.js';
 export type { WindState } from './types/index.js';
 
 export * as WorldSystem from './world/index.js';
+export * as Navigation from './navigation/index.js';
+export * as OpenWorld from './open-world/index.js';
 
 export {
   blinkEyes as animalBlinkEyes,

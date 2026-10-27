@@ -39,12 +39,12 @@ export class InputMap {
   private mouseWheel = 0;
   private isListening = false;
 
-  private keyDownHandler?: (e: KeyboardEvent) => void;
-  private keyUpHandler?: (e: KeyboardEvent) => void;
-  private mouseDownHandler?: (e: MouseEvent) => void;
-  private mouseUpHandler?: (e: MouseEvent) => void;
-  private mouseMoveHandler?: (e: MouseEvent) => void;
-  private wheelHandler?: (e: WheelEvent) => void;
+  private keyDownHandler?: EventListener;
+  private keyUpHandler?: EventListener;
+  private mouseDownHandler?: EventListener;
+  private mouseUpHandler?: EventListener;
+  private mouseMoveHandler?: EventListener;
+  private wheelHandler?: EventListener;
 
   constructor() {
     this.initDefaultBindings();
@@ -70,63 +70,69 @@ export class InputMap {
     this.bindings.set(action, binding);
   }
 
-  public attach(target: Window | HTMLElement | EventTarget = globalThis as any): void {
-    if (this.isListening || typeof (target as any)?.addEventListener !== 'function') return;
+  public attach(target: EventTarget = globalThis): void {
+    if (this.isListening || typeof target?.addEventListener !== 'function') return;
 
-    this.keyDownHandler = (e: KeyboardEvent) => {
+    this.keyDownHandler = (event: Event) => {
+      const e = event as KeyboardEvent;
       if (!this.activeKeys.has(e.code)) {
         this.activeKeys.add(e.code);
         this.updateJustPressedForKey(e.code);
       }
     };
 
-    this.keyUpHandler = (e: KeyboardEvent) => {
+    this.keyUpHandler = (event: Event) => {
+      const e = event as KeyboardEvent;
       this.activeKeys.delete(e.code);
       this.updateJustReleasedForKey(e.code);
     };
 
-    this.mouseDownHandler = (e: MouseEvent) => {
+    this.mouseDownHandler = (event: Event) => {
+      const e = event as MouseEvent;
       if (!this.activeMouseButtons.has(e.button)) {
         this.activeMouseButtons.add(e.button);
         this.updateJustPressedForMouse(e.button);
       }
     };
 
-    this.mouseUpHandler = (e: MouseEvent) => {
+    this.mouseUpHandler = (event: Event) => {
+      const e = event as MouseEvent;
       this.activeMouseButtons.delete(e.button);
       this.updateJustReleasedForMouse(e.button);
     };
 
-    this.mouseMoveHandler = (e: MouseEvent) => {
+    this.mouseMoveHandler = (event: Event) => {
+      const e = event as MouseEvent;
       this.mouseDelta.x += e.movementX ?? 0;
       this.mouseDelta.y += e.movementY ?? 0;
     };
 
-    this.wheelHandler = (e: WheelEvent) => {
+    this.wheelHandler = (event: Event) => {
+      const e = event as WheelEvent;
       this.mouseWheel += e.deltaY;
       if (e.deltaY < 0) this.justPressedActions.add('zoom_in');
       if (e.deltaY > 0) this.justPressedActions.add('zoom_out');
     };
 
-    target.addEventListener('keydown', this.keyDownHandler as any);
-    target.addEventListener('keyup', this.keyUpHandler as any);
-    target.addEventListener('mousedown', this.mouseDownHandler as any);
-    target.addEventListener('mouseup', this.mouseUpHandler as any);
-    target.addEventListener('mousemove', this.mouseMoveHandler as any);
-    target.addEventListener('wheel', this.wheelHandler as any);
+    target.addEventListener('keydown', this.keyDownHandler);
+    target.addEventListener('keyup', this.keyUpHandler);
+    target.addEventListener('mousedown', this.mouseDownHandler);
+    target.addEventListener('mouseup', this.mouseUpHandler);
+    target.addEventListener('mousemove', this.mouseMoveHandler);
+    target.addEventListener('wheel', this.wheelHandler);
 
     this.isListening = true;
   }
 
-  public detach(target: Window | HTMLElement | EventTarget = globalThis as any): void {
-    if (!this.isListening || typeof (target as any)?.removeEventListener !== 'function') return;
+  public detach(target: EventTarget = globalThis): void {
+    if (!this.isListening || typeof target?.removeEventListener !== 'function') return;
 
-    if (this.keyDownHandler) target.removeEventListener('keydown', this.keyDownHandler as any);
-    if (this.keyUpHandler) target.removeEventListener('keyup', this.keyUpHandler as any);
-    if (this.mouseDownHandler) target.removeEventListener('mousedown', this.mouseDownHandler as any);
-    if (this.mouseUpHandler) target.removeEventListener('mouseup', this.mouseUpHandler as any);
-    if (this.mouseMoveHandler) target.removeEventListener('mousemove', this.mouseMoveHandler as any);
-    if (this.wheelHandler) target.removeEventListener('wheel', this.wheelHandler as any);
+    if (this.keyDownHandler) target.removeEventListener('keydown', this.keyDownHandler);
+    if (this.keyUpHandler) target.removeEventListener('keyup', this.keyUpHandler);
+    if (this.mouseDownHandler) target.removeEventListener('mousedown', this.mouseDownHandler);
+    if (this.mouseUpHandler) target.removeEventListener('mouseup', this.mouseUpHandler);
+    if (this.mouseMoveHandler) target.removeEventListener('mousemove', this.mouseMoveHandler);
+    if (this.wheelHandler) target.removeEventListener('wheel', this.wheelHandler);
 
     this.isListening = false;
   }

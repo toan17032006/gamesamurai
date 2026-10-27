@@ -5,7 +5,7 @@
  * physiological, and behavioral subsystems with full 800-function coverage.
  */
 
-import { AnimalConfig } from './types.js';
+import type { AnimalConfig, AnimalAppearanceConfig, SpeciesProfile } from './types.js';
 import { AnimalBase } from './subsystems/animal-base.js';
 import { SkeletonMusclesSubsystem } from './subsystems/skeleton-muscles.js';
 import { HeadSensesSubsystem } from './subsystems/head-senses.js';
@@ -49,7 +49,11 @@ export class Animal {
 
   // 001–020. Khởi tạo và quản lý động vật
   public createAnimal(): Animal { this.base.createAnimal(); return this; }
-  public initializeAnimal(): boolean { return this.base.initializeAnimal(); }
+  public initializeAnimal(
+    ...args: Parameters<AnimalBase['initializeAnimal']>
+  ): ReturnType<AnimalBase['initializeAnimal']> {
+    return this.base.initializeAnimal(...args);
+  }
   public destroyAnimal(): void { this.base.destroyAnimal(); }
   public resetAnimal(): void { this.base.resetAnimal(); }
   public respawnAnimal(): void { this.base.respawnAnimal(); }
@@ -61,52 +65,160 @@ export class Animal {
   }
   public lateUpdateAnimal(dt: number): void { this.base.lateUpdateAnimal(dt); }
   public fixedUpdateAnimal(fdt: number): void { this.base.fixedUpdateAnimal(fdt); }
-  public setAnimalConfig(config: any): void { this.base.setAnimalConfig(config); }
-  public getAnimalConfig(): any { return this.base.getAnimalConfig(); }
-  public getAnimalState(): any { return this.base.getAnimalState(); }
-  public setAnimalState(state: any): void { this.base.setAnimalState(state); }
-  public saveAnimalState(): string { return this.base.saveAnimalState(); }
-  public restoreAnimalState(state: any): boolean { return this.base.restoreAnimalState(state); }
+  public setAnimalConfig(config: Partial<AnimalConfig>): void { this.base.setAnimalConfig(config); }
+  public getAnimalConfig(
+    ...args: Parameters<AnimalBase['getAnimalConfig']>
+  ): ReturnType<AnimalBase['getAnimalConfig']> {
+    return this.base.getAnimalConfig(...args);
+  }
+  public getAnimalState(
+    ...args: Parameters<AnimalBase['getAnimalState']>
+  ): ReturnType<AnimalBase['getAnimalState']> {
+    return this.base.getAnimalState(...args);
+  }
+  public setAnimalState(state: Record<string, unknown>): void { this.base.setAnimalState(state); }
+  public saveAnimalState(
+    ...args: Parameters<AnimalBase['saveAnimalState']>
+  ): ReturnType<AnimalBase['saveAnimalState']> {
+    return this.base.saveAnimalState(...args);
+  }
+  public restoreAnimalState(
+    ...args: Parameters<AnimalBase['restoreAnimalState']>
+  ): ReturnType<AnimalBase['restoreAnimalState']> {
+    return this.base.restoreAnimalState(...args);
+  }
   public enableAnimal(): void { this.base.enableAnimal(); }
   public disableAnimal(): void { this.base.disableAnimal(); }
   public pauseAnimal(): void { this.base.pauseAnimal(); }
   public resumeAnimal(): void { this.base.resumeAnimal(); }
-  public validateAnimalState(): boolean { return this.base.validateAnimalState(); }
+  public validateAnimalState(
+    ...args: Parameters<AnimalBase['validateAnimalState']>
+  ): ReturnType<AnimalBase['validateAnimalState']> {
+    return this.base.validateAnimalState(...args);
+  }
   public disposeAnimalResources(): void { this.base.disposeAnimalResources(); }
 
   // 021–040. Phân loại và đặc điểm loài
   public setAnimalSpecies(species: string): void { this.base.setAnimalSpecies(species); }
-  public getAnimalSpecies(): string { return this.base.getAnimalSpecies(); }
-  public classifyAnimalSpecies(): any { return this.base.classifyAnimalSpecies(); }
-  public identifyAnimalFamily(): string { return this.base.identifyAnimalFamily(); }
-  public identifyAnimalOrder(): string { return this.base.identifyAnimalOrder(); }
-  public identifyAnimalClass(): any { return this.base.identifyAnimalClass(); }
-  public identifyAnimalPhylum(): any { return this.base.identifyAnimalPhylum(); }
+  public getAnimalSpecies(
+    ...args: Parameters<AnimalBase['getAnimalSpecies']>
+  ): ReturnType<AnimalBase['getAnimalSpecies']> {
+    return this.base.getAnimalSpecies(...args);
+  }
+  public classifyAnimalSpecies(
+    ...args: Parameters<AnimalBase['classifyAnimalSpecies']>
+  ): ReturnType<AnimalBase['classifyAnimalSpecies']> {
+    return this.base.classifyAnimalSpecies(...args);
+  }
+  public identifyAnimalFamily(
+    ...args: Parameters<AnimalBase['identifyAnimalFamily']>
+  ): ReturnType<AnimalBase['identifyAnimalFamily']> {
+    return this.base.identifyAnimalFamily(...args);
+  }
+  public identifyAnimalOrder(
+    ...args: Parameters<AnimalBase['identifyAnimalOrder']>
+  ): ReturnType<AnimalBase['identifyAnimalOrder']> {
+    return this.base.identifyAnimalOrder(...args);
+  }
+  public identifyAnimalClass(
+    ...args: Parameters<AnimalBase['identifyAnimalClass']>
+  ): ReturnType<AnimalBase['identifyAnimalClass']> {
+    return this.base.identifyAnimalClass(...args);
+  }
+  public identifyAnimalPhylum(
+    ...args: Parameters<AnimalBase['identifyAnimalPhylum']>
+  ): ReturnType<AnimalBase['identifyAnimalPhylum']> {
+    return this.base.identifyAnimalPhylum(...args);
+  }
   public determineAnimalHabitat(): string[] { return this.base.determineAnimalHabitat(); }
-  public determineAnimalDiet(): any { return this.base.determineAnimalDiet(); }
-  public determineAnimalLocomotion(): any { return this.base.determineAnimalLocomotion(); }
-  public determineAnimalBodyPlan(): string { return this.base.determineAnimalBodyPlan(); }
-  public determineAnimalSymmetry(): string { return this.base.determineAnimalSymmetry(); }
-  public determineAnimalActivityPattern(): any { return this.base.determineAnimalActivityPattern(); }
-  public determineAnimalSocialType(): any { return this.base.determineAnimalSocialType(); }
-  public determineAnimalReproductionType(): any { return this.base.determineAnimalReproductionType(); }
-  public determineAnimalDevelopmentType(): any { return this.base.determineAnimalDevelopmentType(); }
-  public loadSpeciesProfile(species: string): any { return this.base.loadSpeciesProfile(species); }
-  public applySpeciesDefaults(profile: any): void { this.base.applySpeciesDefaults(profile); }
-  public validateSpeciesCompatibility(): boolean { return this.base.validateSpeciesCompatibility(); }
+  public determineAnimalDiet(
+    ...args: Parameters<AnimalBase['determineAnimalDiet']>
+  ): ReturnType<AnimalBase['determineAnimalDiet']> {
+    return this.base.determineAnimalDiet(...args);
+  }
+  public determineAnimalLocomotion(
+    ...args: Parameters<AnimalBase['determineAnimalLocomotion']>
+  ): ReturnType<AnimalBase['determineAnimalLocomotion']> {
+    return this.base.determineAnimalLocomotion(...args);
+  }
+  public determineAnimalBodyPlan(
+    ...args: Parameters<AnimalBase['determineAnimalBodyPlan']>
+  ): ReturnType<AnimalBase['determineAnimalBodyPlan']> {
+    return this.base.determineAnimalBodyPlan(...args);
+  }
+  public determineAnimalSymmetry(
+    ...args: Parameters<AnimalBase['determineAnimalSymmetry']>
+  ): ReturnType<AnimalBase['determineAnimalSymmetry']> {
+    return this.base.determineAnimalSymmetry(...args);
+  }
+  public determineAnimalActivityPattern(
+    ...args: Parameters<AnimalBase['determineAnimalActivityPattern']>
+  ): ReturnType<AnimalBase['determineAnimalActivityPattern']> {
+    return this.base.determineAnimalActivityPattern(...args);
+  }
+  public determineAnimalSocialType(
+    ...args: Parameters<AnimalBase['determineAnimalSocialType']>
+  ): ReturnType<AnimalBase['determineAnimalSocialType']> {
+    return this.base.determineAnimalSocialType(...args);
+  }
+  public determineAnimalReproductionType(
+    ...args: Parameters<AnimalBase['determineAnimalReproductionType']>
+  ): ReturnType<AnimalBase['determineAnimalReproductionType']> {
+    return this.base.determineAnimalReproductionType(...args);
+  }
+  public determineAnimalDevelopmentType(
+    ...args: Parameters<AnimalBase['determineAnimalDevelopmentType']>
+  ): ReturnType<AnimalBase['determineAnimalDevelopmentType']> {
+    return this.base.determineAnimalDevelopmentType(...args);
+  }
+  public loadSpeciesProfile(
+    ...args: Parameters<AnimalBase['loadSpeciesProfile']>
+  ): ReturnType<AnimalBase['loadSpeciesProfile']> {
+    return this.base.loadSpeciesProfile(...args);
+  }
+  public applySpeciesDefaults(profile: Partial<SpeciesProfile>): void { this.base.applySpeciesDefaults(profile); }
+  public validateSpeciesCompatibility(
+    ...args: Parameters<AnimalBase['validateSpeciesCompatibility']>
+  ): ReturnType<AnimalBase['validateSpeciesCompatibility']> {
+    return this.base.validateSpeciesCompatibility(...args);
+  }
   public updateSpeciesCharacteristics(): void { this.base.updateSpeciesCharacteristics(); }
 
   // 041–060. Mô hình 3D và ngoại hình động vật
-  public loadAnimalModel(): boolean { return this.base.loadAnimalModel(); }
-  public createAnimalMesh(): boolean { return this.base.createAnimalMesh(); }
-  public createAnimalMaterial(): boolean { return this.base.createAnimalMaterial(); }
-  public loadAnimalTextures(): boolean { return this.base.loadAnimalTextures(); }
-  public loadAnimalNormalMaps(): boolean { return this.base.loadAnimalNormalMaps(); }
-  public loadAnimalRoughnessMaps(): boolean { return this.base.loadAnimalRoughnessMaps(); }
+  public loadAnimalModel(
+    ...args: Parameters<AnimalBase['loadAnimalModel']>
+  ): ReturnType<AnimalBase['loadAnimalModel']> {
+    return this.base.loadAnimalModel(...args);
+  }
+  public createAnimalMesh(
+    ...args: Parameters<AnimalBase['createAnimalMesh']>
+  ): ReturnType<AnimalBase['createAnimalMesh']> {
+    return this.base.createAnimalMesh(...args);
+  }
+  public createAnimalMaterial(
+    ...args: Parameters<AnimalBase['createAnimalMaterial']>
+  ): ReturnType<AnimalBase['createAnimalMaterial']> {
+    return this.base.createAnimalMaterial(...args);
+  }
+  public loadAnimalTextures(
+    ...args: Parameters<AnimalBase['loadAnimalTextures']>
+  ): ReturnType<AnimalBase['loadAnimalTextures']> {
+    return this.base.loadAnimalTextures(...args);
+  }
+  public loadAnimalNormalMaps(
+    ...args: Parameters<AnimalBase['loadAnimalNormalMaps']>
+  ): ReturnType<AnimalBase['loadAnimalNormalMaps']> {
+    return this.base.loadAnimalNormalMaps(...args);
+  }
+  public loadAnimalRoughnessMaps(
+    ...args: Parameters<AnimalBase['loadAnimalRoughnessMaps']>
+  ): ReturnType<AnimalBase['loadAnimalRoughnessMaps']> {
+    return this.base.loadAnimalRoughnessMaps(...args);
+  }
   public updateAnimalAppearance(): void { this.base.updateAnimalAppearance(); }
   public setAnimalBodyColor(color: string): void { this.base.setAnimalBodyColor(color); }
-  public setAnimalPattern(pattern: any): void { this.base.setAnimalPattern(pattern); }
-  public setAnimalScale(scale: any): void { this.base.setAnimalScale(scale); }
+  public setAnimalPattern(pattern: AnimalAppearanceConfig['pattern']): void { this.base.setAnimalPattern(pattern); }
+  public setAnimalScale(scale: Vec3 | number): void { this.base.setAnimalScale(scale); }
   public setAnimalLength(length: number): void { this.base.setAnimalLength(length); }
   public setAnimalHeight(height: number): void { this.base.setAnimalHeight(height); }
   public setAnimalBodyMass(mass: number): void { this.base.setAnimalBodyMass(mass); }
@@ -121,8 +233,16 @@ export class Animal {
   // 061–080. Bộ xương tổng quát
   public initializeAnimalSkeleton(): void { this.skeletonMuscles.initializeAnimalSkeleton(); }
   public updateAnimalSkeleton(): void { this.skeletonMuscles.updateAnimalSkeleton(); }
-  public loadSkeletalRig(): boolean { return this.skeletonMuscles.loadSkeletalRig(); }
-  public createSkeletalHierarchy(): boolean { return this.skeletonMuscles.createSkeletalHierarchy(); }
+  public loadSkeletalRig(
+    ...args: Parameters<SkeletonMusclesSubsystem['loadSkeletalRig']>
+  ): ReturnType<SkeletonMusclesSubsystem['loadSkeletalRig']> {
+    return this.skeletonMuscles.loadSkeletalRig(...args);
+  }
+  public createSkeletalHierarchy(
+    ...args: Parameters<SkeletonMusclesSubsystem['createSkeletalHierarchy']>
+  ): ReturnType<SkeletonMusclesSubsystem['createSkeletalHierarchy']> {
+    return this.skeletonMuscles.createSkeletalHierarchy(...args);
+  }
   public updateBoneTransforms(): void { this.skeletonMuscles.updateBoneTransforms(); }
   public updateRootBone(): void { this.skeletonMuscles.updateRootBone(); }
   public updateAxialSkeleton(): void { this.skeletonMuscles.updateAxialSkeleton(); }
@@ -135,16 +255,36 @@ export class Animal {
   public updateLimbBones(): void { this.skeletonMuscles.updateLimbBones(); }
   public updateJointTransforms(): void { this.skeletonMuscles.updateJointTransforms(); }
   public constrainBoneRotations(): void { this.skeletonMuscles.constrainBoneRotations(); }
-  public calculateBoneLengths(): any { return this.skeletonMuscles.calculateBoneLengths(); }
-  public calculateJointAngles(): any { return this.skeletonMuscles.calculateJointAngles(); }
-  public validateSkeletonHierarchy(): boolean { return this.skeletonMuscles.validateSkeletonHierarchy(); }
+  public calculateBoneLengths(
+    ...args: Parameters<SkeletonMusclesSubsystem['calculateBoneLengths']>
+  ): ReturnType<SkeletonMusclesSubsystem['calculateBoneLengths']> {
+    return this.skeletonMuscles.calculateBoneLengths(...args);
+  }
+  public calculateJointAngles(
+    ...args: Parameters<SkeletonMusclesSubsystem['calculateJointAngles']>
+  ): ReturnType<SkeletonMusclesSubsystem['calculateJointAngles']> {
+    return this.skeletonMuscles.calculateJointAngles(...args);
+  }
+  public validateSkeletonHierarchy(
+    ...args: Parameters<SkeletonMusclesSubsystem['validateSkeletonHierarchy']>
+  ): ReturnType<SkeletonMusclesSubsystem['validateSkeletonHierarchy']> {
+    return this.skeletonMuscles.validateSkeletonHierarchy(...args);
+  }
   public retargetAnimalSkeleton(): void { this.skeletonMuscles.retargetAnimalSkeleton(); }
 
   // 081–100. Cơ bắp, gân và mô mềm
   public initializeAnimalMuscles(): void { this.skeletonMuscles.initializeAnimalMuscles(); }
   public updateMuscleActivation(muscleId?: string, level?: number): void { this.skeletonMuscles.updateMuscleActivation(muscleId, level); }
-  public calculateMuscleForce(muscleId?: string): number { return this.skeletonMuscles.calculateMuscleForce(muscleId); }
-  public calculateMuscleTension(muscleId?: string): number { return this.skeletonMuscles.calculateMuscleTension(muscleId); }
+  public calculateMuscleForce(
+    ...args: Parameters<SkeletonMusclesSubsystem['calculateMuscleForce']>
+  ): ReturnType<SkeletonMusclesSubsystem['calculateMuscleForce']> {
+    return this.skeletonMuscles.calculateMuscleForce(...args);
+  }
+  public calculateMuscleTension(
+    ...args: Parameters<SkeletonMusclesSubsystem['calculateMuscleTension']>
+  ): ReturnType<SkeletonMusclesSubsystem['calculateMuscleTension']> {
+    return this.skeletonMuscles.calculateMuscleTension(...args);
+  }
   public updateMuscleDeformation(): void { this.skeletonMuscles.updateMuscleDeformation(); }
   public updateTendonStretch(): void { this.skeletonMuscles.updateTendonStretch(); }
   public updateLigamentConstraints(): void { this.skeletonMuscles.updateLigamentConstraints(); }
@@ -159,7 +299,11 @@ export class Animal {
   public updateHipMuscles(): void { this.skeletonMuscles.updateHipMuscles(); }
   public updateLimbMuscles(): void { this.skeletonMuscles.updateLimbMuscles(); }
   public updateJawMuscles(): void { this.skeletonMuscles.updateJawMuscles(); }
-  public calculateMusculoskeletalLoad(): number { return this.skeletonMuscles.calculateMusculoskeletalLoad(); }
+  public calculateMusculoskeletalLoad(
+    ...args: Parameters<SkeletonMusclesSubsystem['calculateMusculoskeletalLoad']>
+  ): ReturnType<SkeletonMusclesSubsystem['calculateMusculoskeletalLoad']> {
+    return this.skeletonMuscles.calculateMusculoskeletalLoad(...args);
+  }
   public resolveMuscleConstraints(): void { this.skeletonMuscles.resolveMuscleConstraints(); }
 
   // 101–120. Đầu, hộp sọ và cổ
@@ -173,7 +317,7 @@ export class Animal {
   public retractNeck(amount?: number): void { this.headSenses.retractNeck(amount); }
   public rotateNeck(angle?: number): void { this.headSenses.rotateNeck(angle); }
   public stabilizeHead(): void { this.headSenses.stabilizeHead(); }
-  public trackHeadTarget(target: any): void { this.headSenses.trackHeadTarget(target); }
+  public trackHeadTarget(target: Vec3): void { this.headSenses.trackHeadTarget(target); }
   public updateSkullOrientation(): void { this.headSenses.updateSkullOrientation(); }
   public updateJawOpening(angle?: number): void { this.headSenses.updateJawOpening(angle); }
   public updateJawClosing(): void { this.headSenses.updateJawClosing(); }
@@ -187,23 +331,43 @@ export class Animal {
   // 121–140. Mắt, mí mắt và thị giác
   public initializeAnimalVision(): void { this.headSenses.initializeAnimalVision(); }
   public updateAnimalEyes(): void { this.headSenses.updateAnimalEyes(); }
-  public lookAtTarget(target: any): void { this.headSenses.lookAtTarget(target); }
-  public moveLeftEye(direction: any): void { this.headSenses.moveLeftEye(direction); }
-  public moveRightEye(direction: any): void { this.headSenses.moveRightEye(direction); }
+  public lookAtTarget(target: Vec3): void { this.headSenses.lookAtTarget(target); }
+  public moveLeftEye(direction: Vec3): void { this.headSenses.moveLeftEye(direction); }
+  public moveRightEye(direction: Vec3): void { this.headSenses.moveRightEye(direction); }
   public synchronizeEyeDirection(): void { this.headSenses.synchronizeEyeDirection(); }
   public blinkEyes(): void { this.headSenses.blinkEyes(); }
   public closeEyes(): void { this.headSenses.closeEyes(); }
   public openEyes(): void { this.headSenses.openEyes(); }
   public updateEyelids(): void { this.headSenses.updateEyelids(); }
   public updatePupilSize(size?: number): void { this.headSenses.updatePupilSize(size); }
-  public updatePupilDirection(direction?: any): void { this.headSenses.updatePupilDirection(direction); }
-  public trackMovingObject(target: any): void { this.headSenses.trackMovingObject(target); }
-  public detectVisualStimulus(): boolean { return this.headSenses.detectVisualStimulus(); }
-  public calculateVisualField(): number { return this.headSenses.calculateVisualField(); }
-  public calculateVisualDistance(): number { return this.headSenses.calculateVisualDistance(); }
-  public detectMotionInVision(): boolean { return this.headSenses.detectMotionInVision(); }
+  public updatePupilDirection(direction?: Vec3): void { this.headSenses.updatePupilDirection(direction); }
+  public trackMovingObject(target: Vec3): void { this.headSenses.trackMovingObject(target); }
+  public detectVisualStimulus(
+    ...args: Parameters<HeadSensesSubsystem['detectVisualStimulus']>
+  ): ReturnType<HeadSensesSubsystem['detectVisualStimulus']> {
+    return this.headSenses.detectVisualStimulus(...args);
+  }
+  public calculateVisualField(
+    ...args: Parameters<HeadSensesSubsystem['calculateVisualField']>
+  ): ReturnType<HeadSensesSubsystem['calculateVisualField']> {
+    return this.headSenses.calculateVisualField(...args);
+  }
+  public calculateVisualDistance(
+    ...args: Parameters<HeadSensesSubsystem['calculateVisualDistance']>
+  ): ReturnType<HeadSensesSubsystem['calculateVisualDistance']> {
+    return this.headSenses.calculateVisualDistance(...args);
+  }
+  public detectMotionInVision(
+    ...args: Parameters<HeadSensesSubsystem['detectMotionInVision']>
+  ): ReturnType<HeadSensesSubsystem['detectMotionInVision']> {
+    return this.headSenses.detectMotionInVision(...args);
+  }
   public updateNightVision(enabled?: boolean): void { this.headSenses.updateNightVision(enabled); }
-  public updateDepthPerception(): number { return this.headSenses.updateDepthPerception(); }
+  public updateDepthPerception(
+    ...args: Parameters<HeadSensesSubsystem['updateDepthPerception']>
+  ): ReturnType<HeadSensesSubsystem['updateDepthPerception']> {
+    return this.headSenses.updateDepthPerception(...args);
+  }
   public updateVisualAttention(): void { this.headSenses.updateVisualAttention(); }
 
   // 141–160. Tai, thính giác và định vị âm thanh
@@ -214,13 +378,33 @@ export class Animal {
   public raiseEars(): void { this.headSenses.raiseEars(); }
   public flattenEars(): void { this.headSenses.flattenEars(); }
   public twitchEars(): void { this.headSenses.twitchEars(); }
-  public detectAuditoryStimulus(): boolean { return this.headSenses.detectAuditoryStimulus(); }
-  public calculateSoundDirection(pos: any): any { return this.headSenses.calculateSoundDirection(pos); }
-  public calculateSoundDistance(pos: any): number { return this.headSenses.calculateSoundDistance(pos); }
-  public localizeSoundSource(pos: any): void { this.headSenses.localizeSoundSource(pos); }
+  public detectAuditoryStimulus(
+    ...args: Parameters<HeadSensesSubsystem['detectAuditoryStimulus']>
+  ): ReturnType<HeadSensesSubsystem['detectAuditoryStimulus']> {
+    return this.headSenses.detectAuditoryStimulus(...args);
+  }
+  public calculateSoundDirection(
+    ...args: Parameters<HeadSensesSubsystem['calculateSoundDirection']>
+  ): ReturnType<HeadSensesSubsystem['calculateSoundDirection']> {
+    return this.headSenses.calculateSoundDirection(...args);
+  }
+  public calculateSoundDistance(
+    ...args: Parameters<HeadSensesSubsystem['calculateSoundDistance']>
+  ): ReturnType<HeadSensesSubsystem['calculateSoundDistance']> {
+    return this.headSenses.calculateSoundDistance(...args);
+  }
+  public localizeSoundSource(pos: Vec3): void { this.headSenses.localizeSoundSource(pos); }
   public filterEnvironmentalNoise(): void { this.headSenses.filterEnvironmentalNoise(); }
-  public detectHighFrequencySound(): boolean { return this.headSenses.detectHighFrequencySound(); }
-  public detectLowFrequencySound(): boolean { return this.headSenses.detectLowFrequencySound(); }
+  public detectHighFrequencySound(
+    ...args: Parameters<HeadSensesSubsystem['detectHighFrequencySound']>
+  ): ReturnType<HeadSensesSubsystem['detectHighFrequencySound']> {
+    return this.headSenses.detectHighFrequencySound(...args);
+  }
+  public detectLowFrequencySound(
+    ...args: Parameters<HeadSensesSubsystem['detectLowFrequencySound']>
+  ): ReturnType<HeadSensesSubsystem['detectLowFrequencySound']> {
+    return this.headSenses.detectLowFrequencySound(...args);
+  }
   public updateAuditoryAttention(): void { this.headSenses.updateAuditoryAttention(); }
   public reactToLoudNoise(): void { this.headSenses.reactToLoudNoise(); }
   public reactToFamiliarSound(): void { this.headSenses.reactToFamiliarSound(); }
@@ -233,20 +417,56 @@ export class Animal {
   public updateAnimalNose(): void { this.headSenses.updateAnimalNose(); }
   public sniffAir(): void { this.headSenses.sniffAir(); }
   public sniffGround(): void { this.headSenses.sniffGround(); }
-  public sniffObject(obj: any): void { this.headSenses.sniffObject(obj); }
-  public detectScent(scent: any): boolean { return this.headSenses.detectScent(scent); }
-  public analyzeScentComposition(): string { return this.headSenses.analyzeScentComposition(); }
-  public trackScentTrail(trail: any): void { this.headSenses.trackScentTrail(trail); }
-  public followScentSource(source: any): void { this.headSenses.followScentSource(source); }
-  public distinguishFamiliarScent(scent: any): boolean { return this.headSenses.distinguishFamiliarScent(scent); }
-  public detectFoodOdor(): boolean { return this.headSenses.detectFoodOdor(); }
-  public detectPredatorOdor(): boolean { return this.headSenses.detectPredatorOdor(); }
-  public detectMateOdor(): boolean { return this.headSenses.detectMateOdor(); }
-  public detectTerritoryScent(): boolean { return this.headSenses.detectTerritoryScent(); }
+  public sniffObject(obj: unknown): void { this.headSenses.sniffObject(obj); }
+  public detectScent(
+    ...args: Parameters<HeadSensesSubsystem['detectScent']>
+  ): ReturnType<HeadSensesSubsystem['detectScent']> {
+    return this.headSenses.detectScent(...args);
+  }
+  public analyzeScentComposition(
+    ...args: Parameters<HeadSensesSubsystem['analyzeScentComposition']>
+  ): ReturnType<HeadSensesSubsystem['analyzeScentComposition']> {
+    return this.headSenses.analyzeScentComposition(...args);
+  }
+  public trackScentTrail(trail: unknown): void { this.headSenses.trackScentTrail(trail); }
+  public followScentSource(source: unknown): void { this.headSenses.followScentSource(source); }
+  public distinguishFamiliarScent(
+    ...args: Parameters<HeadSensesSubsystem['distinguishFamiliarScent']>
+  ): ReturnType<HeadSensesSubsystem['distinguishFamiliarScent']> {
+    return this.headSenses.distinguishFamiliarScent(...args);
+  }
+  public detectFoodOdor(
+    ...args: Parameters<HeadSensesSubsystem['detectFoodOdor']>
+  ): ReturnType<HeadSensesSubsystem['detectFoodOdor']> {
+    return this.headSenses.detectFoodOdor(...args);
+  }
+  public detectPredatorOdor(
+    ...args: Parameters<HeadSensesSubsystem['detectPredatorOdor']>
+  ): ReturnType<HeadSensesSubsystem['detectPredatorOdor']> {
+    return this.headSenses.detectPredatorOdor(...args);
+  }
+  public detectMateOdor(
+    ...args: Parameters<HeadSensesSubsystem['detectMateOdor']>
+  ): ReturnType<HeadSensesSubsystem['detectMateOdor']> {
+    return this.headSenses.detectMateOdor(...args);
+  }
+  public detectTerritoryScent(
+    ...args: Parameters<HeadSensesSubsystem['detectTerritoryScent']>
+  ): ReturnType<HeadSensesSubsystem['detectTerritoryScent']> {
+    return this.headSenses.detectTerritoryScent(...args);
+  }
   public updateNostrilMovement(): void { this.headSenses.updateNostrilMovement(); }
   public updateOlfactoryMemory(): void { this.headSenses.updateOlfactoryMemory(); }
-  public detectChemicalStimulus(): boolean { return this.headSenses.detectChemicalStimulus(); }
-  public compareScentIntensity(): number { return this.headSenses.compareScentIntensity(); }
+  public detectChemicalStimulus(
+    ...args: Parameters<HeadSensesSubsystem['detectChemicalStimulus']>
+  ): ReturnType<HeadSensesSubsystem['detectChemicalStimulus']> {
+    return this.headSenses.detectChemicalStimulus(...args);
+  }
+  public compareScentIntensity(
+    ...args: Parameters<HeadSensesSubsystem['compareScentIntensity']>
+  ): ReturnType<HeadSensesSubsystem['compareScentIntensity']> {
+    return this.headSenses.compareScentIntensity(...args);
+  }
   public updateScentInvestigation(): void { this.headSenses.updateScentInvestigation(); }
   public blendSniffingAnimation(): void { this.headSenses.blendSniffingAnimation(); }
 
@@ -262,8 +482,8 @@ export class Animal {
   public lickWaterSurface(): void { this.headSenses.lickWaterSurface(); }
   public exposeTeeth(): void { this.headSenses.exposeTeeth(); }
   public updateToothDisplay(): void { this.headSenses.updateToothDisplay(); }
-  public biteFood(food: any): void { this.headSenses.biteFood(food); }
-  public gripFoodWithMouth(food: any): void { this.headSenses.gripFoodWithMouth(food); }
+  public biteFood(food: unknown): void { this.headSenses.biteFood(food); }
+  public gripFoodWithMouth(food: unknown): void { this.headSenses.gripFoodWithMouth(food); }
   public chewFood(): void { this.headSenses.chewFood(); }
   public swallowFood(): void { this.headSenses.swallowFood(); }
   public regurgitateFood(): void { this.headSenses.regurgitateFood(); }
@@ -288,8 +508,16 @@ export class Animal {
   public updateMammalJointLimits(): void { this.mammal.updateMammalJointLimits(); }
   public updateMammalBodyFlexion(): void { this.mammal.updateMammalBodyFlexion(); }
   public updateMammalSpinalRotation(): void { this.mammal.updateMammalSpinalRotation(); }
-  public calculateMammalStride(): number { return this.mammal.calculateMammalStride(); }
-  public calculateMammalLimbReach(): number { return this.mammal.calculateMammalLimbReach(); }
+  public calculateMammalStride(
+    ...args: Parameters<MammalSubsystem['calculateMammalStride']>
+  ): ReturnType<MammalSubsystem['calculateMammalStride']> {
+    return this.mammal.calculateMammalStride(...args);
+  }
+  public calculateMammalLimbReach(
+    ...args: Parameters<MammalSubsystem['calculateMammalLimbReach']>
+  ): ReturnType<MammalSubsystem['calculateMammalLimbReach']> {
+    return this.mammal.calculateMammalLimbReach(...args);
+  }
   public maintainMammalPosture(): void { this.mammal.maintainMammalPosture(); }
   public updateMammalMuscleRig(): void { this.mammal.updateMammalMuscleRig(); }
   public blendMammalLocomotion(): void { this.mammal.blendMammalLocomotion(); }
@@ -350,9 +578,9 @@ export class Animal {
   public scratchWithHindLeg(): void { this.mammal.scratchWithHindLeg(); }
   public scratchWithForepaw(): void { this.mammal.scratchWithForepaw(); }
   public groomFur(): void { this.mammal.groomFur(); }
-  public groomAnotherAnimal(target: any): void { this.mammal.groomAnotherAnimal(target); }
+  public groomAnotherAnimal(target: unknown): void { this.mammal.groomAnotherAnimal(target); }
   public cleanFaceWithPaw(): void { this.mammal.cleanFaceWithPaw(); }
-  public rubBodyAgainstObject(obj: any): void { this.mammal.rubBodyAgainstObject(obj); }
+  public rubBodyAgainstObject(obj: unknown): void { this.mammal.rubBodyAgainstObject(obj); }
   public sniffGroundWhileWalking(): void { this.mammal.sniffGroundWhileWalking(); }
   public raiseBodyToInvestigate(): void { this.mammal.raiseBodyToInvestigate(); }
   public lowerBodyToRest(): void { this.mammal.lowerBodyToRest(); }
@@ -393,7 +621,7 @@ export class Animal {
   public adjustWingFrequency(freq?: number): void { this.bird.adjustWingFrequency(freq); }
   public glideForward(): void { this.bird.glideForward(); }
   public soarOnThermals(): void { this.bird.soarOnThermals(); }
-  public diveTowardTarget(target: any): void { this.bird.diveTowardTarget(target); }
+  public diveTowardTarget(target: unknown): void { this.bird.diveTowardTarget(target); }
   public climbDuringFlight(): void { this.bird.climbDuringFlight(); }
   public bankLeftDuringFlight(): void { this.bird.bankLeftDuringFlight(); }
   public bankRightDuringFlight(): void { this.bird.bankRightDuringFlight(); }
@@ -402,20 +630,20 @@ export class Animal {
   public takeOffFromGround(): void { this.bird.takeOffFromGround(); }
   public takeOffFromWater(): void { this.bird.takeOffFromWater(); }
   public landOnGround(): void { this.bird.landOnGround(); }
-  public landOnBranch(branch: any): void { this.bird.landOnBranch(branch); }
+  public landOnBranch(branch: unknown): void { this.bird.landOnBranch(branch); }
 
   // 321–340. Chim: đậu, đi, kiếm ăn và giao tiếp
-  public perchOnBranch(branch: any): void { this.bird.perchOnBranch(branch); }
+  public perchOnBranch(branch: unknown): void { this.bird.perchOnBranch(branch); }
   public releasePerchGrip(): void { this.bird.releasePerchGrip(); }
   public adjustPerchingBalance(): void { this.bird.adjustPerchingBalance(); }
   public walkLikeBird(): void { this.bird.walkLikeBird(); }
   public hopLikeBird(): void { this.bird.hopLikeBird(); }
   public runLikeBird(): void { this.bird.runLikeBird(); }
   public peckAtGround(): void { this.bird.peckAtGround(); }
-  public peckAtFood(food: any): void { this.bird.peckAtFood(food); }
-  public probeWithBeak(target: any): void { this.bird.probeWithBeak(target); }
-  public scoopFoodWithBeak(food: any): void { this.bird.scoopFoodWithBeak(food); }
-  public swallowPrey(prey: any): void { this.bird.swallowPrey(prey); }
+  public peckAtFood(food: unknown): void { this.bird.peckAtFood(food); }
+  public probeWithBeak(target: unknown): void { this.bird.probeWithBeak(target); }
+  public scoopFoodWithBeak(food: unknown): void { this.bird.scoopFoodWithBeak(food); }
+  public swallowPrey(prey: unknown): void { this.bird.swallowPrey(prey); }
   public drinkLikeBird(): void { this.bird.drinkLikeBird(); }
   public preenFeathers(): void { this.bird.preenFeathers(); }
   public cleanBeak(): void { this.bird.cleanBeak(); }
@@ -482,16 +710,32 @@ export class Animal {
   public openFishMouth(): void { this.fish.openFishMouth(); }
   public closeFishMouth(): void { this.fish.closeFishMouth(); }
   public flareFishGills(): void { this.fish.flareFishGills(); }
-  public detectWaterMovement(): boolean { return this.fish.detectWaterMovement(); }
-  public detectWaterPressure(): number { return this.fish.detectWaterPressure(); }
-  public senseWaterTemperature(): number { return this.fish.senseWaterTemperature(); }
-  public detectWaterborneChemicals(): boolean { return this.fish.detectWaterborneChemicals(); }
+  public detectWaterMovement(
+    ...args: Parameters<FishSubsystem['detectWaterMovement']>
+  ): ReturnType<FishSubsystem['detectWaterMovement']> {
+    return this.fish.detectWaterMovement(...args);
+  }
+  public detectWaterPressure(
+    ...args: Parameters<FishSubsystem['detectWaterPressure']>
+  ): ReturnType<FishSubsystem['detectWaterPressure']> {
+    return this.fish.detectWaterPressure(...args);
+  }
+  public senseWaterTemperature(
+    ...args: Parameters<FishSubsystem['senseWaterTemperature']>
+  ): ReturnType<FishSubsystem['senseWaterTemperature']> {
+    return this.fish.senseWaterTemperature(...args);
+  }
+  public detectWaterborneChemicals(
+    ...args: Parameters<FishSubsystem['detectWaterborneChemicals']>
+  ): ReturnType<FishSubsystem['detectWaterborneChemicals']> {
+    return this.fish.detectWaterborneChemicals(...args);
+  }
   public schoolWithNearbyFish(): void { this.fish.schoolWithNearbyFish(); }
   public maintainSchoolSpacing(): void { this.fish.maintainSchoolSpacing(); }
-  public pursueAquaticPrey(prey: any): void { this.fish.pursueAquaticPrey(prey); }
-  public captureAquaticPrey(prey: any): void { this.fish.captureAquaticPrey(prey); }
-  public grazeAquaticPlants(plants: any): void { this.fish.grazeAquaticPlants(plants); }
-  public inspectAquaticObject(obj: any): void { this.fish.inspectAquaticObject(obj); }
+  public pursueAquaticPrey(prey: unknown): void { this.fish.pursueAquaticPrey(prey); }
+  public captureAquaticPrey(prey: unknown): void { this.fish.captureAquaticPrey(prey); }
+  public grazeAquaticPlants(plants: unknown): void { this.fish.grazeAquaticPlants(plants); }
+  public inspectAquaticObject(obj: unknown): void { this.fish.inspectAquaticObject(obj); }
   public restNearAquaticSubstrate(): void { this.fish.restNearAquaticSubstrate(); }
   public performFishIdleMotion(): void { this.fish.performFishIdleMotion(); }
 
@@ -513,7 +757,11 @@ export class Animal {
   public updateReptileBodyFlexion(): void { this.reptile.updateReptileBodyFlexion(); }
   public updateReptileSpinalWave(): void { this.reptile.updateReptileSpinalWave(); }
   public updateReptileJointLimits(): void { this.reptile.updateReptileJointLimits(); }
-  public calculateReptileStride(): number { return this.reptile.calculateReptileStride(); }
+  public calculateReptileStride(
+    ...args: Parameters<ReptileSubsystem['calculateReptileStride']>
+  ): ReturnType<ReptileSubsystem['calculateReptileStride']> {
+    return this.reptile.calculateReptileStride(...args);
+  }
   public stabilizeReptileBody(): void { this.reptile.stabilizeReptileBody(); }
   public blendReptileLocomotion(): void { this.reptile.blendReptileLocomotion(); }
 
@@ -534,7 +782,7 @@ export class Animal {
   public anchorSnakeBody(): void { this.reptile.anchorSnakeBody(); }
   public extendSnakeBodyForward(): void { this.reptile.extendSnakeBodyForward(); }
   public contractSnakeBody(): void { this.reptile.contractSnakeBody(); }
-  public strikeAtTarget(target: any): void { this.reptile.strikeAtTarget(target); }
+  public strikeAtTarget(target: unknown): void { this.reptile.strikeAtTarget(target); }
   public recoilAfterStrike(): void { this.reptile.recoilAfterStrike(); }
   public coilSnakeBody(): void { this.reptile.coilSnakeBody(); }
   public uncoilSnakeBody(): void { this.reptile.uncoilSnakeBody(); }
@@ -546,8 +794,8 @@ export class Animal {
   public openReptileJaw(): void { this.reptile.openReptileJaw(); }
   public closeReptileJaw(): void { this.reptile.closeReptileJaw(); }
   public performJawGape(): void { this.reptile.performJawGape(); }
-  public captureReptilePrey(prey: any): void { this.reptile.captureReptilePrey(prey); }
-  public swallowReptilePrey(prey: any): void { this.reptile.swallowReptilePrey(prey); }
+  public captureReptilePrey(prey: unknown): void { this.reptile.captureReptilePrey(prey); }
+  public swallowReptilePrey(prey: unknown): void { this.reptile.swallowReptilePrey(prey); }
   public regulateBodyTemperature(): void {
     this.reptile.regulateBodyTemperature();
     this.physiologyEcology.regulateBodyTemperature();
@@ -579,9 +827,21 @@ export class Animal {
   public updateAmphibianSkin(): void { this.amphibian.updateAmphibianSkin(); }
   public updateAmphibianMoisture(): void { this.amphibian.updateAmphibianMoisture(); }
   public updateAmphibianBodyFlexion(): void { this.amphibian.updateAmphibianBodyFlexion(); }
-  public calculateAmphibianStride(): number { return this.amphibian.calculateAmphibianStride(); }
-  public calculateFrogJumpForce(): number { return this.amphibian.calculateFrogJumpForce(); }
-  public calculateFrogLandingPose(): any { return this.amphibian.calculateFrogLandingPose(); }
+  public calculateAmphibianStride(
+    ...args: Parameters<AmphibianSubsystem['calculateAmphibianStride']>
+  ): ReturnType<AmphibianSubsystem['calculateAmphibianStride']> {
+    return this.amphibian.calculateAmphibianStride(...args);
+  }
+  public calculateFrogJumpForce(
+    ...args: Parameters<AmphibianSubsystem['calculateFrogJumpForce']>
+  ): ReturnType<AmphibianSubsystem['calculateFrogJumpForce']> {
+    return this.amphibian.calculateFrogJumpForce(...args);
+  }
+  public calculateFrogLandingPose(
+    ...args: Parameters<AmphibianSubsystem['calculateFrogLandingPose']>
+  ): ReturnType<AmphibianSubsystem['calculateFrogLandingPose']> {
+    return this.amphibian.calculateFrogLandingPose(...args);
+  }
   public maintainAmphibianBalance(): void { this.amphibian.maintainAmphibianBalance(); }
   public blendAmphibianGait(): void { this.amphibian.blendAmphibianGait(); }
   public updateAmphibianPosture(): void { this.amphibian.updateAmphibianPosture(); }
@@ -602,8 +862,8 @@ export class Animal {
   public undulateSalamanderTail(): void { this.amphibian.undulateSalamanderTail(); }
   public climbWetSurface(): void { this.amphibian.climbWetSurface(); }
   public flickFrogTongue(): void { this.amphibian.flickFrogTongue(); }
-  public captureInsectWithTongue(insect: any): void { this.amphibian.captureInsectWithTongue(insect); }
-  public swallowSmallPrey(prey: any): void { this.amphibian.swallowSmallPrey(prey); }
+  public captureInsectWithTongue(insect: unknown): void { this.amphibian.captureInsectWithTongue(insect); }
+  public swallowSmallPrey(prey: unknown): void { this.amphibian.swallowSmallPrey(prey); }
   public breatheThroughSkin(): void { this.amphibian.breatheThroughSkin(); }
   public enterWaterFromLand(): void { this.amphibian.enterWaterFromLand(); }
   public performAmphibianIdleMotion(): void { this.amphibian.performAmphibianIdleMotion(); }
@@ -657,10 +917,22 @@ export class Animal {
   public spreadInsectWings(): void { this.insect.spreadInsectWings(); }
   public foldInsectWings(): void { this.insect.foldInsectWings(); }
   public flapInsectWings(): void { this.insect.flapInsectWings(); }
-  public calculateWingbeatFrequency(): number { return this.insect.calculateWingbeatFrequency(); }
-  public calculateWingbeatAmplitude(): number { return this.insect.calculateWingbeatAmplitude(); }
+  public calculateWingbeatFrequency(
+    ...args: Parameters<InsectSubsystem['calculateWingbeatFrequency']>
+  ): ReturnType<InsectSubsystem['calculateWingbeatFrequency']> {
+    return this.insect.calculateWingbeatFrequency(...args);
+  }
+  public calculateWingbeatAmplitude(
+    ...args: Parameters<InsectSubsystem['calculateWingbeatAmplitude']>
+  ): ReturnType<InsectSubsystem['calculateWingbeatAmplitude']> {
+    return this.insect.calculateWingbeatAmplitude(...args);
+  }
   public synchronizeWingPairs(): void { this.insect.synchronizeWingPairs(); }
-  public generateInsectLift(): number { return this.insect.generateInsectLift(); }
+  public generateInsectLift(
+    ...args: Parameters<InsectSubsystem['generateInsectLift']>
+  ): ReturnType<InsectSubsystem['generateInsectLift']> {
+    return this.insect.generateInsectLift(...args);
+  }
   public adjustInsectFlightDirection(): void { this.insect.adjustInsectFlightDirection(); }
   public accelerateInsectFlight(): void { this.insect.accelerateInsectFlight(); }
   public decelerateInsectFlight(): void { this.insect.decelerateInsectFlight(); }
@@ -675,20 +947,28 @@ export class Animal {
   public blendInsectFlightModes(): void { this.insect.blendInsectFlightModes(); }
 
   // 561–580. Côn trùng: kiếm ăn và hành vi xã hội
-  public detectFoodWithAntennae(): boolean { return this.insect.detectFoodWithAntennae(); }
+  public detectFoodWithAntennae(
+    ...args: Parameters<InsectSubsystem['detectFoodWithAntennae']>
+  ): ReturnType<InsectSubsystem['detectFoodWithAntennae']> {
+    return this.insect.detectFoodWithAntennae(...args);
+  }
   public inspectFoodWithPalps(): void { this.insect.inspectFoodWithPalps(); }
   public feedOnNectar(): void { this.insect.feedOnNectar(); }
   public chewPlantMaterial(): void { this.insect.chewPlantMaterial(); }
-  public bitePlantLeaf(leaf: any): void { this.insect.bitePlantLeaf(leaf); }
-  public probeFoodSource(source: any): void { this.insect.probeFoodSource(source); }
-  public followPheromoneTrail(trail: any): void { this.insect.followPheromoneTrail(trail); }
+  public bitePlantLeaf(leaf: unknown): void { this.insect.bitePlantLeaf(leaf); }
+  public probeFoodSource(source: unknown): void { this.insect.probeFoodSource(source); }
+  public followPheromoneTrail(trail: unknown): void { this.insect.followPheromoneTrail(trail); }
   public depositPheromone(type: string): void { this.insect.depositPheromone(type); }
-  public detectColonyPheromone(): boolean { return this.insect.detectColonyPheromone(); }
-  public recruitColonyMembers(target: any): void { this.insect.recruitColonyMembers(target); }
-  public carrySmallObject(object: any): void { this.insect.carrySmallObject(object); }
-  public transportFoodToNest(food: any): void { this.insect.transportFoodToNest(food); }
+  public detectColonyPheromone(
+    ...args: Parameters<InsectSubsystem['detectColonyPheromone']>
+  ): ReturnType<InsectSubsystem['detectColonyPheromone']> {
+    return this.insect.detectColonyPheromone(...args);
+  }
+  public recruitColonyMembers(target: unknown): void { this.insect.recruitColonyMembers(target); }
+  public carrySmallObject(object: unknown): void { this.insect.carrySmallObject(object); }
+  public transportFoodToNest(food: unknown): void { this.insect.transportFoodToNest(food); }
   public digInsectBurrow(): void { this.insect.digInsectBurrow(); }
-  public constructNestMaterial(material: any): void { this.insect.constructNestMaterial(material); }
+  public constructNestMaterial(material: unknown): void { this.insect.constructNestMaterial(material); }
   public groomBodySurface(): void { this.insect.groomBodySurface(); }
   public groomAntennae(): void { this.insect.groomAntennae(); }
   public performMatingDisplay(): void { this.insect.performMatingDisplay(); }
@@ -711,8 +991,16 @@ export class Animal {
   public moveArachnidLegPairFour(): void { this.invertebrate.moveArachnidLegPairFour(); }
   public coordinateArachnidGait(): void { this.invertebrate.coordinateArachnidGait(); }
   public climbUsingArachnidLegs(): void { this.invertebrate.climbUsingArachnidLegs(); }
-  public detectVibrationThroughLegs(): number { return this.invertebrate.detectVibrationThroughLegs(); }
-  public produceSilkThread(): any { return this.invertebrate.produceSilkThread(); }
+  public detectVibrationThroughLegs(
+    ...args: Parameters<InvertebrateSubsystem['detectVibrationThroughLegs']>
+  ): ReturnType<InvertebrateSubsystem['detectVibrationThroughLegs']> {
+    return this.invertebrate.detectVibrationThroughLegs(...args);
+  }
+  public produceSilkThread(
+    ...args: Parameters<InvertebrateSubsystem['produceSilkThread']>
+  ): ReturnType<InvertebrateSubsystem['produceSilkThread']> {
+    return this.invertebrate.produceSilkThread(...args);
+  }
   public attachSilkAnchor(): void { this.invertebrate.attachSilkAnchor(); }
   public constructSpiderWeb(): void { this.invertebrate.constructSpiderWeb(); }
   public traverseSpiderWeb(): void { this.invertebrate.traverseSpiderWeb(); }
@@ -765,19 +1053,31 @@ export class Animal {
   // 641–660. Hô hấp, tuần hoàn và hoạt động sinh lý
   public initializeAnimalPhysiology(): void { this.physiologyEcology.initializeAnimalPhysiology(); }
   public updateRespiration(deltaTime: number): void { this.physiologyEcology.updateRespiration(deltaTime); }
-  public calculateRespiratoryRate(): number { return this.physiologyEcology.calculateRespiratoryRate(); }
+  public calculateRespiratoryRate(
+    ...args: Parameters<PhysiologyEcologySubsystem['calculateRespiratoryRate']>
+  ): ReturnType<PhysiologyEcologySubsystem['calculateRespiratoryRate']> {
+    return this.physiologyEcology.calculateRespiratoryRate(...args);
+  }
   public updateLungExpansion(): void { this.physiologyEcology.updateLungExpansion(); }
   public updateLungContraction(): void { this.physiologyEcology.updateLungContraction(); }
   public updateGillVentilation(): void { this.physiologyEcology.updateGillVentilation(); }
   public updateTrachealVentilation(): void { this.physiologyEcology.updateTrachealVentilation(); }
-  public updateHeartRate(): number { return this.physiologyEcology.updateHeartRate(); }
+  public updateHeartRate(
+    ...args: Parameters<PhysiologyEcologySubsystem['updateHeartRate']>
+  ): ReturnType<PhysiologyEcologySubsystem['updateHeartRate']> {
+    return this.physiologyEcology.updateHeartRate(...args);
+  }
   public updateBloodCirculation(): void { this.physiologyEcology.updateBloodCirculation(); }
   public regulateOxygenDemand(): void { this.physiologyEcology.regulateOxygenDemand(); }
   public regulateCarbonDioxideRemoval(): void { this.physiologyEcology.regulateCarbonDioxideRemoval(); }
   public regulateWaterBalance(): void { this.physiologyEcology.regulateWaterBalance(); }
   public regulateElectrolyteBalance(): void { this.physiologyEcology.regulateElectrolyteBalance(); }
   public regulateEnergyConsumption(): void { this.physiologyEcology.regulateEnergyConsumption(); }
-  public calculateMetabolicRate(): number { return this.physiologyEcology.calculateMetabolicRate(); }
+  public calculateMetabolicRate(
+    ...args: Parameters<PhysiologyEcologySubsystem['calculateMetabolicRate']>
+  ): ReturnType<PhysiologyEcologySubsystem['calculateMetabolicRate']> {
+    return this.physiologyEcology.calculateMetabolicRate(...args);
+  }
   public updateDigestiveActivity(): void { this.physiologyEcology.updateDigestiveActivity(); }
   public updateExcretoryActivity(): void { this.physiologyEcology.updateExcretoryActivity(); }
   public updatePhysiologicalStress(): void { this.physiologyEcology.updatePhysiologicalStress(); }
@@ -785,34 +1085,62 @@ export class Animal {
 
   // 661–680. Dinh dưỡng, săn mồi và kiếm ăn
   public initializeAnimalFeeding(): void { this.physiologyEcology.initializeAnimalFeeding(); }
-  public detectPotentialFood(): boolean { return this.physiologyEcology.detectPotentialFood(); }
-  public classifyFoodSource(): string { return this.physiologyEcology.classifyFoodSource(); }
-  public evaluateFoodSafety(): boolean { return this.physiologyEcology.evaluateFoodSafety(); }
-  public approachFoodSource(source: any): void { this.physiologyEcology.approachFoodSource(source); }
-  public investigateFoodSource(source: any): void { this.physiologyEcology.investigateFoodSource(source); }
-  public selectFoodItem(items: any[]): any { return this.physiologyEcology.selectFoodItem(items); }
-  public captureFoodItem(item: any): void { this.physiologyEcology.captureFoodItem(item); }
-  public manipulateFoodItem(item: any): void { this.physiologyEcology.manipulateFoodItem(item); }
-  public ingestFoodItem(item: any): void { this.physiologyEcology.ingestFoodItem(item); }
+  public detectPotentialFood(
+    ...args: Parameters<PhysiologyEcologySubsystem['detectPotentialFood']>
+  ): ReturnType<PhysiologyEcologySubsystem['detectPotentialFood']> {
+    return this.physiologyEcology.detectPotentialFood(...args);
+  }
+  public classifyFoodSource(
+    ...args: Parameters<PhysiologyEcologySubsystem['classifyFoodSource']>
+  ): ReturnType<PhysiologyEcologySubsystem['classifyFoodSource']> {
+    return this.physiologyEcology.classifyFoodSource(...args);
+  }
+  public evaluateFoodSafety(
+    ...args: Parameters<PhysiologyEcologySubsystem['evaluateFoodSafety']>
+  ): ReturnType<PhysiologyEcologySubsystem['evaluateFoodSafety']> {
+    return this.physiologyEcology.evaluateFoodSafety(...args);
+  }
+  public approachFoodSource(source: unknown): void { this.physiologyEcology.approachFoodSource(source); }
+  public investigateFoodSource(source: unknown): void { this.physiologyEcology.investigateFoodSource(source); }
+  public selectFoodItem(
+    ...args: Parameters<PhysiologyEcologySubsystem['selectFoodItem']>
+  ): ReturnType<PhysiologyEcologySubsystem['selectFoodItem']> {
+    return this.physiologyEcology.selectFoodItem(...args);
+  }
+  public captureFoodItem(item: unknown): void { this.physiologyEcology.captureFoodItem(item); }
+  public manipulateFoodItem(item: unknown): void { this.physiologyEcology.manipulateFoodItem(item); }
+  public ingestFoodItem(item: unknown): void { this.physiologyEcology.ingestFoodItem(item); }
   public processFoodInMouth(): void { this.physiologyEcology.processFoodInMouth(); }
   public swallowFoodBolus(): void { this.physiologyEcology.swallowFoodBolus(); }
-  public trackPreyMovement(prey: any): void { this.physiologyEcology.trackPreyMovement(prey); }
-  public stalkPrey(prey: any): void { this.physiologyEcology.stalkPrey(prey); }
-  public pursuePrey(prey: any): void { this.physiologyEcology.pursuePrey(prey); }
-  public interceptPrey(prey: any): void { this.physiologyEcology.interceptPrey(prey); }
-  public executePredatoryStrike(prey: any): void { this.physiologyEcology.executePredatoryStrike(prey); }
-  public secureCapturedPrey(prey: any): void { this.physiologyEcology.secureCapturedPrey(prey); }
-  public shareFoodWithGroup(group: any): void { this.physiologyEcology.shareFoodWithGroup(group); }
+  public trackPreyMovement(prey: unknown): void { this.physiologyEcology.trackPreyMovement(prey); }
+  public stalkPrey(prey: unknown): void { this.physiologyEcology.stalkPrey(prey); }
+  public pursuePrey(prey: unknown): void { this.physiologyEcology.pursuePrey(prey); }
+  public interceptPrey(prey: unknown): void { this.physiologyEcology.interceptPrey(prey); }
+  public executePredatoryStrike(prey: unknown): void { this.physiologyEcology.executePredatoryStrike(prey); }
+  public secureCapturedPrey(prey: unknown): void { this.physiologyEcology.secureCapturedPrey(prey); }
+  public shareFoodWithGroup(group: unknown): void { this.physiologyEcology.shareFoodWithGroup(group); }
   public updateFeedingMotivation(): void { this.physiologyEcology.updateFeedingMotivation(); }
 
   // 681–700. Sinh sản, giao phối và chăm sóc con non
   public initializeReproductiveBehavior(): void { this.physiologyEcology.initializeReproductiveBehavior(); }
-  public detectReproductiveReadiness(): boolean { return this.physiologyEcology.detectReproductiveReadiness(); }
-  public detectPotentialMate(): boolean { return this.physiologyEcology.detectPotentialMate(); }
-  public approachPotentialMate(mate: any): void { this.physiologyEcology.approachPotentialMate(mate); }
+  public detectReproductiveReadiness(
+    ...args: Parameters<PhysiologyEcologySubsystem['detectReproductiveReadiness']>
+  ): ReturnType<PhysiologyEcologySubsystem['detectReproductiveReadiness']> {
+    return this.physiologyEcology.detectReproductiveReadiness(...args);
+  }
+  public detectPotentialMate(
+    ...args: Parameters<PhysiologyEcologySubsystem['detectPotentialMate']>
+  ): ReturnType<PhysiologyEcologySubsystem['detectPotentialMate']> {
+    return this.physiologyEcology.detectPotentialMate(...args);
+  }
+  public approachPotentialMate(mate: unknown): void { this.physiologyEcology.approachPotentialMate(mate); }
   public performCourtshipBehavior(): void { this.physiologyEcology.performCourtshipBehavior(); }
   public performCourtshipVocalization(): void { this.physiologyEcology.performCourtshipVocalization(); }
-  public evaluateMateCompatibility(mate: any): boolean { return this.physiologyEcology.evaluateMateCompatibility(mate); }
+  public evaluateMateCompatibility(
+    ...args: Parameters<PhysiologyEcologySubsystem['evaluateMateCompatibility']>
+  ): ReturnType<PhysiologyEcologySubsystem['evaluateMateCompatibility']> {
+    return this.physiologyEcology.evaluateMateCompatibility(...args);
+  }
   public initiateMatingSequence(): void { this.physiologyEcology.initiateMatingSequence(); }
   public terminateMatingSequence(): void { this.physiologyEcology.terminateMatingSequence(); }
   public searchForNestingSite(): void { this.physiologyEcology.searchForNestingSite(); }
@@ -821,10 +1149,14 @@ export class Animal {
   public layEggs(): void { this.physiologyEcology.layEggs(); }
   public incubateEggs(): void { this.physiologyEcology.incubateEggs(); }
   public guardNest(): void { this.physiologyEcology.guardNest(); }
-  public recognizeOffspring(offspring: any): boolean { return this.physiologyEcology.recognizeOffspring(offspring); }
-  public retrieveOffspring(offspring: any): void { this.physiologyEcology.retrieveOffspring(offspring); }
-  public feedOffspring(offspring: any): void { this.physiologyEcology.feedOffspring(offspring); }
-  public protectOffspring(offspring: any): void { this.physiologyEcology.protectOffspring(offspring); }
+  public recognizeOffspring(
+    ...args: Parameters<PhysiologyEcologySubsystem['recognizeOffspring']>
+  ): ReturnType<PhysiologyEcologySubsystem['recognizeOffspring']> {
+    return this.physiologyEcology.recognizeOffspring(...args);
+  }
+  public retrieveOffspring(offspring: unknown): void { this.physiologyEcology.retrieveOffspring(offspring); }
+  public feedOffspring(offspring: unknown): void { this.physiologyEcology.feedOffspring(offspring); }
+  public protectOffspring(offspring: unknown): void { this.physiologyEcology.protectOffspring(offspring); }
 
   // 701–720. Phát triển, sinh trưởng và thay đổi cơ thể
   public initializeAnimalDevelopment(): void { this.physiologyEcology.initializeAnimalDevelopment(); }
@@ -832,7 +1164,11 @@ export class Animal {
   public transitionToJuvenileStage(): void { this.physiologyEcology.transitionToJuvenileStage(); }
   public transitionToAdultStage(): void { this.physiologyEcology.transitionToAdultStage(); }
   public transitionToSeniorStage(): void { this.physiologyEcology.transitionToSeniorStage(); }
-  public calculateGrowthRate(): number { return this.physiologyEcology.calculateGrowthRate(); }
+  public calculateGrowthRate(
+    ...args: Parameters<PhysiologyEcologySubsystem['calculateGrowthRate']>
+  ): ReturnType<PhysiologyEcologySubsystem['calculateGrowthRate']> {
+    return this.physiologyEcology.calculateGrowthRate(...args);
+  }
   public updateBodySizeWithAge(): void { this.physiologyEcology.updateBodySizeWithAge(); }
   public updateBodyProportionsWithAge(): void { this.physiologyEcology.updateBodyProportionsWithAge(); }
   public updateSkeletalGrowth(): void { this.physiologyEcology.updateSkeletalGrowth(); }
@@ -850,23 +1186,79 @@ export class Animal {
 
   // 721–740. Giác quan nâng cao và cảm nhận môi trường
   public initializeEnvironmentalSensing(): void { this.physiologyEcology.initializeEnvironmentalSensing(); }
-  public senseAmbientTemperature(): number { return this.physiologyEcology.senseAmbientTemperature(); }
-  public senseHumidity(): number { return this.physiologyEcology.senseHumidity(); }
+  public senseAmbientTemperature(
+    ...args: Parameters<PhysiologyEcologySubsystem['senseAmbientTemperature']>
+  ): ReturnType<PhysiologyEcologySubsystem['senseAmbientTemperature']> {
+    return this.physiologyEcology.senseAmbientTemperature(...args);
+  }
+  public senseHumidity(
+    ...args: Parameters<PhysiologyEcologySubsystem['senseHumidity']>
+  ): ReturnType<PhysiologyEcologySubsystem['senseHumidity']> {
+    return this.physiologyEcology.senseHumidity(...args);
+  }
   public senseWindDirection(): Vec3 { return this.physiologyEcology.senseWindDirection(); }
-  public senseWindSpeed(): number { return this.physiologyEcology.senseWindSpeed(); }
-  public senseGroundVibration(): number { return this.physiologyEcology.senseGroundVibration(); }
+  public senseWindSpeed(
+    ...args: Parameters<PhysiologyEcologySubsystem['senseWindSpeed']>
+  ): ReturnType<PhysiologyEcologySubsystem['senseWindSpeed']> {
+    return this.physiologyEcology.senseWindSpeed(...args);
+  }
+  public senseGroundVibration(
+    ...args: Parameters<PhysiologyEcologySubsystem['senseGroundVibration']>
+  ): ReturnType<PhysiologyEcologySubsystem['senseGroundVibration']> {
+    return this.physiologyEcology.senseGroundVibration(...args);
+  }
   public senseWaterCurrent(): Vec3 { return this.physiologyEcology.senseWaterCurrent(); }
-  public senseWaterPressure(): number { return this.physiologyEcology.senseWaterPressure(); }
+  public senseWaterPressure(
+    ...args: Parameters<PhysiologyEcologySubsystem['senseWaterPressure']>
+  ): ReturnType<PhysiologyEcologySubsystem['senseWaterPressure']> {
+    return this.physiologyEcology.senseWaterPressure(...args);
+  }
   public senseMagneticField(): Vec3 { return this.physiologyEcology.senseMagneticField(); }
-  public senseLightIntensity(): number { return this.physiologyEcology.senseLightIntensity(); }
-  public sensePolarizedLight(): boolean { return this.physiologyEcology.sensePolarizedLight(); }
-  public detectChemicalSignals(): boolean { return this.physiologyEcology.detectChemicalSignals(); }
-  public detectPheromones(): boolean { return this.physiologyEcology.detectPheromones(); }
-  public detectPredatorPresence(): boolean { return this.physiologyEcology.detectPredatorPresence(); }
-  public detectConspecificPresence(): boolean { return this.physiologyEcology.detectConspecificPresence(); }
-  public detectHabitatBoundary(): boolean { return this.physiologyEcology.detectHabitatBoundary(); }
-  public estimateEnvironmentalRisk(): number { return this.physiologyEcology.estimateEnvironmentalRisk(); }
-  public estimateResourceAvailability(): number { return this.physiologyEcology.estimateResourceAvailability(); }
+  public senseLightIntensity(
+    ...args: Parameters<PhysiologyEcologySubsystem['senseLightIntensity']>
+  ): ReturnType<PhysiologyEcologySubsystem['senseLightIntensity']> {
+    return this.physiologyEcology.senseLightIntensity(...args);
+  }
+  public sensePolarizedLight(
+    ...args: Parameters<PhysiologyEcologySubsystem['sensePolarizedLight']>
+  ): ReturnType<PhysiologyEcologySubsystem['sensePolarizedLight']> {
+    return this.physiologyEcology.sensePolarizedLight(...args);
+  }
+  public detectChemicalSignals(
+    ...args: Parameters<PhysiologyEcologySubsystem['detectChemicalSignals']>
+  ): ReturnType<PhysiologyEcologySubsystem['detectChemicalSignals']> {
+    return this.physiologyEcology.detectChemicalSignals(...args);
+  }
+  public detectPheromones(
+    ...args: Parameters<PhysiologyEcologySubsystem['detectPheromones']>
+  ): ReturnType<PhysiologyEcologySubsystem['detectPheromones']> {
+    return this.physiologyEcology.detectPheromones(...args);
+  }
+  public detectPredatorPresence(
+    ...args: Parameters<PhysiologyEcologySubsystem['detectPredatorPresence']>
+  ): ReturnType<PhysiologyEcologySubsystem['detectPredatorPresence']> {
+    return this.physiologyEcology.detectPredatorPresence(...args);
+  }
+  public detectConspecificPresence(
+    ...args: Parameters<PhysiologyEcologySubsystem['detectConspecificPresence']>
+  ): ReturnType<PhysiologyEcologySubsystem['detectConspecificPresence']> {
+    return this.physiologyEcology.detectConspecificPresence(...args);
+  }
+  public detectHabitatBoundary(
+    ...args: Parameters<PhysiologyEcologySubsystem['detectHabitatBoundary']>
+  ): ReturnType<PhysiologyEcologySubsystem['detectHabitatBoundary']> {
+    return this.physiologyEcology.detectHabitatBoundary(...args);
+  }
+  public estimateEnvironmentalRisk(
+    ...args: Parameters<PhysiologyEcologySubsystem['estimateEnvironmentalRisk']>
+  ): ReturnType<PhysiologyEcologySubsystem['estimateEnvironmentalRisk']> {
+    return this.physiologyEcology.estimateEnvironmentalRisk(...args);
+  }
+  public estimateResourceAvailability(
+    ...args: Parameters<PhysiologyEcologySubsystem['estimateResourceAvailability']>
+  ): ReturnType<PhysiologyEcologySubsystem['estimateResourceAvailability']> {
+    return this.physiologyEcology.estimateResourceAvailability(...args);
+  }
   public updateEnvironmentalMemory(): void { this.physiologyEcology.updateEnvironmentalMemory(); }
   public integrateSensoryInformation(): void { this.physiologyEcology.integrateSensoryInformation(); }
 
@@ -874,18 +1266,58 @@ export class Animal {
   public initializeAnimalBehavior(): void { this.physiologyEcology.initializeAnimalBehavior(); }
   public updateAnimalBehavior(deltaTime: number): void { this.physiologyEcology.updateAnimalBehavior(deltaTime); }
   public evaluateAnimalNeeds(): void { this.physiologyEcology.evaluateAnimalNeeds(); }
-  public calculateHungerLevel(): number { return this.physiologyEcology.calculateHungerLevel(); }
-  public calculateThirstLevel(): number { return this.physiologyEcology.calculateThirstLevel(); }
-  public calculateFatigueLevel(): number { return this.physiologyEcology.calculateFatigueLevel(); }
-  public calculateFearLevel(): number { return this.physiologyEcology.calculateFearLevel(); }
-  public calculateCuriosityLevel(): number { return this.physiologyEcology.calculateCuriosityLevel(); }
-  public calculateAggressionLevel(): number { return this.physiologyEcology.calculateAggressionLevel(); }
-  public calculateSocialMotivation(): number { return this.physiologyEcology.calculateSocialMotivation(); }
-  public selectBehaviorState(): string { return this.physiologyEcology.selectBehaviorState(); }
-  public chooseNextAction(): string { return this.physiologyEcology.chooseNextAction(); }
+  public calculateHungerLevel(
+    ...args: Parameters<PhysiologyEcologySubsystem['calculateHungerLevel']>
+  ): ReturnType<PhysiologyEcologySubsystem['calculateHungerLevel']> {
+    return this.physiologyEcology.calculateHungerLevel(...args);
+  }
+  public calculateThirstLevel(
+    ...args: Parameters<PhysiologyEcologySubsystem['calculateThirstLevel']>
+  ): ReturnType<PhysiologyEcologySubsystem['calculateThirstLevel']> {
+    return this.physiologyEcology.calculateThirstLevel(...args);
+  }
+  public calculateFatigueLevel(
+    ...args: Parameters<PhysiologyEcologySubsystem['calculateFatigueLevel']>
+  ): ReturnType<PhysiologyEcologySubsystem['calculateFatigueLevel']> {
+    return this.physiologyEcology.calculateFatigueLevel(...args);
+  }
+  public calculateFearLevel(
+    ...args: Parameters<PhysiologyEcologySubsystem['calculateFearLevel']>
+  ): ReturnType<PhysiologyEcologySubsystem['calculateFearLevel']> {
+    return this.physiologyEcology.calculateFearLevel(...args);
+  }
+  public calculateCuriosityLevel(
+    ...args: Parameters<PhysiologyEcologySubsystem['calculateCuriosityLevel']>
+  ): ReturnType<PhysiologyEcologySubsystem['calculateCuriosityLevel']> {
+    return this.physiologyEcology.calculateCuriosityLevel(...args);
+  }
+  public calculateAggressionLevel(
+    ...args: Parameters<PhysiologyEcologySubsystem['calculateAggressionLevel']>
+  ): ReturnType<PhysiologyEcologySubsystem['calculateAggressionLevel']> {
+    return this.physiologyEcology.calculateAggressionLevel(...args);
+  }
+  public calculateSocialMotivation(
+    ...args: Parameters<PhysiologyEcologySubsystem['calculateSocialMotivation']>
+  ): ReturnType<PhysiologyEcologySubsystem['calculateSocialMotivation']> {
+    return this.physiologyEcology.calculateSocialMotivation(...args);
+  }
+  public selectBehaviorState(
+    ...args: Parameters<PhysiologyEcologySubsystem['selectBehaviorState']>
+  ): ReturnType<PhysiologyEcologySubsystem['selectBehaviorState']> {
+    return this.physiologyEcology.selectBehaviorState(...args);
+  }
+  public chooseNextAction(
+    ...args: Parameters<PhysiologyEcologySubsystem['chooseNextAction']>
+  ): ReturnType<PhysiologyEcologySubsystem['chooseNextAction']> {
+    return this.physiologyEcology.chooseNextAction(...args);
+  }
   public interruptCurrentBehavior(): void { this.physiologyEcology.interruptCurrentBehavior(); }
   public resumePreviousBehavior(): void { this.physiologyEcology.resumePreviousBehavior(); }
-  public evaluateThreatResponse(): string { return this.physiologyEcology.evaluateThreatResponse(); }
+  public evaluateThreatResponse(
+    ...args: Parameters<PhysiologyEcologySubsystem['evaluateThreatResponse']>
+  ): ReturnType<PhysiologyEcologySubsystem['evaluateThreatResponse']> {
+    return this.physiologyEcology.evaluateThreatResponse(...args);
+  }
   public chooseEscapeDirection(): Vec3 { return this.physiologyEcology.chooseEscapeDirection(); }
   public initiateDefensiveBehavior(): void { this.physiologyEcology.initiateDefensiveBehavior(); }
   public investigateNovelStimulus(): void { this.physiologyEcology.investigateNovelStimulus(); }
@@ -894,33 +1326,49 @@ export class Animal {
 
   // 761–780. Bầy đàn, giao tiếp và lãnh thổ
   public initializeSocialBehavior(): void { this.physiologyEcology.initializeSocialBehavior(); }
-  public detectNearbyConspecifics(): any[] { return this.physiologyEcology.detectNearbyConspecifics(); }
-  public recognizeIndividualAnimal(animal: any): boolean { return this.physiologyEcology.recognizeIndividualAnimal(animal); }
+  public detectNearbyConspecifics(): unknown[] { return this.physiologyEcology.detectNearbyConspecifics(); }
+  public recognizeIndividualAnimal(
+    ...args: Parameters<PhysiologyEcologySubsystem['recognizeIndividualAnimal']>
+  ): ReturnType<PhysiologyEcologySubsystem['recognizeIndividualAnimal']> {
+    return this.physiologyEcology.recognizeIndividualAnimal(...args);
+  }
   public maintainGroupSpacing(): void { this.physiologyEcology.maintainGroupSpacing(); }
-  public followGroupLeader(leader: any): void { this.physiologyEcology.followGroupLeader(leader); }
-  public electGroupLeader(group: any): any { return this.physiologyEcology.electGroupLeader(group); }
-  public synchronizeGroupMovement(group: any): void { this.physiologyEcology.synchronizeGroupMovement(group); }
-  public joinAnimalGroup(group: any): void { this.physiologyEcology.joinAnimalGroup(group); }
-  public leaveAnimalGroup(group: any): void { this.physiologyEcology.leaveAnimalGroup(group); }
-  public coordinateGroupForaging(group: any): void { this.physiologyEcology.coordinateGroupForaging(group); }
-  public performSocialGreeting(animal: any): void { this.physiologyEcology.performSocialGreeting(animal); }
-  public initiateSocialGrooming(animal: any): void { this.physiologyEcology.initiateSocialGrooming(animal); }
-  public exchangeVocalSignals(signal: any): void { this.physiologyEcology.exchangeVocalSignals(signal); }
+  public followGroupLeader(leader: unknown): void { this.physiologyEcology.followGroupLeader(leader); }
+  public electGroupLeader(
+    ...args: Parameters<PhysiologyEcologySubsystem['electGroupLeader']>
+  ): ReturnType<PhysiologyEcologySubsystem['electGroupLeader']> {
+    return this.physiologyEcology.electGroupLeader(...args);
+  }
+  public synchronizeGroupMovement(group: unknown): void { this.physiologyEcology.synchronizeGroupMovement(group); }
+  public joinAnimalGroup(group: unknown): void { this.physiologyEcology.joinAnimalGroup(group); }
+  public leaveAnimalGroup(group: unknown): void { this.physiologyEcology.leaveAnimalGroup(group); }
+  public coordinateGroupForaging(group: unknown): void { this.physiologyEcology.coordinateGroupForaging(group); }
+  public performSocialGreeting(animal: unknown): void { this.physiologyEcology.performSocialGreeting(animal); }
+  public initiateSocialGrooming(animal: unknown): void { this.physiologyEcology.initiateSocialGrooming(animal); }
+  public exchangeVocalSignals(signal: unknown): void { this.physiologyEcology.exchangeVocalSignals(signal); }
   public performAlarmCall(): void { this.physiologyEcology.performAlarmCall(); }
-  public respondToAlarmCall(signal: any): void { this.physiologyEcology.respondToAlarmCall(signal); }
-  public establishTerritorialBoundary(area: any): void { this.physiologyEcology.establishTerritorialBoundary(area); }
-  public patrolTerritory(area: any): void { this.physiologyEcology.patrolTerritory(area); }
-  public markTerritory(location: any): void { this.physiologyEcology.markTerritory(location); }
-  public defendTerritory(intruder: any): void { this.physiologyEcology.defendTerritory(intruder); }
-  public resolveSocialConflict(animal: any): void { this.physiologyEcology.resolveSocialConflict(animal); }
+  public respondToAlarmCall(signal: unknown): void { this.physiologyEcology.respondToAlarmCall(signal); }
+  public establishTerritorialBoundary(area: unknown): void { this.physiologyEcology.establishTerritorialBoundary(area); }
+  public patrolTerritory(area: unknown): void { this.physiologyEcology.patrolTerritory(area); }
+  public markTerritory(location: unknown): void { this.physiologyEcology.markTerritory(location); }
+  public defendTerritory(intruder: unknown): void { this.physiologyEcology.defendTerritory(intruder); }
+  public resolveSocialConflict(animal: unknown): void { this.physiologyEcology.resolveSocialConflict(animal); }
 
   // 781–800. Vật lý, animation, AI và tối ưu hóa
   public initializeAnimalPhysics(): void { this.physiologyEcology.initializeAnimalPhysics(); }
-  public createAnimalCollider(): any { return this.physiologyEcology.createAnimalCollider(); }
+  public createAnimalCollider(
+    ...args: Parameters<PhysiologyEcologySubsystem['createAnimalCollider']>
+  ): ReturnType<PhysiologyEcologySubsystem['createAnimalCollider']> {
+    return this.physiologyEcology.createAnimalCollider(...args);
+  }
   public applyAnimalGravity(deltaTime: number): void { this.physiologyEcology.applyAnimalGravity(deltaTime); }
   public applyAnimalForce(force: Vec3): void { this.physiologyEcology.applyAnimalForce(force); }
   public resolveAnimalCollision(): void { this.physiologyEcology.resolveAnimalCollision(); }
-  public updateAnimalGroundContact(): boolean { return this.physiologyEcology.updateAnimalGroundContact(); }
+  public updateAnimalGroundContact(
+    ...args: Parameters<PhysiologyEcologySubsystem['updateAnimalGroundContact']>
+  ): ReturnType<PhysiologyEcologySubsystem['updateAnimalGroundContact']> {
+    return this.physiologyEcology.updateAnimalGroundContact(...args);
+  }
   public solveAnimalIK(): void { this.physiologyEcology.solveAnimalIK(); }
   public solveAnimalFootIK(): void { this.physiologyEcology.solveAnimalFootIK(); }
   public blendAnimalAnimations(): void { this.physiologyEcology.blendAnimalAnimations(); }
@@ -930,9 +1378,13 @@ export class Animal {
   public applyAnimalSecondaryMotion(): void { this.physiologyEcology.applyAnimalSecondaryMotion(); }
   public updateAnimalTailDynamics(): void { this.physiologyEcology.updateAnimalTailDynamics(); }
   public updateAnimalClothDynamics(): void { this.physiologyEcology.updateAnimalClothDynamics(); }
-  public updateAnimalLOD(distance?: number): number { return this.physiologyEcology.updateAnimalLOD(distance); }
+  public updateAnimalLOD(
+    ...args: Parameters<PhysiologyEcologySubsystem['updateAnimalLOD']>
+  ): ReturnType<PhysiologyEcologySubsystem['updateAnimalLOD']> {
+    return this.physiologyEcology.updateAnimalLOD(...args);
+  }
   public interpolateAnimalPosition(target: Vec3, alpha?: number): void { this.physiologyEcology.interpolateAnimalPosition(target, alpha); }
-  public interpolateAnimalRotation(target: any, alpha?: number): void { this.physiologyEcology.interpolateAnimalRotation(target, alpha); }
+  public interpolateAnimalRotation(target: unknown, alpha?: number): void { this.physiologyEcology.interpolateAnimalRotation(target, alpha); }
   public synchronizeAnimalPhysics(): void { this.physiologyEcology.synchronizeAnimalPhysics(); }
   public optimizeAnimalSimulation(): void { this.physiologyEcology.optimizeAnimalSimulation(); }
 }

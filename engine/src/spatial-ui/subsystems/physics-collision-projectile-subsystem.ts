@@ -176,13 +176,13 @@ export class PhysicsCollisionProjectileSubsystem {
   // ==========================================================================
 
   /** Hệ số nhân từ `options.scale` (mặc định 1). */
-  private scaleOf(options?: any): number {
+  private scaleOf(options?: unknown): number {
     const raw = readNum(options, ['scale'], Number.NaN);
     return Number.isFinite(raw) ? raw : 1;
   }
 
   /** Đơn vị trả về do `options.unit` chỉ định (null nếu không chỉ định). */
-  private unitOf(options?: any): string | null {
+  private unitOf(options?: unknown): string | null {
     const raw = options && typeof options === 'object'
       ? (options as Record<string, unknown>).unit
       : undefined;
@@ -190,7 +190,7 @@ export class PhysicsCollisionProjectileSubsystem {
   }
 
   /** Có đảo dấu kết quả số theo `options.invert` không. */
-  private invertOf(options?: any): boolean {
+  private invertOf(options?: unknown): boolean {
     return Boolean(
       options
       && typeof options === 'object'
@@ -199,7 +199,7 @@ export class PhysicsCollisionProjectileSubsystem {
   }
 
   /** Khung tham chiếu: 'world' (mặc định) hoặc 'local'. */
-  private referenceOf(options?: any): 'world' | 'local' {
+  private referenceOf(options?: unknown): 'world' | 'local' {
     const raw = options && typeof options === 'object'
       ? (options as Record<string, unknown>).reference
       : undefined;
@@ -207,18 +207,18 @@ export class PhysicsCollisionProjectileSubsystem {
   }
 
   /** Số kết quả: nhân `options.scale` rồi đảo dấu nếu `options.invert`. */
-  private transformedNumber(value: number, options?: any): number {
+  private transformedNumber(value: number, options?: unknown): number {
     const sign = this.invertOf(options) ? -1 : 1;
     return value * this.scaleOf(options) * sign;
   }
 
   /** Số kết quả chỉ đảo dấu nếu `options.invert` (không nhân hệ số). */
-  private invertedNumber(value: number, options?: any): number {
+  private invertedNumber(value: number, options?: unknown): number {
     return this.invertOf(options) ? -value : value;
   }
 
   /** Vector kết quả: nhân `options.scale` rồi đảo dấu nếu `options.invert`. */
-  private transformedVector(value: Vec3D, options?: any): Vec3D {
+  private transformedVector(value: Vec3D, options?: unknown): Vec3D {
     const factor = this.scaleOf(options);
     const sign = this.invertOf(options) ? -1 : 1;
     return {
@@ -229,14 +229,14 @@ export class PhysicsCollisionProjectileSubsystem {
   }
 
   /** Quaternion nghịch đảo (xoay ngược) khi `options.invert`. */
-  private transformedQuaternion(value: QuatD, options?: any): QuatD {
+  private transformedQuaternion(value: QuatD, options?: unknown): QuatD {
     return this.invertOf(options)
       ? { x: -value.x, y: -value.y, z: -value.z, w: value.w }
       : value;
   }
 
   /** Entity thay thế để tính: `options.entity` ghi đè entity đầu vào. */
-  private entityOf(entity: any, options?: any): any {
+  private entityOf(entity: unknown, options?: unknown) {
     const raw = options && typeof options === 'object'
       ? (options as Record<string, unknown>).entity
       : undefined;
@@ -244,7 +244,7 @@ export class PhysicsCollisionProjectileSubsystem {
   }
 
   /** Điểm kết quả theo khung tham chiếu: 'local' → tương đối `origin`. */
-  private referencePoint(result: Vec3D, origin: Vec3D, options?: any): Vec3D {
+  private referencePoint(result: Vec3D, origin: Vec3D, options?: unknown): Vec3D {
     return this.referenceOf(options) === 'local' ? subtract(result, origin) : result;
   }
 
@@ -258,7 +258,7 @@ export class PhysicsCollisionProjectileSubsystem {
   }
 
   /** Gia tốc đo được từ lịch sử vận tốc trong `dt` (null nếu thiếu dữ liệu). */
-  private observedAcceleration(entity: any, dt: number): Vec3D | null {
+  private observedAcceleration(entity: unknown, dt: number): Vec3D | null {
     const velocity = readVec(entity, ['velocity', 'linearVelocity']);
     const previous = readVec(entity, ['previousVelocity', 'lastVelocity']);
     if (magnitude(velocity) <= 0 || magnitude(previous) <= 0) return null;
@@ -273,14 +273,14 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1451] calculateAABBOverlap
    * Kiểm tra chồng lấn hai hộp giới hạn theo trục.
    */
-  public calculateAABBOverlap(a?: any, b?: any): any {
+  public calculateAABBOverlap(a?: unknown, b?: unknown) {
     return aabb('calculateAABBOverlap', resolveBox(a), resolveBox(b));
   }
   /**
    * [1452] calculateOBBOverlap
    * Kiểm tra chồng lấn hai hộp có hướng (SAT).
    */
-  public calculateOBBOverlap(a?: any, b?: any): any {
+  public calculateOBBOverlap(a?: unknown, b?: unknown) {
     const qa = readQuat(a, ['quaternion', 'rotation']);
     const qb = readQuat(b, ['quaternion', 'rotation']);
     return obbOverlap(resolveBox(a), resolveBox(b), qa, qb);
@@ -289,7 +289,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1453] calculateSphereOverlap
    * Kiểm tra chồng lấn hai hình cầu.
    */
-  public calculateSphereOverlap(entity?: any, radius = 1.0): any {
+  public calculateSphereOverlap(entity?: unknown, radius = 1.0) {
     const first = resolveSphere(entity, radius);
     const other = child(entity, 'other', 'target', 'collider') ?? undefined;
     const second = resolveSphere(other, radius);
@@ -309,7 +309,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1454] calculateCapsuleOverlap
    * Kiểm tra chồng lấn hai capsule.
    */
-  public calculateCapsuleOverlap(entity?: any, height = 2.0, radius = 0.5): any {
+  public calculateCapsuleOverlap(entity?: unknown, height = 2.0, radius = 0.5) {
     const first = resolveCapsule(entity, radius, height);
     const other = child(entity, 'other', 'target', 'collider') ?? undefined;
     const second = resolveCapsule(other, radius, height);
@@ -329,7 +329,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1455] calculateCylinderOverlap
    * Kiểm tra chồng lấn hai hình trụ.
    */
-  public calculateCylinderOverlap(a?: any, b?: any): any {
+  public calculateCylinderOverlap(a?: unknown, b?: unknown) {
     const first = resolveCylinder(a);
     const second = resolveCylinder(b);
     const dx = first.center.x - second.center.x;
@@ -355,7 +355,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1456] calculatePlaneIntersection
    * Tạo mặt phẳng từ normal và khoảng cách.
    */
-  public calculatePlaneIntersection(normal?: Vec3D, distance = 0): any {
+  public calculatePlaneIntersection(normal?: Vec3D, distance = 0) {
     const n = normalize(normal ?? { x: 0, y: 1, z: 0 });
     return {
       normal: n,
@@ -367,7 +367,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1457] calculateRayPlaneIntersection
    * Giao điểm tia với mặt phẳng.
    */
-  public calculateRayPlaneIntersection(origin?: Vec3D, direction?: Vec3D): any {
+  public calculateRayPlaneIntersection(origin?: Vec3D, direction?: Vec3D) {
     const ray = { origin: origin ?? { x: 0, y: 0, z: 0 }, direction: direction ?? { ...FORWARD3 } };
     const plane = resolvePlane(pickShape(ray.origin, child(ray.direction, 'plane', 'target')), { x: 0, y: 1, z: 0 }, 0);
     const point = rayPlane(ray, plane);
@@ -381,7 +381,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1458] calculateRaySphereIntersection
    * Giao điểm tia với hình cầu.
    */
-  public calculateRaySphereIntersection(origin?: Vec3D, direction?: Vec3D): any {
+  public calculateRaySphereIntersection(origin?: Vec3D, direction?: Vec3D) {
     const ray = { origin: origin ?? { x: 0, y: 0, z: 0 }, direction: direction ?? { ...FORWARD3 } };
     const sphere = resolveSphere(pickShape(ray.origin, child(ray.direction, 'sphere', 'target')), 0.5);
     const result = raySphereIntersection(ray, sphere);
@@ -395,7 +395,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1459] calculateRayBoxIntersection
    * Giao điểm tia với hộp giới hạn.
    */
-  public calculateRayBoxIntersection(origin?: Vec3D, direction?: Vec3D): any {
+  public calculateRayBoxIntersection(origin?: Vec3D, direction?: Vec3D) {
     const ray = { origin: origin ?? { x: 0, y: 0, z: 0 }, direction: direction ?? { ...FORWARD3 } };
     const box = resolveBox(pickShape(ray.origin, child(ray.direction, 'box', 'target')));
     const point = rayBox(ray, box);
@@ -409,7 +409,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1460] calculateRayCapsuleIntersection
    * Giao điểm tia với capsule.
    */
-  public calculateRayCapsuleIntersection(origin?: Vec3D, direction?: Vec3D): any {
+  public calculateRayCapsuleIntersection(origin?: Vec3D, direction?: Vec3D) {
     const ray = { origin: origin ?? { x: 0, y: 0, z: 0 }, direction: direction ?? { ...FORWARD3 } };
     const capsule = resolveCapsule(pickShape(ray.origin, child(ray.direction, 'capsule', 'target')));
     const result = rayCapsuleIntersection(ray, capsule);
@@ -423,7 +423,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1461] calculateRayTriangleIntersection
    * Giao điểm tia với tam giác.
    */
-  public calculateRayTriangleIntersection(origin?: Vec3D, direction?: Vec3D): any {
+  public calculateRayTriangleIntersection(origin?: Vec3D, direction?: Vec3D) {
     const ray = { origin: origin ?? { x: 0, y: 0, z: 0 }, direction: direction ?? { ...FORWARD3 } };
     const triangle = resolveTriangle(pickShape(ray.origin, child(ray.direction, 'triangle', 'target')));
     const result = rayTriangleIntersection(ray, triangle);
@@ -437,7 +437,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1462] calculateSegmentSegmentDistance
    * Khoảng cách giữa hai đoạn thẳng.
    */
-  public calculateSegmentSegmentDistance(a?: any, b?: any): any {
+  public calculateSegmentSegmentDistance(a?: unknown, b?: unknown) {
     const p1 = resolvePointOf(a);
     const p2 = resolvePointOf(child(a, 'end', 'b') ?? a);
     const q1 = resolvePointOf(b);
@@ -448,7 +448,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1463] calculateSegmentTriangleIntersection
    * Kiểm tra đoạn thẳng có cắt tam giác không.
    */
-  public calculateSegmentTriangleIntersection(a?: any, b?: any): any {
+  public calculateSegmentTriangleIntersection(a?: unknown, b?: unknown) {
     const start = resolvePointOf(a);
     const end = resolvePointOf(child(a, 'end', 'b') ?? b);
     const triangle = resolveTriangle(pickShape(b, child(a, 'triangle', 'target')));
@@ -468,7 +468,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * `triangleA` / `triangleB` / `triangle` của entity — nhờ vậy hai tam giác
    * thật của cùng một entity được dùng thay vì tam giác rỗng.
    */
-  public calculateTriangleTriangleIntersection(a?: any, b?: any): any {
+  public calculateTriangleTriangleIntersection(a?: unknown, b?: unknown) {
     const fromA = readTriangles(a);
     const fromB = readTriangles(b);
     const first = fromA[0] ?? fromB[0] ?? resolveTriangle(undefined);
@@ -488,7 +488,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1465] calculateMeshMeshIntersection
    * Kiểm tra hai lưới hình học có giao nhau không.
    */
-  public calculateMeshMeshIntersection(a?: any, b?: any): any {
+  public calculateMeshMeshIntersection(a?: unknown, b?: unknown) {
     const pointsA = resolvePoints(a);
     const pointsB = resolvePoints(b);
     const boxA = resolveBox(a);
@@ -505,7 +505,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * theo phép đối xứng (Chamfer): trung bình khoảng cách gần nhất từ mỗi
    * đỉnh của lưới này tới lưới kia, lấy trung bình của cả hai chiều.
    */
-  public calculateMeshSurfaceDistance(a?: any, b?: any): any {
+  public calculateMeshSurfaceDistance(a?: unknown, b?: unknown) {
     const setsA = readMeshSets(a);
     const setsB = readMeshSets(b);
     const first = setsA[0] ?? setsB[0] ?? [];
@@ -517,7 +517,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1467] calculateClosestPointOnTriangle
    * Điểm gần nhất trên tam giác.
    */
-  public calculateClosestPointOnTriangle(a?: any, b?: any, options?: any): any {
+  public calculateClosestPointOnTriangle(a?: unknown, b?: unknown, options?: unknown) {
     const point = resolvePointOf(a);
     const triangle = resolveTriangle(pickShape(b, child(a, 'triangle', 'target')));
     const closest = closestPointOnTriangle(point, triangle);
@@ -537,7 +537,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1468] calculateClosestPointOnSegment
    * Điểm gần nhất trên đoạn thẳng.
    */
-  public calculateClosestPointOnSegment(a?: any, b?: any, options?: any): any {
+  public calculateClosestPointOnSegment(a?: unknown, b?: unknown, options?: unknown) {
     const point = resolvePointOf(a);
     const start = resolvePointOf(b);
     const end = resolvePointOf(child(b, 'end', 'b') ?? b);
@@ -559,8 +559,8 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1469] calculateClosestPointOnPlane
    * Điểm gần nhất trên mặt phẳng.
    */
-  public calculateClosestPointOnPlane(normal?: Vec3D, distance = 0): any {
-    const isPlaneObject = Boolean(normal && typeof normal === 'object' && 'normal' in (normal as any));
+  public calculateClosestPointOnPlane(normal?: Vec3D, distance = 0) {
+    const isPlaneObject = Boolean(normal && typeof normal === 'object' && 'normal' in normal);
     const plane = resolvePlane(
       isPlaneObject ? normal : { x: normal?.x ?? 0, y: normal?.y ?? 1, z: normal?.z ?? 0 },
       { x: 0, y: 1, z: 0 },
@@ -574,7 +574,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1470] calculateClosestPointOnSphere
    * Điểm gần nhất trên hình cầu.
    */
-  public calculateClosestPointOnSphere(a?: any, b?: any, options?: any): any {
+  public calculateClosestPointOnSphere(a?: unknown, b?: unknown, options?: unknown) {
     const point = resolvePointOf(a);
     const sphere = resolveSphere(pickShape(b, child(a, 'sphere', 'target')), 1);
     const closest = closestPointOnSphere(point, sphere);
@@ -595,7 +595,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1471] calculateClosestPointOnBox
    * Điểm gần nhất trên hộp giới hạn.
    */
-  public calculateClosestPointOnBox(a?: any, b?: any, options?: any): any {
+  public calculateClosestPointOnBox(a?: unknown, b?: unknown, options?: unknown) {
     const point = resolvePointOf(a);
     const box = resolveBox(pickShape(b, child(a, 'box', 'target')));
     const closest = closestPointOnBox(point, box);
@@ -616,7 +616,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1472] calculateClosestPointOnCapsule
    * Điểm gần nhất trên capsule.
    */
-  public calculateClosestPointOnCapsule(a?: any, b?: any, options?: any): any {
+  public calculateClosestPointOnCapsule(a?: unknown, b?: unknown, options?: unknown) {
     const point = resolvePointOf(a);
     const capsule = resolveCapsule(pickShape(b, child(a, 'capsule', 'target')));
     const closest = closestPointOnCapsule(point, capsule);
@@ -637,7 +637,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1473] calculateClosestPointOnMesh
    * Điểm gần nhất trên lưới hình học.
    */
-  public calculateClosestPointOnMesh(a?: any, b?: any, options?: any): any {
+  public calculateClosestPointOnMesh(a?: unknown, b?: unknown, options?: unknown) {
     const point = resolvePointOf(a);
     const points = resolvePoints(pickShape(b, child(a, 'mesh', 'target')));
     if (points.length === 0) {
@@ -680,7 +680,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1474] calculateContactManifold
    * Tập điểm tiếp xúc giữa hai vật thể.
    */
-  public calculateContactManifold(a?: any, b?: any, options?: any): any {
+  public calculateContactManifold(a?: unknown, b?: unknown, options?: unknown) {
     const boxA = resolveBox(a);
     const boxB = resolveBox(b);
     const centerA = boxCenter(boxA);
@@ -722,7 +722,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1475] calculateCollisionNormal
    * Pháp tuyến va chạm giữa hai vật thể.
    */
-  public calculateCollisionNormal(a?: any, b?: any): any {
+  public calculateCollisionNormal(a?: unknown, b?: unknown) {
     const normal = normalize(subtract(resolvePointOf(b), resolvePointOf(a)));
     return magnitude(normal) > 0 ? normal : { x: 0, y: 1, z: 0 };
   }
@@ -730,7 +730,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1476] calculateCollisionDepth
    * Độ sâu xâm nhập giữa hai vật thể.
    */
-  public calculateCollisionDepth(a?: any, b?: any): any {
+  public calculateCollisionDepth(a?: unknown, b?: unknown) {
     const boxA = resolveBox(a);
     const boxB = resolveBox(b);
     const overlapX = Math.min(boxA.max.x, boxB.max.x) - Math.max(boxA.min.x, boxB.min.x);
@@ -742,7 +742,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1477] calculateCollisionTimeOfImpact
    * Thời điểm va chạm giữa hai vật thể đang chuyển động.
    */
-  public calculateCollisionTimeOfImpact(a?: any, b?: any): any {
+  public calculateCollisionTimeOfImpact(a?: unknown, b?: unknown) {
     const positionA = resolvePointOf(a);
     const positionB = resolvePointOf(b);
     const velocityA = readVec(a, ['velocity']);
@@ -766,7 +766,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1478] calculateSweptAABB
    * Thể tích quét của hộp giới hạn theo thời gian.
    */
-  public calculateSweptAABB(a?: any, b?: any, options?: any): any {
+  public calculateSweptAABB(a?: unknown, b?: unknown, options?: unknown) {
     const box = resolveBox(a);
     // `b` là vật thể thứ hai: vận tốc quét tính theo chuyển động tương đối.
     const velocityA = readVec(a, ['velocity']);
@@ -801,7 +801,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1479] calculateSweptSphere
    * Thể tích quét của hình cầu theo thời gian.
    */
-  public calculateSweptSphere(a?: any, b?: any, options?: any): any {
+  public calculateSweptSphere(a?: unknown, b?: unknown, options?: unknown) {
     const sphere = resolveSphere(a, 0.5);
     // `b` là vật thể thứ hai: vận tốc quét tính theo chuyển động tương đối.
     const velocityA = readVec(a, ['velocity']);
@@ -825,7 +825,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1480] calculateContinuousCollision
    * Va chạm liên tục giữa hai vật thể chuyển động.
    */
-  public calculateContinuousCollision(a?: any, b?: any): any {
+  public calculateContinuousCollision(a?: unknown, b?: unknown) {
     const toi = this.calculateCollisionTimeOfImpact(a, b);
     const hit = Number.isFinite(toi);
     const pointA = resolvePointOf(a);
@@ -844,56 +844,56 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1481] calculateRigidBodyVelocity
    * Vận tốc tuyến tính của thân cứng.
    */
-  public calculateRigidBodyVelocity(entity?: any, dt = 0.016): any {
+  public calculateRigidBodyVelocity(entity?: unknown, dt = 0.016) {
     return rigidBodyVelocity(entity, dt);
   }
   /**
    * [1482] calculateRigidBodyAcceleration
    * Gia tốc tuyến tính của thân cứng.
    */
-  public calculateRigidBodyAcceleration(entity?: any, dt = 0.016): any {
+  public calculateRigidBodyAcceleration(entity?: unknown, dt = 0.016) {
     return rigidBodyAcceleration(entity, dt);
   }
   /**
    * [1483] calculateRigidBodyAngularVelocity
    * Vận tốc góc của thân cứng.
    */
-  public calculateRigidBodyAngularVelocity(entity?: any, dt = 0.016): any {
+  public calculateRigidBodyAngularVelocity(entity?: unknown, dt = 0.016) {
     return angularVelocity(entity, dt);
   }
   /**
    * [1484] calculateRigidBodyAngularAcceleration
    * Gia tốc góc của thân cứng.
    */
-  public calculateRigidBodyAngularAcceleration(entity?: any, dt = 0.016): any {
+  public calculateRigidBodyAngularAcceleration(entity?: unknown, dt = 0.016) {
     return angularAcceleration(entity, dt);
   }
   /**
    * [1485] calculateRigidBodyMomentum
    * Động lượng tuyến tính.
    */
-  public calculateRigidBodyMomentum(entity?: any, dt = 0.016): any {
+  public calculateRigidBodyMomentum(entity?: unknown, dt = 0.016) {
     return momentum(entity, dt);
   }
   /**
    * [1486] calculateAngularMomentum
    * Động lượng góc.
    */
-  public calculateAngularMomentum(entity?: any, dt = 0.016): any {
+  public calculateAngularMomentum(entity?: unknown, dt = 0.016) {
     return angularMomentum(entity, dt);
   }
   /**
    * [1487] calculateImpulse
    * Xung lượng tác dụng lên thân cứng.
    */
-  public calculateImpulse(entity?: any, dt = 0.016): any {
+  public calculateImpulse(entity?: unknown, dt = 0.016) {
     return impulse(entity, dt);
   }
   /**
    * [1488] calculateCollisionImpulse
    * Xung lượng do va chạm giữa hai thân cứng.
    */
-  public calculateCollisionImpulse(a?: any, b?: any): any {
+  public calculateCollisionImpulse(a?: unknown, b?: unknown) {
     const massA = readNum(a, ['mass'], DEFAULT_MASS);
     const massB = readNum(b, ['mass'], DEFAULT_MASS);
     const relative = subtract(readVec(a, ['velocity']), readVec(b, ['velocity']));
@@ -912,21 +912,21 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1489] calculateRestitutionVelocity
    * Vận tốc sau va chạm có hồi phục.
    */
-  public calculateRestitutionVelocity(entity?: any, dt = 0.016): any {
+  public calculateRestitutionVelocity(entity?: unknown, dt = 0.016) {
     return restitutionVelocity(entity, dt);
   }
   /**
    * [1490] calculateFrictionImpulse
    * Xung lượng ma sát.
    */
-  public calculateFrictionImpulse(entity?: any, dt = 0.016): any {
+  public calculateFrictionImpulse(entity?: unknown, dt = 0.016) {
     return frictionImpulse(entity, dt);
   }
   /**
    * [1491] calculateGravityAcceleration
    * Gia tốc trọng trường.
    */
-  public calculateGravityAcceleration(entity?: any, dt = 0.016): any {
+  public calculateGravityAcceleration(entity?: unknown, dt = 0.016) {
     const explicit = readVec(entity, ['gravity', 'gravityAcceleration']);
     if (magnitude(explicit) > 0) return explicit;
     const gravityScale = readNum(entity, ['gravityScale'], Number.NaN);
@@ -940,35 +940,35 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1492] calculateSpringForce
    * Lực lò xo Hooke.
    */
-  public calculateSpringForce(entity?: any, dt = 0.016): any {
+  public calculateSpringForce(entity?: unknown, dt = 0.016) {
     return springForce(entity, dt);
   }
   /**
    * [1493] calculateDampingForce
    * Lực giảm chấn.
    */
-  public calculateDampingForce(entity?: any, dt = 0.016): any {
+  public calculateDampingForce(entity?: unknown, dt = 0.016) {
     return dampingForce(entity, dt);
   }
   /**
    * [1494] calculateConstraintForce
    * Lực ràng buộc.
    */
-  public calculateConstraintForce(entity?: any, dt = 0.016): any {
+  public calculateConstraintForce(entity?: unknown, dt = 0.016) {
     return constraintForce(entity, dt);
   }
   /**
    * [1495] calculateConstraintError
    * Sai số hiện tại của ràng buộc.
    */
-  public calculateConstraintError(a?: any, b?: any, options?: any): any {
+  public calculateConstraintError(a?: unknown, b?: unknown, options?: unknown) {
     return this.transformedNumber(constraintError(a, b), options);
   }
   /**
    * [1496] calculatePhysicsIntegration
    * Bước tích phân Euler.
    */
-  public calculatePhysicsIntegration(a?: any, b?: any, options?: any): any {
+  public calculatePhysicsIntegration(a?: unknown, b?: unknown, options?: unknown) {
     const position = resolvePointOf(a);
     // `b` là nguồn dữ liệu thứ hai: dùng khi `a` không có vận tốc/gia tốc.
     const velocity = this.firstVectorOf([a, b], ['velocity']);
@@ -995,7 +995,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1497] calculateVerletIntegration
    * Bước tích phân Verlet.
    */
-  public calculateVerletIntegration(a?: any, b?: any, options?: any): any {
+  public calculateVerletIntegration(a?: unknown, b?: unknown, options?: unknown) {
     const position = resolvePointOf(a);
     // `b` là nguồn dữ liệu thứ hai: vị trí trước / gia tốc khi `a` thiếu.
     const previous = this.firstVectorOf([a, b], ['previousPosition']);
@@ -1021,7 +1021,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1498] calculateRungeKuttaIntegration
    * Bước tích phân Runge–Kutta bậc 4.
    */
-  public calculateRungeKuttaIntegration(a?: any, b?: any, options?: any): any {
+  public calculateRungeKuttaIntegration(a?: unknown, b?: unknown, options?: unknown) {
     const position = resolvePointOf(a);
     // `b` là nguồn dữ liệu thứ hai: vận tốc/gia tốc khi `a` thiếu.
     const velocity = this.firstVectorOf([a, b], ['velocity']);
@@ -1048,7 +1048,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1499] calculatePhysicsSubsteps
    * Số bước con mô phỏng.
    */
-  public calculatePhysicsSubsteps(a?: any, b?: any, options?: any): any {
+  public calculatePhysicsSubsteps(a?: unknown, b?: unknown, options?: unknown) {
     // `b` là nguồn dữ liệu thứ hai cho bước thời gian / bước con tối đa.
     const dt = readNum(options, ['dt', 'deltaTime'], readNum(a, ['dt'], readNum(b, ['dt'], 0.016)));
     const maxStep = readNum(options, ['maxStep'], readNum(b, ['maxStep'], 1 / 120));
@@ -1063,7 +1063,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1500] calculatePhysicsStability
    * Độ ổn định của bước mô phỏng.
    */
-  public calculatePhysicsStability(a?: any, b?: any, options?: any): any {
+  public calculatePhysicsStability(a?: unknown, b?: unknown, options?: unknown) {
     // `b` là nguồn dữ liệu thứ hai cho bước thời gian / bước con tối đa.
     const dt = readNum(options, ['dt', 'deltaTime'], readNum(a, ['dt'], readNum(b, ['dt'], 0.016)));
     const maxStep = readNum(options, ['maxStep'], readNum(b, ['maxStep'], 1 / 120));
@@ -1078,7 +1078,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1501] getProjectilePosition
    * Vị trí hiện tại của đạn.
    */
-  public getProjectilePosition(entity?: any, offset?: Vec3D): any {
+  public getProjectilePosition(entity?: unknown, offset?: Vec3D) {
     const base = resolvePointOf(entity);
     return {
       x: base.x + (offset?.x ?? 0),
@@ -1090,7 +1090,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1502] getProjectileOrigin
    * Điểm xuất phát của đạn.
    */
-  public getProjectileOrigin(a?: any, b?: any, options?: any): any {
+  public getProjectileOrigin(a?: unknown, b?: unknown, options?: unknown) {
     // `b` là nguồn thứ hai cho điểm xuất phát.
     const fromA = child(a, 'origin', 'start');
     const fromB = child(b, 'origin', 'start');
@@ -1105,7 +1105,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1503] getProjectileTarget
    * Điểm nhắm của đạn.
    */
-  public getProjectileTarget(a?: any, b?: any, options?: any): any {
+  public getProjectileTarget(a?: unknown, b?: unknown, options?: unknown) {
     const raw = resolvePointOf(child(a, 'target', 'aim') ?? b);
     const target = this.transformedVector(raw, options);
     const extra: Record<string, unknown> = { target };
@@ -1117,7 +1117,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1504] calculateProjectileDirection
    * Hướng bắn.
    */
-  public calculateProjectileDirection(a?: any, b?: any): any {
+  public calculateProjectileDirection(a?: unknown, b?: unknown) {
     const origin = resolvePointOf(child(a, 'origin', 'start') ?? a);
     const target = resolvePointOf(child(b, 'target', 'aim') ?? b);
     return projectileDirection(origin, target);
@@ -1126,14 +1126,14 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1505] calculateProjectileVelocity
    * Vận tốc đạn.
    */
-  public calculateProjectileVelocity(entity?: any, dt = 0.016): any {
+  public calculateProjectileVelocity(entity?: unknown, dt = 0.016) {
     return rigidBodyVelocity(entity, dt);
   }
   /**
    * [1506] calculateProjectileAcceleration
    * Gia tốc đạn (trọng lực).
    */
-  public calculateProjectileAcceleration(entity?: any, dt = 0.016): any {
+  public calculateProjectileAcceleration(entity?: unknown, dt = 0.016) {
     const explicit = readVec(entity, ['acceleration']);
     if (magnitude(explicit) > 0) return explicit;
     const gravityVector = readVec(entity, ['gravity', 'gravityAcceleration']);
@@ -1149,7 +1149,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1507] calculateProjectileTrajectory
    * Quỹ đạo đạn.
    */
-  public calculateProjectileTrajectory(a?: any, b?: any, options?: any): any {
+  public calculateProjectileTrajectory(a?: unknown, b?: unknown, options?: unknown) {
     const origin = resolvePointOf(child(a, 'origin', 'start') ?? a);
     const target = resolvePointOf(child(b, 'target', 'aim') ?? b);
     const speed = readNum(options, ['speed', 'velocity'], readNum(a, ['speed'], 30));
@@ -1167,7 +1167,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1508] calculateProjectileFlightTime
    * Thời gian bay của đạn.
    */
-  public calculateProjectileFlightTime(a?: any, b?: any, options?: any): any {
+  public calculateProjectileFlightTime(a?: unknown, b?: unknown, options?: unknown) {
     const origin = resolvePointOf(child(a, 'origin', 'start') ?? a);
     const target = resolvePointOf(child(b, 'target', 'aim') ?? b);
     const speed = readNum(options, ['speed', 'velocity'], readNum(a, ['speed'], 30));
@@ -1177,7 +1177,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1509] calculateProjectileImpactPoint
    * Điểm va chạm của đạn.
    */
-  public calculateProjectileImpactPoint(a?: any, b?: any, options?: any): any {
+  public calculateProjectileImpactPoint(a?: unknown, b?: unknown, options?: unknown) {
     const origin = resolvePointOf(child(a, 'origin', 'start') ?? a);
     const direction = normalize(subtract(
       resolvePointOf(child(b, 'target', 'aim') ?? b),
@@ -1196,7 +1196,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1510] calculateProjectileImpactNormal
    * Pháp tuyến tại điểm va chạm.
    */
-  public calculateProjectileImpactNormal(a?: any, b?: any): any {
+  public calculateProjectileImpactNormal(a?: unknown, b?: unknown) {
     const normal = normalize(subtract(resolvePointOf(b), resolvePointOf(a)));
     return magnitude(normal) > 0 ? normal : { x: 0, y: 1, z: 0 };
   }
@@ -1204,7 +1204,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1511] calculateProjectileSpreadAngle
    * Góc tán sai của đạn.
    */
-  public calculateProjectileSpreadAngle(a?: any, b?: any): any {
+  public calculateProjectileSpreadAngle(a?: unknown, b?: unknown) {
     const spread = readNum(a, ['spread', 'spreadAngle'], readNum(b, ['spread'], 0));
     return projectileSpreadAngle(spread);
   }
@@ -1212,7 +1212,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1512] calculateProjectileDropDistance
    * Độ rơi của đạn do trọng lực.
    */
-  public calculateProjectileDropDistance(a?: any, b?: any): any {
+  public calculateProjectileDropDistance(a?: unknown, b?: unknown) {
     const origin = resolvePointOf(a);
     const target = resolvePointOf(b);
     const speed = readNum(a, ['speed', 'velocity'], 30);
@@ -1223,7 +1223,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1513] calculateProjectileWindDrift
    * Độ lệch do gió.
    */
-  public calculateProjectileWindDrift(a?: any, b?: any, options?: any): any {
+  public calculateProjectileWindDrift(a?: unknown, b?: unknown, options?: unknown) {
     const origin = resolvePointOf(child(a, 'origin', 'start') ?? a);
     const target = resolvePointOf(child(b, 'target', 'aim') ?? b);
     const speed = readNum(options, ['speed', 'velocity'], readNum(a, ['speed'], 30));
@@ -1238,7 +1238,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1514] calculateProjectileCollision
    * Va chạm của đạn với vật cản.
    */
-  public calculateProjectileCollision(a?: any, b?: any): any {
+  public calculateProjectileCollision(a?: unknown, b?: unknown) {
     const boxA = resolveBox(a);
     const boxB = resolveBox(b);
     const result = aabb('calculateProjectileCollision', boxA, boxB);
@@ -1248,14 +1248,14 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1515] calculateProjectileDistanceToTarget
    * Khoảng cách từ đạn tới mục tiêu.
    */
-  public calculateProjectileDistanceToTarget(a?: any, b?: any): any {
+  public calculateProjectileDistanceToTarget(a?: unknown, b?: unknown) {
     return distance3D(resolvePointOf(a), resolvePointOf(b));
   }
   /**
    * [1516] getItemPosition
    * Vị trí vật phẩm.
    */
-  public getItemPosition(entity?: any, offset?: Vec3D): any {
+  public getItemPosition(entity?: unknown, offset?: Vec3D) {
     const base = resolvePointOf(entity);
     return {
       x: base.x + (offset?.x ?? 0),
@@ -1267,7 +1267,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1517] getItemCenter
    * Tâm vật phẩm.
    */
-  public getItemCenter(entity?: any, offset?: Vec3D): any {
+  public getItemCenter(entity?: unknown, offset?: Vec3D) {
     const base = resolvePointOf(entity);
     const center = readVec(entity, ['center']);
     const centerPoint = magnitude(center) > 0 ? center : base;
@@ -1281,7 +1281,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1518] getItemRotation
    * Góc quay của vật phẩm.
    */
-  public getItemRotation(entityOrAngle?: any, options?: any): any {
+  public getItemRotation(entityOrAngle?: unknown, options?: unknown) {
     const source = this.entityOf(entityOrAngle, options);
     if (!source) return { x: 0, y: 0, z: 0, w: 1 };
     const record = source as Record<string, unknown>;
@@ -1304,7 +1304,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1519] getItemPickupPosition
    * Vị trí nhặt vật phẩm.
    */
-  public getItemPickupPosition(entity?: any, offset?: Vec3D): any {
+  public getItemPickupPosition(entity?: unknown, offset?: Vec3D) {
     const base = resolvePointOf(entity);
     const pickup = readVec(entity, ['pickupOffset']);
     const effective = magnitude(pickup) > 0 ? pickup : { x: 0, y: 0.5, z: 0 };
@@ -1318,14 +1318,14 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1520] calculateItemDistanceToPlayer
    * Khoảng cách vật phẩm tới người chơi.
    */
-  public calculateItemDistanceToPlayer(a?: any, b?: any): any {
+  public calculateItemDistanceToPlayer(a?: unknown, b?: unknown) {
     return distance3D(resolvePointOf(a), resolvePointOf(b));
   }
   /**
    * [1521] calculateItemPickupRange
    * Phạm vi nhặt vật phẩm.
    */
-  public calculateItemPickupRange(a?: any, b?: any, options?: any): any {
+  public calculateItemPickupRange(a?: unknown, b?: unknown, options?: unknown) {
     const explicit = readNum(options, ['pickupRange', 'range'], Number.NaN);
     if (Number.isFinite(explicit)) return explicit;
     return itemPickupRange(a ?? b);
@@ -1334,7 +1334,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1522] calculateItemPickupOffset
    * Độ lệch vị trí nhặt.
    */
-  public calculateItemPickupOffset(a?: any, b?: any): any {
+  public calculateItemPickupOffset(a?: unknown, b?: unknown) {
     const explicit = readVec(a, ['pickupOffset', 'grabOffset']);
     if (magnitude(explicit) > 0) return explicit;
     return itemPickupOffset(b);
@@ -1343,14 +1343,14 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1523] calculateItemMagnetDirection
    * Hướng hút vật phẩm.
    */
-  public calculateItemMagnetDirection(a?: any, b?: any): any {
+  public calculateItemMagnetDirection(a?: unknown, b?: unknown) {
     return magnetDirection(resolvePointOf(a), resolvePointOf(b));
   }
   /**
    * [1524] calculateItemMagnetVelocity
    * Vận tốc hút vật phẩm.
    */
-  public calculateItemMagnetVelocity(entity?: any, dt = 0.016): any {
+  public calculateItemMagnetVelocity(entity?: unknown, dt = 0.016) {
     const item = resolvePointOf(entity);
     const player = readVec(entity, ['player', 'target', 'playerPosition']);
     const strength = readNum(entity, ['magnetStrength'], 10);
@@ -1360,35 +1360,35 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1525] calculateItemHoverHeight
    * Chiều cao lơ lửng của vật phẩm.
    */
-  public calculateItemHoverHeight(entity?: any, options?: any): any {
+  public calculateItemHoverHeight(entity?: unknown, options?: unknown) {
     return this.transformedNumber(itemHoverHeight(this.entityOf(entity, options)), options);
   }
   /**
    * [1526] calculateItemRotationSpeed
    * Tốc độ xoay của vật phẩm.
    */
-  public calculateItemRotationSpeed(entityOrAngle?: any, options?: any): any {
+  public calculateItemRotationSpeed(entityOrAngle?: unknown, options?: unknown) {
     return itemRotationSpeed(entityOrAngle ?? options);
   }
   /**
    * [1527] calculateItemBobAmplitude
    * Biên độ dao động của vật phẩm.
    */
-  public calculateItemBobAmplitude(entity?: any, options?: any): any {
+  public calculateItemBobAmplitude(entity?: unknown, options?: unknown) {
     return itemBobAmplitude(entity ?? options);
   }
   /**
    * [1528] calculateItemBobFrequency
    * Tần số dao động của vật phẩm.
    */
-  public calculateItemBobFrequency(entity?: any, options?: any): any {
+  public calculateItemBobFrequency(entity?: unknown, options?: unknown) {
     return itemBobFrequency(entity ?? options);
   }
   /**
    * [1529] calculateParticlePosition
    * Vị trí hạt.
    */
-  public calculateParticlePosition(a?: any, b?: any, options?: any): any {
+  public calculateParticlePosition(a?: unknown, b?: unknown, options?: unknown) {
     const base = resolvePointOf(a);
     // `b` là nguồn dữ liệu thứ hai: vận tốc/gia tốc khi `a` thiếu.
     const velocity = this.firstVectorOf([a, b], ['velocity']);
@@ -1415,14 +1415,14 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1530] calculateParticleVelocity
    * Vận tốc hạt.
    */
-  public calculateParticleVelocity(entity?: any, dt = 0.016): any {
+  public calculateParticleVelocity(entity?: unknown, dt = 0.016) {
     return rigidBodyVelocity(entity, dt);
   }
   /**
    * [1531] calculateParticleAcceleration
    * Gia tốc hạt.
    */
-  public calculateParticleAcceleration(entity?: any, dt = 0.016): any {
+  public calculateParticleAcceleration(entity?: unknown, dt = 0.016) {
     const explicit = readVec(entity, ['acceleration']);
     if (magnitude(explicit) > 0) return explicit;
     const gravityVector = readVec(entity, ['gravity', 'gravityAcceleration']);
@@ -1438,7 +1438,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1532] calculateParticleLifetime
    * Tuổi thọ hạt.
    */
-  public calculateParticleLifetime(a?: any, b?: any, options?: any): any {
+  public calculateParticleLifetime(a?: unknown, b?: unknown, options?: unknown) {
     const explicit = readNum(options, ['lifetime', 'maxLifetime'], Number.NaN);
     if (Number.isFinite(explicit)) return this.transformedNumber(explicit, options);
     // `b` là nguồn dữ liệu thứ hai (khoá `maxLifetime`) cho tuổi / thời lượng.
@@ -1453,7 +1453,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * Nguồn theo thứ tự ưu tiên: `scale` dạng số → `sizeScale` của hạt →
    * `options` → độ lớn của vector `scale` → mặc định 1.
    */
-  public calculateParticleScale(entity?: any, options?: any): any {
+  public calculateParticleScale(entity?: unknown, options?: unknown) {
     const raw = entity && typeof entity === 'object'
       ? (entity as Record<string, unknown>).scale
       : undefined;
@@ -1471,7 +1471,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1534] calculateParticleRotation
    * Góc quay của hạt.
    */
-  public calculateParticleRotation(entityOrAngle?: any, options?: any): any {
+  public calculateParticleRotation(entityOrAngle?: unknown, options?: unknown) {
     const source = this.entityOf(entityOrAngle, options);
     if (!source) return { x: 0, y: 0, z: 0, w: 1 };
     const record = source as Record<string, unknown>;
@@ -1494,7 +1494,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1535] calculateParticleColorInterpolation
    * Nội suy màu của hạt.
    */
-  public calculateParticleColorInterpolation(a?: any, b?: any, options?: any): any {
+  public calculateParticleColorInterpolation(a?: unknown, b?: unknown, options?: unknown) {
     const t = readNum(options, ['t', 'time', 'progress'], readNum(a, ['t'], 0.5));
     const from = readColor(child(a, 'fromColor', 'startColor') ?? a);
     const to = readColor(child(b, 'toColor', 'endColor') ?? b);
@@ -1509,7 +1509,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * `lifetime` từ `lifetime` / `duration`. Độ mờ gốc của hạt (`opacity`) nhân
    * với đường cong mờ dần theo tuổi, rồi chuẩn hoá về [0, 1].
    */
-  public calculateParticleOpacity(a?: any, b?: any, options?: any): any {
+  public calculateParticleOpacity(a?: unknown, b?: unknown, options?: unknown) {
     // `b` là nguồn dữ liệu thứ hai (khoá `particleAge` / `particleLifetime` /
     // `particleOpacity`) cho đồng hồ và độ mờ gốc.
     const age = readNum(
@@ -1530,14 +1530,14 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1537] calculateParticleCollision
    * Va chạm của hạt với vật cản.
    */
-  public calculateParticleCollision(a?: any, b?: any): any {
+  public calculateParticleCollision(a?: unknown, b?: unknown) {
     return aabb('calculateParticleCollision', resolveBox(a), resolveBox(b));
   }
   /**
    * [1538] calculateParticleAttractorForce
    * Lực hút của hạt.
    */
-  public calculateParticleAttractorForce(entity?: any, dt = 0.016): any {
+  public calculateParticleAttractorForce(entity?: unknown, dt = 0.016) {
     const particle = resolvePointOf(entity);
     const attractor = readVec(entity, ['attractor', 'attractorPosition']);
     const strength = readNum(entity, ['attractorStrength'], 10);
@@ -1560,14 +1560,14 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1539] calculateParticleFieldDirection
    * Hướng trường lực tại vị trí hạt.
    */
-  public calculateParticleFieldDirection(a?: any, b?: any): any {
+  public calculateParticleFieldDirection(a?: unknown, b?: unknown) {
     return fieldDirection(resolvePointOf(a), resolvePointOf(b));
   }
   /**
    * [1540] calculateEffectOrigin
    * Điểm xuất phát của hiệu ứng.
    */
-  public calculateEffectOrigin(a?: any, b?: any, options?: any): any {
+  public calculateEffectOrigin(a?: unknown, b?: unknown, options?: unknown) {
     // `b` là nguồn dữ liệu thứ hai cho điểm xuất phát.
     const fromA = child(a, 'origin', 'position');
     const fromB = child(b, 'origin', 'position');
@@ -1582,7 +1582,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1541] calculateEffectDirection
    * Hướng của hiệu ứng.
    */
-  public calculateEffectDirection(a?: any, b?: any): any {
+  public calculateEffectDirection(a?: unknown, b?: unknown) {
     const dir = normalize(subtract(resolvePointOf(b), resolvePointOf(a)));
     return magnitude(dir) > 0 ? dir : { ...FORWARD3 };
   }
@@ -1590,7 +1590,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1542] calculateEffectRadius
    * Bán kính hiệu ứng.
    */
-  public calculateEffectRadius(entity?: any, options?: any): any {
+  public calculateEffectRadius(entity?: unknown, options?: unknown) {
     return effectRadius(entity ?? options);
   }
   /**
@@ -1601,7 +1601,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * của nó: tiến độ = tuổi / thời lượng, mức giãn nở = tiến độ × mức đích
    * (fallback về bán kính hiệu ứng).
    */
-  public calculateEffectExpansion(a?: any, b?: any, options?: any): any {
+  public calculateEffectExpansion(a?: unknown, b?: unknown, options?: unknown) {
     // `b` là nguồn dữ liệu thứ hai (khoá `effectAge` / `effectLifetime` /
     // `effectExpansion`) cho đồng hồ và mức giãn nở.
     const age = readNum(
@@ -1623,7 +1623,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1544] calculateEffectFalloff
    * Suy giảm cường độ theo khoảng cách.
    */
-  public calculateEffectFalloff(a?: any, b?: any, options?: any): any {
+  public calculateEffectFalloff(a?: unknown, b?: unknown, options?: unknown) {
     const distance = distance3D(resolvePointOf(a), resolvePointOf(b));
     const radius = readNum(options, ['radius'], effectRadius(a));
     return effectFalloff(distance, radius);
@@ -1632,7 +1632,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1545] calculateEffectDuration
    * Thời lượng hiệu ứng.
    */
-  public calculateEffectDuration(a?: any, b?: any, options?: any): any {
+  public calculateEffectDuration(a?: unknown, b?: unknown, options?: unknown) {
     const explicit = readNum(options, ['duration', 'lifetime'], Number.NaN);
     if (Number.isFinite(explicit)) return this.transformedNumber(explicit, options);
     // `b` là nguồn dữ liệu thứ hai (khoá `effectDuration`) cho thời lượng.
@@ -1645,7 +1645,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1546] calculateEffectIntensity
    * Cường độ hiệu ứng.
    */
-  public calculateEffectIntensity(a?: any, b?: any, options?: any): any {
+  public calculateEffectIntensity(a?: unknown, b?: unknown, options?: unknown) {
     const explicit = readNum(options, ['intensity', 'strength', 'power'], Number.NaN);
     if (Number.isFinite(explicit)) return this.transformedNumber(explicit, options);
     // `b` là nguồn dữ liệu thứ hai (khoá `effectIntensity`) cho cường độ.
@@ -1658,7 +1658,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1547] calculateEffectOcclusion
    * Mức độ che khuất của hiệu ứng.
    */
-  public calculateEffectOcclusion(a?: any, b?: any, options?: any): any {
+  public calculateEffectOcclusion(a?: unknown, b?: unknown, options?: unknown) {
     const distance = distance3D(resolvePointOf(a), resolvePointOf(b));
     const radius = readNum(options, ['radius'], effectRadius(a));
     const falloff = effectFalloff(distance, radius);
@@ -1669,14 +1669,14 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1548] calculateEffectDistanceToCamera
    * Khoảng cách hiệu ứng tới camera.
    */
-  public calculateEffectDistanceToCamera(a?: any, b?: any): any {
+  public calculateEffectDistanceToCamera(a?: unknown, b?: unknown) {
     return distance3D(resolvePointOf(a), resolvePointOf(b));
   }
   /**
    * [1549] calculateEffectScreenBounds
    * Giới hạn hiệu ứng trên màn hình.
    */
-  public calculateEffectScreenBounds(entity?: any, size?: Vec3D): any {
+  public calculateEffectScreenBounds(entity?: unknown, size?: Vec3D) {
     const center = resolvePointOf(entity);
     const radius = effectRadius(entity);
     const scale = num(size?.x, radius * 2);
@@ -1690,7 +1690,7 @@ export class PhysicsCollisionProjectileSubsystem {
    * [1550] calculateEffectLOD
    * Mức LOD của hiệu ứng theo khoảng cách camera.
    */
-  public calculateEffectLOD(entity?: any, camera?: any): any {
+  public calculateEffectLOD(entity?: unknown, camera?: unknown) {
     const center = resolvePointOf(entity);
     const cameraPosition = resolvePointOf(camera);
     const distance = distance3D(center, cameraPosition);

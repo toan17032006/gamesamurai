@@ -5,7 +5,7 @@
  */
 
 import { Animal } from './animal.js';
-import type { AnimalConfig } from './types.js';
+import type { AnimalConfig, AnimalAppearanceConfig, SpeciesProfile } from './types.js';
 import type { Vec3 } from '../types/index.js';
 
 export * from './types.js';
@@ -50,24 +50,24 @@ export function createAnimal(config?: Partial<AnimalConfig>): Animal {
   setActiveAnimal(a);
   return a;
 }
-export function initializeAnimal(inst?: Animal): boolean { return resolveAnimal(inst).initializeAnimal(); }
+export function initializeAnimal(inst?: Animal): ReturnType<Animal['initializeAnimal']> { return resolveAnimal(inst).initializeAnimal(); }
 export function destroyAnimal(inst?: Animal): void { resolveAnimal(inst).destroyAnimal(); }
 export function resetAnimal(inst?: Animal): void { resolveAnimal(inst).resetAnimal(); }
 export function respawnAnimal(inst?: Animal): void { resolveAnimal(inst).respawnAnimal(); }
 export function updateAnimal(dt: number, inst?: Animal): void { resolveAnimal(inst).updateAnimal(dt); }
 export function lateUpdateAnimal(dt: number, inst?: Animal): void { resolveAnimal(inst).lateUpdateAnimal(dt); }
 export function fixedUpdateAnimal(fdt: number, inst?: Animal): void { resolveAnimal(inst).fixedUpdateAnimal(fdt); }
-export function setAnimalConfig(config: any, inst?: Animal): void { resolveAnimal(inst).setAnimalConfig(config); }
-export function getAnimalConfig(inst?: Animal): any { return resolveAnimal(inst).getAnimalConfig(); }
-export function getAnimalState(inst?: Animal): any { return resolveAnimal(inst).getAnimalState(); }
-export function setAnimalState(state: any, inst?: Animal): void { resolveAnimal(inst).setAnimalState(state); }
-export function saveAnimalState(inst?: Animal): string { return resolveAnimal(inst).saveAnimalState(); }
-export function restoreAnimalState(state: any, inst?: Animal): boolean { return resolveAnimal(inst).restoreAnimalState(state); }
+export function setAnimalConfig(config: Partial<AnimalConfig>, inst?: Animal): void { resolveAnimal(inst).setAnimalConfig(config); }
+export function getAnimalConfig(inst?: Animal): ReturnType<Animal['getAnimalConfig']> { return resolveAnimal(inst).getAnimalConfig(); }
+export function getAnimalState(inst?: Animal): ReturnType<Animal['getAnimalState']> { return resolveAnimal(inst).getAnimalState(); }
+export function setAnimalState(state: Record<string, unknown>, inst?: Animal): void { resolveAnimal(inst).setAnimalState(state); }
+export function saveAnimalState(inst?: Animal): ReturnType<Animal['saveAnimalState']> { return resolveAnimal(inst).saveAnimalState(); }
+export function restoreAnimalState(state: Parameters<Animal['restoreAnimalState']>[0], inst?: Animal): ReturnType<Animal['restoreAnimalState']> { return resolveAnimal(inst).restoreAnimalState(state!); }
 export function enableAnimal(inst?: Animal): void { resolveAnimal(inst).enableAnimal(); }
 export function disableAnimal(inst?: Animal): void { resolveAnimal(inst).disableAnimal(); }
 export function pauseAnimal(inst?: Animal): void { resolveAnimal(inst).pauseAnimal(); }
 export function resumeAnimal(inst?: Animal): void { resolveAnimal(inst).resumeAnimal(); }
-export function validateAnimalState(inst?: Animal): boolean { return resolveAnimal(inst).validateAnimalState(); }
+export function validateAnimalState(inst?: Animal): ReturnType<Animal['validateAnimalState']> { return resolveAnimal(inst).validateAnimalState(); }
 export function disposeAnimalResources(inst?: Animal): void { resolveAnimal(inst).disposeAnimalResources(); }
 
 // ============================================================================
@@ -75,40 +75,40 @@ export function disposeAnimalResources(inst?: Animal): void { resolveAnimal(inst
 // ============================================================================
 
 export function setAnimalSpecies(species: string, inst?: Animal): void { resolveAnimal(inst).setAnimalSpecies(species); }
-export function getAnimalSpecies(inst?: Animal): string { return resolveAnimal(inst).getAnimalSpecies(); }
-export function classifyAnimalSpecies(inst?: Animal): any { return resolveAnimal(inst).classifyAnimalSpecies(); }
-export function identifyAnimalFamily(inst?: Animal): string { return resolveAnimal(inst).identifyAnimalFamily(); }
-export function identifyAnimalOrder(inst?: Animal): string { return resolveAnimal(inst).identifyAnimalOrder(); }
-export function identifyAnimalClass(inst?: Animal): any { return resolveAnimal(inst).identifyAnimalClass(); }
-export function identifyAnimalPhylum(inst?: Animal): any { return resolveAnimal(inst).identifyAnimalPhylum(); }
+export function getAnimalSpecies(inst?: Animal): ReturnType<Animal['getAnimalSpecies']> { return resolveAnimal(inst).getAnimalSpecies(); }
+export function classifyAnimalSpecies(inst?: Animal): ReturnType<Animal['classifyAnimalSpecies']> { return resolveAnimal(inst).classifyAnimalSpecies(); }
+export function identifyAnimalFamily(inst?: Animal): ReturnType<Animal['identifyAnimalFamily']> { return resolveAnimal(inst).identifyAnimalFamily(); }
+export function identifyAnimalOrder(inst?: Animal): ReturnType<Animal['identifyAnimalOrder']> { return resolveAnimal(inst).identifyAnimalOrder(); }
+export function identifyAnimalClass(inst?: Animal): ReturnType<Animal['identifyAnimalClass']> { return resolveAnimal(inst).identifyAnimalClass(); }
+export function identifyAnimalPhylum(inst?: Animal): ReturnType<Animal['identifyAnimalPhylum']> { return resolveAnimal(inst).identifyAnimalPhylum(); }
 export function determineAnimalHabitat(inst?: Animal): string[] { return resolveAnimal(inst).determineAnimalHabitat(); }
-export function determineAnimalDiet(inst?: Animal): any { return resolveAnimal(inst).determineAnimalDiet(); }
-export function determineAnimalLocomotion(inst?: Animal): any { return resolveAnimal(inst).determineAnimalLocomotion(); }
-export function determineAnimalBodyPlan(inst?: Animal): string { return resolveAnimal(inst).determineAnimalBodyPlan(); }
-export function determineAnimalSymmetry(inst?: Animal): string { return resolveAnimal(inst).determineAnimalSymmetry(); }
-export function determineAnimalActivityPattern(inst?: Animal): any { return resolveAnimal(inst).determineAnimalActivityPattern(); }
-export function determineAnimalSocialType(inst?: Animal): any { return resolveAnimal(inst).determineAnimalSocialType(); }
-export function determineAnimalReproductionType(inst?: Animal): any { return resolveAnimal(inst).determineAnimalReproductionType(); }
-export function determineAnimalDevelopmentType(inst?: Animal): any { return resolveAnimal(inst).determineAnimalDevelopmentType(); }
-export function loadSpeciesProfile(species: string, inst?: Animal): any { return resolveAnimal(inst).loadSpeciesProfile(species); }
-export function applySpeciesDefaults(profile: any, inst?: Animal): void { resolveAnimal(inst).applySpeciesDefaults(profile); }
-export function validateSpeciesCompatibility(inst?: Animal): boolean { return resolveAnimal(inst).validateSpeciesCompatibility(); }
+export function determineAnimalDiet(inst?: Animal): ReturnType<Animal['determineAnimalDiet']> { return resolveAnimal(inst).determineAnimalDiet(); }
+export function determineAnimalLocomotion(inst?: Animal): ReturnType<Animal['determineAnimalLocomotion']> { return resolveAnimal(inst).determineAnimalLocomotion(); }
+export function determineAnimalBodyPlan(inst?: Animal): ReturnType<Animal['determineAnimalBodyPlan']> { return resolveAnimal(inst).determineAnimalBodyPlan(); }
+export function determineAnimalSymmetry(inst?: Animal): ReturnType<Animal['determineAnimalSymmetry']> { return resolveAnimal(inst).determineAnimalSymmetry(); }
+export function determineAnimalActivityPattern(inst?: Animal): ReturnType<Animal['determineAnimalActivityPattern']> { return resolveAnimal(inst).determineAnimalActivityPattern(); }
+export function determineAnimalSocialType(inst?: Animal): ReturnType<Animal['determineAnimalSocialType']> { return resolveAnimal(inst).determineAnimalSocialType(); }
+export function determineAnimalReproductionType(inst?: Animal): ReturnType<Animal['determineAnimalReproductionType']> { return resolveAnimal(inst).determineAnimalReproductionType(); }
+export function determineAnimalDevelopmentType(inst?: Animal): ReturnType<Animal['determineAnimalDevelopmentType']> { return resolveAnimal(inst).determineAnimalDevelopmentType(); }
+export function loadSpeciesProfile(species: string, inst?: Animal): ReturnType<Animal['loadSpeciesProfile']> { return resolveAnimal(inst).loadSpeciesProfile(species!); }
+export function applySpeciesDefaults(profile: Partial<SpeciesProfile>, inst?: Animal): void { resolveAnimal(inst).applySpeciesDefaults(profile); }
+export function validateSpeciesCompatibility(inst?: Animal): ReturnType<Animal['validateSpeciesCompatibility']> { return resolveAnimal(inst).validateSpeciesCompatibility(); }
 export function updateSpeciesCharacteristics(inst?: Animal): void { resolveAnimal(inst).updateSpeciesCharacteristics(); }
 
 // ============================================================================
 // 041–060. Mô hình 3D và ngoại hình động vật
 // ============================================================================
 
-export function loadAnimalModel(inst?: Animal): boolean { return resolveAnimal(inst).loadAnimalModel(); }
-export function createAnimalMesh(inst?: Animal): boolean { return resolveAnimal(inst).createAnimalMesh(); }
-export function createAnimalMaterial(inst?: Animal): boolean { return resolveAnimal(inst).createAnimalMaterial(); }
-export function loadAnimalTextures(inst?: Animal): boolean { return resolveAnimal(inst).loadAnimalTextures(); }
-export function loadAnimalNormalMaps(inst?: Animal): boolean { return resolveAnimal(inst).loadAnimalNormalMaps(); }
-export function loadAnimalRoughnessMaps(inst?: Animal): boolean { return resolveAnimal(inst).loadAnimalRoughnessMaps(); }
+export function loadAnimalModel(inst?: Animal): ReturnType<Animal['loadAnimalModel']> { return resolveAnimal(inst).loadAnimalModel(); }
+export function createAnimalMesh(inst?: Animal): ReturnType<Animal['createAnimalMesh']> { return resolveAnimal(inst).createAnimalMesh(); }
+export function createAnimalMaterial(inst?: Animal): ReturnType<Animal['createAnimalMaterial']> { return resolveAnimal(inst).createAnimalMaterial(); }
+export function loadAnimalTextures(inst?: Animal): ReturnType<Animal['loadAnimalTextures']> { return resolveAnimal(inst).loadAnimalTextures(); }
+export function loadAnimalNormalMaps(inst?: Animal): ReturnType<Animal['loadAnimalNormalMaps']> { return resolveAnimal(inst).loadAnimalNormalMaps(); }
+export function loadAnimalRoughnessMaps(inst?: Animal): ReturnType<Animal['loadAnimalRoughnessMaps']> { return resolveAnimal(inst).loadAnimalRoughnessMaps(); }
 export function updateAnimalAppearance(inst?: Animal): void { resolveAnimal(inst).updateAnimalAppearance(); }
 export function setAnimalBodyColor(color: string, inst?: Animal): void { resolveAnimal(inst).setAnimalBodyColor(color); }
-export function setAnimalPattern(pattern: any, inst?: Animal): void { resolveAnimal(inst).setAnimalPattern(pattern); }
-export function setAnimalScale(scale: any, inst?: Animal): void { resolveAnimal(inst).setAnimalScale(scale); }
+export function setAnimalPattern(pattern: AnimalAppearanceConfig['pattern'], inst?: Animal): void { resolveAnimal(inst).setAnimalPattern(pattern); }
+export function setAnimalScale(scale: Vec3 | number, inst?: Animal): void { resolveAnimal(inst).setAnimalScale(scale); }
 export function setAnimalLength(length: number, inst?: Animal): void { resolveAnimal(inst).setAnimalLength(length); }
 export function setAnimalHeight(height: number, inst?: Animal): void { resolveAnimal(inst).setAnimalHeight(height); }
 export function setAnimalBodyMass(mass: number, inst?: Animal): void { resolveAnimal(inst).setAnimalBodyMass(mass); }
@@ -126,8 +126,8 @@ export function updateAnimalVisibility(inst?: Animal): void { resolveAnimal(inst
 
 export function initializeAnimalSkeleton(inst?: Animal): void { resolveAnimal(inst).initializeAnimalSkeleton(); }
 export function updateAnimalSkeleton(inst?: Animal): void { resolveAnimal(inst).updateAnimalSkeleton(); }
-export function loadSkeletalRig(inst?: Animal): boolean { return resolveAnimal(inst).loadSkeletalRig(); }
-export function createSkeletalHierarchy(inst?: Animal): boolean { return resolveAnimal(inst).createSkeletalHierarchy(); }
+export function loadSkeletalRig(inst?: Animal): ReturnType<Animal['loadSkeletalRig']> { return resolveAnimal(inst).loadSkeletalRig(); }
+export function createSkeletalHierarchy(inst?: Animal): ReturnType<Animal['createSkeletalHierarchy']> { return resolveAnimal(inst).createSkeletalHierarchy(); }
 export function updateBoneTransforms(inst?: Animal): void { resolveAnimal(inst).updateBoneTransforms(); }
 export function updateRootBone(inst?: Animal): void { resolveAnimal(inst).updateRootBone(); }
 export function updateAxialSkeleton(inst?: Animal): void { resolveAnimal(inst).updateAxialSkeleton(); }
@@ -140,9 +140,9 @@ export function updatePelvicStructure(inst?: Animal): void { resolveAnimal(inst)
 export function updateLimbBones(inst?: Animal): void { resolveAnimal(inst).updateLimbBones(); }
 export function updateJointTransforms(inst?: Animal): void { resolveAnimal(inst).updateJointTransforms(); }
 export function constrainBoneRotations(inst?: Animal): void { resolveAnimal(inst).constrainBoneRotations(); }
-export function calculateBoneLengths(inst?: Animal): any { return resolveAnimal(inst).calculateBoneLengths(); }
-export function calculateJointAngles(inst?: Animal): any { return resolveAnimal(inst).calculateJointAngles(); }
-export function validateSkeletonHierarchy(inst?: Animal): boolean { return resolveAnimal(inst).validateSkeletonHierarchy(); }
+export function calculateBoneLengths(inst?: Animal): ReturnType<Animal['calculateBoneLengths']> { return resolveAnimal(inst).calculateBoneLengths(); }
+export function calculateJointAngles(inst?: Animal): ReturnType<Animal['calculateJointAngles']> { return resolveAnimal(inst).calculateJointAngles(); }
+export function validateSkeletonHierarchy(inst?: Animal): ReturnType<Animal['validateSkeletonHierarchy']> { return resolveAnimal(inst).validateSkeletonHierarchy(); }
 export function retargetAnimalSkeleton(inst?: Animal): void { resolveAnimal(inst).retargetAnimalSkeleton(); }
 
 // ============================================================================
@@ -151,8 +151,8 @@ export function retargetAnimalSkeleton(inst?: Animal): void { resolveAnimal(inst
 
 export function initializeAnimalMuscles(inst?: Animal): void { resolveAnimal(inst).initializeAnimalMuscles(); }
 export function updateMuscleActivation(muscleId?: string, level?: number, inst?: Animal): void { resolveAnimal(inst).updateMuscleActivation(muscleId, level); }
-export function calculateMuscleForce(muscleId?: string, inst?: Animal): number { return resolveAnimal(inst).calculateMuscleForce(muscleId); }
-export function calculateMuscleTension(muscleId?: string, inst?: Animal): number { return resolveAnimal(inst).calculateMuscleTension(muscleId); }
+export function calculateMuscleForce(muscleId?: string, inst?: Animal): ReturnType<Animal['calculateMuscleForce']> { return resolveAnimal(inst).calculateMuscleForce(muscleId!); }
+export function calculateMuscleTension(muscleId?: string, inst?: Animal): ReturnType<Animal['calculateMuscleTension']> { return resolveAnimal(inst).calculateMuscleTension(muscleId!); }
 export function updateMuscleDeformation(inst?: Animal): void { resolveAnimal(inst).updateMuscleDeformation(); }
 export function updateTendonStretch(inst?: Animal): void { resolveAnimal(inst).updateTendonStretch(); }
 export function updateLigamentConstraints(inst?: Animal): void { resolveAnimal(inst).updateLigamentConstraints(); }
@@ -167,7 +167,7 @@ export function updateShoulderMuscles(inst?: Animal): void { resolveAnimal(inst)
 export function updateHipMuscles(inst?: Animal): void { resolveAnimal(inst).updateHipMuscles(); }
 export function updateLimbMuscles(inst?: Animal): void { resolveAnimal(inst).updateLimbMuscles(); }
 export function updateJawMuscles(inst?: Animal): void { resolveAnimal(inst).updateJawMuscles(); }
-export function calculateMusculoskeletalLoad(inst?: Animal): number { return resolveAnimal(inst).calculateMusculoskeletalLoad(); }
+export function calculateMusculoskeletalLoad(inst?: Animal): ReturnType<Animal['calculateMusculoskeletalLoad']> { return resolveAnimal(inst).calculateMusculoskeletalLoad(); }
 export function resolveMuscleConstraints(inst?: Animal): void { resolveAnimal(inst).resolveMuscleConstraints(); }
 
 // ============================================================================
@@ -184,7 +184,7 @@ export function extendNeck(amount?: number, inst?: Animal): void { resolveAnimal
 export function retractNeck(amount?: number, inst?: Animal): void { resolveAnimal(inst).retractNeck(amount); }
 export function rotateNeck(angle?: number, inst?: Animal): void { resolveAnimal(inst).rotateNeck(angle); }
 export function stabilizeHead(inst?: Animal): void { resolveAnimal(inst).stabilizeHead(); }
-export function trackHeadTarget(target: any, inst?: Animal): void { resolveAnimal(inst).trackHeadTarget(target); }
+export function trackHeadTarget(target: Vec3, inst?: Animal): void { resolveAnimal(inst).trackHeadTarget(target); }
 export function updateSkullOrientation(inst?: Animal): void { resolveAnimal(inst).updateSkullOrientation(); }
 export function updateJawOpening(angle?: number, inst?: Animal): void { resolveAnimal(inst).updateJawOpening(angle); }
 export function updateJawClosing(inst?: Animal): void { resolveAnimal(inst).updateJawClosing(); }
@@ -201,23 +201,23 @@ export function blendHeadAnimations(inst?: Animal): void { resolveAnimal(inst).b
 
 export function initializeAnimalVision(inst?: Animal): void { resolveAnimal(inst).initializeAnimalVision(); }
 export function updateAnimalEyes(inst?: Animal): void { resolveAnimal(inst).updateAnimalEyes(); }
-export function lookAtTarget(target: any, inst?: Animal): void { resolveAnimal(inst).lookAtTarget(target); }
-export function moveLeftEye(direction: any, inst?: Animal): void { resolveAnimal(inst).moveLeftEye(direction); }
-export function moveRightEye(direction: any, inst?: Animal): void { resolveAnimal(inst).moveRightEye(direction); }
+export function lookAtTarget(target: Vec3, inst?: Animal): void { resolveAnimal(inst).lookAtTarget(target); }
+export function moveLeftEye(direction: Vec3, inst?: Animal): void { resolveAnimal(inst).moveLeftEye(direction); }
+export function moveRightEye(direction: Vec3, inst?: Animal): void { resolveAnimal(inst).moveRightEye(direction); }
 export function synchronizeEyeDirection(inst?: Animal): void { resolveAnimal(inst).synchronizeEyeDirection(); }
 export function blinkEyes(inst?: Animal): void { resolveAnimal(inst).blinkEyes(); }
 export function closeEyes(inst?: Animal): void { resolveAnimal(inst).closeEyes(); }
 export function openEyes(inst?: Animal): void { resolveAnimal(inst).openEyes(); }
 export function updateEyelids(inst?: Animal): void { resolveAnimal(inst).updateEyelids(); }
 export function updatePupilSize(size?: number, inst?: Animal): void { resolveAnimal(inst).updatePupilSize(size); }
-export function updatePupilDirection(direction?: any, inst?: Animal): void { resolveAnimal(inst).updatePupilDirection(direction); }
-export function trackMovingObject(target: any, inst?: Animal): void { resolveAnimal(inst).trackMovingObject(target); }
-export function detectVisualStimulus(inst?: Animal): boolean { return resolveAnimal(inst).detectVisualStimulus(); }
-export function calculateVisualField(inst?: Animal): number { return resolveAnimal(inst).calculateVisualField(); }
-export function calculateVisualDistance(inst?: Animal): number { return resolveAnimal(inst).calculateVisualDistance(); }
-export function detectMotionInVision(inst?: Animal): boolean { return resolveAnimal(inst).detectMotionInVision(); }
+export function updatePupilDirection(direction?: Vec3, inst?: Animal): void { resolveAnimal(inst).updatePupilDirection(direction); }
+export function trackMovingObject(target: Vec3, inst?: Animal): void { resolveAnimal(inst).trackMovingObject(target); }
+export function detectVisualStimulus(inst?: Animal): ReturnType<Animal['detectVisualStimulus']> { return resolveAnimal(inst).detectVisualStimulus(); }
+export function calculateVisualField(inst?: Animal): ReturnType<Animal['calculateVisualField']> { return resolveAnimal(inst).calculateVisualField(); }
+export function calculateVisualDistance(inst?: Animal): ReturnType<Animal['calculateVisualDistance']> { return resolveAnimal(inst).calculateVisualDistance(); }
+export function detectMotionInVision(inst?: Animal): ReturnType<Animal['detectMotionInVision']> { return resolveAnimal(inst).detectMotionInVision(); }
 export function updateNightVision(enabled?: boolean, inst?: Animal): void { resolveAnimal(inst).updateNightVision(enabled); }
-export function updateDepthPerception(inst?: Animal): number { return resolveAnimal(inst).updateDepthPerception(); }
+export function updateDepthPerception(inst?: Animal): ReturnType<Animal['updateDepthPerception']> { return resolveAnimal(inst).updateDepthPerception(); }
 export function updateVisualAttention(inst?: Animal): void { resolveAnimal(inst).updateVisualAttention(); }
 
 // ============================================================================
@@ -231,13 +231,13 @@ export function rotateRightEar(angle?: number, inst?: Animal): void { resolveAni
 export function raiseEars(inst?: Animal): void { resolveAnimal(inst).raiseEars(); }
 export function flattenEars(inst?: Animal): void { resolveAnimal(inst).flattenEars(); }
 export function twitchEars(inst?: Animal): void { resolveAnimal(inst).twitchEars(); }
-export function detectAuditoryStimulus(inst?: Animal): boolean { return resolveAnimal(inst).detectAuditoryStimulus(); }
-export function calculateSoundDirection(pos: any, inst?: Animal): any { return resolveAnimal(inst).calculateSoundDirection(pos); }
-export function calculateSoundDistance(pos: any, inst?: Animal): number { return resolveAnimal(inst).calculateSoundDistance(pos); }
-export function localizeSoundSource(pos: any, inst?: Animal): void { resolveAnimal(inst).localizeSoundSource(pos); }
+export function detectAuditoryStimulus(inst?: Animal): ReturnType<Animal['detectAuditoryStimulus']> { return resolveAnimal(inst).detectAuditoryStimulus(); }
+export function calculateSoundDirection(pos: Parameters<Animal['calculateSoundDirection']>[0], inst?: Animal): ReturnType<Animal['calculateSoundDirection']> { return resolveAnimal(inst).calculateSoundDirection(pos!); }
+export function calculateSoundDistance(pos: Parameters<Animal['calculateSoundDistance']>[0], inst?: Animal): ReturnType<Animal['calculateSoundDistance']> { return resolveAnimal(inst).calculateSoundDistance(pos!); }
+export function localizeSoundSource(pos: Vec3, inst?: Animal): void { resolveAnimal(inst).localizeSoundSource(pos); }
 export function filterEnvironmentalNoise(inst?: Animal): void { resolveAnimal(inst).filterEnvironmentalNoise(); }
-export function detectHighFrequencySound(inst?: Animal): boolean { return resolveAnimal(inst).detectHighFrequencySound(); }
-export function detectLowFrequencySound(inst?: Animal): boolean { return resolveAnimal(inst).detectLowFrequencySound(); }
+export function detectHighFrequencySound(inst?: Animal): ReturnType<Animal['detectHighFrequencySound']> { return resolveAnimal(inst).detectHighFrequencySound(); }
+export function detectLowFrequencySound(inst?: Animal): ReturnType<Animal['detectLowFrequencySound']> { return resolveAnimal(inst).detectLowFrequencySound(); }
 export function updateAuditoryAttention(inst?: Animal): void { resolveAnimal(inst).updateAuditoryAttention(); }
 export function reactToLoudNoise(inst?: Animal): void { resolveAnimal(inst).reactToLoudNoise(); }
 export function reactToFamiliarSound(inst?: Animal): void { resolveAnimal(inst).reactToFamiliarSound(); }
@@ -253,20 +253,20 @@ export function initializeAnimalOlfaction(inst?: Animal): void { resolveAnimal(i
 export function updateAnimalNose(inst?: Animal): void { resolveAnimal(inst).updateAnimalNose(); }
 export function sniffAir(inst?: Animal): void { resolveAnimal(inst).sniffAir(); }
 export function sniffGround(inst?: Animal): void { resolveAnimal(inst).sniffGround(); }
-export function sniffObject(obj: any, inst?: Animal): void { resolveAnimal(inst).sniffObject(obj); }
-export function detectScent(scent: any, inst?: Animal): boolean { return resolveAnimal(inst).detectScent(scent); }
-export function analyzeScentComposition(inst?: Animal): string { return resolveAnimal(inst).analyzeScentComposition(); }
-export function trackScentTrail(trail: any, inst?: Animal): void { resolveAnimal(inst).trackScentTrail(trail); }
-export function followScentSource(source: any, inst?: Animal): void { resolveAnimal(inst).followScentSource(source); }
-export function distinguishFamiliarScent(scent: any, inst?: Animal): boolean { return resolveAnimal(inst).distinguishFamiliarScent(scent); }
-export function detectFoodOdor(inst?: Animal): boolean { return resolveAnimal(inst).detectFoodOdor(); }
-export function detectPredatorOdor(inst?: Animal): boolean { return resolveAnimal(inst).detectPredatorOdor(); }
-export function detectMateOdor(inst?: Animal): boolean { return resolveAnimal(inst).detectMateOdor(); }
-export function detectTerritoryScent(inst?: Animal): boolean { return resolveAnimal(inst).detectTerritoryScent(); }
+export function sniffObject(obj: unknown, inst?: Animal): void { resolveAnimal(inst).sniffObject(obj); }
+export function detectScent(scent: Parameters<Animal['detectScent']>[0], inst?: Animal): ReturnType<Animal['detectScent']> { return resolveAnimal(inst).detectScent(scent!); }
+export function analyzeScentComposition(inst?: Animal): ReturnType<Animal['analyzeScentComposition']> { return resolveAnimal(inst).analyzeScentComposition(); }
+export function trackScentTrail(trail: unknown, inst?: Animal): void { resolveAnimal(inst).trackScentTrail(trail); }
+export function followScentSource(source: unknown, inst?: Animal): void { resolveAnimal(inst).followScentSource(source); }
+export function distinguishFamiliarScent(scent: Parameters<Animal['distinguishFamiliarScent']>[0], inst?: Animal): ReturnType<Animal['distinguishFamiliarScent']> { return resolveAnimal(inst).distinguishFamiliarScent(scent!); }
+export function detectFoodOdor(inst?: Animal): ReturnType<Animal['detectFoodOdor']> { return resolveAnimal(inst).detectFoodOdor(); }
+export function detectPredatorOdor(inst?: Animal): ReturnType<Animal['detectPredatorOdor']> { return resolveAnimal(inst).detectPredatorOdor(); }
+export function detectMateOdor(inst?: Animal): ReturnType<Animal['detectMateOdor']> { return resolveAnimal(inst).detectMateOdor(); }
+export function detectTerritoryScent(inst?: Animal): ReturnType<Animal['detectTerritoryScent']> { return resolveAnimal(inst).detectTerritoryScent(); }
 export function updateNostrilMovement(inst?: Animal): void { resolveAnimal(inst).updateNostrilMovement(); }
 export function updateOlfactoryMemory(inst?: Animal): void { resolveAnimal(inst).updateOlfactoryMemory(); }
-export function detectChemicalStimulus(inst?: Animal): boolean { return resolveAnimal(inst).detectChemicalStimulus(); }
-export function compareScentIntensity(inst?: Animal): number { return resolveAnimal(inst).compareScentIntensity(); }
+export function detectChemicalStimulus(inst?: Animal): ReturnType<Animal['detectChemicalStimulus']> { return resolveAnimal(inst).detectChemicalStimulus(); }
+export function compareScentIntensity(inst?: Animal): ReturnType<Animal['compareScentIntensity']> { return resolveAnimal(inst).compareScentIntensity(); }
 export function updateScentInvestigation(inst?: Animal): void { resolveAnimal(inst).updateScentInvestigation(); }
 export function blendSniffingAnimation(inst?: Animal): void { resolveAnimal(inst).blendSniffingAnimation(); }
 
@@ -285,8 +285,8 @@ export function lickPaw(inst?: Animal): void { resolveAnimal(inst).lickPaw(); }
 export function lickWaterSurface(inst?: Animal): void { resolveAnimal(inst).lickWaterSurface(); }
 export function exposeTeeth(inst?: Animal): void { resolveAnimal(inst).exposeTeeth(); }
 export function updateToothDisplay(inst?: Animal): void { resolveAnimal(inst).updateToothDisplay(); }
-export function biteFood(food: any, inst?: Animal): void { resolveAnimal(inst).biteFood(food); }
-export function gripFoodWithMouth(food: any, inst?: Animal): void { resolveAnimal(inst).gripFoodWithMouth(food); }
+export function biteFood(food: unknown, inst?: Animal): void { resolveAnimal(inst).biteFood(food); }
+export function gripFoodWithMouth(food: unknown, inst?: Animal): void { resolveAnimal(inst).gripFoodWithMouth(food); }
 export function chewFood(inst?: Animal): void { resolveAnimal(inst).chewFood(); }
 export function swallowFood(inst?: Animal): void { resolveAnimal(inst).swallowFood(); }
 export function regurgitateFood(inst?: Animal): void { resolveAnimal(inst).regurgitateFood(); }
@@ -314,8 +314,8 @@ export function updateMammalDigits(inst?: Animal): void { resolveAnimal(inst).up
 export function updateMammalJointLimits(inst?: Animal): void { resolveAnimal(inst).updateMammalJointLimits(); }
 export function updateMammalBodyFlexion(inst?: Animal): void { resolveAnimal(inst).updateMammalBodyFlexion(); }
 export function updateMammalSpinalRotation(inst?: Animal): void { resolveAnimal(inst).updateMammalSpinalRotation(); }
-export function calculateMammalStride(inst?: Animal): number { return resolveAnimal(inst).calculateMammalStride(); }
-export function calculateMammalLimbReach(inst?: Animal): number { return resolveAnimal(inst).calculateMammalLimbReach(); }
+export function calculateMammalStride(inst?: Animal): ReturnType<Animal['calculateMammalStride']> { return resolveAnimal(inst).calculateMammalStride(); }
+export function calculateMammalLimbReach(inst?: Animal): ReturnType<Animal['calculateMammalLimbReach']> { return resolveAnimal(inst).calculateMammalLimbReach(); }
 export function maintainMammalPosture(inst?: Animal): void { resolveAnimal(inst).maintainMammalPosture(); }
 export function updateMammalMuscleRig(inst?: Animal): void { resolveAnimal(inst).updateMammalMuscleRig(); }
 export function blendMammalLocomotion(inst?: Animal): void { resolveAnimal(inst).blendMammalLocomotion(); }
@@ -385,9 +385,9 @@ export function shakeHeadAndNeck(inst?: Animal): void { resolveAnimal(inst).shak
 export function scratchWithHindLeg(inst?: Animal): void { resolveAnimal(inst).scratchWithHindLeg(); }
 export function scratchWithForepaw(inst?: Animal): void { resolveAnimal(inst).scratchWithForepaw(); }
 export function groomFur(inst?: Animal): void { resolveAnimal(inst).groomFur(); }
-export function groomAnotherAnimal(target: any, inst?: Animal): void { resolveAnimal(inst).groomAnotherAnimal(target); }
+export function groomAnotherAnimal(target: unknown, inst?: Animal): void { resolveAnimal(inst).groomAnotherAnimal(target); }
 export function cleanFaceWithPaw(inst?: Animal): void { resolveAnimal(inst).cleanFaceWithPaw(); }
-export function rubBodyAgainstObject(obj: any, inst?: Animal): void { resolveAnimal(inst).rubBodyAgainstObject(obj); }
+export function rubBodyAgainstObject(obj: unknown, inst?: Animal): void { resolveAnimal(inst).rubBodyAgainstObject(obj); }
 export function sniffGroundWhileWalking(inst?: Animal): void { resolveAnimal(inst).sniffGroundWhileWalking(); }
 export function raiseBodyToInvestigate(inst?: Animal): void { resolveAnimal(inst).raiseBodyToInvestigate(); }
 export function lowerBodyToRest(inst?: Animal): void { resolveAnimal(inst).lowerBodyToRest(); }
@@ -434,7 +434,7 @@ export function adjustWingAmplitude(amp?: number, inst?: Animal): void { resolve
 export function adjustWingFrequency(freq?: number, inst?: Animal): void { resolveAnimal(inst).adjustWingFrequency(freq); }
 export function glideForward(inst?: Animal): void { resolveAnimal(inst).glideForward(); }
 export function soarOnThermals(inst?: Animal): void { resolveAnimal(inst).soarOnThermals(); }
-export function diveTowardTarget(target: any, inst?: Animal): void { resolveAnimal(inst).diveTowardTarget(target); }
+export function diveTowardTarget(target: unknown, inst?: Animal): void { resolveAnimal(inst).diveTowardTarget(target); }
 export function climbDuringFlight(inst?: Animal): void { resolveAnimal(inst).climbDuringFlight(); }
 export function bankLeftDuringFlight(inst?: Animal): void { resolveAnimal(inst).bankLeftDuringFlight(); }
 export function bankRightDuringFlight(inst?: Animal): void { resolveAnimal(inst).bankRightDuringFlight(); }
@@ -443,23 +443,23 @@ export function hoverLikeBird(inst?: Animal): void { resolveAnimal(inst).hoverLi
 export function takeOffFromGround(inst?: Animal): void { resolveAnimal(inst).takeOffFromGround(); }
 export function takeOffFromWater(inst?: Animal): void { resolveAnimal(inst).takeOffFromWater(); }
 export function landOnGround(inst?: Animal): void { resolveAnimal(inst).landOnGround(); }
-export function landOnBranch(branch: any, inst?: Animal): void { resolveAnimal(inst).landOnBranch(branch); }
+export function landOnBranch(branch: unknown, inst?: Animal): void { resolveAnimal(inst).landOnBranch(branch); }
 
 // ============================================================================
 // 321–340. Chim: đậu, đi, kiếm ăn và giao tiếp
 // ============================================================================
 
-export function perchOnBranch(branch: any, inst?: Animal): void { resolveAnimal(inst).perchOnBranch(branch); }
+export function perchOnBranch(branch: unknown, inst?: Animal): void { resolveAnimal(inst).perchOnBranch(branch); }
 export function releasePerchGrip(inst?: Animal): void { resolveAnimal(inst).releasePerchGrip(); }
 export function adjustPerchingBalance(inst?: Animal): void { resolveAnimal(inst).adjustPerchingBalance(); }
 export function walkLikeBird(inst?: Animal): void { resolveAnimal(inst).walkLikeBird(); }
 export function hopLikeBird(inst?: Animal): void { resolveAnimal(inst).hopLikeBird(); }
 export function runLikeBird(inst?: Animal): void { resolveAnimal(inst).runLikeBird(); }
 export function peckAtGround(inst?: Animal): void { resolveAnimal(inst).peckAtGround(); }
-export function peckAtFood(food: any, inst?: Animal): void { resolveAnimal(inst).peckAtFood(food); }
-export function probeWithBeak(target: any, inst?: Animal): void { resolveAnimal(inst).probeWithBeak(target); }
-export function scoopFoodWithBeak(food: any, inst?: Animal): void { resolveAnimal(inst).scoopFoodWithBeak(food); }
-export function swallowPrey(prey: any, inst?: Animal): void { resolveAnimal(inst).swallowPrey(prey); }
+export function peckAtFood(food: unknown, inst?: Animal): void { resolveAnimal(inst).peckAtFood(food); }
+export function probeWithBeak(target: unknown, inst?: Animal): void { resolveAnimal(inst).probeWithBeak(target); }
+export function scoopFoodWithBeak(food: unknown, inst?: Animal): void { resolveAnimal(inst).scoopFoodWithBeak(food); }
+export function swallowPrey(prey: unknown, inst?: Animal): void { resolveAnimal(inst).swallowPrey(prey); }
 export function drinkLikeBird(inst?: Animal): void { resolveAnimal(inst).drinkLikeBird(); }
 export function preenFeathers(inst?: Animal): void { resolveAnimal(inst).preenFeathers(); }
 export function cleanBeak(inst?: Animal): void { resolveAnimal(inst).cleanBeak(); }
@@ -532,16 +532,16 @@ export function regulateGillMovement(inst?: Animal): void { resolveAnimal(inst).
 export function openFishMouth(inst?: Animal): void { resolveAnimal(inst).openFishMouth(); }
 export function closeFishMouth(inst?: Animal): void { resolveAnimal(inst).closeFishMouth(); }
 export function flareFishGills(inst?: Animal): void { resolveAnimal(inst).flareFishGills(); }
-export function detectWaterMovement(inst?: Animal): boolean { return resolveAnimal(inst).detectWaterMovement(); }
-export function detectWaterPressure(inst?: Animal): number { return resolveAnimal(inst).detectWaterPressure(); }
-export function senseWaterTemperature(inst?: Animal): number { return resolveAnimal(inst).senseWaterTemperature(); }
-export function detectWaterborneChemicals(inst?: Animal): boolean { return resolveAnimal(inst).detectWaterborneChemicals(); }
+export function detectWaterMovement(inst?: Animal): ReturnType<Animal['detectWaterMovement']> { return resolveAnimal(inst).detectWaterMovement(); }
+export function detectWaterPressure(inst?: Animal): ReturnType<Animal['detectWaterPressure']> { return resolveAnimal(inst).detectWaterPressure(); }
+export function senseWaterTemperature(inst?: Animal): ReturnType<Animal['senseWaterTemperature']> { return resolveAnimal(inst).senseWaterTemperature(); }
+export function detectWaterborneChemicals(inst?: Animal): ReturnType<Animal['detectWaterborneChemicals']> { return resolveAnimal(inst).detectWaterborneChemicals(); }
 export function schoolWithNearbyFish(inst?: Animal): void { resolveAnimal(inst).schoolWithNearbyFish(); }
 export function maintainSchoolSpacing(inst?: Animal): void { resolveAnimal(inst).maintainSchoolSpacing(); }
-export function pursueAquaticPrey(prey: any, inst?: Animal): void { resolveAnimal(inst).pursueAquaticPrey(prey); }
-export function captureAquaticPrey(prey: any, inst?: Animal): void { resolveAnimal(inst).captureAquaticPrey(prey); }
-export function grazeAquaticPlants(plants: any, inst?: Animal): void { resolveAnimal(inst).grazeAquaticPlants(plants); }
-export function inspectAquaticObject(obj: any, inst?: Animal): void { resolveAnimal(inst).inspectAquaticObject(obj); }
+export function pursueAquaticPrey(prey: unknown, inst?: Animal): void { resolveAnimal(inst).pursueAquaticPrey(prey); }
+export function captureAquaticPrey(prey: unknown, inst?: Animal): void { resolveAnimal(inst).captureAquaticPrey(prey); }
+export function grazeAquaticPlants(plants: unknown, inst?: Animal): void { resolveAnimal(inst).grazeAquaticPlants(plants); }
+export function inspectAquaticObject(obj: unknown, inst?: Animal): void { resolveAnimal(inst).inspectAquaticObject(obj); }
 export function restNearAquaticSubstrate(inst?: Animal): void { resolveAnimal(inst).restNearAquaticSubstrate(); }
 export function performFishIdleMotion(inst?: Animal): void { resolveAnimal(inst).performFishIdleMotion(); }
 
@@ -566,7 +566,7 @@ export function updateReptileScutePattern(inst?: Animal): void { resolveAnimal(i
 export function updateReptileBodyFlexion(inst?: Animal): void { resolveAnimal(inst).updateReptileBodyFlexion(); }
 export function updateReptileSpinalWave(inst?: Animal): void { resolveAnimal(inst).updateReptileSpinalWave(); }
 export function updateReptileJointLimits(inst?: Animal): void { resolveAnimal(inst).updateReptileJointLimits(); }
-export function calculateReptileStride(inst?: Animal): number { return resolveAnimal(inst).calculateReptileStride(); }
+export function calculateReptileStride(inst?: Animal): ReturnType<Animal['calculateReptileStride']> { return resolveAnimal(inst).calculateReptileStride(); }
 export function stabilizeReptileBody(inst?: Animal): void { resolveAnimal(inst).stabilizeReptileBody(); }
 export function blendReptileLocomotion(inst?: Animal): void { resolveAnimal(inst).blendReptileLocomotion(); }
 
@@ -590,7 +590,7 @@ export function performSidewinding(inst?: Animal): void { resolveAnimal(inst).pe
 export function anchorSnakeBody(inst?: Animal): void { resolveAnimal(inst).anchorSnakeBody(); }
 export function extendSnakeBodyForward(inst?: Animal): void { resolveAnimal(inst).extendSnakeBodyForward(); }
 export function contractSnakeBody(inst?: Animal): void { resolveAnimal(inst).contractSnakeBody(); }
-export function strikeAtTarget(target: any, inst?: Animal): void { resolveAnimal(inst).strikeAtTarget(target); }
+export function strikeAtTarget(target: unknown, inst?: Animal): void { resolveAnimal(inst).strikeAtTarget(target); }
 export function recoilAfterStrike(inst?: Animal): void { resolveAnimal(inst).recoilAfterStrike(); }
 export function coilSnakeBody(inst?: Animal): void { resolveAnimal(inst).coilSnakeBody(); }
 export function uncoilSnakeBody(inst?: Animal): void { resolveAnimal(inst).uncoilSnakeBody(); }
@@ -605,8 +605,8 @@ export function sampleAirWithTongue(inst?: Animal): void { resolveAnimal(inst).s
 export function openReptileJaw(inst?: Animal): void { resolveAnimal(inst).openReptileJaw(); }
 export function closeReptileJaw(inst?: Animal): void { resolveAnimal(inst).closeReptileJaw(); }
 export function performJawGape(inst?: Animal): void { resolveAnimal(inst).performJawGape(); }
-export function captureReptilePrey(prey: any, inst?: Animal): void { resolveAnimal(inst).captureReptilePrey(prey); }
-export function swallowReptilePrey(prey: any, inst?: Animal): void { resolveAnimal(inst).swallowReptilePrey(prey); }
+export function captureReptilePrey(prey: unknown, inst?: Animal): void { resolveAnimal(inst).captureReptilePrey(prey); }
+export function swallowReptilePrey(prey: unknown, inst?: Animal): void { resolveAnimal(inst).swallowReptilePrey(prey); }
 export function regulateBodyTemperature(inst?: Animal): void { resolveAnimal(inst).regulateBodyTemperature(); }
 export function baskInSunlight(inst?: Animal): void { resolveAnimal(inst).baskInSunlight(); }
 export function seekShade(inst?: Animal): void { resolveAnimal(inst).seekShade(); }
@@ -638,9 +638,9 @@ export function updateAmphibianTail(inst?: Animal): void { resolveAnimal(inst).u
 export function updateAmphibianSkin(inst?: Animal): void { resolveAnimal(inst).updateAmphibianSkin(); }
 export function updateAmphibianMoisture(inst?: Animal): void { resolveAnimal(inst).updateAmphibianMoisture(); }
 export function updateAmphibianBodyFlexion(inst?: Animal): void { resolveAnimal(inst).updateAmphibianBodyFlexion(); }
-export function calculateAmphibianStride(inst?: Animal): number { return resolveAnimal(inst).calculateAmphibianStride(); }
-export function calculateFrogJumpForce(inst?: Animal): number { return resolveAnimal(inst).calculateFrogJumpForce(); }
-export function calculateFrogLandingPose(inst?: Animal): any { return resolveAnimal(inst).calculateFrogLandingPose(); }
+export function calculateAmphibianStride(inst?: Animal): ReturnType<Animal['calculateAmphibianStride']> { return resolveAnimal(inst).calculateAmphibianStride(); }
+export function calculateFrogJumpForce(inst?: Animal): ReturnType<Animal['calculateFrogJumpForce']> { return resolveAnimal(inst).calculateFrogJumpForce(); }
+export function calculateFrogLandingPose(inst?: Animal): ReturnType<Animal['calculateFrogLandingPose']> { return resolveAnimal(inst).calculateFrogLandingPose(); }
 export function maintainAmphibianBalance(inst?: Animal): void { resolveAnimal(inst).maintainAmphibianBalance(); }
 export function blendAmphibianGait(inst?: Animal): void { resolveAnimal(inst).blendAmphibianGait(); }
 export function updateAmphibianPosture(inst?: Animal): void { resolveAnimal(inst).updateAmphibianPosture(); }
@@ -664,8 +664,8 @@ export function paddleWithHindlimbs(inst?: Animal): void { resolveAnimal(inst).p
 export function undulateSalamanderTail(inst?: Animal): void { resolveAnimal(inst).undulateSalamanderTail(); }
 export function climbWetSurface(inst?: Animal): void { resolveAnimal(inst).climbWetSurface(); }
 export function flickFrogTongue(inst?: Animal): void { resolveAnimal(inst).flickFrogTongue(); }
-export function captureInsectWithTongue(insect: any, inst?: Animal): void { resolveAnimal(inst).captureInsectWithTongue(insect); }
-export function swallowSmallPrey(prey: any, inst?: Animal): void { resolveAnimal(inst).swallowSmallPrey(prey); }
+export function captureInsectWithTongue(insect: unknown, inst?: Animal): void { resolveAnimal(inst).captureInsectWithTongue(insect); }
+export function swallowSmallPrey(prey: unknown, inst?: Animal): void { resolveAnimal(inst).swallowSmallPrey(prey); }
 export function breatheThroughSkin(inst?: Animal): void { resolveAnimal(inst).breatheThroughSkin(); }
 export function enterWaterFromLand(inst?: Animal): void { resolveAnimal(inst).enterWaterFromLand(); }
 export function performAmphibianIdleMotion(inst?: Animal): void { resolveAnimal(inst).performAmphibianIdleMotion(); }
@@ -728,10 +728,10 @@ export function initializeInsectFlight(inst?: Animal): void { resolveAnimal(inst
 export function spreadInsectWings(inst?: Animal): void { resolveAnimal(inst).spreadInsectWings(); }
 export function foldInsectWings(inst?: Animal): void { resolveAnimal(inst).foldInsectWings(); }
 export function flapInsectWings(inst?: Animal): void { resolveAnimal(inst).flapInsectWings(); }
-export function calculateWingbeatFrequency(inst?: Animal): number { return resolveAnimal(inst).calculateWingbeatFrequency(); }
-export function calculateWingbeatAmplitude(inst?: Animal): number { return resolveAnimal(inst).calculateWingbeatAmplitude(); }
+export function calculateWingbeatFrequency(inst?: Animal): ReturnType<Animal['calculateWingbeatFrequency']> { return resolveAnimal(inst).calculateWingbeatFrequency(); }
+export function calculateWingbeatAmplitude(inst?: Animal): ReturnType<Animal['calculateWingbeatAmplitude']> { return resolveAnimal(inst).calculateWingbeatAmplitude(); }
 export function synchronizeWingPairs(inst?: Animal): void { resolveAnimal(inst).synchronizeWingPairs(); }
-export function generateInsectLift(inst?: Animal): number { return resolveAnimal(inst).generateInsectLift(); }
+export function generateInsectLift(inst?: Animal): ReturnType<Animal['generateInsectLift']> { return resolveAnimal(inst).generateInsectLift(); }
 export function adjustInsectFlightDirection(inst?: Animal): void { resolveAnimal(inst).adjustInsectFlightDirection(); }
 export function accelerateInsectFlight(inst?: Animal): void { resolveAnimal(inst).accelerateInsectFlight(); }
 export function decelerateInsectFlight(inst?: Animal): void { resolveAnimal(inst).decelerateInsectFlight(); }
@@ -749,20 +749,20 @@ export function blendInsectFlightModes(inst?: Animal): void { resolveAnimal(inst
 // 561–580. Côn trùng: kiếm ăn và hành vi xã hội
 // ============================================================================
 
-export function detectFoodWithAntennae(inst?: Animal): boolean { return resolveAnimal(inst).detectFoodWithAntennae(); }
+export function detectFoodWithAntennae(inst?: Animal): ReturnType<Animal['detectFoodWithAntennae']> { return resolveAnimal(inst).detectFoodWithAntennae(); }
 export function inspectFoodWithPalps(inst?: Animal): void { resolveAnimal(inst).inspectFoodWithPalps(); }
 export function feedOnNectar(inst?: Animal): void { resolveAnimal(inst).feedOnNectar(); }
 export function chewPlantMaterial(inst?: Animal): void { resolveAnimal(inst).chewPlantMaterial(); }
-export function bitePlantLeaf(leaf: any, inst?: Animal): void { resolveAnimal(inst).bitePlantLeaf(leaf); }
-export function probeFoodSource(source: any, inst?: Animal): void { resolveAnimal(inst).probeFoodSource(source); }
-export function followPheromoneTrail(trail: any, inst?: Animal): void { resolveAnimal(inst).followPheromoneTrail(trail); }
+export function bitePlantLeaf(leaf: unknown, inst?: Animal): void { resolveAnimal(inst).bitePlantLeaf(leaf); }
+export function probeFoodSource(source: unknown, inst?: Animal): void { resolveAnimal(inst).probeFoodSource(source); }
+export function followPheromoneTrail(trail: unknown, inst?: Animal): void { resolveAnimal(inst).followPheromoneTrail(trail); }
 export function depositPheromone(type: string, inst?: Animal): void { resolveAnimal(inst).depositPheromone(type); }
-export function detectColonyPheromone(inst?: Animal): boolean { return resolveAnimal(inst).detectColonyPheromone(); }
-export function recruitColonyMembers(target: any, inst?: Animal): void { resolveAnimal(inst).recruitColonyMembers(target); }
-export function carrySmallObject(object: any, inst?: Animal): void { resolveAnimal(inst).carrySmallObject(object); }
-export function transportFoodToNest(food: any, inst?: Animal): void { resolveAnimal(inst).transportFoodToNest(food); }
+export function detectColonyPheromone(inst?: Animal): ReturnType<Animal['detectColonyPheromone']> { return resolveAnimal(inst).detectColonyPheromone(); }
+export function recruitColonyMembers(target: unknown, inst?: Animal): void { resolveAnimal(inst).recruitColonyMembers(target); }
+export function carrySmallObject(object: unknown, inst?: Animal): void { resolveAnimal(inst).carrySmallObject(object); }
+export function transportFoodToNest(food: unknown, inst?: Animal): void { resolveAnimal(inst).transportFoodToNest(food); }
 export function digInsectBurrow(inst?: Animal): void { resolveAnimal(inst).digInsectBurrow(); }
-export function constructNestMaterial(material: any, inst?: Animal): void { resolveAnimal(inst).constructNestMaterial(material); }
+export function constructNestMaterial(material: unknown, inst?: Animal): void { resolveAnimal(inst).constructNestMaterial(material); }
 export function groomBodySurface(inst?: Animal): void { resolveAnimal(inst).groomBodySurface(); }
 export function groomAntennae(inst?: Animal): void { resolveAnimal(inst).groomAntennae(); }
 export function performMatingDisplay(inst?: Animal): void { resolveAnimal(inst).performMatingDisplay(); }
@@ -788,8 +788,8 @@ export function moveArachnidLegPairThree(inst?: Animal): void { resolveAnimal(in
 export function moveArachnidLegPairFour(inst?: Animal): void { resolveAnimal(inst).moveArachnidLegPairFour(); }
 export function coordinateArachnidGait(inst?: Animal): void { resolveAnimal(inst).coordinateArachnidGait(); }
 export function climbUsingArachnidLegs(inst?: Animal): void { resolveAnimal(inst).climbUsingArachnidLegs(); }
-export function detectVibrationThroughLegs(inst?: Animal): number { return resolveAnimal(inst).detectVibrationThroughLegs(); }
-export function produceSilkThread(inst?: Animal): any { return resolveAnimal(inst).produceSilkThread(); }
+export function detectVibrationThroughLegs(inst?: Animal): ReturnType<Animal['detectVibrationThroughLegs']> { return resolveAnimal(inst).detectVibrationThroughLegs(); }
+export function produceSilkThread(inst?: Animal): ReturnType<Animal['produceSilkThread']> { return resolveAnimal(inst).produceSilkThread(); }
 export function attachSilkAnchor(inst?: Animal): void { resolveAnimal(inst).attachSilkAnchor(); }
 export function constructSpiderWeb(inst?: Animal): void { resolveAnimal(inst).constructSpiderWeb(); }
 export function traverseSpiderWeb(inst?: Animal): void { resolveAnimal(inst).traverseSpiderWeb(); }
@@ -851,19 +851,19 @@ export function performSoftBodiedAnimalIdleMotion(inst?: Animal): void { resolve
 
 export function initializeAnimalPhysiology(inst?: Animal): void { resolveAnimal(inst).initializeAnimalPhysiology(); }
 export function updateRespiration(deltaTime: number, inst?: Animal): void { resolveAnimal(inst).updateRespiration(deltaTime); }
-export function calculateRespiratoryRate(inst?: Animal): number { return resolveAnimal(inst).calculateRespiratoryRate(); }
+export function calculateRespiratoryRate(inst?: Animal): ReturnType<Animal['calculateRespiratoryRate']> { return resolveAnimal(inst).calculateRespiratoryRate(); }
 export function updateLungExpansion(inst?: Animal): void { resolveAnimal(inst).updateLungExpansion(); }
 export function updateLungContraction(inst?: Animal): void { resolveAnimal(inst).updateLungContraction(); }
 export function updateGillVentilation(inst?: Animal): void { resolveAnimal(inst).updateGillVentilation(); }
 export function updateTrachealVentilation(inst?: Animal): void { resolveAnimal(inst).updateTrachealVentilation(); }
-export function updateHeartRate(inst?: Animal): number { return resolveAnimal(inst).updateHeartRate(); }
+export function updateHeartRate(inst?: Animal): ReturnType<Animal['updateHeartRate']> { return resolveAnimal(inst).updateHeartRate(); }
 export function updateBloodCirculation(inst?: Animal): void { resolveAnimal(inst).updateBloodCirculation(); }
 export function regulateOxygenDemand(inst?: Animal): void { resolveAnimal(inst).regulateOxygenDemand(); }
 export function regulateCarbonDioxideRemoval(inst?: Animal): void { resolveAnimal(inst).regulateCarbonDioxideRemoval(); }
 export function regulateWaterBalance(inst?: Animal): void { resolveAnimal(inst).regulateWaterBalance(); }
 export function regulateElectrolyteBalance(inst?: Animal): void { resolveAnimal(inst).regulateElectrolyteBalance(); }
 export function regulateEnergyConsumption(inst?: Animal): void { resolveAnimal(inst).regulateEnergyConsumption(); }
-export function calculateMetabolicRate(inst?: Animal): number { return resolveAnimal(inst).calculateMetabolicRate(); }
+export function calculateMetabolicRate(inst?: Animal): ReturnType<Animal['calculateMetabolicRate']> { return resolveAnimal(inst).calculateMetabolicRate(); }
 export function updateDigestiveActivity(inst?: Animal): void { resolveAnimal(inst).updateDigestiveActivity(); }
 export function updateExcretoryActivity(inst?: Animal): void { resolveAnimal(inst).updateExcretoryActivity(); }
 export function updatePhysiologicalStress(inst?: Animal): void { resolveAnimal(inst).updatePhysiologicalStress(); }
@@ -874,24 +874,24 @@ export function recoverPhysiologicalHomeostasis(inst?: Animal): void { resolveAn
 // ============================================================================
 
 export function initializeAnimalFeeding(inst?: Animal): void { resolveAnimal(inst).initializeAnimalFeeding(); }
-export function detectPotentialFood(inst?: Animal): boolean { return resolveAnimal(inst).detectPotentialFood(); }
-export function classifyFoodSource(inst?: Animal): string { return resolveAnimal(inst).classifyFoodSource(); }
-export function evaluateFoodSafety(inst?: Animal): boolean { return resolveAnimal(inst).evaluateFoodSafety(); }
-export function approachFoodSource(source: any, inst?: Animal): void { resolveAnimal(inst).approachFoodSource(source); }
-export function investigateFoodSource(source: any, inst?: Animal): void { resolveAnimal(inst).investigateFoodSource(source); }
-export function selectFoodItem(items: any[], inst?: Animal): any { return resolveAnimal(inst).selectFoodItem(items); }
-export function captureFoodItem(item: any, inst?: Animal): void { resolveAnimal(inst).captureFoodItem(item); }
-export function manipulateFoodItem(item: any, inst?: Animal): void { resolveAnimal(inst).manipulateFoodItem(item); }
-export function ingestFoodItem(item: any, inst?: Animal): void { resolveAnimal(inst).ingestFoodItem(item); }
+export function detectPotentialFood(inst?: Animal): ReturnType<Animal['detectPotentialFood']> { return resolveAnimal(inst).detectPotentialFood(); }
+export function classifyFoodSource(inst?: Animal): ReturnType<Animal['classifyFoodSource']> { return resolveAnimal(inst).classifyFoodSource(); }
+export function evaluateFoodSafety(inst?: Animal): ReturnType<Animal['evaluateFoodSafety']> { return resolveAnimal(inst).evaluateFoodSafety(); }
+export function approachFoodSource(source: unknown, inst?: Animal): void { resolveAnimal(inst).approachFoodSource(source); }
+export function investigateFoodSource(source: unknown, inst?: Animal): void { resolveAnimal(inst).investigateFoodSource(source); }
+export function selectFoodItem(items: unknown[], inst?: Animal): ReturnType<Animal['selectFoodItem']> { return resolveAnimal(inst).selectFoodItem(items!); }
+export function captureFoodItem(item: unknown, inst?: Animal): void { resolveAnimal(inst).captureFoodItem(item); }
+export function manipulateFoodItem(item: unknown, inst?: Animal): void { resolveAnimal(inst).manipulateFoodItem(item); }
+export function ingestFoodItem(item: unknown, inst?: Animal): void { resolveAnimal(inst).ingestFoodItem(item); }
 export function processFoodInMouth(inst?: Animal): void { resolveAnimal(inst).processFoodInMouth(); }
 export function swallowFoodBolus(inst?: Animal): void { resolveAnimal(inst).swallowFoodBolus(); }
-export function trackPreyMovement(prey: any, inst?: Animal): void { resolveAnimal(inst).trackPreyMovement(prey); }
-export function stalkPrey(prey: any, inst?: Animal): void { resolveAnimal(inst).stalkPrey(prey); }
-export function pursuePrey(prey: any, inst?: Animal): void { resolveAnimal(inst).pursuePrey(prey); }
-export function interceptPrey(prey: any, inst?: Animal): void { resolveAnimal(inst).interceptPrey(prey); }
-export function executePredatoryStrike(prey: any, inst?: Animal): void { resolveAnimal(inst).executePredatoryStrike(prey); }
-export function secureCapturedPrey(prey: any, inst?: Animal): void { resolveAnimal(inst).secureCapturedPrey(prey); }
-export function shareFoodWithGroup(group: any, inst?: Animal): void { resolveAnimal(inst).shareFoodWithGroup(group); }
+export function trackPreyMovement(prey: unknown, inst?: Animal): void { resolveAnimal(inst).trackPreyMovement(prey); }
+export function stalkPrey(prey: unknown, inst?: Animal): void { resolveAnimal(inst).stalkPrey(prey); }
+export function pursuePrey(prey: unknown, inst?: Animal): void { resolveAnimal(inst).pursuePrey(prey); }
+export function interceptPrey(prey: unknown, inst?: Animal): void { resolveAnimal(inst).interceptPrey(prey); }
+export function executePredatoryStrike(prey: unknown, inst?: Animal): void { resolveAnimal(inst).executePredatoryStrike(prey); }
+export function secureCapturedPrey(prey: unknown, inst?: Animal): void { resolveAnimal(inst).secureCapturedPrey(prey); }
+export function shareFoodWithGroup(group: unknown, inst?: Animal): void { resolveAnimal(inst).shareFoodWithGroup(group); }
 export function updateFeedingMotivation(inst?: Animal): void { resolveAnimal(inst).updateFeedingMotivation(); }
 
 // ============================================================================
@@ -899,12 +899,12 @@ export function updateFeedingMotivation(inst?: Animal): void { resolveAnimal(ins
 // ============================================================================
 
 export function initializeReproductiveBehavior(inst?: Animal): void { resolveAnimal(inst).initializeReproductiveBehavior(); }
-export function detectReproductiveReadiness(inst?: Animal): boolean { return resolveAnimal(inst).detectReproductiveReadiness(); }
-export function detectPotentialMate(inst?: Animal): boolean { return resolveAnimal(inst).detectPotentialMate(); }
-export function approachPotentialMate(mate: any, inst?: Animal): void { resolveAnimal(inst).approachPotentialMate(mate); }
+export function detectReproductiveReadiness(inst?: Animal): ReturnType<Animal['detectReproductiveReadiness']> { return resolveAnimal(inst).detectReproductiveReadiness(); }
+export function detectPotentialMate(inst?: Animal): ReturnType<Animal['detectPotentialMate']> { return resolveAnimal(inst).detectPotentialMate(); }
+export function approachPotentialMate(mate: unknown, inst?: Animal): void { resolveAnimal(inst).approachPotentialMate(mate); }
 export function performCourtshipBehavior(inst?: Animal): void { resolveAnimal(inst).performCourtshipBehavior(); }
 export function performCourtshipVocalization(inst?: Animal): void { resolveAnimal(inst).performCourtshipVocalization(); }
-export function evaluateMateCompatibility(mate: any, inst?: Animal): boolean { return resolveAnimal(inst).evaluateMateCompatibility(mate); }
+export function evaluateMateCompatibility(mate: Parameters<Animal['evaluateMateCompatibility']>[0], inst?: Animal): ReturnType<Animal['evaluateMateCompatibility']> { return resolveAnimal(inst).evaluateMateCompatibility(mate!); }
 export function initiateMatingSequence(inst?: Animal): void { resolveAnimal(inst).initiateMatingSequence(); }
 export function terminateMatingSequence(inst?: Animal): void { resolveAnimal(inst).terminateMatingSequence(); }
 export function searchForNestingSite(inst?: Animal): void { resolveAnimal(inst).searchForNestingSite(); }
@@ -913,10 +913,10 @@ export function prepareNestingMaterial(inst?: Animal): void { resolveAnimal(inst
 export function layEggs(inst?: Animal): void { resolveAnimal(inst).layEggs(); }
 export function incubateEggs(inst?: Animal): void { resolveAnimal(inst).incubateEggs(); }
 export function guardNest(inst?: Animal): void { resolveAnimal(inst).guardNest(); }
-export function recognizeOffspring(offspring: any, inst?: Animal): boolean { return resolveAnimal(inst).recognizeOffspring(offspring); }
-export function retrieveOffspring(offspring: any, inst?: Animal): void { resolveAnimal(inst).retrieveOffspring(offspring); }
-export function feedOffspring(offspring: any, inst?: Animal): void { resolveAnimal(inst).feedOffspring(offspring); }
-export function protectOffspring(offspring: any, inst?: Animal): void { resolveAnimal(inst).protectOffspring(offspring); }
+export function recognizeOffspring(offspring: Parameters<Animal['recognizeOffspring']>[0], inst?: Animal): ReturnType<Animal['recognizeOffspring']> { return resolveAnimal(inst).recognizeOffspring(offspring!); }
+export function retrieveOffspring(offspring: unknown, inst?: Animal): void { resolveAnimal(inst).retrieveOffspring(offspring); }
+export function feedOffspring(offspring: unknown, inst?: Animal): void { resolveAnimal(inst).feedOffspring(offspring); }
+export function protectOffspring(offspring: unknown, inst?: Animal): void { resolveAnimal(inst).protectOffspring(offspring); }
 
 // ============================================================================
 // 701–720. Phát triển, sinh trưởng và thay đổi cơ thể
@@ -927,7 +927,7 @@ export function updateDevelopmentStage(inst?: Animal): void { resolveAnimal(inst
 export function transitionToJuvenileStage(inst?: Animal): void { resolveAnimal(inst).transitionToJuvenileStage(); }
 export function transitionToAdultStage(inst?: Animal): void { resolveAnimal(inst).transitionToAdultStage(); }
 export function transitionToSeniorStage(inst?: Animal): void { resolveAnimal(inst).transitionToSeniorStage(); }
-export function calculateGrowthRate(inst?: Animal): number { return resolveAnimal(inst).calculateGrowthRate(); }
+export function calculateGrowthRate(inst?: Animal): ReturnType<Animal['calculateGrowthRate']> { return resolveAnimal(inst).calculateGrowthRate(); }
 export function updateBodySizeWithAge(inst?: Animal): void { resolveAnimal(inst).updateBodySizeWithAge(); }
 export function updateBodyProportionsWithAge(inst?: Animal): void { resolveAnimal(inst).updateBodyProportionsWithAge(); }
 export function updateSkeletalGrowth(inst?: Animal): void { resolveAnimal(inst).updateSkeletalGrowth(); }
@@ -948,23 +948,23 @@ export function updateLifeStageAppearance(inst?: Animal): void { resolveAnimal(i
 // ============================================================================
 
 export function initializeEnvironmentalSensing(inst?: Animal): void { resolveAnimal(inst).initializeEnvironmentalSensing(); }
-export function senseAmbientTemperature(inst?: Animal): number { return resolveAnimal(inst).senseAmbientTemperature(); }
-export function senseHumidity(inst?: Animal): number { return resolveAnimal(inst).senseHumidity(); }
+export function senseAmbientTemperature(inst?: Animal): ReturnType<Animal['senseAmbientTemperature']> { return resolveAnimal(inst).senseAmbientTemperature(); }
+export function senseHumidity(inst?: Animal): ReturnType<Animal['senseHumidity']> { return resolveAnimal(inst).senseHumidity(); }
 export function senseWindDirection(inst?: Animal): Vec3 { return resolveAnimal(inst).senseWindDirection(); }
-export function senseWindSpeed(inst?: Animal): number { return resolveAnimal(inst).senseWindSpeed(); }
-export function senseGroundVibration(inst?: Animal): number { return resolveAnimal(inst).senseGroundVibration(); }
+export function senseWindSpeed(inst?: Animal): ReturnType<Animal['senseWindSpeed']> { return resolveAnimal(inst).senseWindSpeed(); }
+export function senseGroundVibration(inst?: Animal): ReturnType<Animal['senseGroundVibration']> { return resolveAnimal(inst).senseGroundVibration(); }
 export function senseWaterCurrent(inst?: Animal): Vec3 { return resolveAnimal(inst).senseWaterCurrent(); }
-export function senseWaterPressure(inst?: Animal): number { return resolveAnimal(inst).senseWaterPressure(); }
+export function senseWaterPressure(inst?: Animal): ReturnType<Animal['senseWaterPressure']> { return resolveAnimal(inst).senseWaterPressure(); }
 export function senseMagneticField(inst?: Animal): Vec3 { return resolveAnimal(inst).senseMagneticField(); }
-export function senseLightIntensity(inst?: Animal): number { return resolveAnimal(inst).senseLightIntensity(); }
-export function sensePolarizedLight(inst?: Animal): boolean { return resolveAnimal(inst).sensePolarizedLight(); }
-export function detectChemicalSignals(inst?: Animal): boolean { return resolveAnimal(inst).detectChemicalSignals(); }
-export function detectPheromones(inst?: Animal): boolean { return resolveAnimal(inst).detectPheromones(); }
-export function detectPredatorPresence(inst?: Animal): boolean { return resolveAnimal(inst).detectPredatorPresence(); }
-export function detectConspecificPresence(inst?: Animal): boolean { return resolveAnimal(inst).detectConspecificPresence(); }
-export function detectHabitatBoundary(inst?: Animal): boolean { return resolveAnimal(inst).detectHabitatBoundary(); }
-export function estimateEnvironmentalRisk(inst?: Animal): number { return resolveAnimal(inst).estimateEnvironmentalRisk(); }
-export function estimateResourceAvailability(inst?: Animal): number { return resolveAnimal(inst).estimateResourceAvailability(); }
+export function senseLightIntensity(inst?: Animal): ReturnType<Animal['senseLightIntensity']> { return resolveAnimal(inst).senseLightIntensity(); }
+export function sensePolarizedLight(inst?: Animal): ReturnType<Animal['sensePolarizedLight']> { return resolveAnimal(inst).sensePolarizedLight(); }
+export function detectChemicalSignals(inst?: Animal): ReturnType<Animal['detectChemicalSignals']> { return resolveAnimal(inst).detectChemicalSignals(); }
+export function detectPheromones(inst?: Animal): ReturnType<Animal['detectPheromones']> { return resolveAnimal(inst).detectPheromones(); }
+export function detectPredatorPresence(inst?: Animal): ReturnType<Animal['detectPredatorPresence']> { return resolveAnimal(inst).detectPredatorPresence(); }
+export function detectConspecificPresence(inst?: Animal): ReturnType<Animal['detectConspecificPresence']> { return resolveAnimal(inst).detectConspecificPresence(); }
+export function detectHabitatBoundary(inst?: Animal): ReturnType<Animal['detectHabitatBoundary']> { return resolveAnimal(inst).detectHabitatBoundary(); }
+export function estimateEnvironmentalRisk(inst?: Animal): ReturnType<Animal['estimateEnvironmentalRisk']> { return resolveAnimal(inst).estimateEnvironmentalRisk(); }
+export function estimateResourceAvailability(inst?: Animal): ReturnType<Animal['estimateResourceAvailability']> { return resolveAnimal(inst).estimateResourceAvailability(); }
 export function updateEnvironmentalMemory(inst?: Animal): void { resolveAnimal(inst).updateEnvironmentalMemory(); }
 export function integrateSensoryInformation(inst?: Animal): void { resolveAnimal(inst).integrateSensoryInformation(); }
 
@@ -975,18 +975,18 @@ export function integrateSensoryInformation(inst?: Animal): void { resolveAnimal
 export function initializeAnimalBehavior(inst?: Animal): void { resolveAnimal(inst).initializeAnimalBehavior(); }
 export function updateAnimalBehavior(deltaTime: number, inst?: Animal): void { resolveAnimal(inst).updateAnimalBehavior(deltaTime); }
 export function evaluateAnimalNeeds(inst?: Animal): void { resolveAnimal(inst).evaluateAnimalNeeds(); }
-export function calculateHungerLevel(inst?: Animal): number { return resolveAnimal(inst).calculateHungerLevel(); }
-export function calculateThirstLevel(inst?: Animal): number { return resolveAnimal(inst).calculateThirstLevel(); }
-export function calculateFatigueLevel(inst?: Animal): number { return resolveAnimal(inst).calculateFatigueLevel(); }
-export function calculateFearLevel(inst?: Animal): number { return resolveAnimal(inst).calculateFearLevel(); }
-export function calculateCuriosityLevel(inst?: Animal): number { return resolveAnimal(inst).calculateCuriosityLevel(); }
-export function calculateAggressionLevel(inst?: Animal): number { return resolveAnimal(inst).calculateAggressionLevel(); }
-export function calculateSocialMotivation(inst?: Animal): number { return resolveAnimal(inst).calculateSocialMotivation(); }
-export function selectBehaviorState(inst?: Animal): string { return resolveAnimal(inst).selectBehaviorState(); }
-export function chooseNextAction(inst?: Animal): string { return resolveAnimal(inst).chooseNextAction(); }
+export function calculateHungerLevel(inst?: Animal): ReturnType<Animal['calculateHungerLevel']> { return resolveAnimal(inst).calculateHungerLevel(); }
+export function calculateThirstLevel(inst?: Animal): ReturnType<Animal['calculateThirstLevel']> { return resolveAnimal(inst).calculateThirstLevel(); }
+export function calculateFatigueLevel(inst?: Animal): ReturnType<Animal['calculateFatigueLevel']> { return resolveAnimal(inst).calculateFatigueLevel(); }
+export function calculateFearLevel(inst?: Animal): ReturnType<Animal['calculateFearLevel']> { return resolveAnimal(inst).calculateFearLevel(); }
+export function calculateCuriosityLevel(inst?: Animal): ReturnType<Animal['calculateCuriosityLevel']> { return resolveAnimal(inst).calculateCuriosityLevel(); }
+export function calculateAggressionLevel(inst?: Animal): ReturnType<Animal['calculateAggressionLevel']> { return resolveAnimal(inst).calculateAggressionLevel(); }
+export function calculateSocialMotivation(inst?: Animal): ReturnType<Animal['calculateSocialMotivation']> { return resolveAnimal(inst).calculateSocialMotivation(); }
+export function selectBehaviorState(inst?: Animal): ReturnType<Animal['selectBehaviorState']> { return resolveAnimal(inst).selectBehaviorState(); }
+export function chooseNextAction(inst?: Animal): ReturnType<Animal['chooseNextAction']> { return resolveAnimal(inst).chooseNextAction(); }
 export function interruptCurrentBehavior(inst?: Animal): void { resolveAnimal(inst).interruptCurrentBehavior(); }
 export function resumePreviousBehavior(inst?: Animal): void { resolveAnimal(inst).resumePreviousBehavior(); }
-export function evaluateThreatResponse(inst?: Animal): string { return resolveAnimal(inst).evaluateThreatResponse(); }
+export function evaluateThreatResponse(inst?: Animal): ReturnType<Animal['evaluateThreatResponse']> { return resolveAnimal(inst).evaluateThreatResponse(); }
 export function chooseEscapeDirection(inst?: Animal): Vec3 { return resolveAnimal(inst).chooseEscapeDirection(); }
 export function initiateDefensiveBehavior(inst?: Animal): void { resolveAnimal(inst).initiateDefensiveBehavior(); }
 export function investigateNovelStimulus(inst?: Animal): void { resolveAnimal(inst).investigateNovelStimulus(); }
@@ -998,36 +998,36 @@ export function transitionBehaviorState(newState?: string, inst?: Animal): void 
 // ============================================================================
 
 export function initializeSocialBehavior(inst?: Animal): void { resolveAnimal(inst).initializeSocialBehavior(); }
-export function detectNearbyConspecifics(inst?: Animal): any[] { return resolveAnimal(inst).detectNearbyConspecifics(); }
-export function recognizeIndividualAnimal(animal: any, inst?: Animal): boolean { return resolveAnimal(inst).recognizeIndividualAnimal(animal); }
+export function detectNearbyConspecifics(inst?: Animal): unknown[] { return resolveAnimal(inst).detectNearbyConspecifics(); }
+export function recognizeIndividualAnimal(animal: Parameters<Animal['recognizeIndividualAnimal']>[0], inst?: Animal): ReturnType<Animal['recognizeIndividualAnimal']> { return resolveAnimal(inst).recognizeIndividualAnimal(animal!); }
 export function maintainGroupSpacing(inst?: Animal): void { resolveAnimal(inst).maintainGroupSpacing(); }
-export function followGroupLeader(leader: any, inst?: Animal): void { resolveAnimal(inst).followGroupLeader(leader); }
-export function electGroupLeader(group: any, inst?: Animal): any { return resolveAnimal(inst).electGroupLeader(group); }
-export function synchronizeGroupMovement(group: any, inst?: Animal): void { resolveAnimal(inst).synchronizeGroupMovement(group); }
-export function joinAnimalGroup(group: any, inst?: Animal): void { resolveAnimal(inst).joinAnimalGroup(group); }
-export function leaveAnimalGroup(group: any, inst?: Animal): void { resolveAnimal(inst).leaveAnimalGroup(group); }
-export function coordinateGroupForaging(group: any, inst?: Animal): void { resolveAnimal(inst).coordinateGroupForaging(group); }
-export function performSocialGreeting(animal: any, inst?: Animal): void { resolveAnimal(inst).performSocialGreeting(animal); }
-export function initiateSocialGrooming(animal: any, inst?: Animal): void { resolveAnimal(inst).initiateSocialGrooming(animal); }
-export function exchangeVocalSignals(signal: any, inst?: Animal): void { resolveAnimal(inst).exchangeVocalSignals(signal); }
+export function followGroupLeader(leader: unknown, inst?: Animal): void { resolveAnimal(inst).followGroupLeader(leader); }
+export function electGroupLeader(group: Parameters<Animal['electGroupLeader']>[0], inst?: Animal): ReturnType<Animal['electGroupLeader']> { return resolveAnimal(inst).electGroupLeader(group!); }
+export function synchronizeGroupMovement(group: unknown, inst?: Animal): void { resolveAnimal(inst).synchronizeGroupMovement(group); }
+export function joinAnimalGroup(group: unknown, inst?: Animal): void { resolveAnimal(inst).joinAnimalGroup(group); }
+export function leaveAnimalGroup(group: unknown, inst?: Animal): void { resolveAnimal(inst).leaveAnimalGroup(group); }
+export function coordinateGroupForaging(group: unknown, inst?: Animal): void { resolveAnimal(inst).coordinateGroupForaging(group); }
+export function performSocialGreeting(animal: unknown, inst?: Animal): void { resolveAnimal(inst).performSocialGreeting(animal); }
+export function initiateSocialGrooming(animal: unknown, inst?: Animal): void { resolveAnimal(inst).initiateSocialGrooming(animal); }
+export function exchangeVocalSignals(signal: unknown, inst?: Animal): void { resolveAnimal(inst).exchangeVocalSignals(signal); }
 export function performAlarmCall(inst?: Animal): void { resolveAnimal(inst).performAlarmCall(); }
-export function respondToAlarmCall(signal: any, inst?: Animal): void { resolveAnimal(inst).respondToAlarmCall(signal); }
-export function establishTerritorialBoundary(area: any, inst?: Animal): void { resolveAnimal(inst).establishTerritorialBoundary(area); }
-export function patrolTerritory(area: any, inst?: Animal): void { resolveAnimal(inst).patrolTerritory(area); }
-export function markTerritory(location: any, inst?: Animal): void { resolveAnimal(inst).markTerritory(location); }
-export function defendTerritory(intruder: any, inst?: Animal): void { resolveAnimal(inst).defendTerritory(intruder); }
-export function resolveSocialConflict(animal: any, inst?: Animal): void { resolveAnimal(inst).resolveSocialConflict(animal); }
+export function respondToAlarmCall(signal: unknown, inst?: Animal): void { resolveAnimal(inst).respondToAlarmCall(signal); }
+export function establishTerritorialBoundary(area: unknown, inst?: Animal): void { resolveAnimal(inst).establishTerritorialBoundary(area); }
+export function patrolTerritory(area: unknown, inst?: Animal): void { resolveAnimal(inst).patrolTerritory(area); }
+export function markTerritory(location: unknown, inst?: Animal): void { resolveAnimal(inst).markTerritory(location); }
+export function defendTerritory(intruder: unknown, inst?: Animal): void { resolveAnimal(inst).defendTerritory(intruder); }
+export function resolveSocialConflict(animal: unknown, inst?: Animal): void { resolveAnimal(inst).resolveSocialConflict(animal); }
 
 // ============================================================================
 // 781–800. Vật lý, animation, AI và tối ưu hóa
 // ============================================================================
 
 export function initializeAnimalPhysics(inst?: Animal): void { resolveAnimal(inst).initializeAnimalPhysics(); }
-export function createAnimalCollider(inst?: Animal): any { return resolveAnimal(inst).createAnimalCollider(); }
+export function createAnimalCollider(inst?: Animal): ReturnType<Animal['createAnimalCollider']> { return resolveAnimal(inst).createAnimalCollider(); }
 export function applyAnimalGravity(deltaTime: number, inst?: Animal): void { resolveAnimal(inst).applyAnimalGravity(deltaTime); }
 export function applyAnimalForce(force: Vec3, inst?: Animal): void { resolveAnimal(inst).applyAnimalForce(force); }
 export function resolveAnimalCollision(inst?: Animal): void { resolveAnimal(inst).resolveAnimalCollision(); }
-export function updateAnimalGroundContact(inst?: Animal): boolean { return resolveAnimal(inst).updateAnimalGroundContact(); }
+export function updateAnimalGroundContact(inst?: Animal): ReturnType<Animal['updateAnimalGroundContact']> { return resolveAnimal(inst).updateAnimalGroundContact(); }
 export function solveAnimalIK(inst?: Animal): void { resolveAnimal(inst).solveAnimalIK(); }
 export function solveAnimalFootIK(inst?: Animal): void { resolveAnimal(inst).solveAnimalFootIK(); }
 export function blendAnimalAnimations(inst?: Animal): void { resolveAnimal(inst).blendAnimalAnimations(); }
@@ -1037,8 +1037,8 @@ export function updateAnimalRootMotion(inst?: Animal): Vec3 { return resolveAnim
 export function applyAnimalSecondaryMotion(inst?: Animal): void { resolveAnimal(inst).applyAnimalSecondaryMotion(); }
 export function updateAnimalTailDynamics(inst?: Animal): void { resolveAnimal(inst).updateAnimalTailDynamics(); }
 export function updateAnimalClothDynamics(inst?: Animal): void { resolveAnimal(inst).updateAnimalClothDynamics(); }
-export function updateAnimalLOD(distance?: number, inst?: Animal): number { return resolveAnimal(inst).updateAnimalLOD(distance); }
+export function updateAnimalLOD(distance?: number, inst?: Animal): ReturnType<Animal['updateAnimalLOD']> { return resolveAnimal(inst).updateAnimalLOD(distance!); }
 export function interpolateAnimalPosition(target: Vec3, alpha?: number, inst?: Animal): void { resolveAnimal(inst).interpolateAnimalPosition(target, alpha); }
-export function interpolateAnimalRotation(target: any, alpha?: number, inst?: Animal): void { resolveAnimal(inst).interpolateAnimalRotation(target, alpha); }
+export function interpolateAnimalRotation(target: unknown, alpha?: number, inst?: Animal): void { resolveAnimal(inst).interpolateAnimalRotation(target, alpha); }
 export function synchronizeAnimalPhysics(inst?: Animal): void { resolveAnimal(inst).synchronizeAnimalPhysics(); }
 export function optimizeAnimalSimulation(inst?: Animal): void { resolveAnimal(inst).optimizeAnimalSimulation(); }

@@ -33,11 +33,30 @@
     "./spatial-ui": "./src/spatial-ui/index.ts",
     "./ui-3d": "./src/spatial-ui/index.ts",
     "./npc": "./src/npc/index.ts",
-    "./ai-npc": "./src/npc/index.ts"
+    "./ai-npc": "./src/npc/index.ts",
+    "./navigation": "./src/navigation/index.ts",
+    "./open-world": "./src/open-world/index.ts",
+    "./deeplearning": "./src/deeplearning/index.ts",
+    "./learning": "./src/learning/index.ts",
+    "./animation": "./src/animation/index.ts",
+    "./render/interop": "./src/render/interop/index.ts",
+    "./life": "./src/life/index.ts",
+    "./psychology": "./src/psychology/index.ts",
+    "./knowledge": "./src/knowledge/index.ts",
+    "./civilization": "./src/civilization/index.ts",
+    "./law": "./src/law/index.ts",
+    "./research": "./src/research/index.ts",
+    "./ui-procedural": "./src/ui-procedural/index.ts",
+    "./worldview": "./src/worldview/index.ts",
+    "./training": "./src/training/index.ts",
+    "./life-simulation": "./src/life/simulation.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "train:assets": "vite-node scripts/train-assets-campaign.mjs",
+    "train:daemon": "vite-node scripts/train-assets-daemon.mjs",
+    "train:10m": "vite-node scripts/train-10m-campaign.mjs"
   },
   "peerDependencies": {
     "three": "^0.170.0"

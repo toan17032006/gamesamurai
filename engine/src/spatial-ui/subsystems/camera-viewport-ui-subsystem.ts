@@ -44,6 +44,7 @@ import {
   clamp,
   clamp01,
   num,
+  asRecord,
   toVec3,
   entityQuaternion,
   eulerToQuaternion,
@@ -111,7 +112,7 @@ export class CameraViewportUISubsystem {
    * Bán kính lấy từ `radius`/`occluderRadius` của chính vật cản, sau đó tới
    * bán kính mặc định truyền vào, cuối cùng ước lượng từ kích thước/`bounds`.
    */
-  private occluderCandidate(value: any, fallbackRadius: number): { position: Vec3D; radius: number } | null {
+  private occluderCandidate(value: unknown, fallbackRadius: number): { position: Vec3D; radius: number } | null {
     if (!value || typeof value !== 'object') return null;
     const record = value as Record<string, unknown>;
     const raw =
@@ -151,9 +152,9 @@ export class CameraViewportUISubsystem {
    * Nguồn: `occluder`/`occluderPosition` (một vật), `occluders`/`obstacles`/
    * `blockers` (danh sách) — trên `options` lẫn trên chính `target`.
    */
-  private occludersOf(target?: any, options?: any): Array<{ position: Vec3D; radius: number }> {
+  private occludersOf(target?: unknown, options?: unknown): Array<{ position: Vec3D; radius: number }> {
     const result: Array<{ position: Vec3D; radius: number }> = [];
-    const fallbackRadius = num((options as any)?.occluderRadius, 0);
+    const fallbackRadius = num(asRecord(options).occluderRadius, 0);
     for (const source of [options, target]) {
       if (!source || typeof source !== 'object') continue;
       const record = source as Record<string, unknown>;
@@ -176,8 +177,8 @@ export class CameraViewportUISubsystem {
   // ==========================================================================
 
   /** Camera dùng để tính — người gọi có thể chỉ định lại qua `options.camera`. */
-  private cameraOf(source: any, options: any): any {
-    const override = (options as any)?.camera ?? (options as any)?.cameraEntity;
+  private cameraOf(source: unknown, options: unknown) {
+    const override = asRecord(options).camera ?? asRecord(options).cameraEntity;
     return override ?? source;
   }
 
@@ -187,14 +188,14 @@ export class CameraViewportUISubsystem {
    * Tuỳ chọn: `camera` (nguồn camera), `fov`, `aspect`, `near`/`nearPlane`,
    * `far`/`farPlane`, `width`/`height` (kích thước màn hình theo pixel).
    */
-  private frameOf(source: any, options: any): CameraFrame {
+  private frameOf(source: unknown, options: unknown): CameraFrame {
     const frame = resolveCameraFrame(this.cameraOf(source, options), this.config);
-    const fov = num((options as any)?.fov, frame.fov);
-    const aspect = num((options as any)?.aspect, frame.aspect);
-    const near = num((options as any)?.near ?? (options as any)?.nearPlane, frame.near);
-    const far = num((options as any)?.far ?? (options as any)?.farPlane, frame.far);
-    const screenWidth = num((options as any)?.width, frame.screenWidth);
-    const screenHeight = num((options as any)?.height, frame.screenHeight);
+    const fov = num(asRecord(options).fov, frame.fov);
+    const aspect = num(asRecord(options).aspect, frame.aspect);
+    const near = num(asRecord(options).near ?? asRecord(options).nearPlane, frame.near);
+    const far = num(asRecord(options).far ?? asRecord(options).farPlane, frame.far);
+    const screenWidth = num(asRecord(options).width, frame.screenWidth);
+    const screenHeight = num(asRecord(options).height, frame.screenHeight);
     if (
       fov === frame.fov &&
       aspect === frame.aspect &&
@@ -209,7 +210,7 @@ export class CameraViewportUISubsystem {
   }
 
   /** Kích thước viewport (px) từ một nguồn bất kỳ. */
-  private viewportBox(value: any): { width?: number; height?: number } {
+  private viewportBox(value: unknown): { width?: number; height?: number } {
     if (value === undefined || value === null) return {};
     if (typeof value === 'number') {
       return Number.isFinite(value) ? { width: value } : {};
@@ -233,7 +234,7 @@ export class CameraViewportUISubsystem {
    * Hai số ⇒ số thứ nhất là chiều rộng, số thứ hai là chiều cao; đối tượng ⇒
    * đọc `width`/`height` (hoặc `w`/`h`, `size.x`/`size.y`).
    */
-  private viewportSize(a?: any, b?: any): { width?: number; height?: number } {
+  private viewportSize(a?: unknown, b?: unknown): { width?: number; height?: number } {
     if (typeof a === 'number' && typeof b === 'number') {
       return {
         width: Number.isFinite(a) ? a : undefined,
@@ -261,7 +262,7 @@ export class CameraViewportUISubsystem {
    * [1391] getCameraPosition
    * Lấy tọa độ camera (vị trí neo + offset tuỳ chọn).
    */
-  public getCameraPosition(entity?: any, offset?: Vec3D): any {
+  public getCameraPosition(entity?: unknown, offset?: Vec3D) {
     const base = resolvePoint(entity);
     return {
       x: base.x + (offset?.x ?? 0),
@@ -273,11 +274,11 @@ export class CameraViewportUISubsystem {
    * [1392] getCameraRotation
    * Lấy góc quay camera dưới dạng quaternion.
    */
-  public getCameraRotation(entityOrAngle?: any, options?: any): any {
+  public getCameraRotation(entityOrAngle?: unknown, options?: unknown) {
     if (!entityOrAngle) {
       const euler = readVec3(options, ['euler', 'rotation']);
       const hasEuler = options && typeof options === 'object'
-        && (options as any).euler !== undefined;
+        && asRecord(options).euler !== undefined;
       return hasEuler ? eulerToQuaternion(euler.x, euler.y, euler.z) : { x: 0, y: 0, z: 0, w: 1 };
     }
     const source = entityOrAngle as Record<string, unknown>;
@@ -294,7 +295,7 @@ export class CameraViewportUISubsystem {
    * [1393] getCameraForwardVector
    * Lấy hướng nhìn phía trước camera.
    */
-  public getCameraForwardVector(a?: any, b?: any): any {
+  public getCameraForwardVector(a?: unknown, b?: unknown) {
     const frame = resolveCameraFrame(a, this.config);
     if (a && b && typeof a === 'object' && typeof b === 'object') {
       const from = resolvePoint(a);
@@ -308,7 +309,7 @@ export class CameraViewportUISubsystem {
    * [1394] getCameraRightVector
    * Lấy hướng bên phải camera.
    */
-  public getCameraRightVector(a?: any, b?: any): any {
+  public getCameraRightVector(a?: unknown, b?: unknown) {
     const frame = resolveCameraFrame(a, this.config);
     if (a && b && typeof a === 'object' && typeof b === 'object') {
       const from = resolvePoint(a);
@@ -325,7 +326,7 @@ export class CameraViewportUISubsystem {
    * [1395] getCameraUpVector
    * Lấy hướng phía trên camera.
    */
-  public getCameraUpVector(a?: any, b?: any): any {
+  public getCameraUpVector(a?: unknown, b?: unknown) {
     const frame = resolveCameraFrame(a, this.config);
     if (a && b && typeof a === 'object' && typeof b === 'object') {
       const from = resolvePoint(a);
@@ -345,7 +346,7 @@ export class CameraViewportUISubsystem {
    * [1396] getCameraTargetPosition
    * Lấy tọa độ mục tiêu camera.
    */
-  public getCameraTargetPosition(entity?: any, offset?: Vec3D): any {
+  public getCameraTargetPosition(entity?: unknown, offset?: Vec3D) {
     const base = resolvePoint(entity);
     return {
       x: base.x + (offset?.x ?? 0),
@@ -357,7 +358,7 @@ export class CameraViewportUISubsystem {
    * [1397] getCameraFocalPoint
    * Lấy tiêu điểm camera và khoảng cách tiêu cự.
    */
-  public getCameraFocalPoint(a?: any, b?: any, options?: any): any {
+  public getCameraFocalPoint(a?: unknown, b?: unknown, options?: unknown) {
     const frame = resolveCameraFrame(a, this.config);
     const explicit = readVec3(options, ['target', 'focus', 'focalPoint']);
     const target = magnitude(explicit) > 0
@@ -377,7 +378,7 @@ export class CameraViewportUISubsystem {
    * [1398] getCameraNearPlane
    * Lấy mặt phẳng cắt gần camera.
    */
-  public getCameraNearPlane(normal?: Vec3D, distance = 0): any {
+  public getCameraNearPlane(normal?: Vec3D, distance = 0) {
     const frame = this.frame();
     const n = normal ?? frame.forward;
     return plane('getCameraNearPlane', n, distance || dot(frame.forward, frame.position) + frame.near, {
@@ -388,7 +389,7 @@ export class CameraViewportUISubsystem {
    * [1399] getCameraFarPlane
    * Lấy mặt phẳng cắt xa camera.
    */
-  public getCameraFarPlane(normal?: Vec3D, distance = 0): any {
+  public getCameraFarPlane(normal?: Vec3D, distance = 0) {
     const frame = this.frame();
     const n = normal ?? scale(frame.forward, -1);
     return plane('getCameraFarPlane', n, distance || -(dot(frame.forward, frame.position) + frame.far), {
@@ -399,15 +400,15 @@ export class CameraViewportUISubsystem {
    * [1400] getCameraFieldOfView
    * Lấy trường nhìn camera (độ và radian).
    */
-  public getCameraFieldOfView(a?: any, b?: any, options?: any): any {
+  public getCameraFieldOfView(a?: unknown, b?: unknown, options?: unknown) {
     const frame = resolveCameraFrame(a, this.config);
     const viewport = this.viewportSize(b);
     const viewportAspect =
       viewport.width !== undefined && viewport.height !== undefined && viewport.height > 0
         ? viewport.width / viewport.height
         : undefined;
-    const aspect = this.dimension((options as any)?.aspect, viewportAspect, frame.aspect);
-    const fov = num((options as any)?.fov, frame.fov);
+    const aspect = this.dimension(asRecord(options).aspect, viewportAspect, frame.aspect);
+    const fov = num(asRecord(options).fov, frame.fov);
     const rad = (fov * Math.PI) / 180;
     return named('getCameraFieldOfView', fov, {
       degrees: fov,
@@ -420,7 +421,7 @@ export class CameraViewportUISubsystem {
    * [1401] calculateCameraDistance
    * Tính khoảng cách camera đến mục tiêu.
    */
-  public calculateCameraDistance(a?: any, b?: any): any {
+  public calculateCameraDistance(a?: unknown, b?: unknown) {
     const from = resolvePoint(a);
     const to = resolvePoint(b);
     return distance3D(from, to);
@@ -429,42 +430,42 @@ export class CameraViewportUISubsystem {
    * [1402] calculateCameraOrbitPosition
    * Tính vị trí camera quỹ đạo quanh mục tiêu.
    */
-  public calculateCameraOrbitPosition(a?: any, b?: any, options?: any): any {
+  public calculateCameraOrbitPosition(a?: unknown, b?: unknown, options?: unknown) {
     const target = b ? resolvePoint(b) : resolvePoint(a);
-    const radius = num((options as any)?.radius, distance3D(resolvePoint(a), target));
-    const angle = num((options as any)?.angle, orbitAngle(resolvePoint(a), target));
-    const elevation = num((options as any)?.elevation, elevationAngle(resolvePoint(a), target));
+    const radius = num(asRecord(options).radius, distance3D(resolvePoint(a), target));
+    const angle = num(asRecord(options).angle, orbitAngle(resolvePoint(a), target));
+    const elevation = num(asRecord(options).elevation, elevationAngle(resolvePoint(a), target));
     return orbitPosition(target, radius, angle, elevation);
   }
   /**
    * [1403] calculateCameraOrbitAngle
    * Tính góc quỹ đạo camera (rad, quanh trục Y).
    */
-  public calculateCameraOrbitAngle(a?: any, b?: any): any {
+  public calculateCameraOrbitAngle(a?: unknown, b?: unknown) {
     return orbitAngle(resolvePoint(a), resolvePoint(b));
   }
   /**
    * [1404] calculateCameraOrbitRadius
    * Tính bán kính quỹ đạo camera.
    */
-  public calculateCameraOrbitRadius(entity?: any, options?: any): any {
-    const explicit = num((options as any)?.radius, Number.NaN);
+  public calculateCameraOrbitRadius(entity?: unknown, options?: unknown) {
+    const explicit = num(asRecord(options).radius, Number.NaN);
     if (Number.isFinite(explicit)) return Math.max(0, explicit);
     const source = (entity ?? {}) as Record<string, unknown>;
     if (source.target && typeof source.target === 'object') {
       return distance3D(resolvePoint(entity), toVec3(source.target));
     }
     const position = resolvePoint(entity);
-    const origin = resolvePoint((options as any)?.target);
+    const origin = resolvePoint(asRecord(options).target);
     return distance3D(position, origin);
   }
   /**
    * [1405] calculateCameraLookAt
    * Tính hướng camera nhìn mục tiêu.
    */
-  public calculateCameraLookAt(a?: any, b?: any, options?: any): any {
+  public calculateCameraLookAt(a?: unknown, b?: unknown, options?: unknown) {
     const from = resolvePoint(a);
-    const to = b ? resolvePoint(b) : resolvePoint((options as any)?.target);
+    const to = b ? resolvePoint(b) : resolvePoint(asRecord(options).target);
     const up = readVec3(options, ['up']);
     const quaternion = cameraLookAtQuaternion(from, to, magnitude(up) > 0 ? up : UP3);
     const direction = normalize(subtract(to, from));
@@ -479,7 +480,7 @@ export class CameraViewportUISubsystem {
    * [1406] calculateCameraLookAtMatrix
    * Tính ma trận hướng nhìn camera.
    */
-  public calculateCameraLookAtMatrix(target?: any, options?: any): any {
+  public calculateCameraLookAtMatrix(target?: unknown, options?: unknown) {
     const frame = resolveCameraFrame(target, this.config);
     const lookTarget = readVec3(options, ['lookTarget']);
     const destination = magnitude(lookTarget) > 0 ? lookTarget : add(frame.position, frame.forward);
@@ -489,7 +490,7 @@ export class CameraViewportUISubsystem {
    * [1407] calculateCameraViewMatrix
    * Tính ma trận nhìn camera.
    */
-  public calculateCameraViewMatrix(target?: any, options?: any): any {
+  public calculateCameraViewMatrix(target?: unknown, options?: unknown) {
     const frame = this.frameOf(target, options);
     const up = readVec3(options, ['up']);
     if (magnitude(up) > 0) {
@@ -501,14 +502,14 @@ export class CameraViewportUISubsystem {
    * [1408] calculateCameraProjectionMatrix
    * Tính ma trận chiếu camera.
    */
-  public calculateCameraProjectionMatrix(target?: any, options?: any): any {
+  public calculateCameraProjectionMatrix(target?: unknown, options?: unknown) {
     return cameraProjectionMatrix(this.frameOf(target, options));
   }
   /**
    * [1409] calculateCameraViewProjectionMatrix
    * Tính ma trận nhìn và chiếu.
    */
-  public calculateCameraViewProjectionMatrix(target?: any, options?: any): any {
+  public calculateCameraViewProjectionMatrix(target?: unknown, options?: unknown) {
     const frame = this.frameOf(target, options);
     return multiplyMatrices(cameraProjectionMatrix(frame), cameraViewMatrix(frame));
   }
@@ -516,7 +517,7 @@ export class CameraViewportUISubsystem {
    * [1410] calculateCameraFrustum
    * Tính thể tích nhìn camera.
    */
-  public calculateCameraFrustum(a?: any, b?: any, options?: any): any {
+  public calculateCameraFrustum(a?: unknown, b?: unknown, options?: unknown) {
     let frame = resolveCameraFrame(a, this.config);
     if (b !== undefined && b !== null) {
       const dir = normalize(subtract(resolvePoint(b), frame.position));
@@ -532,7 +533,7 @@ export class CameraViewportUISubsystem {
       }
     }
     const planes = frustumPlanes(frame);
-    const depth = num((options as any)?.depth, frame.near);
+    const depth = num(asRecord(options).depth, frame.near);
     const corners = frustumCorners(frame, depth);
     const frustum: CameraFrustum = {
       near: planes[0],
@@ -554,7 +555,7 @@ export class CameraViewportUISubsystem {
    * [1411] calculateCameraFrustumPlanes
    * Tính các mặt phẳng của thể tích nhìn.
    */
-  public calculateCameraFrustumPlanes(normal?: Vec3D, distance = 0): any {
+  public calculateCameraFrustumPlanes(normal?: Vec3D, distance = 0) {
     const frame = this.frame();
     const planes = frustumPlanes(frame);
     const n = normal ?? frame.forward;
@@ -568,7 +569,7 @@ export class CameraViewportUISubsystem {
    * [1412] calculateCameraFrustumCorners
    * Tính các góc của thể tích nhìn.
    */
-  public calculateCameraFrustumCorners(entity?: any, size?: Vec3D): any {
+  public calculateCameraFrustumCorners(entity?: unknown, size?: Vec3D) {
     const frame = resolveCameraFrame(entity, this.config);
     const corners = frustumCorners(frame, frame.near);
     const farCorners = frustumCorners(frame, frame.far);
@@ -597,11 +598,11 @@ export class CameraViewportUISubsystem {
    * [1413] calculateCameraVisibility
    * Kiểm tra vật thể có nằm trong tầm nhìn.
    */
-  public calculateCameraVisibility(entity?: any, camera?: any): any {
+  public calculateCameraVisibility(entity?: unknown, camera?: unknown) {
     const frame = resolveCameraFrame(camera, this.config);
     const target = resolvePoint(entity);
     const projection = projectToScreen(target, frame);
-    const radius = num((entity as any)?.radius, 0);
+    const radius = num(asRecord(entity).radius, 0);
     const level = Math.max(0, Math.round(Math.log2(Math.max(1, projection.depth / Math.max(0.5, radius)))));
     return lod('calculateCameraVisibility', level, {
       visible: projection.depth > frame.near && projection.depth < frame.far,
@@ -614,10 +615,10 @@ export class CameraViewportUISubsystem {
    * [1414] calculateCameraOcclusion
    * Kiểm tra vật thể bị che khuất.
    */
-  public calculateCameraOcclusion(a?: any, b?: any, options?: any): any {
+  public calculateCameraOcclusion(a?: unknown, b?: unknown, options?: unknown) {
     const target = resolvePoint(a);
     const occluder = b ? resolvePoint(b) : readVec3(options, ['occluder', 'occluderPosition']);
-    const radius = num((options as any)?.occluderRadius, 0);
+    const radius = num(asRecord(options).occluderRadius, 0);
     const occlusion = occlusionFactor(target, occluder, radius);
     return named('calculateCameraOcclusion', occlusion, {
       occluded: occlusion > 0.5,
@@ -629,8 +630,8 @@ export class CameraViewportUISubsystem {
    * [1415] calculateCameraDepth
    * Tính độ sâu vật thể theo camera.
    */
-  public calculateCameraDepth(entity?: any, options?: any): any {
-    const frame = resolveCameraFrame((options as any)?.camera, this.config);
+  public calculateCameraDepth(entity?: unknown, options?: unknown) {
+    const frame = resolveCameraFrame(asRecord(options).camera, this.config);
     const target = resolvePoint(entity);
     return dot(subtract(target, frame.position), frame.forward);
   }
@@ -638,7 +639,7 @@ export class CameraViewportUISubsystem {
    * [1416] calculateCameraScreenPosition
    * Tính vị trí màn hình từ camera.
    */
-  public calculateCameraScreenPosition(a?: any, b?: any, options?: any): any {
+  public calculateCameraScreenPosition(a?: unknown, b?: unknown, options?: unknown) {
     const frame = this.frameOf(a, options);
     const target = b ? resolvePoint(b) : resolvePoint(a);
     const projection = projectToScreen(target, frame);
@@ -652,31 +653,32 @@ export class CameraViewportUISubsystem {
    * [1417] calculateCameraScreenRay
    * Tính tia từ camera qua điểm màn hình.
    */
-  public calculateCameraScreenRay(origin?: Vec3D, direction?: Vec3D): any {
+  public calculateCameraScreenRay(origin?: Vec3D, direction?: Vec3D) {
     return ray('calculateCameraScreenRay', origin ?? { x: 0, y: 0, z: 0 }, direction ?? { ...FORWARD3 });
   }
   /**
    * [1418] calculateCameraWorldRay
    * Tính tia trong thế giới từ camera.
    */
-  public calculateCameraWorldRay(origin?: Vec3D, direction?: Vec3D): any {
+  public calculateCameraWorldRay(origin?: Vec3D, direction?: Vec3D) {
     return ray('calculateCameraWorldRay', origin ?? { x: 0, y: 0, z: 0 }, direction ?? { ...FORWARD3 });
   }
   /**
    * [1419] calculateCameraPickingRay
    * Tính tia chọn vật thể.
    */
-  public calculateCameraPickingRay(origin?: Vec3D, direction?: Vec3D): any {
+  public calculateCameraPickingRay(origin?: Vec3D, direction?: Vec3D) {
     return ray('calculateCameraPickingRay', origin ?? { x: 0, y: 0, z: 0 }, direction ?? { ...FORWARD3 });
   }
   /**
    * [1420] calculateCameraRayIntersection
    * Tính giao điểm tia camera.
    */
-  public calculateCameraRayIntersection(origin?: Vec3D, direction?: Vec3D): any {
+  public calculateCameraRayIntersection(origin?: Vec3D, direction?: Vec3D) {
     const o = origin ?? { x: 0, y: 0, z: 0 };
     const d = direction ?? { ...FORWARD3 };
-    const t = num((this as any).__rayT, 0);
+    // Không có độ sâu mục tiêu: giao điểm chính là gốc tia (t = 0).
+    const t = 0;
     return ray('calculateCameraRayIntersection', o, d, {
       point: add(o, scale(normalize(d), t)),
       t,
@@ -686,15 +688,15 @@ export class CameraViewportUISubsystem {
    * [1421] calculateScreenToWorldRay
    * Chuyển tọa độ màn hình thành tia thế giới.
    */
-  public calculateScreenToWorldRay(origin?: Vec3D, direction?: Vec3D): any {
+  public calculateScreenToWorldRay(origin?: Vec3D, direction?: Vec3D) {
     return ray('calculateScreenToWorldRay', origin ?? { x: 0, y: 0, z: 0 }, direction ?? { ...FORWARD3 });
   }
   /**
    * [1422] calculateWorldToScreenPosition
    * Chuyển tọa độ thế giới sang màn hình.
    */
-  public calculateWorldToScreenPosition(a?: any, b?: any, options?: any): any {
-    const frame = resolveCameraFrame((options as any)?.camera, this.config);
+  public calculateWorldToScreenPosition(a?: unknown, b?: unknown, options?: unknown) {
+    const frame = resolveCameraFrame(asRecord(options).camera, this.config);
     const target = b ? resolvePoint(b) : resolvePoint(a);
     const projection = projectToScreen(target, frame);
     return named('calculateWorldToScreenPosition', { x: projection.x, y: projection.y }, {
@@ -709,10 +711,10 @@ export class CameraViewportUISubsystem {
    * [1423] calculateScreenToWorldPosition
    * Chuyển tọa độ màn hình sang thế giới tại độ sâu cho trước.
    */
-  public calculateScreenToWorldPosition(a?: any, b?: any, options?: any): any {
-    const frame = resolveCameraFrame((options as any)?.camera, this.config);
+  public calculateScreenToWorldPosition(a?: unknown, b?: unknown, options?: unknown) {
+    const frame = resolveCameraFrame(asRecord(options).camera, this.config);
     const screen = resolvePoint(a);
-    let depth = num((options as any)?.depth, 1);
+    let depth = num(asRecord(options).depth, 1);
     if (b !== undefined && b !== null) {
       // `b` là một điểm thế giới: chiều sâu lấy theo mặt phẳng chứa nó.
       const planeDepth = dot(subtract(resolvePoint(b), frame.position), frame.forward);
@@ -728,11 +730,11 @@ export class CameraViewportUISubsystem {
    * [1424] calculateViewportAspectRatio
    * Tính tỷ lệ khung hình viewport.
    */
-  public calculateViewportAspectRatio(a?: any, b?: any, options?: any): any {
+  public calculateViewportAspectRatio(a?: unknown, b?: unknown, options?: unknown) {
     const frame = resolveCameraFrame(undefined, this.config);
     const viewport = this.viewportSize(a, b);
-    const width = this.dimension((options as any)?.width, viewport.width, frame.screenWidth);
-    const height = this.dimension((options as any)?.height, viewport.height, frame.screenHeight);
+    const width = this.dimension(asRecord(options).width, viewport.width, frame.screenWidth);
+    const height = this.dimension(asRecord(options).height, viewport.height, frame.screenHeight);
     const aspect = height > 0 ? width / height : frame.aspect;
     return named('calculateViewportAspectRatio', aspect, {
       width,
@@ -744,11 +746,11 @@ export class CameraViewportUISubsystem {
    * [1425] calculateViewportCenter
    * Tính tâm viewport.
    */
-  public calculateViewportCenter(a?: any, b?: any, options?: any): any {
+  public calculateViewportCenter(a?: unknown, b?: unknown, options?: unknown) {
     const frame = resolveCameraFrame(undefined, this.config);
     const viewport = this.viewportSize(a, b);
-    const width = this.dimension((options as any)?.width, viewport.width, frame.screenWidth);
-    const height = this.dimension((options as any)?.height, viewport.height, frame.screenHeight);
+    const width = this.dimension(asRecord(options).width, viewport.width, frame.screenWidth);
+    const height = this.dimension(asRecord(options).height, viewport.height, frame.screenHeight);
     return named('calculateViewportCenter', { x: width / 2, y: height / 2 }, {
       width,
       height,
@@ -758,7 +760,7 @@ export class CameraViewportUISubsystem {
    * [1426] calculateViewportBounds
    * Tính giới hạn viewport.
    */
-  public calculateViewportBounds(entity?: any, size?: Vec3D): any {
+  public calculateViewportBounds(entity?: unknown, size?: Vec3D) {
     const frame = resolveCameraFrame(entity, this.config);
     // `size` = kích thước viewport (px) dùng thay cho kích thước mặc định.
     const width = size && Number.isFinite(size.x) && size.x > 0 ? size.x : frame.screenWidth;
@@ -772,7 +774,7 @@ export class CameraViewportUISubsystem {
    * [1427] calculateScreenSpaceDistance
    * Tính khoảng cách trên màn hình.
    */
-  public calculateScreenSpaceDistance(a?: any, b?: any): any {
+  public calculateScreenSpaceDistance(a?: unknown, b?: unknown) {
     const from = resolvePoint(a);
     const to = resolvePoint(b);
     return Math.hypot(to.x - from.x, to.y - from.y);
@@ -781,7 +783,7 @@ export class CameraViewportUISubsystem {
    * [1428] calculateScreenSpaceAngle
    * Tính góc trên màn hình.
    */
-  public calculateScreenSpaceAngle(a?: any, b?: any): any {
+  public calculateScreenSpaceAngle(a?: unknown, b?: unknown) {
     const from = resolvePoint(a);
     const to = resolvePoint(b);
     return angleBetween({ x: from.x, y: from.y, z: 0 }, { x: to.x, y: to.y, z: 0 });
@@ -790,7 +792,7 @@ export class CameraViewportUISubsystem {
    * [1429] calculateScreenSpaceBoundingBox
    * Tính hộp bao 2D của vật thể 3D.
    */
-  public calculateScreenSpaceBoundingBox(entity?: any, size?: Vec3D): any {
+  public calculateScreenSpaceBoundingBox(entity?: unknown, size?: Vec3D) {
     const frame = resolveCameraFrame(undefined, this.config);
     const center = resolvePoint(entity);
     const projection = projectToScreen(center, frame);
@@ -807,7 +809,7 @@ export class CameraViewportUISubsystem {
    * [1430] calculateScreenSpaceBoundingSphere
    * Tính hình cầu chiếu lên màn hình.
    */
-  public calculateScreenSpaceBoundingSphere(entity?: any, radius = 1.0): any {
+  public calculateScreenSpaceBoundingSphere(entity?: unknown, radius = 1.0) {
     const center = resolvePoint(entity);
     return {
       center: { ...center },
@@ -818,11 +820,11 @@ export class CameraViewportUISubsystem {
    * [1431] calculateScreenSpaceArea
    * Tính diện tích chiếm trên màn hình.
    */
-  public calculateScreenSpaceArea(entity?: any, options?: any): any {
-    const frame = resolveCameraFrame((options as any)?.camera, this.config);
+  public calculateScreenSpaceArea(entity?: unknown, options?: unknown) {
+    const frame = resolveCameraFrame(asRecord(options).camera, this.config);
     const center = resolvePoint(entity);
     const projection = projectToScreen(center, frame);
-    const size = (entity as any)?.size ?? (options as any)?.size ?? { x: 1, y: 1, z: 1 };
+    const size = toVec3(asRecord(entity).size ?? asRecord(options).size ?? { x: 1, y: 1, z: 1 });
     const scale = pixelScaleAtDepth(projection.depth, frame);
     return Math.abs(num(size.x, 1) * num(size.y, 1)) * scale * scale;
   }
@@ -830,8 +832,8 @@ export class CameraViewportUISubsystem {
    * [1432] calculateScreenSpaceScale
    * Tính tỷ lệ kích thước trên màn hình.
    */
-  public calculateScreenSpaceScale(entity?: any, options?: any): any {
-    const frame = resolveCameraFrame((options as any)?.camera, this.config);
+  public calculateScreenSpaceScale(entity?: unknown, options?: unknown) {
+    const frame = resolveCameraFrame(asRecord(options).camera, this.config);
     const center = resolvePoint(entity);
     const projection = projectToScreen(center, frame);
     const scale = pixelScaleAtDepth(projection.depth, frame);
@@ -842,7 +844,7 @@ export class CameraViewportUISubsystem {
    * [1433] calculatePixelDistance
    * Tính khoảng cách theo pixel.
    */
-  public calculatePixelDistance(a?: any, b?: any): any {
+  public calculatePixelDistance(a?: unknown, b?: unknown) {
     const from = resolvePoint(a);
     const to = resolvePoint(b);
     return Math.hypot(to.x - from.x, to.y - from.y);
@@ -851,7 +853,7 @@ export class CameraViewportUISubsystem {
    * [1434] calculatePixelPosition
    * Tính vị trí pixel.
    */
-  public calculatePixelPosition(a?: any, b?: any, options?: any): any {
+  public calculatePixelPosition(a?: unknown, b?: unknown, options?: unknown) {
     const frame = this.frameOf(a, options);
     const target = b ? resolvePoint(b) : resolvePoint(a);
     const projection = projectToScreen(target, frame);
@@ -864,28 +866,28 @@ export class CameraViewportUISubsystem {
    * [1435] calculatePixelToWorldScale
    * Tính tỷ lệ chuyển pixel sang đơn vị thế giới.
    */
-  public calculatePixelToWorldScale(entity?: any, options?: any): any {
-    const frame = resolveCameraFrame((options as any)?.camera, this.config);
+  public calculatePixelToWorldScale(entity?: unknown, options?: unknown) {
+    const frame = resolveCameraFrame(asRecord(options).camera, this.config);
     const center = resolvePoint(entity);
-    const depth = num((options as any)?.depth, dot(subtract(center, frame.position), frame.forward));
+    const depth = num(asRecord(options).depth, dot(subtract(center, frame.position), frame.forward));
     return 1 / Math.max(1e-6, pixelScaleAtDepth(depth, frame));
   }
   /**
    * [1436] calculateWorldToPixelScale
    * Tính tỷ lệ chuyển đơn vị thế giới sang pixel.
    */
-  public calculateWorldToPixelScale(entity?: any, options?: any): any {
-    const frame = resolveCameraFrame((options as any)?.camera, this.config);
+  public calculateWorldToPixelScale(entity?: unknown, options?: unknown) {
+    const frame = resolveCameraFrame(asRecord(options).camera, this.config);
     const center = resolvePoint(entity);
-    const depth = num((options as any)?.depth, dot(subtract(center, frame.position), frame.forward));
+    const depth = num(asRecord(options).depth, dot(subtract(center, frame.position), frame.forward));
     return pixelScaleAtDepth(depth, frame);
   }
   /**
    * [1437] calculateUIAnchorPosition
    * Tính vị trí neo giao diện.
    */
-  public calculateUIAnchorPosition(target?: any, options?: any): any {
-    const frame = resolveCameraFrame((options as any)?.camera, this.config);
+  public calculateUIAnchorPosition(target?: unknown, options?: unknown) {
+    const frame = resolveCameraFrame(asRecord(options).camera, this.config);
     const world = resolveAnchorPoint(target, frame);
     return buildUIAnchor('calculateUIAnchorPosition', world, frame, options);
   }
@@ -893,21 +895,21 @@ export class CameraViewportUISubsystem {
    * [1438] calculateUIWorldAnchor
    * Tính điểm neo giao diện trong thế giới 3D.
    */
-  public calculateUIWorldAnchor(target?: any, options?: any): any {
-    const frame = resolveCameraFrame((options as any)?.camera, this.config);
+  public calculateUIWorldAnchor(target?: unknown, options?: unknown) {
+    const frame = resolveCameraFrame(asRecord(options).camera, this.config);
     const world = resolveAnchorPoint(target, frame);
     const anchor = buildUIAnchor('calculateUIWorldAnchor', world, frame, options);
-    return { ...anchor, anchorType: 'world', anchorId: (target as any)?.id };
+    return { ...anchor, anchorType: 'world', anchorId: asRecord(target).id };
   }
   /**
    * [1439] calculateUIBillboardRotation
    * Tính góc quay UI hướng về camera.
    */
-  public calculateUIBillboardRotation(entityOrAngle?: any, options?: any): any {
+  public calculateUIBillboardRotation(entityOrAngle?: unknown, options?: unknown) {
     if (entityOrAngle === undefined || entityOrAngle === null) {
       return { x: 0, y: 0, z: 0, w: 1 };
     }
-    const frame = resolveCameraFrame((options as any)?.camera ?? options, this.config);
+    const frame = resolveCameraFrame(asRecord(options).camera ?? options, this.config);
     const anchor = resolvePoint(entityOrAngle);
     if (magnitude(frame.position) === 0 && magnitude(anchor) === 0) {
       return { x: 0, y: 0, z: 0, w: 1 };
@@ -918,8 +920,8 @@ export class CameraViewportUISubsystem {
    * [1440] calculateUIBillboardPosition
    * Tính vị trí UI dạng billboard.
    */
-  public calculateUIBillboardPosition(target?: any, options?: any): any {
-    const frame = resolveCameraFrame((options as any)?.camera, this.config);
+  public calculateUIBillboardPosition(target?: unknown, options?: unknown) {
+    const frame = resolveCameraFrame(asRecord(options).camera, this.config);
     const world = resolveAnchorPoint(target, frame);
     const anchor = buildUIAnchor('calculateUIBillboardPosition', world, frame, options);
     return { ...anchor, billboard: true };
@@ -928,8 +930,8 @@ export class CameraViewportUISubsystem {
    * [1441] calculateUIFollowTarget
    * Tính vị trí UI bám theo mục tiêu.
    */
-  public calculateUIFollowTarget(target?: any, options?: any): any {
-    const frame = resolveCameraFrame((options as any)?.camera, this.config);
+  public calculateUIFollowTarget(target?: unknown, options?: unknown) {
+    const frame = resolveCameraFrame(asRecord(options).camera, this.config);
     const world = resolveAnchorPoint(target, frame);
     const anchor = buildUIAnchor('calculateUIFollowTarget', world, frame, options);
     return { ...anchor, following: true, followTarget: world };
@@ -938,8 +940,8 @@ export class CameraViewportUISubsystem {
    * [1442] calculateUIFollowOffset
    * Tính độ lệch UI so với mục tiêu.
    */
-  public calculateUIFollowOffset(target?: any, options?: any): any {
-    const frame = resolveCameraFrame((options as any)?.camera, this.config);
+  public calculateUIFollowOffset(target?: unknown, options?: unknown) {
+    const frame = resolveCameraFrame(asRecord(options).camera, this.config);
     const world = resolveAnchorPoint(target, frame);
     const offset = readVec3(options, ['offset', 'followOffset']);
     const projection = projectToScreen(world, frame);
@@ -953,11 +955,11 @@ export class CameraViewportUISubsystem {
    * [1443] calculateUIVisibility
    * Tính trạng thái hiển thị UI.
    */
-  public calculateUIVisibility(target?: any, options?: any): any {
-    const frame = resolveCameraFrame((options as any)?.camera, this.config);
+  public calculateUIVisibility(target?: unknown, options?: unknown) {
+    const frame = resolveCameraFrame(asRecord(options).camera, this.config);
     const world = resolveAnchorPoint(target, frame);
     const projection = projectToScreen(world, frame);
-    const occlusion = occlusionFactor(world, readVec3(options, ['occluder']), num((options as any)?.occluderRadius, 0));
+    const occlusion = occlusionFactor(world, readVec3(options, ['occluder']), num(asRecord(options).occluderRadius, 0));
     const visible = projection.depth > frame.near && projection.depth < frame.far && occlusion < 0.5;
     return named('calculateUIVisibility', visible, {
       onScreen: projection.visible,
@@ -974,8 +976,8 @@ export class CameraViewportUISubsystem {
    * che khuất là mức chồng lấn của vật cản gần nhất lên điểm neo UI. Không có
    * vật cản nào ⇒ không che khuất (0).
    */
-  public calculateUIOcclusion(target?: any, options?: any): any {
-    const frame = resolveCameraFrame((options as any)?.camera, this.config);
+  public calculateUIOcclusion(target?: unknown, options?: unknown) {
+    const frame = resolveCameraFrame(asRecord(options).camera, this.config);
     const world = resolveAnchorPoint(target, frame);
     const candidates = this.occludersOf(target, options);
 
@@ -1007,7 +1009,7 @@ export class CameraViewportUISubsystem {
    * [1445] calculateUIDistanceScale
    * Tính tỷ lệ UI theo khoảng cách.
    */
-  public calculateUIDistanceScale(a?: any, b?: any): any {
+  public calculateUIDistanceScale(a?: unknown, b?: unknown) {
     const from = resolvePoint(a);
     const to = resolvePoint(b);
     return uiDistanceScale(distance3D(from, to));
@@ -1016,8 +1018,8 @@ export class CameraViewportUISubsystem {
    * [1446] calculateUIDepthOrder
    * Tính thứ tự độ sâu UI.
    */
-  public calculateUIDepthOrder(entity?: any, options?: any): any {
-    const frame = resolveCameraFrame((options as any)?.camera, this.config);
+  public calculateUIDepthOrder(entity?: unknown, options?: unknown) {
+    const frame = resolveCameraFrame(asRecord(options).camera, this.config);
     const center = resolvePoint(entity);
     return uiDepthOrder(dot(subtract(center, frame.position), frame.forward));
   }
@@ -1025,7 +1027,7 @@ export class CameraViewportUISubsystem {
    * [1447] calculateUIProjectionBounds
    * Tính giới hạn UI sau phép chiếu.
    */
-  public calculateUIProjectionBounds(entity?: any, size?: Vec3D): any {
+  public calculateUIProjectionBounds(entity?: unknown, size?: Vec3D) {
     const frame = resolveCameraFrame(undefined, this.config);
     const center = resolvePoint(entity);
     const projection = projectToScreen(center, frame);
@@ -1041,17 +1043,17 @@ export class CameraViewportUISubsystem {
    * [1448] calculateUIInteractionRay
    * Tính tia tương tác UI trong không gian 3D.
    */
-  public calculateUIInteractionRay(origin?: Vec3D, direction?: Vec3D): any {
+  public calculateUIInteractionRay(origin?: Vec3D, direction?: Vec3D) {
     return ray('calculateUIInteractionRay', origin ?? { x: 0, y: 0, z: 0 }, direction ?? { ...FORWARD3 });
   }
   /**
    * [1449] calculateUIHitTest
    * Kiểm tra điểm tương tác có chạm UI.
    */
-  public calculateUIHitTest(a?: any, b?: any): any {
+  public calculateUIHitTest(a?: unknown, b?: unknown) {
     const point = resolvePoint(a);
     const target = resolvePoint(b);
-    const radius = num((a as any)?.radius, 0.5);
+    const radius = num(asRecord(a).radius, 0.5);
     const distance = distance3D(point, target);
     const hit = distance <= radius;
     return {
@@ -1063,15 +1065,15 @@ export class CameraViewportUISubsystem {
       normal: { x: 0, y: 1, z: 0 },
       penetration: Math.max(0, radius - distance),
       screenPoint: { x: point.x, y: point.y },
-      targetId: (b as any)?.id,
+      targetId: asRecord(b).id,
     };
   }
   /**
    * [1450] calculateUIWorldToScreenOffset
    * Tính độ lệch chiếu UI từ thế giới sang màn hình.
    */
-  public calculateUIWorldToScreenOffset(target?: any, options?: any): any {
-    const frame = resolveCameraFrame((options as any)?.camera, this.config);
+  public calculateUIWorldToScreenOffset(target?: unknown, options?: unknown) {
+    const frame = resolveCameraFrame(asRecord(options).camera, this.config);
     const world = resolveAnchorPoint(target, frame);
     const projection = projectToScreen(world, frame);
     const desired = readVec2(options, ['screenOffset', 'desiredPosition']);

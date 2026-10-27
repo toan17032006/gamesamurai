@@ -334,21 +334,21 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1681] getClothingPosition
    * Vị trí trang phục trên cơ thể.
    */
-  public getClothingPosition(entity?: any, offset?: Vec3D): any {
+  public getClothingPosition(entity?: unknown, offset?: Vec3D) {
     return this.anchorAt(entity, offset ?? { x: 0, y: 0, z: 0 });
   }
   /**
    * [1682] getClothingAnchor
    * Điểm neo của trang phục.
    */
-  public getClothingAnchor(entity?: any, offset?: Vec3D): any {
+  public getClothingAnchor(entity?: unknown, offset?: Vec3D) {
     return this.anchorAt(entity, offset ?? { x: 0, y: 0, z: 0 });
   }
   /**
    * [1683] getClothingSurfacePosition
    * Vị trí trên bề mặt trang phục.
    */
-  public getClothingSurfacePosition(entity?: any, offset?: Vec3D): any {
+  public getClothingSurfacePosition(entity?: unknown, offset?: Vec3D) {
     const thickness = readNum(entity, ['thickness'], EQUIPMENT_DIMENSIONS.clothingThickness);
     const shift = offset ?? { x: 0, y: 0, z: 0 };
     return this.anchorAt(entity, { x: shift.x, y: shift.y, z: thickness + shift.z });
@@ -357,7 +357,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1684] getClothingVertexPosition
    * Vị trí một đỉnh của lưới trang phục.
    */
-  public getClothingVertexPosition(entity?: any, offset?: Vec3D): any {
+  public getClothingVertexPosition(entity?: unknown, offset?: Vec3D) {
     const vertices = readPoints(entity, ['vertices', 'mesh']);
     if (vertices.length > 0) {
       const base = entityPosition(entity);
@@ -374,7 +374,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1685] calculateClothingFitOffset
    * Độ lệch giữa trang phục và cơ thể (trang phục rộng hơn = dương).
    */
-  public calculateClothingFitOffset(a?: any, b?: any, options?: any): any {
+  public calculateClothingFitOffset(a?: unknown, b?: unknown, options?: unknown) {
     const bodyRadius = readNum(a, ['bodyRadius', 'radius'], 0.3);
     const clothRadius = readNum(b, ['clothingRadius', 'radius'], bodyRadius + EQUIPMENT_DIMENSIONS.clothingThickness);
     const offset = clothRadius - bodyRadius;
@@ -388,14 +388,14 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1686] calculateClothingBodyDistance
    * Khoảng cách giữa trang phục và cơ thể.
    */
-  public calculateClothingBodyDistance(a?: any, b?: any): any {
+  public calculateClothingBodyDistance(a?: unknown, b?: unknown) {
     return distance3D(worldPoint(a), worldPoint(b));
   }
   /**
    * [1687] calculateClothingPenetration
    * Độ xâm nhập của trang phục vào cơ thể.
    */
-  public calculateClothingPenetration(a?: any, b?: any, options?: any): any {
+  public calculateClothingPenetration(a?: unknown, b?: unknown, options?: unknown) {
     const bodyRadius = readNum(a, ['bodyRadius', 'radius'], 0.3);
     const clothRadius = readNum(b, ['clothingRadius', 'radius'], bodyRadius);
     const distance = distance3D(worldPoint(a), worldPoint(b));
@@ -406,7 +406,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1688] calculateClothingCollision
    * Va chạm giữa trang phục và cơ thể.
    */
-  public calculateClothingCollision(a?: any, b?: any): any {
+  public calculateClothingCollision(a?: unknown, b?: unknown) {
     const bodyRadius = readNum(a, ['bodyRadius', 'radius'], 0.3);
     const clothRadius = readNum(b, ['clothingRadius', 'radius'], bodyRadius + EQUIPMENT_DIMENSIONS.clothingThickness);
     const centerA = worldPoint(a);
@@ -430,7 +430,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * Lực kéo lấy từ `force` tường minh; nếu không có thì dùng gió tác động
    * (`wind`), và nếu cũng không có thì dùng lực quán tính F = m·a của người mặc.
    */
-  public calculateClothingDeformation(a?: any, b?: any, options?: any): any {
+  public calculateClothingDeformation(a?: unknown, b?: unknown, options?: unknown) {
     const sources = [a, b, options];
     const explicitForce = this.firstVector(sources, ['force', 'tension', 'pull']);
     let force = explicitForce;
@@ -464,7 +464,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1690] calculateClothingWrinkleCurvature
    * Độ cong nếp nhăn trên trang phục.
    */
-  public calculateClothingWrinkleCurvature(entity?: any, options?: any): any {
+  public calculateClothingWrinkleCurvature(entity?: unknown, options?: unknown) {
     const amplitude = readNum(entity, ['wrinkleAmplitude'], 0.004);
     const wavelength = readNum(entity, ['wrinkleWavelength'], 0.05);
     const curvature = wavelength > 0 ? (2 * Math.PI * amplitude) / (wavelength * wavelength) : 0;
@@ -474,7 +474,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1691] calculateClothingCenterOfMass
    * Tâm khối lượng của trang phục.
    */
-  public calculateClothingCenterOfMass(entity?: any, options?: any): any {
+  public calculateClothingCenterOfMass(entity?: unknown, options?: unknown) {
     const source = this.optionEntity(options, entity);
     const center = entityPosition(source);
     const mass = readNum(source, ['mass'], 0.4);
@@ -486,7 +486,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1692] calculateClothingBoundingBox
    * Hộp bao của trang phục.
    */
-  public calculateClothingBoundingBox(entity?: any, size?: Vec3D): any {
+  public calculateClothingBoundingBox(entity?: unknown, size?: Vec3D) {
     const extent = size ?? { x: 0.4, y: 0.6, z: 0.25 };
     return bounds('calculateClothingBoundingBox', this.boxOf(entity, extent));
   }
@@ -494,21 +494,21 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1693] getHelmetPosition
    * Vị trí mũ bảo hiểm.
    */
-  public getHelmetPosition(entity?: any, offset?: Vec3D): any {
+  public getHelmetPosition(entity?: unknown, offset?: Vec3D) {
     return this.anchorAt(entity, offset ?? { x: 0, y: 0.12, z: 0 });
   }
   /**
    * [1694] getHelmetAnchor
    * Điểm neo của mũ.
    */
-  public getHelmetAnchor(entity?: any, offset?: Vec3D): any {
+  public getHelmetAnchor(entity?: unknown, offset?: Vec3D) {
     return this.anchorAt(entity, offset ?? { x: 0, y: 0.1, z: 0 });
   }
   /**
    * [1695] calculateHelmetHeadOffset
    * Độ lệch của mũ so với đầu.
    */
-  public calculateHelmetHeadOffset(a?: any, b?: any, options?: any): any {
+  public calculateHelmetHeadOffset(a?: unknown, b?: unknown, options?: unknown) {
     const offset = subtract(worldPoint(b), worldPoint(a));
     const magnitudeOffset = magnitude(offset);
     return named('calculateHelmetHeadOffset', this.applyVectorOptions(offset, options, a), {
@@ -520,7 +520,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1696] calculateHelmetOrientation
    * Góc quay của mũ.
    */
-  public calculateHelmetOrientation(entityOrAngle?: any, options?: any): any {
+  public calculateHelmetOrientation(entityOrAngle?: unknown, options?: unknown) {
     const source = this.optionEntity(options, entityOrAngle);
     return orientation('calculateHelmetOrientation', this.applyQuaternionOptions(entityQuaternion(source), options, source));
   }
@@ -528,7 +528,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1697] calculateHelmetCollision
    * Va chạm của mũ.
    */
-  public calculateHelmetCollision(a?: any, b?: any): any {
+  public calculateHelmetCollision(a?: unknown, b?: unknown) {
     const sphereA = boundingSphere(worldPoint(a), EQUIPMENT_DIMENSIONS.helmetRadius);
     const sphereB = boundingSphere(worldPoint(b), readNum(b, ['radius'], EQUIPMENT_DIMENSIONS.helmetRadius));
     const distance = distance3D(sphereA.center, sphereB.center);
@@ -547,14 +547,14 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1698] getGlassesPosition
    * Vị trí kính.
    */
-  public getGlassesPosition(entity?: any, offset?: Vec3D): any {
+  public getGlassesPosition(entity?: unknown, offset?: Vec3D) {
     return this.anchorAt(entity, offset ?? { x: 0, y: 0, z: EQUIPMENT_DIMENSIONS.glassesOffset });
   }
   /**
    * [1699] calculateGlassesEyeAlignment
    * Mức độ khớp kính với vị trí mắt.
    */
-  public calculateGlassesEyeAlignment(a?: any, b?: any, options?: any): any {
+  public calculateGlassesEyeAlignment(a?: unknown, b?: unknown, options?: unknown) {
     const glasses = worldPoint(a);
     const eyes = worldPoint(b);
     const distance = distance3D(glasses, eyes);
@@ -568,7 +568,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1700] calculateGlassesHeadOffset
    * Độ lệch của kính so với đầu.
    */
-  public calculateGlassesHeadOffset(a?: any, b?: any, options?: any): any {
+  public calculateGlassesHeadOffset(a?: unknown, b?: unknown, options?: unknown) {
     const offset = subtract(worldPoint(b), worldPoint(a));
     return named('calculateGlassesHeadOffset', this.applyVectorOptions(offset, options, a), { distance: magnitude(offset) });
   }
@@ -576,14 +576,14 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1701] getBackpackPosition
    * Vị trí ba lô.
    */
-  public getBackpackPosition(entity?: any, offset?: Vec3D): any {
+  public getBackpackPosition(entity?: unknown, offset?: Vec3D) {
     return this.anchorAt(entity, offset ?? { x: 0, y: 0.1, z: -EQUIPMENT_DIMENSIONS.backpackDepth });
   }
   /**
    * [1702] calculateBackpackSpineOffset
    * Độ lệch của ba lô so với cột sống.
    */
-  public calculateBackpackSpineOffset(a?: any, b?: any, options?: any): any {
+  public calculateBackpackSpineOffset(a?: unknown, b?: unknown, options?: unknown) {
     const offset = subtract(worldPoint(b), worldPoint(a));
     const magnitudeOffset = magnitude(offset);
     return named('calculateBackpackSpineOffset', this.applyVectorOptions(offset, options, a), {
@@ -595,7 +595,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1703] calculateBackpackCenterOfMass
    * Tâm khối lượng của ba lô.
    */
-  public calculateBackpackCenterOfMass(entity?: any, options?: any): any {
+  public calculateBackpackCenterOfMass(entity?: unknown, options?: unknown) {
     const source = this.optionEntity(options, entity);
     const center = entityPosition(source);
     const mass = readNum(source, ['mass'], 5);
@@ -607,7 +607,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1704] calculateBackpackSwing
    * Góc lắc của ba lô khi chạy.
    */
-  public calculateBackpackSwing(a?: any, b?: any, options?: any): any {
+  public calculateBackpackSwing(a?: unknown, b?: unknown, options?: unknown) {
     const speed = readNum(a, ['speed'], readNum(b, ['speed'], 0));
     const amplitude = readNum(options, ['amplitude'], 0.08);
     const phase = readNum(options, ['phase'], 0);
@@ -618,35 +618,35 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1705] getWeaponPosition
    * Vị trí vũ khí.
    */
-  public getWeaponPosition(entity?: any, offset?: Vec3D): any {
+  public getWeaponPosition(entity?: unknown, offset?: Vec3D) {
     return this.anchorAt(entity, offset ?? { x: 0, y: 0, z: 0 });
   }
   /**
    * [1706] getWeaponGripPosition
    * Vị trí tay nắm vũ khí.
    */
-  public getWeaponGripPosition(entity?: any, offset?: Vec3D): any {
+  public getWeaponGripPosition(entity?: unknown, offset?: Vec3D) {
     return this.anchorAt(entity, offset ?? { x: 0, y: 0, z: EQUIPMENT_DIMENSIONS.weaponGripOffset });
   }
   /**
    * [1707] getWeaponMuzzlePosition
    * Vị trí nòng vũ khí.
    */
-  public getWeaponMuzzlePosition(entity?: any, offset?: Vec3D): any {
+  public getWeaponMuzzlePosition(entity?: unknown, offset?: Vec3D) {
     return this.anchorAt(entity, offset ?? { x: 0, y: 0, z: EQUIPMENT_DIMENSIONS.weaponMuzzleOffset });
   }
   /**
    * [1708] getWeaponStockPosition
    * Vị trí báng vũ khí.
    */
-  public getWeaponStockPosition(entity?: any, offset?: Vec3D): any {
+  public getWeaponStockPosition(entity?: unknown, offset?: Vec3D) {
     return this.anchorAt(entity, offset ?? { x: 0, y: 0, z: -EQUIPMENT_DIMENSIONS.weaponStockOffset });
   }
   /**
    * [1709] calculateWeaponAimDirection
    * Hướng ngắm của vũ khí.
    */
-  public calculateWeaponAimDirection(a?: any, b?: any): any {
+  public calculateWeaponAimDirection(a?: unknown, b?: unknown) {
     const origin = worldPoint(a);
     const target = worldPoint(b);
     const dir = normalize(subtract(target, origin));
@@ -656,7 +656,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1710] calculateWeaponHandAlignment
    * Mức độ khớp tay với tay nắm.
    */
-  public calculateWeaponHandAlignment(a?: any, b?: any, options?: any): any {
+  public calculateWeaponHandAlignment(a?: unknown, b?: unknown, options?: unknown) {
     const weapon = worldPoint(a);
     const hand = worldPoint(b);
     const distance = distance3D(weapon, hand);
@@ -670,7 +670,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1711] calculateWeaponRecoilOffset
    * Độ giật lùi của vũ khí.
    */
-  public calculateWeaponRecoilOffset(a?: any, b?: any, options?: any): any {
+  public calculateWeaponRecoilOffset(a?: unknown, b?: unknown, options?: unknown) {
     const impulse = readNum(a, ['impulse', 'recoilImpulse'], readNum(b, ['impulse', 'recoilImpulse'], 0));
     const mass = readNum(a, ['mass'], readNum(b, ['mass'], 3.5));
     const direction = entityForward(a);
@@ -685,7 +685,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1712] calculateWeaponRecoilRotation
    * Góc giật của vũ khí.
    */
-  public calculateWeaponRecoilRotation(entityOrAngle?: any, options?: any): any {
+  public calculateWeaponRecoilRotation(entityOrAngle?: unknown, options?: unknown) {
     const source = this.optionEntity(options, entityOrAngle);
     const angle = readNum(source, ['recoilAngle', 'angle'], 0);
     const axis = normalize(readVec(source, ['axis']));
@@ -703,7 +703,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1713] calculateWeaponMuzzleDirection
    * Hướng nòng vũ khí.
    */
-  public calculateWeaponMuzzleDirection(a?: any, b?: any): any {
+  public calculateWeaponMuzzleDirection(a?: unknown, b?: unknown) {
     const explicit = this.firstVector([a, b], ['direction', 'muzzleDirection', 'aimDirection']);
     const forward = magnitude(explicit) > 0 ? normalize(explicit) : entityForward(a);
     return direction('calculateWeaponMuzzleDirection', magnitude(forward) > 0 ? forward : FORWARD3);
@@ -712,7 +712,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1714] calculateWeaponCollision
    * Va chạm của vũ khí.
    */
-  public calculateWeaponCollision(a?: any, b?: any): any {
+  public calculateWeaponCollision(a?: unknown, b?: unknown) {
     const boxA = this.boxOf(a, { x: 0.08, y: 0.12, z: EQUIPMENT_DIMENSIONS.weaponLength });
     const boxB = this.boxOf(b, { x: 0.3, y: 1.8, z: 0.3 });
     const hit = boxesOverlap(boxA, boxB);
@@ -723,21 +723,21 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1715] getShieldPosition
    * Vị trí khiên.
    */
-  public getShieldPosition(entity?: any, offset?: Vec3D): any {
+  public getShieldPosition(entity?: unknown, offset?: Vec3D) {
     return this.anchorAt(entity, offset ?? { x: 0, y: 0, z: 0.2 });
   }
   /**
    * [1716] getShieldCenter
    * Tâm khiên.
    */
-  public getShieldCenter(entity?: any, offset?: Vec3D): any {
+  public getShieldCenter(entity?: unknown, offset?: Vec3D) {
     return this.anchorAt(entity, offset ?? { x: 0, y: 0, z: 0.2 });
   }
   /**
    * [1717] calculateShieldOrientation
    * Góc quay của khiên.
    */
-  public calculateShieldOrientation(entityOrAngle?: any, options?: any): any {
+  public calculateShieldOrientation(entityOrAngle?: unknown, options?: unknown) {
     const source = this.optionEntity(options, entityOrAngle);
     return orientation('calculateShieldOrientation', this.applyQuaternionOptions(entityQuaternion(source), options, source));
   }
@@ -745,7 +745,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1718] calculateShieldSurfaceNormal
    * Pháp tuyến mặt khiên.
    */
-  public calculateShieldSurfaceNormal(a?: any, b?: any): any {
+  public calculateShieldSurfaceNormal(a?: unknown, b?: unknown) {
     const explicit = this.firstVector([a, b], ['normal', 'shieldNormal', 'surfaceNormal']);
     if (magnitude(explicit) > 0) return direction('calculateShieldSurfaceNormal', normalize(explicit));
     const forward = entityForward(a);
@@ -756,7 +756,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1719] calculateShieldCoverageAngle
    * Góc che phủ của khiên.
    */
-  public calculateShieldCoverageAngle(a?: any, b?: any): any {
+  public calculateShieldCoverageAngle(a?: unknown, b?: unknown) {
     const radius = readNum(a, ['radius'], EQUIPMENT_DIMENSIONS.shieldRadius);
     const threat = worldPoint(b);
     const center = worldPoint(a);
@@ -768,7 +768,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1720] calculateShieldCollision
    * Va chạm của khiên.
    */
-  public calculateShieldCollision(a?: any, b?: any): any {
+  public calculateShieldCollision(a?: unknown, b?: unknown) {
     const radius = readNum(a, ['radius'], EQUIPMENT_DIMENSIONS.shieldRadius);
     const center = worldPoint(a);
     const other = worldPoint(b);
@@ -793,14 +793,14 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1721] getVehiclePosition
    * Vị trí phương tiện.
    */
-  public getVehiclePosition(entity?: any, offset?: Vec3D): any {
+  public getVehiclePosition(entity?: unknown, offset?: Vec3D) {
     return this.anchorAt(entity, offset ?? { x: 0, y: 0, z: 0 });
   }
   /**
    * [1722] getVehicleCenter
    * Tâm phương tiện.
    */
-  public getVehicleCenter(entity?: any, offset?: Vec3D): any {
+  public getVehicleCenter(entity?: unknown, offset?: Vec3D) {
     const size = this.vehicleSize(entity);
     return this.anchorAt(entity, offset ?? { x: 0, y: size.height / 2, z: 0 });
   }
@@ -808,7 +808,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1723] getVehicleFrontPosition
    * Vị trí đầu xe.
    */
-  public getVehicleFrontPosition(entity?: any, offset?: Vec3D): any {
+  public getVehicleFrontPosition(entity?: unknown, offset?: Vec3D) {
     const size = this.vehicleSize(entity);
     return this.anchorAt(entity, offset ?? { x: 0, y: size.height / 2, z: size.length / 2 });
   }
@@ -816,7 +816,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1724] getVehicleRearPosition
    * Vị trí đuôi xe.
    */
-  public getVehicleRearPosition(entity?: any, offset?: Vec3D): any {
+  public getVehicleRearPosition(entity?: unknown, offset?: Vec3D) {
     const size = this.vehicleSize(entity);
     return this.anchorAt(entity, offset ?? { x: 0, y: size.height / 2, z: -size.length / 2 });
   }
@@ -824,7 +824,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1725] getVehicleLeftPosition
    * Vị trí bên trái xe.
    */
-  public getVehicleLeftPosition(entity?: any, offset?: Vec3D): any {
+  public getVehicleLeftPosition(entity?: unknown, offset?: Vec3D) {
     const size = this.vehicleSize(entity);
     return this.anchorAt(entity, offset ?? { x: -size.width / 2, y: size.height / 2, z: 0 });
   }
@@ -832,7 +832,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1726] getVehicleRightPosition
    * Vị trí bên phải xe.
    */
-  public getVehicleRightPosition(entity?: any, offset?: Vec3D): any {
+  public getVehicleRightPosition(entity?: unknown, offset?: Vec3D) {
     const size = this.vehicleSize(entity);
     return this.anchorAt(entity, offset ?? { x: size.width / 2, y: size.height / 2, z: 0 });
   }
@@ -840,7 +840,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1727] getVehicleRoofPosition
    * Vị trí nói xe.
    */
-  public getVehicleRoofPosition(entity?: any, offset?: Vec3D): any {
+  public getVehicleRoofPosition(entity?: unknown, offset?: Vec3D) {
     const size = this.vehicleSize(entity);
     return this.anchorAt(entity, offset ?? { x: 0, y: size.height, z: 0 });
   }
@@ -848,7 +848,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1728] getVehicleUndersidePosition
    * Vị trí gầm xe.
    */
-  public getVehicleUndersidePosition(entity?: any, offset?: Vec3D): any {
+  public getVehicleUndersidePosition(entity?: unknown, offset?: Vec3D) {
     const clearance = readNum(entity, ['groundClearance'], VEHICLE_DIMENSIONS.groundClearance);
     return this.anchorAt(entity, offset ?? { x: 0, y: clearance, z: 0 });
   }
@@ -856,7 +856,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1729] getVehicleWheelPosition
    * Vị trí bánh xe.
    */
-  public getVehicleWheelPosition(entity?: any, offset?: Vec3D): any {
+  public getVehicleWheelPosition(entity?: unknown, offset?: Vec3D) {
     const size = this.vehicleSize(entity);
     const track = readNum(entity, ['trackWidth'], VEHICLE_DIMENSIONS.trackWidth);
     const wheelbase = readNum(entity, ['wheelbase'], VEHICLE_DIMENSIONS.wheelbase);
@@ -871,7 +871,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1730] getVehicleAxlePosition
    * Vị trí trục bánh xe.
    */
-  public getVehicleAxlePosition(entity?: any, offset?: Vec3D): any {
+  public getVehicleAxlePosition(entity?: unknown, offset?: Vec3D) {
     const wheelbase = readNum(entity, ['wheelbase'], VEHICLE_DIMENSIONS.wheelbase);
     return this.anchorAt(entity, offset ?? { x: 0, y: VEHICLE_DIMENSIONS.wheelRadius, z: wheelbase / 2 });
   }
@@ -879,28 +879,28 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1731] calculateVehicleLength
    * Chiều dài xe.
    */
-  public calculateVehicleLength(entity?: any, options?: any): any {
+  public calculateVehicleLength(entity?: unknown, options?: unknown) {
     return this.applyNumberOptions(this.vehicleSize(entity).length, options);
   }
   /**
    * [1732] calculateVehicleWidth
    * Bề ngang xe.
    */
-  public calculateVehicleWidth(entity?: any, options?: any): any {
+  public calculateVehicleWidth(entity?: unknown, options?: unknown) {
     return this.applyNumberOptions(this.vehicleSize(entity).width, options);
   }
   /**
    * [1733] calculateVehicleHeight
    * Chiều cao xe.
    */
-  public calculateVehicleHeight(entity?: any, options?: any): any {
+  public calculateVehicleHeight(entity?: unknown, options?: unknown) {
     return this.applyNumberOptions(this.vehicleSize(entity).height, options);
   }
   /**
    * [1734] calculateVehicleWheelbase
    * Chiều dài cơ sở xe.
    */
-  public calculateVehicleWheelbase(a?: any, b?: any, options?: any): any {
+  public calculateVehicleWheelbase(a?: unknown, b?: unknown, options?: unknown) {
     const front = readVec(a, ['frontWheel', 'front']);
     const rear = readVec(a, ['rearWheel', 'rear']);
     const frontAlt = readVec(b, ['frontWheel', 'front']);
@@ -916,7 +916,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1735] calculateVehicleTrackWidth
    * Chiều rộng vệt bánh xe.
    */
-  public calculateVehicleTrackWidth(a?: any, b?: any, options?: any): any {
+  public calculateVehicleTrackWidth(a?: unknown, b?: unknown, options?: unknown) {
     const left = this.firstVector([a, b], ['leftWheel', 'left']);
     const right = this.firstVector([a, b], ['rightWheel', 'right']);
     const width = magnitude(left) > 0 && magnitude(right) > 0
@@ -936,7 +936,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1736] calculateVehicleTurningRadius
    * Bán kính quay vòng của xe.
    */
-  public calculateVehicleTurningRadius(entity?: any, options?: any): any {
+  public calculateVehicleTurningRadius(entity?: unknown, options?: unknown) {
     const wheelbase = readNum(entity, ['wheelbase'], VEHICLE_DIMENSIONS.wheelbase);
     const steering = readNum(entity, ['steeringAngle', 'steerAngle'], 0);
     if (Math.abs(steering) < 1e-3) return Infinity;
@@ -946,7 +946,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1737] calculateVehicleTurningAngle
    * Góc quay của xe.
    */
-  public calculateVehicleTurningAngle(a?: any, b?: any): any {
+  public calculateVehicleTurningAngle(a?: unknown, b?: unknown) {
     const from = readVec(a, ['forward', 'heading']);
     const to = readVec(b, ['forward', 'heading']);
     const dirA = magnitude(from) > 0 ? normalize(from) : entityForward(a);
@@ -957,7 +957,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1738] calculateVehicleSpeed
    * Tốc độ xe (m/s).
    */
-  public calculateVehicleSpeed(entity?: any, options?: any): any {
+  public calculateVehicleSpeed(entity?: unknown, options?: unknown) {
     const explicit = readNum(entity, ['speed'], Number.NaN);
     if (Number.isFinite(explicit)) {
       return this.applyNumberOptions(Math.abs(explicit), options);
@@ -973,7 +973,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1739] calculateVehicleAcceleration
    * Gia tốc của xe.
    */
-  public calculateVehicleAcceleration(entity?: any, dt = 0.016): any {
+  public calculateVehicleAcceleration(entity?: unknown, dt = 0.016) {
     const explicit = readVec(entity, ['acceleration']);
     if (magnitude(explicit) > 0) return direction('calculateVehicleAcceleration', explicit, { dt });
     const velocity = readVec(entity, ['velocity']);
@@ -989,7 +989,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1740] calculateVehicleBrakingDistance
    * Quãng đường phanh của xe.
    */
-  public calculateVehicleBrakingDistance(a?: any, b?: any): any {
+  public calculateVehicleBrakingDistance(a?: unknown, b?: unknown) {
     const speed = Math.abs(readNum(a, ['speed'], VEHICLE_REFERENCE_SPEED));
     const deceleration = readNum(a, ['deceleration', 'braking'], readNum(b, ['deceleration'], 6));
     const distance = deceleration > 0 ? (speed * speed) / (2 * deceleration) : Infinity;
@@ -999,7 +999,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1741] calculateVehicleStoppingTime
    * Thời gian dừng xe.
    */
-  public calculateVehicleStoppingTime(a?: any, b?: any, options?: any): any {
+  public calculateVehicleStoppingTime(a?: unknown, b?: unknown, options?: unknown) {
     const speed = Math.abs(readNum(a, ['speed'], VEHICLE_REFERENCE_SPEED));
     const deceleration = readNum(a, ['deceleration', 'braking'], readNum(b, ['deceleration', 'braking'], readNum(options, ['deceleration'], 6)));
     const time = deceleration > 0 ? speed / deceleration : Infinity;
@@ -1009,7 +1009,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1742] calculateVehicleHeading
    * Hướng đầu xe (góc yaw trên mặt phẳng ngang).
    */
-  public calculateVehicleHeading(a?: any, b?: any, options?: any): any {
+  public calculateVehicleHeading(a?: unknown, b?: unknown, options?: unknown) {
     const source = this.optionEntity(options, a);
     const explicit = readVec(b, ['forward', 'heading']);
     const forward = magnitude(explicit) > 0 ? normalize(explicit) : entityForward(source);
@@ -1019,7 +1019,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1743] calculateVehicleYawRate
    * Tốc độ yaw của xe.
    */
-  public calculateVehicleYawRate(entity?: any, options?: any): any {
+  public calculateVehicleYawRate(entity?: unknown, options?: unknown) {
     const angular = readVec(entity, ['angularVelocity']);
     const yawRate = magnitude(angular) > 0 ? angular.y : readNum(entity, ['yawRate'], 0);
     return this.applyNumberOptions(yawRate, options);
@@ -1028,7 +1028,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1744] calculateVehiclePitchAngle
    * Góc nghiêng dọc của xe.
    */
-  public calculateVehiclePitchAngle(entity?: any, options?: any): any {
+  public calculateVehiclePitchAngle(entity?: unknown, options?: unknown) {
     const source = this.optionEntity(options, entity);
     const forward = entityForward(source);
     return this.applyNumberOptions(Math.asin(clamp(forward.y, -1, 1)), options);
@@ -1040,7 +1040,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * Roll là góc xoay quanh trục dọn của xe (+Z) nên nó chính là thành phần `z`
    * của Euler của hướng xe — đọc từ quaternion/rotation thật của đối tượng.
    */
-  public calculateVehicleRollAngle(entity?: any, options?: any): any {
+  public calculateVehicleRollAngle(entity?: unknown, options?: unknown) {
     const explicit = this.firstNumber([entity, options], ['roll', 'rollAngle']);
     if (Number.isFinite(explicit)) return explicit;
     const euler = quaternionToEuler(entityQuaternion(entity));
@@ -1050,7 +1050,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1746] calculateVehicleGroundClearance
    * Khoảng hở gầm xe.
    */
-  public calculateVehicleGroundClearance(entity?: any, options?: any): any {
+  public calculateVehicleGroundClearance(entity?: unknown, options?: unknown) {
     const explicit = readNum(entity, ['groundClearance'], Number.NaN);
     const value = Number.isFinite(explicit) ? explicit : VEHICLE_DIMENSIONS.groundClearance;
     return this.applyNumberOptions(value, options);
@@ -1059,7 +1059,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1747] calculateVehicleCenterOfMass
    * Tâm khối lượng của xe.
    */
-  public calculateVehicleCenterOfMass(entity?: any, options?: any): any {
+  public calculateVehicleCenterOfMass(entity?: unknown, options?: unknown) {
     const source = this.optionEntity(options, entity);
     const center = entityPosition(source);
     const size = this.vehicleSize(source);
@@ -1074,7 +1074,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1748] calculateVehicleCollisionBounds
    * Hộp bao va chạm của xe.
    */
-  public calculateVehicleCollisionBounds(entity?: any, size?: Vec3D): any {
+  public calculateVehicleCollisionBounds(entity?: unknown, size?: Vec3D) {
     const dimensions = this.vehicleSize(entity);
     const extent = size ?? { x: dimensions.width, y: dimensions.height, z: dimensions.length };
     return bounds('calculateVehicleCollisionBounds', this.boxOf(entity, extent), { dimensions });
@@ -1086,7 +1086,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * Ưu tiên công thức lái xe κ = yawRate / speed (tốc độ lái và tốc độ thật);
    * khi không có tốc độ lái thì đo độ cong hình học của đường đi.
    */
-  public calculateVehiclePathCurvature(entity?: any, options?: any): any {
+  public calculateVehiclePathCurvature(entity?: unknown, options?: unknown) {
     const sources = [entity, options];
     const yawRate = Math.abs(this.vehicleYawRate(sources));
     const speed = this.vehicleSpeed(sources);
@@ -1099,7 +1099,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1750] calculateVehicleWheelRotation
    * Góc quay của bánh xe.
    */
-  public calculateVehicleWheelRotation(entityOrAngle?: any, options?: any): any {
+  public calculateVehicleWheelRotation(entityOrAngle?: unknown, options?: unknown) {
     const source = this.optionEntity(options, entityOrAngle);
     const speed = Math.abs(readNum(source, ['speed'], VEHICLE_REFERENCE_SPEED));
     const radius = readNum(source, ['wheelRadius'], VEHICLE_DIMENSIONS.wheelRadius);
@@ -1115,14 +1115,14 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1751] getBuildingPosition
    * Vị trí công trình.
    */
-  public getBuildingPosition(entity?: any, offset?: Vec3D): any {
+  public getBuildingPosition(entity?: unknown, offset?: Vec3D) {
     return this.anchorAt(entity, offset ?? { x: 0, y: 0, z: 0 });
   }
   /**
    * [1752] getBuildingCenter
    * Tâm công trình.
    */
-  public getBuildingCenter(entity?: any, offset?: Vec3D): any {
+  public getBuildingCenter(entity?: unknown, offset?: Vec3D) {
     const size = this.buildingSize(entity);
     return this.anchorAt(entity, offset ?? { x: 0, y: size.height / 2, z: 0 });
   }
@@ -1130,14 +1130,14 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1753] getBuildingBasePosition
    * Vị trí đáy công trình.
    */
-  public getBuildingBasePosition(entity?: any, offset?: Vec3D): any {
+  public getBuildingBasePosition(entity?: unknown, offset?: Vec3D) {
     return this.anchorAt(entity, offset ?? { x: 0, y: 0, z: 0 });
   }
   /**
    * [1754] getBuildingTopPosition
    * Vị trí đỉnh công trình.
    */
-  public getBuildingTopPosition(entity?: any, offset?: Vec3D): any {
+  public getBuildingTopPosition(entity?: unknown, offset?: Vec3D) {
     const size = this.buildingSize(entity);
     return this.anchorAt(entity, offset ?? { x: 0, y: size.height, z: 0 });
   }
@@ -1145,7 +1145,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1755] getBuildingCornerPosition
    * Vị trí một góc công trình.
    */
-  public getBuildingCornerPosition(entity?: any, offset?: Vec3D): any {
+  public getBuildingCornerPosition(entity?: unknown, offset?: Vec3D) {
     const size = this.buildingSize(entity);
     return this.anchorAt(entity, offset ?? {
       x: size.width / 2,
@@ -1157,7 +1157,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1756] getWallCenter
    * Tâm bức tường.
    */
-  public getWallCenter(entity?: any, offset?: Vec3D): any {
+  public getWallCenter(entity?: unknown, offset?: Vec3D) {
     const size = this.buildingSize(entity);
     return this.anchorAt(entity, offset ?? { x: 0, y: size.height / 2, z: size.depth / 2 });
   }
@@ -1165,7 +1165,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1757] getWallSurfacePosition
    * Vị trí trên mặt tường.
    */
-  public getWallSurfacePosition(entity?: any, offset?: Vec3D): any {
+  public getWallSurfacePosition(entity?: unknown, offset?: Vec3D) {
     const thickness = readNum(entity, ['wallThickness'], BUILDING_DIMENSIONS.wallThickness);
     const size = this.buildingSize(entity);
     return this.anchorAt(entity, offset ?? { x: 0, y: size.height / 2, z: size.depth / 2 + thickness / 2 });
@@ -1178,7 +1178,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * của đối tượng (mặt tường hướng về phía trước), và cuối cùng là hướng từ
    * tường về phía đối diện.
    */
-  public getWallNormal(a?: any, b?: any): any {
+  public getWallNormal(a?: unknown, b?: unknown) {
     const explicit = this.firstVector([a, b], ['normal', 'wallNormal', 'planeNormal']);
     if (magnitude(explicit) > 0) return direction('getWallNormal', normalize(explicit));
     const source = (a ?? {}) as Record<string, unknown>;
@@ -1197,14 +1197,14 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1759] getFloorPosition
    * Vị trí sàn.
    */
-  public getFloorPosition(entity?: any, offset?: Vec3D): any {
+  public getFloorPosition(entity?: unknown, offset?: Vec3D) {
     return this.anchorAt(entity, offset ?? { x: 0, y: 0, z: 0 });
   }
   /**
    * [1760] getCeilingPosition
    * Vị trí trần.
    */
-  public getCeilingPosition(entity?: any, offset?: Vec3D): any {
+  public getCeilingPosition(entity?: unknown, offset?: Vec3D) {
     const size = this.buildingSize(entity);
     return this.anchorAt(entity, offset ?? { x: 0, y: size.height, z: 0 });
   }
@@ -1212,7 +1212,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1761] getDoorPosition
    * Vị trí cửa.
    */
-  public getDoorPosition(entity?: any, offset?: Vec3D): any {
+  public getDoorPosition(entity?: unknown, offset?: Vec3D) {
     const size = this.buildingSize(entity);
     return this.anchorAt(entity, offset ?? {
       x: -size.width / 4,
@@ -1224,7 +1224,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1762] getDoorHandlePosition
    * Vị trí tay nắm cửa.
    */
-  public getDoorHandlePosition(entity?: any, offset?: Vec3D): any {
+  public getDoorHandlePosition(entity?: unknown, offset?: Vec3D) {
     const size = this.buildingSize(entity);
     return this.anchorAt(entity, offset ?? {
       x: -size.width / 4 + BUILDING_DIMENSIONS.doorWidth / 2,
@@ -1236,7 +1236,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1763] getWindowPosition
    * Vị trí cửa sổ.
    */
-  public getWindowPosition(entity?: any, offset?: Vec3D): any {
+  public getWindowPosition(entity?: unknown, offset?: Vec3D) {
     const size = this.buildingSize(entity);
     return this.anchorAt(entity, offset ?? {
       x: size.width / 4,
@@ -1248,7 +1248,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1764] getStairPosition
    * Vị trí cầu thang.
    */
-  public getStairPosition(entity?: any, offset?: Vec3D): any {
+  public getStairPosition(entity?: unknown, offset?: Vec3D) {
     const size = this.buildingSize(entity);
     return this.anchorAt(entity, offset ?? {
       x: size.width / 4,
@@ -1260,7 +1260,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1765] getRoofPosition
    * Vị trí mái.
    */
-  public getRoofPosition(entity?: any, offset?: Vec3D): any {
+  public getRoofPosition(entity?: unknown, offset?: Vec3D) {
     const size = this.buildingSize(entity);
     return this.anchorAt(entity, offset ?? { x: 0, y: size.height, z: 0 });
   }
@@ -1268,14 +1268,14 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1766] calculateBuildingHeight
    * Chiều cao công trình.
    */
-  public calculateBuildingHeight(entity?: any, options?: any): any {
+  public calculateBuildingHeight(entity?: unknown, options?: unknown) {
     return this.applyNumberOptions(this.buildingSize(entity).height, options);
   }
   /**
    * [1767] calculateBuildingFootprint
    * Diện tích mặt bằng công trình.
    */
-  public calculateBuildingFootprint(a?: any, b?: any, options?: any): any {
+  public calculateBuildingFootprint(a?: unknown, b?: unknown, options?: unknown) {
     const size = this.buildingSize(a);
     const width = readNum(a, ['width'], readNum(b, ['width'], size.width));
     const depth = readNum(a, ['depth'], readNum(b, ['depth'], size.depth));
@@ -1286,7 +1286,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1768] calculateBuildingVolume
    * Thể tích công trình.
    */
-  public calculateBuildingVolume(entity?: any, options?: any): any {
+  public calculateBuildingVolume(entity?: unknown, options?: unknown) {
     const size = this.buildingSize(entity);
     return this.applyNumberOptions(size.width * size.depth * size.height, options);
   }
@@ -1294,7 +1294,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1769] calculateWallLength
    * Chiều dài bức tường.
    */
-  public calculateWallLength(entity?: any, options?: any): any {
+  public calculateWallLength(entity?: unknown, options?: unknown) {
     const size = this.buildingSize(entity);
     return this.applyNumberOptions(size.width, options);
   }
@@ -1302,14 +1302,14 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1770] calculateWallHeight
    * Chiều cao bức tường.
    */
-  public calculateWallHeight(entity?: any, options?: any): any {
+  public calculateWallHeight(entity?: unknown, options?: unknown) {
     return this.applyNumberOptions(this.buildingSize(entity).height, options);
   }
   /**
    * [1771] calculateWallThickness
    * Độ dày bức tường.
    */
-  public calculateWallThickness(a?: any, b?: any, options?: any): any {
+  public calculateWallThickness(a?: unknown, b?: unknown, options?: unknown) {
     const explicit = readNum(a, ['wallThickness'], Number.NaN);
     const fromB = readNum(b, ['wallThickness'], Number.NaN);
     const value = Number.isFinite(explicit)
@@ -1321,7 +1321,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1772] calculateWallSurfaceArea
    * Diện tích mặt tường.
    */
-  public calculateWallSurfaceArea(entity?: any, options?: any): any {
+  public calculateWallSurfaceArea(entity?: unknown, options?: unknown) {
     const size = this.buildingSize(entity);
     const perimeter = 2 * (size.width + size.depth);
     return this.applyNumberOptions(perimeter * size.height, options);
@@ -1330,7 +1330,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1773] calculateFloorArea
    * Diện tích sàn.
    */
-  public calculateFloorArea(entity?: any, options?: any): any {
+  public calculateFloorArea(entity?: unknown, options?: unknown) {
     const size = this.buildingSize(entity);
     return this.applyNumberOptions(size.width * size.depth, options);
   }
@@ -1338,7 +1338,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1774] calculateFloorElevation
    * Cao độ sàn.
    */
-  public calculateFloorElevation(a?: any, b?: any, options?: any): any {
+  public calculateFloorElevation(a?: unknown, b?: unknown, options?: unknown) {
     const explicit = readNum(a, ['elevation'], Number.NaN);
     const fromB = readNum(b, ['elevation'], Number.NaN);
     const value = Number.isFinite(explicit)
@@ -1350,7 +1350,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1775] calculateCeilingHeight
    * Chiều cao trần nhà.
    */
-  public calculateCeilingHeight(entity?: any, options?: any): any {
+  public calculateCeilingHeight(entity?: unknown, options?: unknown) {
     const size = this.buildingSize(entity);
     return this.applyNumberOptions(size.height, options);
   }
@@ -1358,7 +1358,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1776] calculateDoorClearance
    * Khoảng trống cửa.
    */
-  public calculateDoorClearance(entity?: any, options?: any): any {
+  public calculateDoorClearance(entity?: unknown, options?: unknown) {
     const width = readNum(entity, ['doorWidth'], BUILDING_DIMENSIONS.doorWidth);
     const height = readNum(entity, ['doorHeight'], BUILDING_DIMENSIONS.doorHeight);
     return this.applyNumberOptions(width * height, options);
@@ -1367,7 +1367,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1777] calculateWindowOpening
    * Diện tích cửa sổ.
    */
-  public calculateWindowOpening(entity?: any, options?: any): any {
+  public calculateWindowOpening(entity?: unknown, options?: unknown) {
     const width = readNum(entity, ['windowWidth'], BUILDING_DIMENSIONS.windowWidth);
     const height = readNum(entity, ['windowHeight'], BUILDING_DIMENSIONS.windowHeight);
     return scalar('calculateWindowOpening', this.applyNumberOptions(width * height, options), this.optionUnit(options, 'm²'), { width, height });
@@ -1376,7 +1376,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1778] calculateStairRise
    * Chiều cao bậc thang.
    */
-  public calculateStairRise(entity?: any, options?: any): any {
+  public calculateStairRise(entity?: unknown, options?: unknown) {
     const explicit = readNum(entity, ['stairRise'], Number.NaN);
     const value = Number.isFinite(explicit) ? explicit : BUILDING_DIMENSIONS.stairRise;
     return scalar('calculateStairRise', this.applyNumberOptions(value, options), this.optionUnit(options, 'm'));
@@ -1385,7 +1385,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1779] calculateStairTread
    * Chiều sâu bậc thang.
    */
-  public calculateStairTread(entity?: any, options?: any): any {
+  public calculateStairTread(entity?: unknown, options?: unknown) {
     const explicit = readNum(entity, ['stairTread'], Number.NaN);
     const value = Number.isFinite(explicit) ? explicit : BUILDING_DIMENSIONS.stairTread;
     return scalar('calculateStairTread', this.applyNumberOptions(value, options), this.optionUnit(options, 'm'));
@@ -1394,7 +1394,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1780] calculateRoofSlope
    * Độ dốc mái.
    */
-  public calculateRoofSlope(entity?: any, options?: any): any {
+  public calculateRoofSlope(entity?: unknown, options?: unknown) {
     const pitch = readNum(entity, ['roofPitch', 'pitch'], 30);
     const slope = (pitch * Math.PI) / 180;
     return scalar('calculateRoofSlope', this.applyNumberOptions(slope, options), this.optionUnit(options, 'rad'), { pitch, degrees: pitch });
@@ -1403,7 +1403,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1781] calculateRoomBounds
    * Hộp bao của phòng.
    */
-  public calculateRoomBounds(entity?: any, size?: Vec3D): any {
+  public calculateRoomBounds(entity?: unknown, size?: Vec3D) {
     const dimensions = this.buildingSize(entity);
     const extent = size ?? { x: dimensions.width, y: dimensions.height, z: dimensions.depth };
     return bounds('calculateRoomBounds', this.boxOf(entity, extent), { dimensions });
@@ -1412,7 +1412,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1782] calculateRoomCenter
    * Tâm phòng.
    */
-  public calculateRoomCenter(a?: any, b?: any, options?: any): any {
+  public calculateRoomCenter(a?: unknown, b?: unknown, options?: unknown) {
     const size = this.buildingSize(a);
     const height = readNum(a, ['height'], readNum(b, ['height'], size.height));
     const center = entityPosition(a);
@@ -1427,7 +1427,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1783] calculateRoomVolume
    * Thể tích phòng.
    */
-  public calculateRoomVolume(entity?: any, options?: any): any {
+  public calculateRoomVolume(entity?: unknown, options?: unknown) {
     const size = this.buildingSize(entity);
     return this.applyNumberOptions(size.width * size.depth * size.height, options);
   }
@@ -1435,7 +1435,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1784] calculateRoomNavigationDistance
    * Quãng đường đi giữa hai điểm trong phòng.
    */
-  public calculateRoomNavigationDistance(a?: any, b?: any): any {
+  public calculateRoomNavigationDistance(a?: unknown, b?: unknown) {
     const from = worldPoint(a);
     const to = worldPoint(b);
     const size = this.buildingSize(a);
@@ -1450,7 +1450,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1785] calculateBuildingCollision
    * Va chạm với công trình.
    */
-  public calculateBuildingCollision(a?: any, b?: any): any {
+  public calculateBuildingCollision(a?: unknown, b?: unknown) {
     const size = this.buildingSize(a);
     const boxA = this.boxOf(a, { x: size.width, y: size.height, z: size.depth });
     const boxB = this.boxOf(b, { x: 1, y: 1.8, z: 1 });
@@ -1475,7 +1475,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1786] calculateSpatialDistanceMatrix
    * Ma trận khoảng cách giữa các điểm.
    */
-  public calculateSpatialDistanceMatrix(a?: any, b?: any): any {
+  public calculateSpatialDistanceMatrix(a?: unknown, b?: unknown) {
     const points = this.pointsOf(a, b);
     const matrix = pairwiseDistanceMatrix(points);
     return named('calculateSpatialDistanceMatrix', matrix, { count: points.length });
@@ -1484,7 +1484,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1787] calculatePairwiseDistances
    * Danh sách khoảng cách giữa các cặp điểm.
    */
-  public calculatePairwiseDistances(a?: any, b?: any): any {
+  public calculatePairwiseDistances(a?: unknown, b?: unknown) {
     const points = this.pointsOf(a, b);
     const distances: number[] = [];
     for (let i = 0; i < points.length; i++) {
@@ -1498,7 +1498,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1788] calculateNearestNeighborDistance
    * Khoảng cách tới láng giềng gần nhất.
    */
-  public calculateNearestNeighborDistance(a?: any, b?: any): any {
+  public calculateNearestNeighborDistance(a?: unknown, b?: unknown) {
     const points = this.pointsOf(a, b);
     const distances = nearestNeighborDistances(points);
     const value = distances.length > 0 ? Math.min(...distances) : 0;
@@ -1508,7 +1508,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1789] calculateFarthestNeighborDistance
    * Khoảng cách tới láng giềng xa nhất.
    */
-  public calculateFarthestNeighborDistance(a?: any, b?: any): any {
+  public calculateFarthestNeighborDistance(a?: unknown, b?: unknown) {
     const points = this.pointsOf(a, b);
     const distances = farthestNeighborDistances(points);
     const value = distances.length > 0 ? Math.max(...distances) : 0;
@@ -1518,7 +1518,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1790] calculateSpatialCentroid
    * Trọng tâm của tập điểm.
    */
-  public calculateSpatialCentroid(a?: any, b?: any, options?: any): any {
+  public calculateSpatialCentroid(a?: unknown, b?: unknown, options?: unknown) {
     const points = this.pointsOf(a, b);
     const centroid = centroidOf(points);
     return named('calculateSpatialCentroid', this.applyPointOptions(centroid, options, a), { count: points.length });
@@ -1527,7 +1527,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1791] calculateWeightedCentroid
    * Trọng tâm có trọng số.
    */
-  public calculateWeightedCentroid(a?: any, b?: any, options?: any): any {
+  public calculateWeightedCentroid(a?: unknown, b?: unknown, options?: unknown) {
     const points = this.pointsOf(a, b);
     const weights = readPoints(a, ['weights']).map((w) => w.x);
     const centroid = centroidOf(points, weights.length === points.length ? weights : undefined);
@@ -1540,7 +1540,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1792] calculateSpatialMedian
    * Trung vị không gian.
    */
-  public calculateSpatialMedian(a?: any, b?: any, options?: any): any {
+  public calculateSpatialMedian(a?: unknown, b?: unknown, options?: unknown) {
     const points = this.pointsOf(a, b);
     const median = medianOf(points);
     return named('calculateSpatialMedian', this.applyPointOptions(median, options, a), { count: points.length });
@@ -1549,7 +1549,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1793] calculateSpatialVariance
    * Phương sai không gian.
    */
-  public calculateSpatialVariance(a?: any, b?: any, options?: any): any {
+  public calculateSpatialVariance(a?: unknown, b?: unknown, options?: unknown) {
     const points = this.pointsOf(a, b);
     const variance = varianceOf(points);
     return named('calculateSpatialVariance', this.applyVectorOptions(variance, options, a), { count: points.length });
@@ -1558,7 +1558,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1794] calculateSpatialCovariance
    * Ma trận hiệp phương sai.
    */
-  public calculateSpatialCovariance(a?: any, b?: any, options?: any): any {
+  public calculateSpatialCovariance(a?: unknown, b?: unknown, options?: unknown) {
     const points = this.pointsOf(a, b);
     const covariance = covarianceOf(points);
     const factor = this.optionScale(options);
@@ -1569,7 +1569,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1795] calculateSpatialDistribution
    * Phân bố không gian.
    */
-  public calculateSpatialDistribution(a?: any, b?: any, options?: any): any {
+  public calculateSpatialDistribution(a?: unknown, b?: unknown, options?: unknown) {
     const points = this.pointsOf(a, b);
     const bins = opt(options, ['bins'], 8);
     return named('calculateSpatialDistribution', spatialDistribution(points, bins), { count: points.length });
@@ -1578,7 +1578,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1796] calculateSpatialDensity
    * Mật độ không gian.
    */
-  public calculateSpatialDensity(a?: any, b?: any, options?: any): any {
+  public calculateSpatialDensity(a?: unknown, b?: unknown, options?: unknown) {
     const points = this.pointsOf(a, b);
     return scalar('calculateSpatialDensity', this.applyNumberOptions(spatialDensity(points), options), this.optionUnit(options, 'point/m³'), { count: points.length });
   }
@@ -1586,7 +1586,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1797] calculateSpatialClustering
    * Mức độ gom cụm không gian.
    */
-  public calculateSpatialClustering(a?: any, b?: any, options?: any): any {
+  public calculateSpatialClustering(a?: unknown, b?: unknown, options?: unknown) {
     const points = this.pointsOf(a, b);
     return scalar('calculateSpatialClustering', this.applyNumberOptions(spatialClustering(points), options), this.optionUnit(options, 'ratio'), { count: points.length });
   }
@@ -1597,7 +1597,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * Dùng `outlierThreshold` thật (khoảng cách tuyệt đối so với trọng tâm)
    * nếu có; nếu không thì lùi về phương pháp độ lệch chuẩn theo `sigma`.
    */
-  public calculateSpatialOutliers(a?: any, b?: any, options?: any): any {
+  public calculateSpatialOutliers(a?: unknown, b?: unknown, options?: unknown) {
     const points = this.pointsOf(a, b);
     const threshold = this.firstNumber([a, b, options], ['outlierThreshold', 'threshold']);
     const sigma = opt(options, ['sigma'], 2);
@@ -1627,7 +1627,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1799] calculateSpatialSymmetry
    * Mức độ đối xứng không gian.
    */
-  public calculateSpatialSymmetry(a?: any, b?: any, options?: any): any {
+  public calculateSpatialSymmetry(a?: unknown, b?: unknown, options?: unknown) {
     const points = this.pointsOf(a, b);
     const axis = readVec(options, ['axis']);
     const resolved = magnitude(axis) > 0 ? axis : RIGHT3;
@@ -1639,7 +1639,7 @@ export class SpatialEquipmentArchitectureSubsystem {
    * [1800] calculateSpatialOverlapRatio
    * Tỷ lệ chồng lấn giữa hai vùng không gian.
    */
-  public calculateSpatialOverlapRatio(a?: any, b?: any): any {
+  public calculateSpatialOverlapRatio(a?: unknown, b?: unknown) {
     const sizeA = this.buildingSize(a);
     const sizeB = this.buildingSize(b);
     const boxA = this.boxOf(a, { x: sizeA.width, y: sizeA.height, z: sizeA.depth });

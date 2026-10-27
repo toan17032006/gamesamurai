@@ -65,6 +65,7 @@ import {
   signedAngle,
   quaternionToEuler,
   normalizeQuaternion,
+  asRecord,
   boundingBox,
   offsetPosition,
   namedResult,
@@ -317,8 +318,8 @@ function jointAnglePayload(finger: FingerId, entityOrAngle: unknown, other: unkn
 }
 
 /** Tìm xương (bone) theo tên trong `entity.children` / `options.bones`. */
-function findBone(entity: unknown, options: unknown, names: readonly string[]): any {
-  const candidates: any[] = [];
+function findBone(entity: unknown, options: unknown, names: readonly string[]) {
+  const candidates: unknown[] = [];
   const collect = (value: unknown): void => {
     if (!value || typeof value !== 'object') return;
     if (Array.isArray(value)) {
@@ -326,19 +327,19 @@ function findBone(entity: unknown, options: unknown, names: readonly string[]): 
       return;
     }
     candidates.push(value);
-    const rec = value as Record<string, any>;
+    const rec = value as Record<string, unknown>;
     if (Array.isArray(rec.bones)) rec.bones.forEach(collect);
     if (Array.isArray(rec.children)) rec.children.forEach(collect);
   };
 
-  const opt = (options ?? {}) as Record<string, any>;
-  const ent = (entity ?? {}) as Record<string, any>;
+  const opt = (options ?? {}) as Record<string, unknown>;
+  const ent = (entity ?? {}) as Record<string, unknown>;
   collect(opt.bones);
   collect(opt.bone);
-  collect(opt.skeleton?.bones);
+  collect(asRecord(opt.skeleton).bones);
   collect(ent.bones);
   collect(ent.bone);
-  collect(ent.skeleton?.bones);
+  collect(asRecord(ent.skeleton).bones);
   collect(ent.children);
   collect(entity);
 
@@ -347,11 +348,12 @@ function findBone(entity: unknown, options: unknown, names: readonly string[]): 
 
   // Xương có tên riêng ("indexFinger", "thumb", …).
   for (const candidate of candidates) {
-    if (matches(candidate.name) || matches(candidate.id) || matches(candidate.boneName)) return candidate;
+    const record = asRecord(candidate);
+    if (matches(record.name) || matches(record.id) || matches(record.boneName)) return candidate;
   }
   // Bảng tra cứu theo tên: { thumb: {...}, indexFinger: {...} }.
   for (const candidate of candidates) {
-    for (const [key, value] of Object.entries(candidate)) {
+    for (const [key, value] of Object.entries(asRecord(candidate))) {
       if (matches(key) && value && typeof value === 'object') return value;
     }
   }
@@ -377,7 +379,7 @@ function readVector(entity: unknown, key: string): Vec3D {
 /** Đọc hộp bao từ nhiều dạng dữ liệu ({min,max} / {center,size} / entity). */
 function readBox(value: unknown, fallbackCenter: Vec3D, fallbackSize: Vec3D): Box3D {
   if (!value || typeof value !== 'object') return boundingBox(fallbackCenter, fallbackSize);
-  const v = value as Record<string, any>;
+  const v = value as Record<string, unknown>;
   if (v.min && v.max && typeof v.min === 'object' && typeof v.max === 'object') {
     return { min: toVec3(v.min), max: toVec3(v.max) };
   }
@@ -385,11 +387,8 @@ function readBox(value: unknown, fallbackCenter: Vec3D, fallbackSize: Vec3D): Bo
   const hasPosition =
     !!v.position || (typeof v.x === 'number' && typeof v.y === 'number' && typeof v.z === 'number');
   const center = v.center ? toVec3(v.center) : hasPosition ? entityPosition(value) : fallbackCenter;
-  const size = v.size
-    ? toVec3(v.size)
-    : v.bounds && typeof v.bounds === 'object' && v.bounds.size
-      ? toVec3(v.bounds.size)
-      : fallbackSize;
+  const boundsSize = asRecord(v.bounds).size;
+  const size = v.size ? toVec3(v.size) : boundsSize ? toVec3(boundsSize) : fallbackSize;
   return boundingBox(center, size);
 }
 
@@ -537,7 +536,7 @@ export class AnatomicalHandDigitsSubsystem {
   // ==========================================================================
 
   /** Đọc số tuỳ chọn — trả `fallback` khi không có giá trị hữu hạn. */
-  private optNumber(options: any, fallback: number, ...keys: string[]): number {
+  private optNumber(options: unknown, fallback: number, ...keys: string[]): number {
     if (!options || typeof options !== 'object') return fallback;
     const record = options as Record<string, unknown>;
     for (const key of keys) {
@@ -548,7 +547,7 @@ export class AnatomicalHandDigitsSubsystem {
   }
 
   /** Đọc cờ boolean tuỳ chọn. */
-  private optBoolean(options: any, fallback: boolean, ...keys: string[]): boolean {
+  private optBoolean(options: unknown, fallback: boolean, ...keys: string[]): boolean {
     if (!options || typeof options !== 'object') return fallback;
     const record = options as Record<string, unknown>;
     for (const key of keys) {
@@ -559,7 +558,7 @@ export class AnatomicalHandDigitsSubsystem {
   }
 
   /** Đọc chuỗi tuỳ chọn (không phân biệt hoa thường, cắt khoảng trắng). */
-  private optString(options: any, fallback: string, ...keys: string[]): string {
+  private optString(options: unknown, fallback: string, ...keys: string[]): string {
     if (!options || typeof options !== 'object') return fallback;
     const record = options as Record<string, unknown>;
     for (const key of keys) {
@@ -570,7 +569,7 @@ export class AnatomicalHandDigitsSubsystem {
   }
 
   /** Đọc đối tượng tuỳ chọn — dùng để chỉ định nguồn dữ liệu khác. */
-  private optObject(options: any, ...keys: string[]): any {
+  private optObject(options: unknown, ...keys: string[]) {
     if (!options || typeof options !== 'object') return undefined;
     const record = options as Record<string, unknown>;
     for (const key of keys) {
@@ -581,7 +580,7 @@ export class AnatomicalHandDigitsSubsystem {
   }
 
   /** Đọc vector tuỳ chọn (mốc/đường chiều tham chiếu). */
-  private optVector(options: any, ...keys: string[]): Vec3D | undefined {
+  private optVector(options: unknown, ...keys: string[]): Vec3D | undefined {
     const found = this.optObject(options, ...keys);
     if (!found) return undefined;
     const record = found as Record<string, unknown>;
@@ -604,7 +603,7 @@ export class AnatomicalHandDigitsSubsystem {
    * Mặc định là đơn vị gốc của phép đo (mét cho độ dài, m⁻¹ cho độ cong).
    * Đơn vị dạng `cm^-1`/`mm^-1` được hiểu là nghịch đảo của đơn vị độ dài tương ứng.
    */
-  private unitFactor(options: any, fallbackUnit: string): { unit: string; factor: number } {
+  private unitFactor(options: unknown, fallbackUnit: string): { unit: string; factor: number } {
     const requested = this.optString(options, fallbackUnit, 'unit');
     const inverse = requested.endsWith('^-1');
     const base = inverse ? requested.slice(0, -3) : requested;
@@ -625,7 +624,7 @@ export class AnatomicalHandDigitsSubsystem {
    * Bàn tay dùng để đo — người gọi có thể chỉ định lại nguồn dữ liệu qua
    * `options.entity` (mặc định: chính `entity` truyền vào).
    */
-  private handOf(entity: any, options: any): any {
+  private handOf(entity: unknown, options: unknown) {
     return this.optObject(options, 'entity', 'hand') ?? entity;
   }
 
@@ -633,7 +632,7 @@ export class AnatomicalHandDigitsSubsystem {
    * Tỉ lệ kích thước của bàn tay theo `entity.scale` (số hoặc Vec3) — bàn tay
    * lớn hơn thì ngón dài hơn theo cùng tỉ lệ. Không có `scale` ⇒ tỉ lệ 1.
    */
-  private anatomyScale(entity: any): number {
+  private anatomyScale(entity: unknown): number {
     if (!entity || typeof entity !== 'object') return 1;
     const record = entity as Record<string, unknown>;
     const raw = record.scale ?? record.handScale;
@@ -652,12 +651,12 @@ export class AnatomicalHandDigitsSubsystem {
   }
 
   /** Bàn tay trái hay phải — 'right' phản chiếu mô hình giải phẫu theo trục X. */
-  private sideOf(options: any): 'left' | 'right' {
+  private sideOf(options: unknown): 'left' | 'right' {
     return this.optString(options, 'left', 'side', 'hand') === 'right' ? 'right' : 'left';
   }
 
   /** Giới hạn giá trị chuẩn hoá theo `options.min`/`options.max` (mặc định 0..1). */
-  private clampToRange(value: number, options: any): number {
+  private clampToRange(value: number, options: unknown): number {
     const min = this.optNumber(options, 0, 'min');
     const max = this.optNumber(options, 1, 'max');
     if (max < min) return value;
@@ -665,7 +664,7 @@ export class AnatomicalHandDigitsSubsystem {
   }
 
   /** Chiều dài ngón (mét → đơn vị tuỳ chọn), nhân theo tỉ lệ bàn tay. */
-  private fingerLength(finger: FingerId, name: string, entity: any, options: any): any {
+  private fingerLength(finger: FingerId, name: string, entity: unknown, options: unknown) {
     const size = this.anatomyScale(this.handOf(entity, options));
     const { unit, factor } = this.unitFactor(options, 'm');
     const meters = FINGER_LENGTHS[finger] * size;
@@ -677,7 +676,7 @@ export class AnatomicalHandDigitsSubsystem {
   }
 
   /** Bề rộng ngón (mét → đơn vị tuỳ chọn), nhân theo tỉ lệ bàn tay. */
-  private fingerWidth(finger: FingerId, name: string, entity: any, options: any): any {
+  private fingerWidth(finger: FingerId, name: string, entity: unknown, options: unknown) {
     const size = this.anatomyScale(this.handOf(entity, options));
     const { unit, factor } = this.unitFactor(options, 'm');
     const meters = fingerDiameter(finger) * size;
@@ -689,7 +688,7 @@ export class AnatomicalHandDigitsSubsystem {
   }
 
   /** Độ cong ngón (m⁻¹) — bàn tay lớn hơn thì bán kính cong lớn hơn ⇒ độ cong nhỏ hơn. */
-  private fingerCurvatureValue(finger: FingerId, name: string, entity: any, options: any): any {
+  private fingerCurvatureValue(finger: FingerId, name: string, entity: unknown, options: unknown) {
     const size = this.anatomyScale(this.handOf(entity, options));
     const { unit, factor } = this.unitFactor(options, 'm^-1');
     const perMeter = fingerCurvature(finger) / size;
@@ -700,7 +699,7 @@ export class AnatomicalHandDigitsSubsystem {
   }
 
   /** Chiều dài từng đốt ngón. */
-  private fingerSegments(finger: FingerId, name: string, entity: any, options: any): any {
+  private fingerSegments(finger: FingerId, name: string, entity: unknown, options: unknown) {
     const size = this.anatomyScale(this.handOf(entity, options));
     const { unit, factor } = this.unitFactor(options, 'm');
     const scale = this.optNumber(options, 1, 'scale');
@@ -722,7 +721,7 @@ export class AnatomicalHandDigitsSubsystem {
    * Độ dày ngón: neo theo bàn tay `a`, đối chiếu tương đối với bàn tay `b`
    * (giá trị `relative` = độ dày so với bàn tay tham chiếu).
    */
-  private fingerThickness(finger: FingerId, name: string, a: any, b: any, options: any): any {
+  private fingerThickness(finger: FingerId, name: string, a: unknown, b: unknown, options: unknown) {
     const hand = this.handOf(a, options);
     const reference = this.optObject(options, 'reference') ?? b;
     const side = this.sideOf(options);
@@ -750,7 +749,7 @@ export class AnatomicalHandDigitsSubsystem {
    * Ưu tiên xương thật (nếu người gọi truyền xương của ngón), sau đó tới
    * quaternion của entity, cuối cùng là trục giải phẫu tĩnh.
    */
-  private fingerDirection(finger: FingerId, a: any, b: any): Vec3D {
+  private fingerDirection(finger: FingerId, a: unknown, b: unknown): Vec3D {
     const side = this.sideOf(b ?? a);
     const bone = findBone(b ?? a, undefined, FINGER_BONE_NAMES[finger]);
     if (bone) {
@@ -761,7 +760,7 @@ export class AnatomicalHandDigitsSubsystem {
   }
 
   /** Mức độ đối chiếu giữa ngón cái và ngón trỏ. */
-  private thumbOpposition(a: any, b: any, options: any): any {
+  private thumbOpposition(a: unknown, b: unknown, options: unknown) {
     const side = this.sideOf(options);
     const reference = this.optObject(options, 'reference') ?? b;
     const thumbAxis = currentFingerAxis('thumb', a, side);
@@ -783,7 +782,7 @@ export class AnatomicalHandDigitsSubsystem {
   }
 
   /** Lực kẹp giữa ngón cái và ngón trỏ. */
-  private thumbPinchStrength(a: any, b: any, options: any): any {
+  private thumbPinchStrength(a: unknown, b: unknown, options: unknown) {
     const side = this.sideOf(options);
     const size = this.anatomyScale(a);
     const gap = tipDistance('thumb', 'index', a, b, side);
@@ -803,7 +802,7 @@ export class AnatomicalHandDigitsSubsystem {
   }
 
   /** Vùng với tới của ngón; `b` là mục tiêu cần với tới (nếu có). */
-  private reachEnvelope(finger: FingerId, name: string, a: any, b: any, options: any): any {
+  private reachEnvelope(finger: FingerId, name: string, a: unknown, b: unknown, options: unknown) {
     const size = this.anatomyScale(a);
     const scale = this.optNumber(options, 1, 'scale');
     const { unit, factor } = this.unitFactor(options, 'm');
@@ -831,7 +830,7 @@ export class AnatomicalHandDigitsSubsystem {
    *
    * `options.surface` chọn bộ phận tiếp xúc: 'pad' (mặc định), 'nail' hoặc 'tip'.
    */
-  private contactPoint(finger: FingerId, name: string, a: any, b: any, options: any): any {
+  private contactPoint(finger: FingerId, name: string, a: unknown, b: unknown, options: unknown) {
     const side = this.sideOf(options);
     const surface = this.optString(options, 'pad', 'surface');
     const joint = surface === 'nail' || surface === 'tip' ? surface : 'pad';
@@ -857,7 +856,7 @@ export class AnatomicalHandDigitsSubsystem {
    * Pháp tuyến bề mặt: mặc định là pháp tuyến lòng bàn tay; nếu có `b` thì là
    * hướng từ vật cản `b` ra ngoài tại điểm tiếp xúc.
    */
-  private surfaceNormal(finger: FingerId, name: string, a: any, b: any): any {
+  private surfaceNormal(finger: FingerId, name: string, a: unknown, b: unknown) {
     const side = this.sideOf(b ?? a);
     if (b === undefined || b === null) {
       return directionResult(name, palmNormal(a), { finger });
@@ -871,7 +870,7 @@ export class AnatomicalHandDigitsSubsystem {
   }
 
   /** Sai lệch tư thế so với tư thế tham chiếu `b`. */
-  private poseError(finger: FingerId, name: string, a: any, b: any, options: any): any {
+  private poseError(finger: FingerId, name: string, a: unknown, b: unknown, options: unknown) {
     const side = this.sideOf(options);
     const reference = this.optObject(options, 'reference') ?? b;
     const payload = poseErrorPayload(finger, a, reference, side);
@@ -892,7 +891,7 @@ export class AnatomicalHandDigitsSubsystem {
   }
 
   /** Độ mượt chuyển động; `b` là mẫu trước để đo biến thiên vận tốc. */
-  private motionSmoothness(finger: FingerId, name: string, a: any, b: any, options: any): any {
+  private motionSmoothness(finger: FingerId, name: string, a: unknown, b: unknown, options: unknown) {
     const payload = motionPayload(finger, a);
     const maxAcceleration = this.optNumber(options, MAX_SMOOTH_ACCELERATION, 'maxAcceleration');
     const current = payload.velocity as Vec3D;
@@ -921,7 +920,7 @@ export class AnatomicalHandDigitsSubsystem {
    * Khi có `options.direction` và entity không phải vector, độ cuộn được đo là
    * góc giữa trục ngón ở tư thế hiện tại và hướng tham chiếu đó.
    */
-  private fingerCurl(finger: FingerId, name: string, entity: any, options: any): any {
+  private fingerCurl(finger: FingerId, name: string, entity: unknown, options: unknown) {
     const reference = this.optVector(options, 'direction', 'axis', 'reference');
     const side = this.sideOf(options);
     const payload = jointAnglePayload(finger, entity, reference);
@@ -944,7 +943,7 @@ export class AnatomicalHandDigitsSubsystem {
   }
 
   /** Độ xòe ngón (khoảng cách ngang với ngón kề bên). */
-  private fingerSpreadValue(finger: FingerId, name: string, entity: any, options: any): any {
+  private fingerSpreadValue(finger: FingerId, name: string, entity: unknown, options: unknown) {
     const size = this.anatomyScale(this.handOf(entity, options));
     const { unit, factor } = this.unitFactor(options, 'm');
     const meters = fingerSpread(finger) * size;
@@ -956,7 +955,7 @@ export class AnatomicalHandDigitsSubsystem {
   }
 
   /** Độ thẳng hàng ngón; `b` là bàn tay tham chiếu để so sánh. */
-  private fingerAlignment(finger: FingerId, name: string, a: any, b: any, options: any): any {
+  private fingerAlignment(finger: FingerId, name: string, a: unknown, b: unknown, options: unknown) {
     const side = this.sideOf(options);
     const reference = this.optObject(options, 'reference') ?? b;
     const rest = reference ? currentFingerAxis(finger, reference, side) : fingerAxis(finger, side);
@@ -986,105 +985,105 @@ export class AnatomicalHandDigitsSubsystem {
    * [0401] getThumbRootPosition
    * Lấy tọa độ gốc ngón cái.
    */
-  public getThumbRootPosition(entity?: any, offset?: Vec3D): any {
+  public getThumbRootPosition(entity?: unknown, offset?: Vec3D) {
     return offsetPosition(entity, add(jointOffset('thumb', 'root'), toVec3(offset)));
   }
   /**
    * [0402] getThumbCMCPosition
    * Lấy tọa độ khớp CMC ngón cái.
    */
-  public getThumbCMCPosition(entity?: any, offset?: Vec3D): any {
+  public getThumbCMCPosition(entity?: unknown, offset?: Vec3D) {
     return offsetPosition(entity, add(jointOffset('thumb', 'cmc'), toVec3(offset)));
   }
   /**
    * [0403] getThumbMCPPosition
    * Lấy tọa độ khớp MCP ngón cái.
    */
-  public getThumbMCPPosition(entity?: any, offset?: Vec3D): any {
+  public getThumbMCPPosition(entity?: unknown, offset?: Vec3D) {
     return offsetPosition(entity, add(jointOffset('thumb', 'mcp'), toVec3(offset)));
   }
   /**
    * [0404] getThumbIPPosition
    * Lấy tọa độ khớp IP ngón cái.
    */
-  public getThumbIPPosition(entity?: any, offset?: Vec3D): any {
+  public getThumbIPPosition(entity?: unknown, offset?: Vec3D) {
     return offsetPosition(entity, add(jointOffset('thumb', 'ip'), toVec3(offset)));
   }
   /**
    * [0405] getThumbTipPosition
    * Lấy tọa độ đầu ngón cái.
    */
-  public getThumbTipPosition(entity?: any, offset?: Vec3D): any {
+  public getThumbTipPosition(entity?: unknown, offset?: Vec3D) {
     return offsetPosition(entity, add(jointOffset('thumb', 'tip'), toVec3(offset)));
   }
   /**
    * [0406] getThumbNailPosition
    * Lấy tọa độ móng ngón cái.
    */
-  public getThumbNailPosition(entity?: any, offset?: Vec3D): any {
+  public getThumbNailPosition(entity?: unknown, offset?: Vec3D) {
     return offsetPosition(entity, add(jointOffset('thumb', 'nail'), toVec3(offset)));
   }
   /**
    * [0407] getThumbPadPosition
    * Lấy tọa độ đệm ngón cái.
    */
-  public getThumbPadPosition(entity?: any, offset?: Vec3D): any {
+  public getThumbPadPosition(entity?: unknown, offset?: Vec3D) {
     return offsetPosition(entity, add(jointOffset('thumb', 'pad'), toVec3(offset)));
   }
   /**
    * [0408] getThumbBasePosition
    * Lấy tọa độ đáy ngón cái.
    */
-  public getThumbBasePosition(entity?: any, offset?: Vec3D): any {
+  public getThumbBasePosition(entity?: unknown, offset?: Vec3D) {
     return offsetPosition(entity, add(jointOffset('thumb', 'base'), toVec3(offset)));
   }
   /**
    * [0409] getThumbProximalJoint
    * Lấy tọa độ khớp gần ngón cái.
    */
-  public getThumbProximalJoint(entity?: any, offset?: Vec3D): any {
+  public getThumbProximalJoint(entity?: unknown, offset?: Vec3D) {
     return offsetPosition(entity, add(jointOffset('thumb', 'mcp'), toVec3(offset)));
   }
   /**
    * [0410] getThumbDistalJoint
    * Lấy tọa độ khớp xa ngón cái.
    */
-  public getThumbDistalJoint(entity?: any, offset?: Vec3D): any {
+  public getThumbDistalJoint(entity?: unknown, offset?: Vec3D) {
     return offsetPosition(entity, add(jointOffset('thumb', 'ip'), toVec3(offset)));
   }
   /**
    * [0411] calculateThumbLength
    * Tính chiều dài ngón cái.
    */
-  public calculateThumbLength(entity?: any, options?: any): any {
+  public calculateThumbLength(entity?: unknown, options?: unknown) {
     return this.fingerLength('thumb', 'calculateThumbLength', entity, options);
   }
   /**
    * [0412] calculateThumbWidth
    * Tính chiều rộng ngón cái.
    */
-  public calculateThumbWidth(entity?: any, options?: any): any {
+  public calculateThumbWidth(entity?: unknown, options?: unknown) {
     return this.fingerWidth('thumb', 'calculateThumbWidth', entity, options);
   }
   /**
    * [0413] calculateThumbThickness
    * Tính độ dày ngón cái.
    */
-  public calculateThumbThickness(a?: any, b?: any, options?: any): any {
+  public calculateThumbThickness(a?: unknown, b?: unknown, options?: unknown) {
     return this.fingerThickness('thumb', 'calculateThumbThickness', a, b, options);
   }
   /**
    * [0414] calculateThumbCurvature
    * Tính độ cong ngón cái.
    */
-  public calculateThumbCurvature(entity?: any, options?: any): any {
+  public calculateThumbCurvature(entity?: unknown, options?: unknown) {
     return this.fingerCurvatureValue('thumb', 'calculateThumbCurvature', entity, options);
   }
   /**
    * [0415] calculateThumbDirection
    * Tính hướng ngón cái.
    */
-  public calculateThumbDirection(a?: any, b?: any): any {
+  public calculateThumbDirection(a?: unknown, b?: unknown) {
     return directionResult('calculateThumbDirection', this.fingerDirection('thumb', a, b), {
       finger: 'thumb'
     });
@@ -1093,7 +1092,7 @@ export class AnatomicalHandDigitsSubsystem {
    * [0416] calculateThumbOrientation
    * Tính hướng quay ngón cái.
    */
-  public calculateThumbOrientation(entityOrAngle?: any, options?: any): any {
+  public calculateThumbOrientation(entityOrAngle?: unknown, options?: unknown) {
     return orientationResult('calculateThumbOrientation', fingerOrientation('thumb', entityOrAngle, options), {
       finger: 'thumb'
     });
@@ -1102,42 +1101,42 @@ export class AnatomicalHandDigitsSubsystem {
    * [0417] calculateThumbFlexion
    * Tính góc gập ngón cái.
    */
-  public calculateThumbFlexion(a?: any, b?: any): any {
+  public calculateThumbFlexion(a?: unknown, b?: unknown) {
     return measurement('calculateThumbFlexion', readAngles(a, b).flexion, 'rad', { finger: 'thumb' });
   }
   /**
    * [0418] calculateThumbExtension
    * Tính góc duỗi ngón cái.
    */
-  public calculateThumbExtension(a?: any, b?: any): any {
+  public calculateThumbExtension(a?: unknown, b?: unknown) {
     return measurement('calculateThumbExtension', readAngles(a, b).extension, 'rad', { finger: 'thumb' });
   }
   /**
    * [0419] calculateThumbAbduction
    * Tính góc dạng ngón cái.
    */
-  public calculateThumbAbduction(a?: any, b?: any): any {
+  public calculateThumbAbduction(a?: unknown, b?: unknown) {
     return measurement('calculateThumbAbduction', readAngles(a, b).abduction, 'rad', { finger: 'thumb' });
   }
   /**
    * [0420] calculateThumbAdduction
    * Tính góc khép ngón cái.
    */
-  public calculateThumbAdduction(a?: any, b?: any): any {
+  public calculateThumbAdduction(a?: unknown, b?: unknown) {
     return measurement('calculateThumbAdduction', readAngles(a, b).adduction, 'rad', { finger: 'thumb' });
   }
   /**
    * [0421] calculateThumbOpposition
    * Tính mức độ đối chiếu ngón cái.
    */
-  public calculateThumbOpposition(a?: any, b?: any, options?: any): any {
+  public calculateThumbOpposition(a?: unknown, b?: unknown, options?: unknown) {
     return this.thumbOpposition(a, b, options);
   }
   /**
    * [0422] calculateThumbRotation
    * Tính góc quay ngón cái.
    */
-  public calculateThumbRotation(entityOrAngle?: any, options?: any): any {
+  public calculateThumbRotation(entityOrAngle?: unknown, options?: unknown) {
     return orientationResult('calculateThumbRotation', fingerOrientation('thumb', entityOrAngle, options), {
       finger: 'thumb'
     });
@@ -1146,14 +1145,14 @@ export class AnatomicalHandDigitsSubsystem {
    * [0423] calculateThumbTipVelocity
    * Tính vận tốc đầu ngón cái.
    */
-  public calculateThumbTipVelocity(entity?: any, dt = 0.016): any {
+  public calculateThumbTipVelocity(entity?: unknown, dt = 0.016) {
     return directionResult('calculateThumbTipVelocity', readVector(entity, 'velocity'), { finger: 'thumb', dt });
   }
   /**
    * [0424] calculateThumbTipAcceleration
    * Tính gia tốc đầu ngón cái.
    */
-  public calculateThumbTipAcceleration(entity?: any, dt = 0.016): any {
+  public calculateThumbTipAcceleration(entity?: unknown, dt = 0.016) {
     return directionResult('calculateThumbTipAcceleration', readVector(entity, 'acceleration'), {
       finger: 'thumb',
       dt
@@ -1163,7 +1162,7 @@ export class AnatomicalHandDigitsSubsystem {
    * [0425] calculateThumbJointAngles
    * Tính các góc khớp ngón cái.
    */
-  public calculateThumbJointAngles(a?: any, b?: any): any {
+  public calculateThumbJointAngles(a?: unknown, b?: unknown) {
     const payload = jointAnglePayload('thumb', a, b);
     return measurement('calculateThumbJointAngles', payload.total as number, 'rad', payload);
   }
@@ -1171,21 +1170,21 @@ export class AnatomicalHandDigitsSubsystem {
    * [0426] calculateThumbSegmentLengths
    * Tính chiều dài các đốt ngón cái.
    */
-  public calculateThumbSegmentLengths(entity?: any, options?: any): any {
+  public calculateThumbSegmentLengths(entity?: unknown, options?: unknown) {
     return this.fingerSegments('thumb', 'calculateThumbSegmentLengths', entity, options);
   }
   /**
    * [0427] calculateThumbBoundingBox
    * Tính hộp bao ngón cái.
    */
-  public calculateThumbBoundingBox(entity?: any, size?: Vec3D): any {
+  public calculateThumbBoundingBox(entity?: unknown, size?: Vec3D) {
     return boundsResult('calculateThumbBoundingBox', fingerBox('thumb', entity, size), { finger: 'thumb' });
   }
   /**
    * [0428] calculateThumbBoundingSphere
    * Tính hình cầu bao ngón cái.
    */
-  public calculateThumbBoundingSphere(entity?: any, radius?: number): any {
+  public calculateThumbBoundingSphere(entity?: unknown, radius?: number) {
     return {
       name: 'calculateThumbBoundingSphere',
       valid: true,
@@ -1198,7 +1197,7 @@ export class AnatomicalHandDigitsSubsystem {
    * [0429] calculateThumbTipDistanceToIndex
    * Tính khoảng cách đầu ngón cái đến ngón trỏ.
    */
-  public calculateThumbTipDistanceToIndex(a?: any, b?: any): any {
+  public calculateThumbTipDistanceToIndex(a?: unknown, b?: unknown) {
     return measurement('calculateThumbTipDistanceToIndex', tipDistance('thumb', 'index', a, b), 'm', {
       from: 'thumb',
       to: 'index'
@@ -1208,7 +1207,7 @@ export class AnatomicalHandDigitsSubsystem {
    * [0430] calculateThumbTipDistanceToMiddle
    * Tính khoảng cách đầu ngón cái đến ngón giữa.
    */
-  public calculateThumbTipDistanceToMiddle(a?: any, b?: any): any {
+  public calculateThumbTipDistanceToMiddle(a?: unknown, b?: unknown) {
     return measurement('calculateThumbTipDistanceToMiddle', tipDistance('thumb', 'middle', a, b), 'm', {
       from: 'thumb',
       to: 'middle'
@@ -1218,7 +1217,7 @@ export class AnatomicalHandDigitsSubsystem {
    * [0431] calculateThumbTipDistanceToRing
    * Tính khoảng cách đầu ngón cái đến ngón áp út.
    */
-  public calculateThumbTipDistanceToRing(a?: any, b?: any): any {
+  public calculateThumbTipDistanceToRing(a?: unknown, b?: unknown) {
     return measurement('calculateThumbTipDistanceToRing', tipDistance('thumb', 'ring', a, b), 'm', {
       from: 'thumb',
       to: 'ring'
@@ -1228,7 +1227,7 @@ export class AnatomicalHandDigitsSubsystem {
    * [0432] calculateThumbTipDistanceToLittle
    * Tính khoảng cách đầu ngón cái đến ngón út.
    */
-  public calculateThumbTipDistanceToLittle(a?: any, b?: any): any {
+  public calculateThumbTipDistanceToLittle(a?: unknown, b?: unknown) {
     return measurement('calculateThumbTipDistanceToLittle', tipDistance('thumb', 'little', a, b), 'm', {
       from: 'thumb',
       to: 'little'
@@ -1238,7 +1237,7 @@ export class AnatomicalHandDigitsSubsystem {
    * [0433] calculateThumbPinchDistance
    * Tính khoảng cách kẹp giữa ngón cái và ngón khác.
    */
-  public calculateThumbPinchDistance(a?: any, b?: any): any {
+  public calculateThumbPinchDistance(a?: unknown, b?: unknown) {
     return measurement('calculateThumbPinchDistance', tipDistance('thumb', 'index', a, b), 'm', {
       from: 'thumb',
       to: 'index'
@@ -1248,49 +1247,49 @@ export class AnatomicalHandDigitsSubsystem {
    * [0434] calculateThumbPinchStrength
    * Ước lượng lực kẹp từ mô hình vật lý.
    */
-  public calculateThumbPinchStrength(a?: any, b?: any, options?: any): any {
+  public calculateThumbPinchStrength(a?: unknown, b?: unknown, options?: unknown) {
     return this.thumbPinchStrength(a, b, options);
   }
   /**
    * [0435] calculateThumbReachEnvelope
    * Tính vùng với tới của ngón cái.
    */
-  public calculateThumbReachEnvelope(a?: any, b?: any, options?: any): any {
+  public calculateThumbReachEnvelope(a?: unknown, b?: unknown, options?: unknown) {
     return this.reachEnvelope('thumb', 'calculateThumbReachEnvelope', a, b, options);
   }
   /**
    * [0436] calculateThumbContactPoint
    * Tính điểm tiếp xúc ngón cái.
    */
-  public calculateThumbContactPoint(a?: any, b?: any, options?: any): any {
+  public calculateThumbContactPoint(a?: unknown, b?: unknown, options?: unknown) {
     return this.contactPoint('thumb', 'calculateThumbContactPoint', a, b, options);
   }
   /**
    * [0437] calculateThumbSurfaceNormal
    * Tính pháp tuyến bề mặt ngón cái.
    */
-  public calculateThumbSurfaceNormal(a?: any, b?: any): any {
+  public calculateThumbSurfaceNormal(a?: unknown, b?: unknown) {
     return this.surfaceNormal('thumb', 'calculateThumbSurfaceNormal', a, b);
   }
   /**
    * [0438] calculateThumbPoseError
    * Tính sai lệch tư thế ngón cái.
    */
-  public calculateThumbPoseError(a?: any, b?: any, options?: any): any {
+  public calculateThumbPoseError(a?: unknown, b?: unknown, options?: unknown) {
     return this.poseError('thumb', 'calculateThumbPoseError', a, b, options);
   }
   /**
    * [0439] calculateThumbMotionSmoothness
    * Tính độ mượt chuyển động ngón cái.
    */
-  public calculateThumbMotionSmoothness(a?: any, b?: any, options?: any): any {
+  public calculateThumbMotionSmoothness(a?: unknown, b?: unknown, options?: unknown) {
     return this.motionSmoothness('thumb', 'calculateThumbMotionSmoothness', a, b, options);
   }
   /**
    * [0440] calculateThumbCollision
    * Kiểm tra va chạm ngón cái.
    */
-  public calculateThumbCollision(a?: any, b?: any): any {
+  public calculateThumbCollision(a?: unknown, b?: unknown) {
     return aabbResult(
       'calculateThumbCollision',
       fingerBox('thumb', a),
@@ -1305,105 +1304,105 @@ export class AnatomicalHandDigitsSubsystem {
    * [0441] getIndexFingerRootPosition
    * Lấy tọa độ gốc ngón trỏ.
    */
-  public getIndexFingerRootPosition(entity?: any, offset?: Vec3D): any {
+  public getIndexFingerRootPosition(entity?: unknown, offset?: Vec3D) {
     return offsetPosition(entity, add(jointOffset('index', 'root'), toVec3(offset)));
   }
   /**
    * [0442] getIndexFingerMCPPosition
    * Lấy tọa độ khớp MCP ngón trỏ.
    */
-  public getIndexFingerMCPPosition(entity?: any, offset?: Vec3D): any {
+  public getIndexFingerMCPPosition(entity?: unknown, offset?: Vec3D) {
     return offsetPosition(entity, add(jointOffset('index', 'mcp'), toVec3(offset)));
   }
   /**
    * [0443] getIndexFingerPIPPosition
    * Lấy tọa độ khớp PIP ngón trỏ.
    */
-  public getIndexFingerPIPPosition(entity?: any, offset?: Vec3D): any {
+  public getIndexFingerPIPPosition(entity?: unknown, offset?: Vec3D) {
     return offsetPosition(entity, add(jointOffset('index', 'pip'), toVec3(offset)));
   }
   /**
    * [0444] getIndexFingerDIPPosition
    * Lấy tọa độ khớp DIP ngón trỏ.
    */
-  public getIndexFingerDIPPosition(entity?: any, offset?: Vec3D): any {
+  public getIndexFingerDIPPosition(entity?: unknown, offset?: Vec3D) {
     return offsetPosition(entity, add(jointOffset('index', 'dip'), toVec3(offset)));
   }
   /**
    * [0445] getIndexFingerTipPosition
    * Lấy tọa độ đầu ngón trỏ.
    */
-  public getIndexFingerTipPosition(entity?: any, offset?: Vec3D): any {
+  public getIndexFingerTipPosition(entity?: unknown, offset?: Vec3D) {
     return offsetPosition(entity, add(jointOffset('index', 'tip'), toVec3(offset)));
   }
   /**
    * [0446] getIndexFingerNailPosition
    * Lấy tọa độ móng ngón trỏ.
    */
-  public getIndexFingerNailPosition(entity?: any, offset?: Vec3D): any {
+  public getIndexFingerNailPosition(entity?: unknown, offset?: Vec3D) {
     return offsetPosition(entity, add(jointOffset('index', 'nail'), toVec3(offset)));
   }
   /**
    * [0447] getIndexFingerPadPosition
    * Lấy tọa độ đệm ngón trỏ.
    */
-  public getIndexFingerPadPosition(entity?: any, offset?: Vec3D): any {
+  public getIndexFingerPadPosition(entity?: unknown, offset?: Vec3D) {
     return offsetPosition(entity, add(jointOffset('index', 'pad'), toVec3(offset)));
   }
   /**
    * [0448] getIndexFingerBasePosition
    * Lấy tọa độ đáy ngón trỏ.
    */
-  public getIndexFingerBasePosition(entity?: any, offset?: Vec3D): any {
+  public getIndexFingerBasePosition(entity?: unknown, offset?: Vec3D) {
     return offsetPosition(entity, add(jointOffset('index', 'base'), toVec3(offset)));
   }
   /**
    * [0449] getIndexFingerProximalJoint
    * Lấy tọa độ khớp gần ngón trỏ.
    */
-  public getIndexFingerProximalJoint(entity?: any, offset?: Vec3D): any {
+  public getIndexFingerProximalJoint(entity?: unknown, offset?: Vec3D) {
     return offsetPosition(entity, add(jointOffset('index', 'pip'), toVec3(offset)));
   }
   /**
    * [0450] getIndexFingerDistalJoint
    * Lấy tọa độ khớp xa ngón trỏ.
    */
-  public getIndexFingerDistalJoint(entity?: any, offset?: Vec3D): any {
+  public getIndexFingerDistalJoint(entity?: unknown, offset?: Vec3D) {
     return offsetPosition(entity, add(jointOffset('index', 'dip'), toVec3(offset)));
   }
   /**
    * [0451] calculateIndexFingerLength
    * Tính chiều dài ngón trỏ.
    */
-  public calculateIndexFingerLength(entity?: any, options?: any): any {
+  public calculateIndexFingerLength(entity?: unknown, options?: unknown) {
     return this.fingerLength('index', 'calculateIndexFingerLength', entity, options);
   }
   /**
    * [0452] calculateIndexFingerWidth
    * Tính chiều rộng ngón trỏ.
    */
-  public calculateIndexFingerWidth(entity?: any, options?: any): any {
+  public calculateIndexFingerWidth(entity?: unknown, options?: unknown) {
     return this.fingerWidth('index', 'calculateIndexFingerWidth', entity, options);
   }
   /**
    * [0453] calculateIndexFingerThickness
    * Tính độ dày ngón trỏ.
    */
-  public calculateIndexFingerThickness(a?: any, b?: any, options?: any): any {
+  public calculateIndexFingerThickness(a?: unknown, b?: unknown, options?: unknown) {
     return this.fingerThickness('index', 'calculateIndexFingerThickness', a, b, options);
   }
   /**
    * [0454] calculateIndexFingerCurvature
    * Tính độ cong ngón trỏ.
    */
-  public calculateIndexFingerCurvature(entity?: any, options?: any): any {
+  public calculateIndexFingerCurvature(entity?: unknown, options?: unknown) {
     return this.fingerCurvatureValue('index', 'calculateIndexFingerCurvature', entity, options);
   }
   /**
    * [0455] calculateIndexFingerDirection
    * Tính hướng ngón trỏ.
    */
-  public calculateIndexFingerDirection(a?: any, b?: any): any {
+  public calculateIndexFingerDirection(a?: unknown, b?: unknown) {
     return directionResult('calculateIndexFingerDirection', this.fingerDirection('index', a, b), {
       finger: 'index'
     });
@@ -1412,7 +1411,7 @@ export class AnatomicalHandDigitsSubsystem {
    * [0456] calculateIndexFingerOrientation
    * Tính hướng quay ngón trỏ.
    */
-  public calculateIndexFingerOrientation(entityOrAngle?: any, options?: any): any {
+  public calculateIndexFingerOrientation(entityOrAngle?: unknown, options?: unknown) {
     return orientationResult('calculateIndexFingerOrientation', fingerOrientation('index', entityOrAngle, options), {
       finger: 'index'
     });
@@ -1421,35 +1420,35 @@ export class AnatomicalHandDigitsSubsystem {
    * [0457] calculateIndexFingerFlexion
    * Tính góc gập ngón trỏ.
    */
-  public calculateIndexFingerFlexion(a?: any, b?: any): any {
+  public calculateIndexFingerFlexion(a?: unknown, b?: unknown) {
     return measurement('calculateIndexFingerFlexion', readAngles(a, b).flexion, 'rad', { finger: 'index' });
   }
   /**
    * [0458] calculateIndexFingerExtension
    * Tính góc duỗi ngón trỏ.
    */
-  public calculateIndexFingerExtension(a?: any, b?: any): any {
+  public calculateIndexFingerExtension(a?: unknown, b?: unknown) {
     return measurement('calculateIndexFingerExtension', readAngles(a, b).extension, 'rad', { finger: 'index' });
   }
   /**
    * [0459] calculateIndexFingerAbduction
    * Tính góc dạng ngón trỏ.
    */
-  public calculateIndexFingerAbduction(a?: any, b?: any): any {
+  public calculateIndexFingerAbduction(a?: unknown, b?: unknown) {
     return measurement('calculateIndexFingerAbduction', readAngles(a, b).abduction, 'rad', { finger: 'index' });
   }
   /**
    * [0460] calculateIndexFingerAdduction
    * Tính góc khép ngón trỏ.
    */
-  public calculateIndexFingerAdduction(a?: any, b?: any): any {
+  public calculateIndexFingerAdduction(a?: unknown, b?: unknown) {
     return measurement('calculateIndexFingerAdduction', readAngles(a, b).adduction, 'rad', { finger: 'index' });
   }
   /**
    * [0461] calculateIndexFingerRotation
    * Tính góc quay ngón trỏ.
    */
-  public calculateIndexFingerRotation(entityOrAngle?: any, options?: any): any {
+  public calculateIndexFingerRotation(entityOrAngle?: unknown, options?: unknown) {
     return orientationResult('calculateIndexFingerRotation', fingerOrientation('index', entityOrAngle, options), {
       finger: 'index'
     });
@@ -1458,14 +1457,14 @@ export class AnatomicalHandDigitsSubsystem {
    * [0462] calculateIndexFingerTipVelocity
    * Tính vận tốc đầu ngón trỏ.
    */
-  public calculateIndexFingerTipVelocity(entity?: any, dt = 0.016): any {
+  public calculateIndexFingerTipVelocity(entity?: unknown, dt = 0.016) {
     return directionResult('calculateIndexFingerTipVelocity', readVector(entity, 'velocity'), { finger: 'index', dt });
   }
   /**
    * [0463] calculateIndexFingerTipAcceleration
    * Tính gia tốc đầu ngón trỏ.
    */
-  public calculateIndexFingerTipAcceleration(entity?: any, dt = 0.016): any {
+  public calculateIndexFingerTipAcceleration(entity?: unknown, dt = 0.016) {
     return directionResult('calculateIndexFingerTipAcceleration', readVector(entity, 'acceleration'), {
       finger: 'index',
       dt
@@ -1475,7 +1474,7 @@ export class AnatomicalHandDigitsSubsystem {
    * [0464] calculateIndexFingerJointAngles
    * Tính các góc khớp ngón trỏ.
    */
-  public calculateIndexFingerJointAngles(a?: any, b?: any): any {
+  public calculateIndexFingerJointAngles(a?: unknown, b?: unknown) {
     const payload = jointAnglePayload('index', a, b);
     return measurement('calculateIndexFingerJointAngles', payload.total as number, 'rad', payload);
   }
@@ -1483,21 +1482,21 @@ export class AnatomicalHandDigitsSubsystem {
    * [0465] calculateIndexFingerSegmentLengths
    * Tính chiều dài các đốt ngón trỏ.
    */
-  public calculateIndexFingerSegmentLengths(entity?: any, options?: any): any {
+  public calculateIndexFingerSegmentLengths(entity?: unknown, options?: unknown) {
     return this.fingerSegments('index', 'calculateIndexFingerSegmentLengths', entity, options);
   }
   /**
    * [0466] calculateIndexFingerBoundingBox
    * Tính hộp bao ngón trỏ.
    */
-  public calculateIndexFingerBoundingBox(entity?: any, size?: Vec3D): any {
+  public calculateIndexFingerBoundingBox(entity?: unknown, size?: Vec3D) {
     return boundsResult('calculateIndexFingerBoundingBox', fingerBox('index', entity, size), { finger: 'index' });
   }
   /**
    * [0467] calculateIndexFingerBoundingSphere
    * Tính hình cầu bao ngón trỏ.
    */
-  public calculateIndexFingerBoundingSphere(entity?: any, radius?: number): any {
+  public calculateIndexFingerBoundingSphere(entity?: unknown, radius?: number) {
     return {
       name: 'calculateIndexFingerBoundingSphere',
       valid: true,
@@ -1510,7 +1509,7 @@ export class AnatomicalHandDigitsSubsystem {
    * [0468] calculateIndexToThumbDistance
    * Tính khoảng cách ngón trỏ đến ngón cái.
    */
-  public calculateIndexToThumbDistance(a?: any, b?: any): any {
+  public calculateIndexToThumbDistance(a?: unknown, b?: unknown) {
     return measurement('calculateIndexToThumbDistance', tipDistance('index', 'thumb', a, b), 'm', {
       from: 'index',
       to: 'thumb'
@@ -1520,7 +1519,7 @@ export class AnatomicalHandDigitsSubsystem {
    * [0469] calculateIndexToMiddleDistance
    * Tính khoảng cách ngón trỏ đến ngón giữa.
    */
-  public calculateIndexToMiddleDistance(a?: any, b?: any): any {
+  public calculateIndexToMiddleDistance(a?: unknown, b?: unknown) {
     return measurement('calculateIndexToMiddleDistance', tipDistance('index', 'middle', a, b), 'm', {
       from: 'index',
       to: 'middle'
@@ -1530,7 +1529,7 @@ export class AnatomicalHandDigitsSubsystem {
    * [0470] calculateIndexToRingDistance
    * Tính khoảng cách ngón trỏ đến ngón áp út.
    */
-  public calculateIndexToRingDistance(a?: any, b?: any): any {
+  public calculateIndexToRingDistance(a?: unknown, b?: unknown) {
     return measurement('calculateIndexToRingDistance', tipDistance('index', 'ring', a, b), 'm', {
       from: 'index',
       to: 'ring'
@@ -1540,7 +1539,7 @@ export class AnatomicalHandDigitsSubsystem {
    * [0471] calculateIndexToLittleDistance
    * Tính khoảng cách ngón trỏ đến ngón út.
    */
-  public calculateIndexToLittleDistance(a?: any, b?: any): any {
+  public calculateIndexToLittleDistance(a?: unknown, b?: unknown) {
     return measurement('calculateIndexToLittleDistance', tipDistance('index', 'little', a, b), 'm', {
       from: 'index',
       to: 'little'
@@ -1550,7 +1549,7 @@ export class AnatomicalHandDigitsSubsystem {
    * [0472] calculateIndexPointingDirection
    * Tính hướng chỉ của ngón trỏ.
    */
-  public calculateIndexPointingDirection(a?: any, b?: any): any {
+  public calculateIndexPointingDirection(a?: unknown, b?: unknown) {
     const side = this.sideOf(b ?? a);
     const from = jointOffset('index', 'pip', side);
     const to = jointOffset('index', 'tip', side);
@@ -1565,42 +1564,42 @@ export class AnatomicalHandDigitsSubsystem {
    * [0473] calculateIndexReachEnvelope
    * Tính vùng với tới của ngón trỏ.
    */
-  public calculateIndexReachEnvelope(a?: any, b?: any, options?: any): any {
+  public calculateIndexReachEnvelope(a?: unknown, b?: unknown, options?: unknown) {
     return this.reachEnvelope('index', 'calculateIndexReachEnvelope', a, b, options);
   }
   /**
    * [0474] calculateIndexContactPoint
    * Tính điểm tiếp xúc ngón trỏ.
    */
-  public calculateIndexContactPoint(a?: any, b?: any, options?: any): any {
+  public calculateIndexContactPoint(a?: unknown, b?: unknown, options?: unknown) {
     return this.contactPoint('index', 'calculateIndexContactPoint', a, b, options);
   }
   /**
    * [0475] calculateIndexSurfaceNormal
    * Tính pháp tuyến bề mặt ngón trỏ.
    */
-  public calculateIndexSurfaceNormal(a?: any, b?: any): any {
+  public calculateIndexSurfaceNormal(a?: unknown, b?: unknown) {
     return this.surfaceNormal('index', 'calculateIndexSurfaceNormal', a, b);
   }
   /**
    * [0476] calculateIndexPoseError
    * Tính sai lệch tư thế ngón trỏ.
    */
-  public calculateIndexPoseError(a?: any, b?: any, options?: any): any {
+  public calculateIndexPoseError(a?: unknown, b?: unknown, options?: unknown) {
     return this.poseError('index', 'calculateIndexPoseError', a, b, options);
   }
   /**
    * [0477] calculateIndexMotionSmoothness
    * Tính độ mượt chuyển động ngón trỏ.
    */
-  public calculateIndexMotionSmoothness(a?: any, b?: any, options?: any): any {
+  public calculateIndexMotionSmoothness(a?: unknown, b?: unknown, options?: unknown) {
     return this.motionSmoothness('index', 'calculateIndexMotionSmoothness', a, b, options);
   }
   /**
    * [0478] calculateIndexCollision
    * Kiểm tra va chạm ngón trỏ.
    */
-  public calculateIndexCollision(a?: any, b?: any): any {
+  public calculateIndexCollision(a?: unknown, b?: unknown) {
     return aabbResult(
       'calculateIndexCollision',
       fingerBox('index', a),
@@ -1611,14 +1610,14 @@ export class AnatomicalHandDigitsSubsystem {
    * [0479] calculateIndexFingerCurl
    * Tính độ cuộn ngón trỏ.
    */
-  public calculateIndexFingerCurl(entity?: any, options?: any): any {
+  public calculateIndexFingerCurl(entity?: unknown, options?: unknown) {
     return this.fingerCurl('index', 'calculateIndexFingerCurl', entity, options);
   }
   /**
    * [0480] calculateIndexFingerSpread
    * Tính độ xòe ngón trỏ.
    */
-  public calculateIndexFingerSpread(entity?: any, options?: any): any {
+  public calculateIndexFingerSpread(entity?: unknown, options?: unknown) {
     return this.fingerSpreadValue('index', 'calculateIndexFingerSpread', entity, options);
   }
   // ==========================================================================
@@ -1629,105 +1628,105 @@ export class AnatomicalHandDigitsSubsystem {
    * [0481] getMiddleFingerRootPosition
    * Lấy tọa độ gốc ngón giữa.
    */
-  public getMiddleFingerRootPosition(entity?: any, offset?: Vec3D): any {
+  public getMiddleFingerRootPosition(entity?: unknown, offset?: Vec3D) {
     return offsetPosition(entity, add(jointOffset('middle', 'root'), toVec3(offset)));
   }
   /**
    * [0482] getMiddleFingerMCPPosition
    * Lấy tọa độ khớp MCP ngón giữa.
    */
-  public getMiddleFingerMCPPosition(entity?: any, offset?: Vec3D): any {
+  public getMiddleFingerMCPPosition(entity?: unknown, offset?: Vec3D) {
     return offsetPosition(entity, add(jointOffset('middle', 'mcp'), toVec3(offset)));
   }
   /**
    * [0483] getMiddleFingerPIPPosition
    * Lấy tọa độ khớp PIP ngón giữa.
    */
-  public getMiddleFingerPIPPosition(entity?: any, offset?: Vec3D): any {
+  public getMiddleFingerPIPPosition(entity?: unknown, offset?: Vec3D) {
     return offsetPosition(entity, add(jointOffset('middle', 'pip'), toVec3(offset)));
   }
   /**
    * [0484] getMiddleFingerDIPPosition
    * Lấy tọa độ khớp DIP ngón giữa.
    */
-  public getMiddleFingerDIPPosition(entity?: any, offset?: Vec3D): any {
+  public getMiddleFingerDIPPosition(entity?: unknown, offset?: Vec3D) {
     return offsetPosition(entity, add(jointOffset('middle', 'dip'), toVec3(offset)));
   }
   /**
    * [0485] getMiddleFingerTipPosition
    * Lấy tọa độ đầu ngón giữa.
    */
-  public getMiddleFingerTipPosition(entity?: any, offset?: Vec3D): any {
+  public getMiddleFingerTipPosition(entity?: unknown, offset?: Vec3D) {
     return offsetPosition(entity, add(jointOffset('middle', 'tip'), toVec3(offset)));
   }
   /**
    * [0486] getMiddleFingerNailPosition
    * Lấy tọa độ móng ngón giữa.
    */
-  public getMiddleFingerNailPosition(entity?: any, offset?: Vec3D): any {
+  public getMiddleFingerNailPosition(entity?: unknown, offset?: Vec3D) {
     return offsetPosition(entity, add(jointOffset('middle', 'nail'), toVec3(offset)));
   }
   /**
    * [0487] getMiddleFingerPadPosition
    * Lấy tọa độ đệm ngón giữa.
    */
-  public getMiddleFingerPadPosition(entity?: any, offset?: Vec3D): any {
+  public getMiddleFingerPadPosition(entity?: unknown, offset?: Vec3D) {
     return offsetPosition(entity, add(jointOffset('middle', 'pad'), toVec3(offset)));
   }
   /**
    * [0488] getMiddleFingerBasePosition
    * Lấy tọa độ đáy ngón giữa.
    */
-  public getMiddleFingerBasePosition(entity?: any, offset?: Vec3D): any {
+  public getMiddleFingerBasePosition(entity?: unknown, offset?: Vec3D) {
     return offsetPosition(entity, add(jointOffset('middle', 'base'), toVec3(offset)));
   }
   /**
    * [0489] getMiddleFingerProximalJoint
    * Lấy tọa độ khớp gần ngón giữa.
    */
-  public getMiddleFingerProximalJoint(entity?: any, offset?: Vec3D): any {
+  public getMiddleFingerProximalJoint(entity?: unknown, offset?: Vec3D) {
     return offsetPosition(entity, add(jointOffset('middle', 'pip'), toVec3(offset)));
   }
   /**
    * [0490] getMiddleFingerDistalJoint
    * Lấy tọa độ khớp xa ngón giữa.
    */
-  public getMiddleFingerDistalJoint(entity?: any, offset?: Vec3D): any {
+  public getMiddleFingerDistalJoint(entity?: unknown, offset?: Vec3D) {
     return offsetPosition(entity, add(jointOffset('middle', 'dip'), toVec3(offset)));
   }
   /**
    * [0491] calculateMiddleFingerLength
    * Tính chiều dài ngón giữa.
    */
-  public calculateMiddleFingerLength(entity?: any, options?: any): any {
+  public calculateMiddleFingerLength(entity?: unknown, options?: unknown) {
     return this.fingerLength('middle', 'calculateMiddleFingerLength', entity, options);
   }
   /**
    * [0492] calculateMiddleFingerWidth
    * Tính chiều rộng ngón giữa.
    */
-  public calculateMiddleFingerWidth(entity?: any, options?: any): any {
+  public calculateMiddleFingerWidth(entity?: unknown, options?: unknown) {
     return this.fingerWidth('middle', 'calculateMiddleFingerWidth', entity, options);
   }
   /**
    * [0493] calculateMiddleFingerThickness
    * Tính độ dày ngón giữa.
    */
-  public calculateMiddleFingerThickness(a?: any, b?: any, options?: any): any {
+  public calculateMiddleFingerThickness(a?: unknown, b?: unknown, options?: unknown) {
     return this.fingerThickness('middle', 'calculateMiddleFingerThickness', a, b, options);
   }
   /**
    * [0494] calculateMiddleFingerCurvature
    * Tính độ cong ngón giữa.
    */
-  public calculateMiddleFingerCurvature(entity?: any, options?: any): any {
+  public calculateMiddleFingerCurvature(entity?: unknown, options?: unknown) {
     return this.fingerCurvatureValue('middle', 'calculateMiddleFingerCurvature', entity, options);
   }
   /**
    * [0495] calculateMiddleFingerDirection
    * Tính hướng ngón giữa.
    */
-  public calculateMiddleFingerDirection(a?: any, b?: any): any {
+  public calculateMiddleFingerDirection(a?: unknown, b?: unknown) {
     return directionResult('calculateMiddleFingerDirection', this.fingerDirection('middle', a, b), {
       finger: 'middle'
     });
@@ -1736,7 +1735,7 @@ export class AnatomicalHandDigitsSubsystem {
    * [0496] calculateMiddleFingerOrientation
    * Tính hướng quay ngón giữa.
    */
-  public calculateMiddleFingerOrientation(entityOrAngle?: any, options?: any): any {
+  public calculateMiddleFingerOrientation(entityOrAngle?: unknown, options?: unknown) {
     return orientationResult('calculateMiddleFingerOrientation', fingerOrientation('middle', entityOrAngle, options), {
       finger: 'middle'
     });
@@ -1745,35 +1744,35 @@ export class AnatomicalHandDigitsSubsystem {
    * [0497] calculateMiddleFingerFlexion
    * Tính góc gập ngón giữa.
    */
-  public calculateMiddleFingerFlexion(a?: any, b?: any): any {
+  public calculateMiddleFingerFlexion(a?: unknown, b?: unknown) {
     return measurement('calculateMiddleFingerFlexion', readAngles(a, b).flexion, 'rad', { finger: 'middle' });
   }
   /**
    * [0498] calculateMiddleFingerExtension
    * Tính góc duỗi ngón giữa.
    */
-  public calculateMiddleFingerExtension(a?: any, b?: any): any {
+  public calculateMiddleFingerExtension(a?: unknown, b?: unknown) {
     return measurement('calculateMiddleFingerExtension', readAngles(a, b).extension, 'rad', { finger: 'middle' });
   }
   /**
    * [0499] calculateMiddleFingerAbduction
    * Tính góc dạng ngón giữa.
    */
-  public calculateMiddleFingerAbduction(a?: any, b?: any): any {
+  public calculateMiddleFingerAbduction(a?: unknown, b?: unknown) {
     return measurement('calculateMiddleFingerAbduction', readAngles(a, b).abduction, 'rad', { finger: 'middle' });
   }
   /**
    * [0500] calculateMiddleFingerAdduction
    * Tính góc khép ngón giữa.
    */
-  public calculateMiddleFingerAdduction(a?: any, b?: any): any {
+  public calculateMiddleFingerAdduction(a?: unknown, b?: unknown) {
     return measurement('calculateMiddleFingerAdduction', readAngles(a, b).adduction, 'rad', { finger: 'middle' });
   }
   /**
    * [0501] calculateMiddleFingerRotation
    * Tính góc quay ngón giữa.
    */
-  public calculateMiddleFingerRotation(entityOrAngle?: any, options?: any): any {
+  public calculateMiddleFingerRotation(entityOrAngle?: unknown, options?: unknown) {
     return orientationResult('calculateMiddleFingerRotation', fingerOrientation('middle', entityOrAngle, options), {
       finger: 'middle'
     });
@@ -1782,7 +1781,7 @@ export class AnatomicalHandDigitsSubsystem {
    * [0502] calculateMiddleFingerTipVelocity
    * Tính vận tốc đầu ngón giữa.
    */
-  public calculateMiddleFingerTipVelocity(entity?: any, dt = 0.016): any {
+  public calculateMiddleFingerTipVelocity(entity?: unknown, dt = 0.016) {
     return directionResult('calculateMiddleFingerTipVelocity', readVector(entity, 'velocity'), {
       finger: 'middle',
       dt
@@ -1792,7 +1791,7 @@ export class AnatomicalHandDigitsSubsystem {
    * [0503] calculateMiddleFingerTipAcceleration
    * Tính gia tốc đầu ngón giữa.
    */
-  public calculateMiddleFingerTipAcceleration(entity?: any, dt = 0.016): any {
+  public calculateMiddleFingerTipAcceleration(entity?: unknown, dt = 0.016) {
     return directionResult('calculateMiddleFingerTipAcceleration', readVector(entity, 'acceleration'), {
       finger: 'middle',
       dt
@@ -1802,7 +1801,7 @@ export class AnatomicalHandDigitsSubsystem {
    * [0504] calculateMiddleFingerJointAngles
    * Tính các góc khớp ngón giữa.
    */
-  public calculateMiddleFingerJointAngles(a?: any, b?: any): any {
+  public calculateMiddleFingerJointAngles(a?: unknown, b?: unknown) {
     const payload = jointAnglePayload('middle', a, b);
     return measurement('calculateMiddleFingerJointAngles', payload.total as number, 'rad', payload);
   }
@@ -1810,21 +1809,21 @@ export class AnatomicalHandDigitsSubsystem {
    * [0505] calculateMiddleFingerSegmentLengths
    * Tính chiều dài các đốt ngón giữa.
    */
-  public calculateMiddleFingerSegmentLengths(entity?: any, options?: any): any {
+  public calculateMiddleFingerSegmentLengths(entity?: unknown, options?: unknown) {
     return this.fingerSegments('middle', 'calculateMiddleFingerSegmentLengths', entity, options);
   }
   /**
    * [0506] calculateMiddleFingerBoundingBox
    * Tính hộp bao ngón giữa.
    */
-  public calculateMiddleFingerBoundingBox(entity?: any, size?: Vec3D): any {
+  public calculateMiddleFingerBoundingBox(entity?: unknown, size?: Vec3D) {
     return boundsResult('calculateMiddleFingerBoundingBox', fingerBox('middle', entity, size), { finger: 'middle' });
   }
   /**
    * [0507] calculateMiddleFingerBoundingSphere
    * Tính hình cầu bao ngón giữa.
    */
-  public calculateMiddleFingerBoundingSphere(entity?: any, radius?: number): any {
+  public calculateMiddleFingerBoundingSphere(entity?: unknown, radius?: number) {
     return {
       name: 'calculateMiddleFingerBoundingSphere',
       valid: true,
@@ -1837,7 +1836,7 @@ export class AnatomicalHandDigitsSubsystem {
    * [0508] calculateMiddleToThumbDistance
    * Tính khoảng cách ngón giữa đến ngón cái.
    */
-  public calculateMiddleToThumbDistance(a?: any, b?: any): any {
+  public calculateMiddleToThumbDistance(a?: unknown, b?: unknown) {
     return measurement('calculateMiddleToThumbDistance', tipDistance('middle', 'thumb', a, b), 'm', {
       from: 'middle',
       to: 'thumb'
@@ -1847,7 +1846,7 @@ export class AnatomicalHandDigitsSubsystem {
    * [0509] calculateMiddleToIndexDistance
    * Tính khoảng cách ngón giữa đến ngón trỏ.
    */
-  public calculateMiddleToIndexDistance(a?: any, b?: any): any {
+  public calculateMiddleToIndexDistance(a?: unknown, b?: unknown) {
     return measurement('calculateMiddleToIndexDistance', tipDistance('middle', 'index', a, b), 'm', {
       from: 'middle',
       to: 'index'
@@ -1857,7 +1856,7 @@ export class AnatomicalHandDigitsSubsystem {
    * [0510] calculateMiddleToRingDistance
    * Tính khoảng cách ngón giữa đến ngón áp út.
    */
-  public calculateMiddleToRingDistance(a?: any, b?: any): any {
+  public calculateMiddleToRingDistance(a?: unknown, b?: unknown) {
     return measurement('calculateMiddleToRingDistance', tipDistance('middle', 'ring', a, b), 'm', {
       from: 'middle',
       to: 'ring'
@@ -1867,7 +1866,7 @@ export class AnatomicalHandDigitsSubsystem {
    * [0511] calculateMiddleToLittleDistance
    * Tính khoảng cách ngón giữa đến ngón út.
    */
-  public calculateMiddleToLittleDistance(a?: any, b?: any): any {
+  public calculateMiddleToLittleDistance(a?: unknown, b?: unknown) {
     return measurement('calculateMiddleToLittleDistance', tipDistance('middle', 'little', a, b), 'm', {
       from: 'middle',
       to: 'little'
@@ -1877,42 +1876,42 @@ export class AnatomicalHandDigitsSubsystem {
    * [0512] calculateMiddleFingerReachEnvelope
    * Tính vùng với tới của ngón giữa.
    */
-  public calculateMiddleFingerReachEnvelope(a?: any, b?: any, options?: any): any {
+  public calculateMiddleFingerReachEnvelope(a?: unknown, b?: unknown, options?: unknown) {
     return this.reachEnvelope('middle', 'calculateMiddleFingerReachEnvelope', a, b, options);
   }
   /**
    * [0513] calculateMiddleFingerContactPoint
    * Tính điểm tiếp xúc ngón giữa.
    */
-  public calculateMiddleFingerContactPoint(a?: any, b?: any, options?: any): any {
+  public calculateMiddleFingerContactPoint(a?: unknown, b?: unknown, options?: unknown) {
     return this.contactPoint('middle', 'calculateMiddleFingerContactPoint', a, b, options);
   }
   /**
    * [0514] calculateMiddleFingerSurfaceNormal
    * Tính pháp tuyến bề mặt ngón giữa.
    */
-  public calculateMiddleFingerSurfaceNormal(a?: any, b?: any): any {
+  public calculateMiddleFingerSurfaceNormal(a?: unknown, b?: unknown) {
     return this.surfaceNormal('middle', 'calculateMiddleFingerSurfaceNormal', a, b);
   }
   /**
    * [0515] calculateMiddleFingerPoseError
    * Tính sai lệch tư thế ngón giữa.
    */
-  public calculateMiddleFingerPoseError(a?: any, b?: any, options?: any): any {
+  public calculateMiddleFingerPoseError(a?: unknown, b?: unknown, options?: unknown) {
     return this.poseError('middle', 'calculateMiddleFingerPoseError', a, b, options);
   }
   /**
    * [0516] calculateMiddleFingerMotionSmoothness
    * Tính độ mượt chuyển động ngón giữa.
    */
-  public calculateMiddleFingerMotionSmoothness(a?: any, b?: any, options?: any): any {
+  public calculateMiddleFingerMotionSmoothness(a?: unknown, b?: unknown, options?: unknown) {
     return this.motionSmoothness('middle', 'calculateMiddleFingerMotionSmoothness', a, b, options);
   }
   /**
    * [0517] calculateMiddleFingerCollision
    * Kiểm tra va chạm ngón giữa.
    */
-  public calculateMiddleFingerCollision(a?: any, b?: any): any {
+  public calculateMiddleFingerCollision(a?: unknown, b?: unknown) {
     return aabbResult(
       'calculateMiddleFingerCollision',
       fingerBox('middle', a),
@@ -1923,21 +1922,21 @@ export class AnatomicalHandDigitsSubsystem {
    * [0518] calculateMiddleFingerCurl
    * Tính độ cuộn ngón giữa.
    */
-  public calculateMiddleFingerCurl(entity?: any, options?: any): any {
+  public calculateMiddleFingerCurl(entity?: unknown, options?: unknown) {
     return this.fingerCurl('middle', 'calculateMiddleFingerCurl', entity, options);
   }
   /**
    * [0519] calculateMiddleFingerSpread
    * Tính độ xòe ngón giữa.
    */
-  public calculateMiddleFingerSpread(entity?: any, options?: any): any {
+  public calculateMiddleFingerSpread(entity?: unknown, options?: unknown) {
     return this.fingerSpreadValue('middle', 'calculateMiddleFingerSpread', entity, options);
   }
   /**
    * [0520] calculateMiddleFingerAlignment
    * Tính độ thẳng hàng ngón giữa.
    */
-  public calculateMiddleFingerAlignment(a?: any, b?: any, options?: any): any {
+  public calculateMiddleFingerAlignment(a?: unknown, b?: unknown, options?: unknown) {
     return this.fingerAlignment('middle', 'calculateMiddleFingerAlignment', a, b, options);
   }
   // ==========================================================================
@@ -1948,105 +1947,105 @@ export class AnatomicalHandDigitsSubsystem {
    * [0521] getRingFingerRootPosition
    * Lấy tọa độ gốc ngón áp út.
    */
-  public getRingFingerRootPosition(entity?: any, offset?: Vec3D): any {
+  public getRingFingerRootPosition(entity?: unknown, offset?: Vec3D) {
     return offsetPosition(entity, add(jointOffset('ring', 'root'), toVec3(offset)));
   }
   /**
    * [0522] getRingFingerMCPPosition
    * Lấy tọa độ khớp MCP ngón áp út.
    */
-  public getRingFingerMCPPosition(entity?: any, offset?: Vec3D): any {
+  public getRingFingerMCPPosition(entity?: unknown, offset?: Vec3D) {
     return offsetPosition(entity, add(jointOffset('ring', 'mcp'), toVec3(offset)));
   }
   /**
    * [0523] getRingFingerPIPPosition
    * Lấy tọa độ khớp PIP ngón áp út.
    */
-  public getRingFingerPIPPosition(entity?: any, offset?: Vec3D): any {
+  public getRingFingerPIPPosition(entity?: unknown, offset?: Vec3D) {
     return offsetPosition(entity, add(jointOffset('ring', 'pip'), toVec3(offset)));
   }
   /**
    * [0524] getRingFingerDIPPosition
    * Lấy tọa độ khớp DIP ngón áp út.
    */
-  public getRingFingerDIPPosition(entity?: any, offset?: Vec3D): any {
+  public getRingFingerDIPPosition(entity?: unknown, offset?: Vec3D) {
     return offsetPosition(entity, add(jointOffset('ring', 'dip'), toVec3(offset)));
   }
   /**
    * [0525] getRingFingerTipPosition
    * Lấy tọa độ đầu ngón áp út.
    */
-  public getRingFingerTipPosition(entity?: any, offset?: Vec3D): any {
+  public getRingFingerTipPosition(entity?: unknown, offset?: Vec3D) {
     return offsetPosition(entity, add(jointOffset('ring', 'tip'), toVec3(offset)));
   }
   /**
    * [0526] getRingFingerNailPosition
    * Lấy tọa độ móng ngón áp út.
    */
-  public getRingFingerNailPosition(entity?: any, offset?: Vec3D): any {
+  public getRingFingerNailPosition(entity?: unknown, offset?: Vec3D) {
     return offsetPosition(entity, add(jointOffset('ring', 'nail'), toVec3(offset)));
   }
   /**
    * [0527] getRingFingerPadPosition
    * Lấy tọa độ đệm ngón áp út.
    */
-  public getRingFingerPadPosition(entity?: any, offset?: Vec3D): any {
+  public getRingFingerPadPosition(entity?: unknown, offset?: Vec3D) {
     return offsetPosition(entity, add(jointOffset('ring', 'pad'), toVec3(offset)));
   }
   /**
    * [0528] getRingFingerBasePosition
    * Lấy tọa độ đáy ngón áp út.
    */
-  public getRingFingerBasePosition(entity?: any, offset?: Vec3D): any {
+  public getRingFingerBasePosition(entity?: unknown, offset?: Vec3D) {
     return offsetPosition(entity, add(jointOffset('ring', 'base'), toVec3(offset)));
   }
   /**
    * [0529] getRingFingerProximalJoint
    * Lấy tọa độ khớp gần ngón áp út.
    */
-  public getRingFingerProximalJoint(entity?: any, offset?: Vec3D): any {
+  public getRingFingerProximalJoint(entity?: unknown, offset?: Vec3D) {
     return offsetPosition(entity, add(jointOffset('ring', 'pip'), toVec3(offset)));
   }
   /**
    * [0530] getRingFingerDistalJoint
    * Lấy tọa độ khớp xa ngón áp út.
    */
-  public getRingFingerDistalJoint(entity?: any, offset?: Vec3D): any {
+  public getRingFingerDistalJoint(entity?: unknown, offset?: Vec3D) {
     return offsetPosition(entity, add(jointOffset('ring', 'dip'), toVec3(offset)));
   }
   /**
    * [0531] calculateRingFingerLength
    * Tính chiều dài ngón áp út.
    */
-  public calculateRingFingerLength(entity?: any, options?: any): any {
+  public calculateRingFingerLength(entity?: unknown, options?: unknown) {
     return this.fingerLength('ring', 'calculateRingFingerLength', entity, options);
   }
   /**
    * [0532] calculateRingFingerWidth
    * Tính chiều rộng ngón áp út.
    */
-  public calculateRingFingerWidth(entity?: any, options?: any): any {
+  public calculateRingFingerWidth(entity?: unknown, options?: unknown) {
     return this.fingerWidth('ring', 'calculateRingFingerWidth', entity, options);
   }
   /**
    * [0533] calculateRingFingerThickness
    * Tính độ dày ngón áp út.
    */
-  public calculateRingFingerThickness(a?: any, b?: any, options?: any): any {
+  public calculateRingFingerThickness(a?: unknown, b?: unknown, options?: unknown) {
     return this.fingerThickness('ring', 'calculateRingFingerThickness', a, b, options);
   }
   /**
    * [0534] calculateRingFingerCurvature
    * Tính độ cong ngón áp út.
    */
-  public calculateRingFingerCurvature(entity?: any, options?: any): any {
+  public calculateRingFingerCurvature(entity?: unknown, options?: unknown) {
     return this.fingerCurvatureValue('ring', 'calculateRingFingerCurvature', entity, options);
   }
   /**
    * [0535] calculateRingFingerDirection
    * Tính hướng ngón áp út.
    */
-  public calculateRingFingerDirection(a?: any, b?: any): any {
+  public calculateRingFingerDirection(a?: unknown, b?: unknown) {
     return directionResult('calculateRingFingerDirection', this.fingerDirection('ring', a, b), {
       finger: 'ring'
     });
@@ -2055,7 +2054,7 @@ export class AnatomicalHandDigitsSubsystem {
    * [0536] calculateRingFingerOrientation
    * Tính hướng quay ngón áp út.
    */
-  public calculateRingFingerOrientation(entityOrAngle?: any, options?: any): any {
+  public calculateRingFingerOrientation(entityOrAngle?: unknown, options?: unknown) {
     return orientationResult('calculateRingFingerOrientation', fingerOrientation('ring', entityOrAngle, options), {
       finger: 'ring'
     });
@@ -2064,35 +2063,35 @@ export class AnatomicalHandDigitsSubsystem {
    * [0537] calculateRingFingerFlexion
    * Tính góc gập ngón áp út.
    */
-  public calculateRingFingerFlexion(a?: any, b?: any): any {
+  public calculateRingFingerFlexion(a?: unknown, b?: unknown) {
     return measurement('calculateRingFingerFlexion', readAngles(a, b).flexion, 'rad', { finger: 'ring' });
   }
   /**
    * [0538] calculateRingFingerExtension
    * Tính góc duỗi ngón áp út.
    */
-  public calculateRingFingerExtension(a?: any, b?: any): any {
+  public calculateRingFingerExtension(a?: unknown, b?: unknown) {
     return measurement('calculateRingFingerExtension', readAngles(a, b).extension, 'rad', { finger: 'ring' });
   }
   /**
    * [0539] calculateRingFingerAbduction
    * Tính góc dạng ngón áp út.
    */
-  public calculateRingFingerAbduction(a?: any, b?: any): any {
+  public calculateRingFingerAbduction(a?: unknown, b?: unknown) {
     return measurement('calculateRingFingerAbduction', readAngles(a, b).abduction, 'rad', { finger: 'ring' });
   }
   /**
    * [0540] calculateRingFingerAdduction
    * Tính góc khép ngón áp út.
    */
-  public calculateRingFingerAdduction(a?: any, b?: any): any {
+  public calculateRingFingerAdduction(a?: unknown, b?: unknown) {
     return measurement('calculateRingFingerAdduction', readAngles(a, b).adduction, 'rad', { finger: 'ring' });
   }
   /**
    * [0541] calculateRingFingerRotation
    * Tính góc quay ngón áp út.
    */
-  public calculateRingFingerRotation(entityOrAngle?: any, options?: any): any {
+  public calculateRingFingerRotation(entityOrAngle?: unknown, options?: unknown) {
     return orientationResult('calculateRingFingerRotation', fingerOrientation('ring', entityOrAngle, options), {
       finger: 'ring'
     });
@@ -2101,14 +2100,14 @@ export class AnatomicalHandDigitsSubsystem {
    * [0542] calculateRingFingerTipVelocity
    * Tính vận tốc đầu ngón áp út.
    */
-  public calculateRingFingerTipVelocity(entity?: any, dt = 0.016): any {
+  public calculateRingFingerTipVelocity(entity?: unknown, dt = 0.016) {
     return directionResult('calculateRingFingerTipVelocity', readVector(entity, 'velocity'), { finger: 'ring', dt });
   }
   /**
    * [0543] calculateRingFingerTipAcceleration
    * Tính gia tốc đầu ngón áp út.
    */
-  public calculateRingFingerTipAcceleration(entity?: any, dt = 0.016): any {
+  public calculateRingFingerTipAcceleration(entity?: unknown, dt = 0.016) {
     return directionResult('calculateRingFingerTipAcceleration', readVector(entity, 'acceleration'), {
       finger: 'ring',
       dt
@@ -2118,7 +2117,7 @@ export class AnatomicalHandDigitsSubsystem {
    * [0544] calculateRingFingerJointAngles
    * Tính các góc khớp ngón áp út.
    */
-  public calculateRingFingerJointAngles(a?: any, b?: any): any {
+  public calculateRingFingerJointAngles(a?: unknown, b?: unknown) {
     const payload = jointAnglePayload('ring', a, b);
     return measurement('calculateRingFingerJointAngles', payload.total as number, 'rad', payload);
   }
@@ -2126,21 +2125,21 @@ export class AnatomicalHandDigitsSubsystem {
    * [0545] calculateRingFingerSegmentLengths
    * Tính chiều dài các đốt ngón áp út.
    */
-  public calculateRingFingerSegmentLengths(entity?: any, options?: any): any {
+  public calculateRingFingerSegmentLengths(entity?: unknown, options?: unknown) {
     return this.fingerSegments('ring', 'calculateRingFingerSegmentLengths', entity, options);
   }
   /**
    * [0546] calculateRingFingerBoundingBox
    * Tính hộp bao ngón áp út.
    */
-  public calculateRingFingerBoundingBox(entity?: any, size?: Vec3D): any {
+  public calculateRingFingerBoundingBox(entity?: unknown, size?: Vec3D) {
     return boundsResult('calculateRingFingerBoundingBox', fingerBox('ring', entity, size), { finger: 'ring' });
   }
   /**
    * [0547] calculateRingFingerBoundingSphere
    * Tính hình cầu bao ngón áp út.
    */
-  public calculateRingFingerBoundingSphere(entity?: any, radius?: number): any {
+  public calculateRingFingerBoundingSphere(entity?: unknown, radius?: number) {
     return {
       name: 'calculateRingFingerBoundingSphere',
       valid: true,
@@ -2153,7 +2152,7 @@ export class AnatomicalHandDigitsSubsystem {
    * [0548] calculateRingToThumbDistance
    * Tính khoảng cách ngón áp út đến ngón cái.
    */
-  public calculateRingToThumbDistance(a?: any, b?: any): any {
+  public calculateRingToThumbDistance(a?: unknown, b?: unknown) {
     return measurement('calculateRingToThumbDistance', tipDistance('ring', 'thumb', a, b), 'm', {
       from: 'ring',
       to: 'thumb'
@@ -2163,7 +2162,7 @@ export class AnatomicalHandDigitsSubsystem {
    * [0549] calculateRingToIndexDistance
    * Tính khoảng cách ngón áp út đến ngón trỏ.
    */
-  public calculateRingToIndexDistance(a?: any, b?: any): any {
+  public calculateRingToIndexDistance(a?: unknown, b?: unknown) {
     return measurement('calculateRingToIndexDistance', tipDistance('ring', 'index', a, b), 'm', {
       from: 'ring',
       to: 'index'
@@ -2173,7 +2172,7 @@ export class AnatomicalHandDigitsSubsystem {
    * [0550] calculateRingToMiddleDistance
    * Tính khoảng cách ngón áp út đến ngón giữa.
    */
-  public calculateRingToMiddleDistance(a?: any, b?: any): any {
+  public calculateRingToMiddleDistance(a?: unknown, b?: unknown) {
     return measurement('calculateRingToMiddleDistance', tipDistance('ring', 'middle', a, b), 'm', {
       from: 'ring',
       to: 'middle'
@@ -2183,7 +2182,7 @@ export class AnatomicalHandDigitsSubsystem {
    * [0551] calculateRingToLittleDistance
    * Tính khoảng cách ngón áp út đến ngón út.
    */
-  public calculateRingToLittleDistance(a?: any, b?: any): any {
+  public calculateRingToLittleDistance(a?: unknown, b?: unknown) {
     return measurement('calculateRingToLittleDistance', tipDistance('ring', 'little', a, b), 'm', {
       from: 'ring',
       to: 'little'
@@ -2193,42 +2192,42 @@ export class AnatomicalHandDigitsSubsystem {
    * [0552] calculateRingFingerReachEnvelope
    * Tính vùng với tới của ngón áp út.
    */
-  public calculateRingFingerReachEnvelope(a?: any, b?: any, options?: any): any {
+  public calculateRingFingerReachEnvelope(a?: unknown, b?: unknown, options?: unknown) {
     return this.reachEnvelope('ring', 'calculateRingFingerReachEnvelope', a, b, options);
   }
   /**
    * [0553] calculateRingFingerContactPoint
    * Tính điểm tiếp xúc ngón áp út.
    */
-  public calculateRingFingerContactPoint(a?: any, b?: any, options?: any): any {
+  public calculateRingFingerContactPoint(a?: unknown, b?: unknown, options?: unknown) {
     return this.contactPoint('ring', 'calculateRingFingerContactPoint', a, b, options);
   }
   /**
    * [0554] calculateRingFingerSurfaceNormal
    * Tính pháp tuyến bề mặt ngón áp út.
    */
-  public calculateRingFingerSurfaceNormal(a?: any, b?: any): any {
+  public calculateRingFingerSurfaceNormal(a?: unknown, b?: unknown) {
     return this.surfaceNormal('ring', 'calculateRingFingerSurfaceNormal', a, b);
   }
   /**
    * [0555] calculateRingFingerPoseError
    * Tính sai lệch tư thế ngón áp út.
    */
-  public calculateRingFingerPoseError(a?: any, b?: any, options?: any): any {
+  public calculateRingFingerPoseError(a?: unknown, b?: unknown, options?: unknown) {
     return this.poseError('ring', 'calculateRingFingerPoseError', a, b, options);
   }
   /**
    * [0556] calculateRingFingerMotionSmoothness
    * Tính độ mượt chuyển động ngón áp út.
    */
-  public calculateRingFingerMotionSmoothness(a?: any, b?: any, options?: any): any {
+  public calculateRingFingerMotionSmoothness(a?: unknown, b?: unknown, options?: unknown) {
     return this.motionSmoothness('ring', 'calculateRingFingerMotionSmoothness', a, b, options);
   }
   /**
    * [0557] calculateRingFingerCollision
    * Kiểm tra va chạm ngón áp út.
    */
-  public calculateRingFingerCollision(a?: any, b?: any): any {
+  public calculateRingFingerCollision(a?: unknown, b?: unknown) {
     return aabbResult(
       'calculateRingFingerCollision',
       fingerBox('ring', a),
@@ -2239,21 +2238,21 @@ export class AnatomicalHandDigitsSubsystem {
    * [0558] calculateRingFingerCurl
    * Tính độ cuộn ngón áp út.
    */
-  public calculateRingFingerCurl(entity?: any, options?: any): any {
+  public calculateRingFingerCurl(entity?: unknown, options?: unknown) {
     return this.fingerCurl('ring', 'calculateRingFingerCurl', entity, options);
   }
   /**
    * [0559] calculateRingFingerSpread
    * Tính độ xòe ngón áp út.
    */
-  public calculateRingFingerSpread(entity?: any, options?: any): any {
+  public calculateRingFingerSpread(entity?: unknown, options?: unknown) {
     return this.fingerSpreadValue('ring', 'calculateRingFingerSpread', entity, options);
   }
   /**
    * [0560] calculateRingFingerAlignment
    * Tính độ thẳng hàng ngón áp út.
    */
-  public calculateRingFingerAlignment(a?: any, b?: any, options?: any): any {
+  public calculateRingFingerAlignment(a?: unknown, b?: unknown, options?: unknown) {
     return this.fingerAlignment('ring', 'calculateRingFingerAlignment', a, b, options);
   }
   // ==========================================================================
@@ -2264,105 +2263,105 @@ export class AnatomicalHandDigitsSubsystem {
    * [0561] getLittleFingerRootPosition
    * Lấy tọa độ gốc ngón út.
    */
-  public getLittleFingerRootPosition(entity?: any, offset?: Vec3D): any {
+  public getLittleFingerRootPosition(entity?: unknown, offset?: Vec3D) {
     return offsetPosition(entity, add(jointOffset('little', 'root'), toVec3(offset)));
   }
   /**
    * [0562] getLittleFingerMCPPosition
    * Lấy tọa độ khớp MCP ngón út.
    */
-  public getLittleFingerMCPPosition(entity?: any, offset?: Vec3D): any {
+  public getLittleFingerMCPPosition(entity?: unknown, offset?: Vec3D) {
     return offsetPosition(entity, add(jointOffset('little', 'mcp'), toVec3(offset)));
   }
   /**
    * [0563] getLittleFingerPIPPosition
    * Lấy tọa độ khớp PIP ngón út.
    */
-  public getLittleFingerPIPPosition(entity?: any, offset?: Vec3D): any {
+  public getLittleFingerPIPPosition(entity?: unknown, offset?: Vec3D) {
     return offsetPosition(entity, add(jointOffset('little', 'pip'), toVec3(offset)));
   }
   /**
    * [0564] getLittleFingerDIPPosition
    * Lấy tọa độ khớp DIP ngón út.
    */
-  public getLittleFingerDIPPosition(entity?: any, offset?: Vec3D): any {
+  public getLittleFingerDIPPosition(entity?: unknown, offset?: Vec3D) {
     return offsetPosition(entity, add(jointOffset('little', 'dip'), toVec3(offset)));
   }
   /**
    * [0565] getLittleFingerTipPosition
    * Lấy tọa độ đầu ngón út.
    */
-  public getLittleFingerTipPosition(entity?: any, offset?: Vec3D): any {
+  public getLittleFingerTipPosition(entity?: unknown, offset?: Vec3D) {
     return offsetPosition(entity, add(jointOffset('little', 'tip'), toVec3(offset)));
   }
   /**
    * [0566] getLittleFingerNailPosition
    * Lấy tọa độ móng ngón út.
    */
-  public getLittleFingerNailPosition(entity?: any, offset?: Vec3D): any {
+  public getLittleFingerNailPosition(entity?: unknown, offset?: Vec3D) {
     return offsetPosition(entity, add(jointOffset('little', 'nail'), toVec3(offset)));
   }
   /**
    * [0567] getLittleFingerPadPosition
    * Lấy tọa độ đệm ngón út.
    */
-  public getLittleFingerPadPosition(entity?: any, offset?: Vec3D): any {
+  public getLittleFingerPadPosition(entity?: unknown, offset?: Vec3D) {
     return offsetPosition(entity, add(jointOffset('little', 'pad'), toVec3(offset)));
   }
   /**
    * [0568] getLittleFingerBasePosition
    * Lấy tọa độ đáy ngón út.
    */
-  public getLittleFingerBasePosition(entity?: any, offset?: Vec3D): any {
+  public getLittleFingerBasePosition(entity?: unknown, offset?: Vec3D) {
     return offsetPosition(entity, add(jointOffset('little', 'base'), toVec3(offset)));
   }
   /**
    * [0569] getLittleFingerProximalJoint
    * Lấy tọa độ khớp gần ngón út.
    */
-  public getLittleFingerProximalJoint(entity?: any, offset?: Vec3D): any {
+  public getLittleFingerProximalJoint(entity?: unknown, offset?: Vec3D) {
     return offsetPosition(entity, add(jointOffset('little', 'pip'), toVec3(offset)));
   }
   /**
    * [0570] getLittleFingerDistalJoint
    * Lấy tọa độ khớp xa ngón út.
    */
-  public getLittleFingerDistalJoint(entity?: any, offset?: Vec3D): any {
+  public getLittleFingerDistalJoint(entity?: unknown, offset?: Vec3D) {
     return offsetPosition(entity, add(jointOffset('little', 'dip'), toVec3(offset)));
   }
   /**
    * [0571] calculateLittleFingerLength
    * Tính chiều dài ngón út.
    */
-  public calculateLittleFingerLength(entity?: any, options?: any): any {
+  public calculateLittleFingerLength(entity?: unknown, options?: unknown) {
     return this.fingerLength('little', 'calculateLittleFingerLength', entity, options);
   }
   /**
    * [0572] calculateLittleFingerWidth
    * Tính chiều rộng ngón út.
    */
-  public calculateLittleFingerWidth(entity?: any, options?: any): any {
+  public calculateLittleFingerWidth(entity?: unknown, options?: unknown) {
     return this.fingerWidth('little', 'calculateLittleFingerWidth', entity, options);
   }
   /**
    * [0573] calculateLittleFingerThickness
    * Tính độ dày ngón út.
    */
-  public calculateLittleFingerThickness(a?: any, b?: any, options?: any): any {
+  public calculateLittleFingerThickness(a?: unknown, b?: unknown, options?: unknown) {
     return this.fingerThickness('little', 'calculateLittleFingerThickness', a, b, options);
   }
   /**
    * [0574] calculateLittleFingerCurvature
    * Tính độ cong ngón út.
    */
-  public calculateLittleFingerCurvature(entity?: any, options?: any): any {
+  public calculateLittleFingerCurvature(entity?: unknown, options?: unknown) {
     return this.fingerCurvatureValue('little', 'calculateLittleFingerCurvature', entity, options);
   }
   /**
    * [0575] calculateLittleFingerDirection
    * Tính hướng ngón út.
    */
-  public calculateLittleFingerDirection(a?: any, b?: any): any {
+  public calculateLittleFingerDirection(a?: unknown, b?: unknown) {
     return directionResult('calculateLittleFingerDirection', this.fingerDirection('little', a, b), {
       finger: 'little'
     });
@@ -2371,7 +2370,7 @@ export class AnatomicalHandDigitsSubsystem {
    * [0576] calculateLittleFingerOrientation
    * Tính hướng quay ngón út.
    */
-  public calculateLittleFingerOrientation(entityOrAngle?: any, options?: any): any {
+  public calculateLittleFingerOrientation(entityOrAngle?: unknown, options?: unknown) {
     return orientationResult('calculateLittleFingerOrientation', fingerOrientation('little', entityOrAngle, options), {
       finger: 'little'
     });
@@ -2380,35 +2379,35 @@ export class AnatomicalHandDigitsSubsystem {
    * [0577] calculateLittleFingerFlexion
    * Tính góc gập ngón út.
    */
-  public calculateLittleFingerFlexion(a?: any, b?: any): any {
+  public calculateLittleFingerFlexion(a?: unknown, b?: unknown) {
     return measurement('calculateLittleFingerFlexion', readAngles(a, b).flexion, 'rad', { finger: 'little' });
   }
   /**
    * [0578] calculateLittleFingerExtension
    * Tính góc duỗi ngón út.
    */
-  public calculateLittleFingerExtension(a?: any, b?: any): any {
+  public calculateLittleFingerExtension(a?: unknown, b?: unknown) {
     return measurement('calculateLittleFingerExtension', readAngles(a, b).extension, 'rad', { finger: 'little' });
   }
   /**
    * [0579] calculateLittleFingerAbduction
    * Tính góc dạng ngón út.
    */
-  public calculateLittleFingerAbduction(a?: any, b?: any): any {
+  public calculateLittleFingerAbduction(a?: unknown, b?: unknown) {
     return measurement('calculateLittleFingerAbduction', readAngles(a, b).abduction, 'rad', { finger: 'little' });
   }
   /**
    * [0580] calculateLittleFingerAdduction
    * Tính góc khép ngón út.
    */
-  public calculateLittleFingerAdduction(a?: any, b?: any): any {
+  public calculateLittleFingerAdduction(a?: unknown, b?: unknown) {
     return measurement('calculateLittleFingerAdduction', readAngles(a, b).adduction, 'rad', { finger: 'little' });
   }
   /**
    * [0581] calculateLittleFingerRotation
    * Tính góc quay ngón út.
    */
-  public calculateLittleFingerRotation(entityOrAngle?: any, options?: any): any {
+  public calculateLittleFingerRotation(entityOrAngle?: unknown, options?: unknown) {
     return orientationResult('calculateLittleFingerRotation', fingerOrientation('little', entityOrAngle, options), {
       finger: 'little'
     });
@@ -2417,7 +2416,7 @@ export class AnatomicalHandDigitsSubsystem {
    * [0582] calculateLittleFingerTipVelocity
    * Tính vận tốc đầu ngón út.
    */
-  public calculateLittleFingerTipVelocity(entity?: any, dt = 0.016): any {
+  public calculateLittleFingerTipVelocity(entity?: unknown, dt = 0.016) {
     return directionResult('calculateLittleFingerTipVelocity', readVector(entity, 'velocity'), {
       finger: 'little',
       dt
@@ -2427,7 +2426,7 @@ export class AnatomicalHandDigitsSubsystem {
    * [0583] calculateLittleFingerTipAcceleration
    * Tính gia tốc đầu ngón út.
    */
-  public calculateLittleFingerTipAcceleration(entity?: any, dt = 0.016): any {
+  public calculateLittleFingerTipAcceleration(entity?: unknown, dt = 0.016) {
     return directionResult('calculateLittleFingerTipAcceleration', readVector(entity, 'acceleration'), {
       finger: 'little',
       dt
@@ -2437,7 +2436,7 @@ export class AnatomicalHandDigitsSubsystem {
    * [0584] calculateLittleFingerJointAngles
    * Tính các góc khớp ngón út.
    */
-  public calculateLittleFingerJointAngles(a?: any, b?: any): any {
+  public calculateLittleFingerJointAngles(a?: unknown, b?: unknown) {
     const payload = jointAnglePayload('little', a, b);
     return measurement('calculateLittleFingerJointAngles', payload.total as number, 'rad', payload);
   }
@@ -2445,21 +2444,21 @@ export class AnatomicalHandDigitsSubsystem {
    * [0585] calculateLittleFingerSegmentLengths
    * Tính chiều dài các đốt ngón út.
    */
-  public calculateLittleFingerSegmentLengths(entity?: any, options?: any): any {
+  public calculateLittleFingerSegmentLengths(entity?: unknown, options?: unknown) {
     return this.fingerSegments('little', 'calculateLittleFingerSegmentLengths', entity, options);
   }
   /**
    * [0586] calculateLittleFingerBoundingBox
    * Tính hộp bao ngón út.
    */
-  public calculateLittleFingerBoundingBox(entity?: any, size?: Vec3D): any {
+  public calculateLittleFingerBoundingBox(entity?: unknown, size?: Vec3D) {
     return boundsResult('calculateLittleFingerBoundingBox', fingerBox('little', entity, size), { finger: 'little' });
   }
   /**
    * [0587] calculateLittleFingerBoundingSphere
    * Tính hình cầu bao ngón út.
    */
-  public calculateLittleFingerBoundingSphere(entity?: any, radius?: number): any {
+  public calculateLittleFingerBoundingSphere(entity?: unknown, radius?: number) {
     return {
       name: 'calculateLittleFingerBoundingSphere',
       valid: true,
@@ -2472,7 +2471,7 @@ export class AnatomicalHandDigitsSubsystem {
    * [0588] calculateLittleToThumbDistance
    * Tính khoảng cách ngón út đến ngón cái.
    */
-  public calculateLittleToThumbDistance(a?: any, b?: any): any {
+  public calculateLittleToThumbDistance(a?: unknown, b?: unknown) {
     return measurement('calculateLittleToThumbDistance', tipDistance('little', 'thumb', a, b), 'm', {
       from: 'little',
       to: 'thumb'
@@ -2482,7 +2481,7 @@ export class AnatomicalHandDigitsSubsystem {
    * [0589] calculateLittleToIndexDistance
    * Tính khoảng cách ngón út đến ngón trỏ.
    */
-  public calculateLittleToIndexDistance(a?: any, b?: any): any {
+  public calculateLittleToIndexDistance(a?: unknown, b?: unknown) {
     return measurement('calculateLittleToIndexDistance', tipDistance('little', 'index', a, b), 'm', {
       from: 'little',
       to: 'index'
@@ -2492,7 +2491,7 @@ export class AnatomicalHandDigitsSubsystem {
    * [0590] calculateLittleToMiddleDistance
    * Tính khoảng cách ngón út đến ngón giữa.
    */
-  public calculateLittleToMiddleDistance(a?: any, b?: any): any {
+  public calculateLittleToMiddleDistance(a?: unknown, b?: unknown) {
     return measurement('calculateLittleToMiddleDistance', tipDistance('little', 'middle', a, b), 'm', {
       from: 'little',
       to: 'middle'
@@ -2502,7 +2501,7 @@ export class AnatomicalHandDigitsSubsystem {
    * [0591] calculateLittleToRingDistance
    * Tính khoảng cách ngón út đến ngón áp út.
    */
-  public calculateLittleToRingDistance(a?: any, b?: any): any {
+  public calculateLittleToRingDistance(a?: unknown, b?: unknown) {
     return measurement('calculateLittleToRingDistance', tipDistance('little', 'ring', a, b), 'm', {
       from: 'little',
       to: 'ring'
@@ -2512,42 +2511,42 @@ export class AnatomicalHandDigitsSubsystem {
    * [0592] calculateLittleFingerReachEnvelope
    * Tính vùng với tới của ngón út.
    */
-  public calculateLittleFingerReachEnvelope(a?: any, b?: any, options?: any): any {
+  public calculateLittleFingerReachEnvelope(a?: unknown, b?: unknown, options?: unknown) {
     return this.reachEnvelope('little', 'calculateLittleFingerReachEnvelope', a, b, options);
   }
   /**
    * [0593] calculateLittleFingerContactPoint
    * Tính điểm tiếp xúc ngón út.
    */
-  public calculateLittleFingerContactPoint(a?: any, b?: any, options?: any): any {
+  public calculateLittleFingerContactPoint(a?: unknown, b?: unknown, options?: unknown) {
     return this.contactPoint('little', 'calculateLittleFingerContactPoint', a, b, options);
   }
   /**
    * [0594] calculateLittleFingerSurfaceNormal
    * Tính pháp tuyến bề mặt ngón út.
    */
-  public calculateLittleFingerSurfaceNormal(a?: any, b?: any): any {
+  public calculateLittleFingerSurfaceNormal(a?: unknown, b?: unknown) {
     return this.surfaceNormal('little', 'calculateLittleFingerSurfaceNormal', a, b);
   }
   /**
    * [0595] calculateLittleFingerPoseError
    * Tính sai lệch tư thế ngón út.
    */
-  public calculateLittleFingerPoseError(a?: any, b?: any, options?: any): any {
+  public calculateLittleFingerPoseError(a?: unknown, b?: unknown, options?: unknown) {
     return this.poseError('little', 'calculateLittleFingerPoseError', a, b, options);
   }
   /**
    * [0596] calculateLittleFingerMotionSmoothness
    * Tính độ mượt chuyển động ngón út.
    */
-  public calculateLittleFingerMotionSmoothness(a?: any, b?: any, options?: any): any {
+  public calculateLittleFingerMotionSmoothness(a?: unknown, b?: unknown, options?: unknown) {
     return this.motionSmoothness('little', 'calculateLittleFingerMotionSmoothness', a, b, options);
   }
   /**
    * [0597] calculateLittleFingerCollision
    * Kiểm tra va chạm ngón út.
    */
-  public calculateLittleFingerCollision(a?: any, b?: any): any {
+  public calculateLittleFingerCollision(a?: unknown, b?: unknown) {
     return aabbResult(
       'calculateLittleFingerCollision',
       fingerBox('little', a),
@@ -2558,21 +2557,21 @@ export class AnatomicalHandDigitsSubsystem {
    * [0598] calculateLittleFingerCurl
    * Tính độ cuộn ngón út.
    */
-  public calculateLittleFingerCurl(entity?: any, options?: any): any {
+  public calculateLittleFingerCurl(entity?: unknown, options?: unknown) {
     return this.fingerCurl('little', 'calculateLittleFingerCurl', entity, options);
   }
   /**
    * [0599] calculateLittleFingerSpread
    * Tính độ xòe ngón út.
    */
-  public calculateLittleFingerSpread(entity?: any, options?: any): any {
+  public calculateLittleFingerSpread(entity?: unknown, options?: unknown) {
     return this.fingerSpreadValue('little', 'calculateLittleFingerSpread', entity, options);
   }
   /**
    * [0600] calculateLittleFingerAlignment
    * Tính độ thẳng hàng ngón út.
    */
-  public calculateLittleFingerAlignment(a?: any, b?: any, options?: any): any {
+  public calculateLittleFingerAlignment(a?: unknown, b?: unknown, options?: unknown) {
     return this.fingerAlignment('little', 'calculateLittleFingerAlignment', a, b, options);
   }
 }

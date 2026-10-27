@@ -187,7 +187,7 @@ export class CooldownTimer<TKey extends string = string> {
 /**
  * Cancellable Game Event wrapper.
  */
-export class GameEvent<TPayload = any> {
+export class GameEvent<TPayload = unknown> {
   public readonly name: string;
   public readonly timestamp: number;
   public payload: TPayload;
@@ -207,8 +207,8 @@ export class GameEvent<TPayload = any> {
 /**
  * Strongly typed Event Dispatcher pub/sub system.
  */
-export class EventDispatcher<TEventMap extends Record<string, any> = Record<string, any>> {
-  private _listeners: Map<string, Set<(payload: any) => void>> = new Map();
+export class EventDispatcher<TEventMap extends Record<string, unknown> = Record<string, unknown>> {
+  private _listeners: Map<string, Set<(payload: never) => void>> = new Map();
 
   public on<K extends keyof TEventMap>(
     event: K,
@@ -243,7 +243,7 @@ export class EventDispatcher<TEventMap extends Record<string, any> = Record<stri
     const set = this._listeners.get(key);
     if (set) {
       for (const listener of set) {
-        listener(payload);
+        (listener as unknown as (payload: TEventMap[K]) => void)(payload);
       }
     }
   }
@@ -256,7 +256,7 @@ export class EventDispatcher<TEventMap extends Record<string, any> = Record<stri
 /**
  * Scheduled Task Manager supporting one-off delays and repeating timers.
  */
-export class ScheduledTaskManager<TContext = any> {
+export class ScheduledTaskManager<TContext = unknown> {
   private _tasks: Map<
     string,
     {

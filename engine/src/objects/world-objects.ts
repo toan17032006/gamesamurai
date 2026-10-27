@@ -8,13 +8,13 @@ import { Transform3D } from './entities.js';
 
 export type SwitchState = 'open' | 'closed' | 'locked' | 'jammed';
 
-export interface HarvestYield<TYield = any> {
+export interface HarvestYield<TYield = unknown> {
   resourceId: string;
   quantity: number;
   itemData?: TYield;
 }
 
-export interface WorldObjectDestructionShard<TShard = any> {
+export interface WorldObjectDestructionShard<TShard = unknown> {
   shardId: string;
   relativePosition: [number, number, number];
   linearVelocity: [number, number, number];
@@ -24,7 +24,7 @@ export interface WorldObjectDestructionShard<TShard = any> {
 /**
  * Base generic World Object placed in 3D scene space.
  */
-export class WorldObject<TData = Record<string, any>> {
+export class WorldObject<TData = Record<string, unknown>> {
   public readonly id: string;
   public name: string;
   public transform: Transform3D;
@@ -165,7 +165,7 @@ export class HouseObject extends WorldObject<{
 /**
  * Harvestable Resource Node (Ore vein, Herb patch, Fishing spot).
  */
-export class HarvestableResource<TYield = any> extends WorldObject<{
+export class HarvestableResource<TYield = unknown> extends WorldObject<{
   resourceType: string;
   tier: number;
   itemData?: TYield;
@@ -226,7 +226,7 @@ export class HarvestableResource<TYield = any> extends WorldObject<{
 /**
  * Breakable Object (Pots, Crates, Barrels, Destructible Walls).
  */
-export class BreakableObject<TShard = any> extends WorldObject<{
+export class BreakableObject<TShard = unknown> extends WorldObject<{
   breakableType: string;
   debrisCount: number;
 }> {

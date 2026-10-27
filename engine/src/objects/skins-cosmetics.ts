@@ -22,7 +22,7 @@ export interface ColorDye<TColor = string> {
   colorValue: TColor;
 }
 
-export interface SkinMetadata<TMesh = any, TMaterial = any> {
+export interface SkinMetadata<TMesh = unknown, TMaterial = unknown> {
   tier?: CosmeticTier;
   tags?: string[];
   customMesh?: TMesh;
@@ -33,7 +33,7 @@ export interface SkinMetadata<TMesh = any, TMaterial = any> {
 /**
  * Generic Skin definition for cosmetic overrides.
  */
-export class Skin<TMesh = any, TMaterial = any> {
+export class Skin<TMesh = unknown, TMaterial = unknown> {
   public readonly id: string;
   public name: string;
   public slot: SkinSlot;
@@ -127,8 +127,8 @@ export class CosmeticLoadout {
 /**
  * Outfit & Character Appearance Customizer (Hair, Skin tone, Body Scale, Eye Color).
  */
-export class OutfitCustomizer<TOptions extends Record<string, any> = Record<string, any>> {
-  private _options: Map<string, any> = new Map();
+export class OutfitCustomizer<TOptions extends Record<string, unknown> = Record<string, unknown>> {
+  private _options: Map<string, unknown> = new Map();
 
   constructor(initialOptions?: TOptions) {
     if (initialOptions) {
@@ -147,7 +147,7 @@ export class OutfitCustomizer<TOptions extends Record<string, any> = Record<stri
   }
 
   public getAllOptions(): TOptions {
-    const res: Record<string, any> = {};
+    const res: Record<string, unknown> = {};
     for (const [k, v] of this._options.entries()) {
       res[k] = v;
     }

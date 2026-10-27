@@ -28,11 +28,36 @@ import { PhysicsWorld } from '@aetheria/engine/physics';
 import { AssetForge } from '@aetheria/engine/procedural';
 import { createEngineCombiner } from '@aetheria/engine/combiner';
 import { AgentManager, AgentBrain } from '@aetheria/engine/ai';
+import { SupervisedTrainer, PPOTrainer } from '@aetheria/engine/learning';
 ```
 
 Dedicated subpaths are available for `asset-parser`, `combiner`, `physics`,
 `spatial`, `procedural`, `transformer`, `renderer`, `environment`, `behavior`,
-`ui-3d`, `npc`, `ai` and the other engine modules listed in `package.json`.
+`ui-3d`, `npc`, `ai`, `learning` and the other engine modules listed in
+`package.json`.
+
+## Learning runtime
+
+`@aetheria/engine/learning` cung cấp huấn luyện có giám sát, reinforcement
+learning, imitation, world model, căn chỉnh/RLHF/DPO, MCTS/AlphaZero, tiến hoá,
+sinh dữ liệu, federated learning, EWC và runtime quản lý phiên/checkpoint. Toàn
+bộ API là TypeScript thuần, không phụ thuộc DOM hay Three.js.
+
+```ts
+import { NeuralNetwork } from '@aetheria/engine/deeplearning';
+import { SupervisedTrainer } from '@aetheria/engine/learning';
+
+const network = new NeuralNetwork({
+  inputSize: 4,
+  hiddenSizes: [16, 16],
+  outputSize: 2,
+  outputActivation: 'linear',
+});
+const trainer = new SupervisedTrainer(network, { loss: 'crossEntropy' });
+trainer.fit(samples, { epochs: 20, batchSize: 16 });
+```
+
+Xem hồ sơ kiến trúc chi tiết tại [`docs/LEARNING-RUNTIME.md`](docs/LEARNING-RUNTIME.md).
 
 ## Quick asset pipeline
 

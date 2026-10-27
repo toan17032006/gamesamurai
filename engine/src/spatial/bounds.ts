@@ -77,12 +77,12 @@ export class AABB {
 
   public static fromPoints(points: Iterable<Vec3Like>): AABB {
     const result = AABB.empty();
-    let any = false;
+    let found = false;
     for (const p of points) {
       result.expandByPoint(p);
-      any = true;
+      found = true;
     }
-    return any ? result : new AABB();
+    return found ? result : new AABB();
   }
 
   public static fromMinMax(min: Vec3Like, max: Vec3Like): AABB {

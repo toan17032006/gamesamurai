@@ -19,7 +19,7 @@ export interface CharacterSpec {
 export interface BuiltCharacter {
   root: THREE.Group;
   spec: CharacterSpec;
-  sockets: { name: string; node: THREE.Object3D }[] & Record<string, any>;
+  sockets: { name: string; node: THREE.Object3D }[] & Record<string, THREE.Object3D>;
   boneHierarchy: { name: string; node: THREE.Object3D; parentName?: string }[];
 }
 
@@ -46,7 +46,7 @@ export function buildCharacter(specIn: CharacterSpec): BuiltCharacter {
   const root = new THREE.Group();
   root.name = `character_${archetype}_${spec.seed}`;
 
-  const sockets: { name: string; node: THREE.Object3D }[] = [];
+  const sockets = [] as unknown as { name: string; node: THREE.Object3D }[] & Record<string, THREE.Object3D>;
   const boneHierarchy: { name: string; node: THREE.Object3D; parentName?: string }[] = [];
 
   // 1. Hips (Pelvis)
@@ -185,11 +185,10 @@ export function buildCharacter(specIn: CharacterSpec): BuiltCharacter {
   const box = new THREE.Box3().setFromObject(root);
   root.position.y -= box.min.y;
 
-  const socketsRecord = sockets as any;
-  socketsRecord.spine = spine;
-  socketsRecord.head = head;
-  socketsRecord.hips = hips;
-  socketsRecord.root = root;
+  sockets.spine = spine;
+  sockets.head = head;
+  sockets.hips = hips;
+  sockets.root = root;
 
   return {
     root,

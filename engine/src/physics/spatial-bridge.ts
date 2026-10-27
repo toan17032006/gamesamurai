@@ -51,7 +51,7 @@ export function collisionShapeCenter(shape: CollisionShape, position: Vec3Like):
   );
 }
 
-/** Compute an AABB for any primitive collision shape. */
+/** Compute an AABB for each primitive collision shape. */
 export function collisionShapeBounds(shape: CollisionShape, position: Vec3Like): AABB {
   const center = collisionShapeCenter(shape, position);
   switch (shape.kind) {

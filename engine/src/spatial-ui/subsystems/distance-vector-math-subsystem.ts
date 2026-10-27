@@ -19,6 +19,7 @@ import {
   IDENTITY_MAT4,
   toVec3,
   num,
+  asRecord,
   entityPosition,
   entityQuaternion,
   entityForward,
@@ -199,7 +200,7 @@ function asRay(value: unknown): Ray3D {
  * Hàm nhận `(a, b)` theo quy ước chung của subsystem: `b` có thể là chính
  * quaternion thứ hai, hoặc một "options bag" có `b`/`to` bên trong.
  */
-function secondOperand(options: any): unknown {
+function secondOperand(options: unknown): unknown {
   if (options && typeof options === 'object') {
     if ('b' in options) return options.b;
     if ('to' in options) return options.to;
@@ -230,10 +231,11 @@ function asQuaternion(value: unknown): QuatD {
  * Không có tham chiếu thì phép biến đổi không gian không thể thực hiện —
  * kết quả phải nói rõ là đang ở không gian thế giới.
  */
-function hasSpaceReference(options: any, key: 'camera' | 'object' | 'reference'): boolean {
+function hasSpaceReference(options: unknown, key: 'camera' | 'object' | 'reference'): boolean {
   if (!options || typeof options !== 'object') return false;
-  if (Array.isArray(options.matrix) && options.matrix.length >= 16) return true;
-  const value = options[key];
+  const bag = options as Record<string, unknown>;
+  if (Array.isArray(bag.matrix) && bag.matrix.length >= 16) return true;
+  const value = bag[key];
   return Boolean(value);
 }
 
@@ -257,120 +259,120 @@ export class DistanceVectorMathSubsystem {
   // ==========================================================================
 
   /** [0001] Khoảng cách Euclid trong không gian 3D. */
-  public calculateDistance3D(a?: any, b?: any): any {
+  public calculateDistance3D(a?: unknown, b?: unknown) {
     return distance3D(asPoint(a), asPoint(b));
   }
 
   /** [0002] Khoảng cách trên mặt phẳng ngang (XZ) — "2D distance" của engine Y-up. */
-  public calculateDistance2D(a?: any, b?: any): any {
+  public calculateDistance2D(a?: unknown, b?: unknown) {
     return distance2D(asPoint(a), asPoint(b));
   }
 
   /** [0003] Độ lệch ngang theo trục X. */
-  public calculateHorizontalDistance(a?: any, b?: any): any {
+  public calculateHorizontalDistance(a?: unknown, b?: unknown) {
     return horizontalDistance(asPoint(a), asPoint(b));
   }
 
   /** [0004] Độ lệch theo trục Y (chiều cao). */
-  public calculateVerticalDistance(a?: any, b?: any): any {
+  public calculateVerticalDistance(a?: unknown, b?: unknown) {
     return verticalDistance(asPoint(a), asPoint(b));
   }
 
   /** [0005] Độ lệch theo trục Z (chiều sâu). */
-  public calculateDepthDistance(a?: any, b?: any): any {
+  public calculateDepthDistance(a?: unknown, b?: unknown) {
     return depthDistance(asPoint(a), asPoint(b));
   }
 
   /** [0006] Khoảng cách Euclid — tương đương calculateDistance3D. */
-  public calculateEuclideanDistance(a?: any, b?: any): any {
+  public calculateEuclideanDistance(a?: unknown, b?: unknown) {
     return distance3D(asPoint(a), asPoint(b));
   }
 
   /** [0007] Khoảng cách Manhattan (L1) — tổng độ lệch trên ba trục. */
-  public calculateManhattanDistance(a?: any, b?: any): any {
+  public calculateManhattanDistance(a?: unknown, b?: unknown) {
     return manhattanDistance(asPoint(a), asPoint(b));
   }
 
   /** [0008] Khoảng cách Chebyshev (L∞) — độ lệch lớn nhất trên ba trục. */
-  public calculateChebyshevDistance(a?: any, b?: any): any {
+  public calculateChebyshevDistance(a?: unknown, b?: unknown) {
     return chebyshevDistance(asPoint(a), asPoint(b));
   }
 
   /** [0009] Bình phương khoảng cách — tránh căn bậc hai khi so sánh. */
-  public calculateSquaredDistance(a?: any, b?: any): any {
+  public calculateSquaredDistance(a?: unknown, b?: unknown) {
     return squaredDistance(asPoint(a), asPoint(b));
   }
 
   /** [0010] Khoảng cách từ `a` tới gốc toạ độ (hoặc tới `b` nếu có). */
-  public calculateDistanceToOrigin(a?: any, b?: any): any {
+  public calculateDistanceToOrigin(a?: unknown, b?: unknown) {
     return distanceToOrigin(asPoint(a), b === undefined ? undefined : asPoint(b));
   }
 
   /** [0011] Khoảng cách tới vị trí camera. */
-  public calculateDistanceToCamera(a?: any, b?: any): any {
+  public calculateDistanceToCamera(a?: unknown, b?: unknown) {
     return distance3D(asPoint(a), asPoint(b));
   }
 
   /** [0012] Khoảng cách tới người chơi. */
-  public calculateDistanceToPlayer(a?: any, b?: any): any {
+  public calculateDistanceToPlayer(a?: unknown, b?: unknown) {
     return distance3D(asPoint(a), asPoint(b));
   }
 
   /** [0013] Khoảng cách tới mục tiêu. */
-  public calculateDistanceToTarget(a?: any, b?: any): any {
+  public calculateDistanceToTarget(a?: unknown, b?: unknown) {
     return distance3D(asPoint(a), asPoint(b));
   }
 
   /** [0014] Khoảng cách tới một xương. */
-  public calculateDistanceToBone(a?: any, b?: any): any {
+  public calculateDistanceToBone(a?: unknown, b?: unknown) {
     return distance3D(asPoint(a), asPoint(b));
   }
 
   /** [0015] Khoảng cách tới một khớp. */
-  public calculateDistanceToJoint(a?: any, b?: any): any {
+  public calculateDistanceToJoint(a?: unknown, b?: unknown) {
     return distance3D(asPoint(a), asPoint(b));
   }
 
   /** [0016] Khoảng cách tới một mặt phẳng (bề mặt). */
-  public calculateDistanceToSurface(a?: any, b?: any): any {
+  public calculateDistanceToSurface(a?: unknown, b?: unknown) {
     return distanceToPlane(asPoint(a), asPlane(b));
   }
 
   /** [0017] Khoảng cách tới tâm một hình học. */
-  public calculateDistanceToCenter(a?: any, b?: any): any {
+  public calculateDistanceToCenter(a?: unknown, b?: unknown) {
     const sphere = asSphere(b);
     return Math.max(0, distance3D(asPoint(a), sphere.center) - sphere.radius);
   }
 
   /** [0018] Khoảng cách tới cạnh của hộp bao. */
-  public calculateDistanceToEdge(a?: any, b?: any): any {
+  public calculateDistanceToEdge(a?: unknown, b?: unknown) {
     return distanceToBox(asPoint(a), asBox(b));
   }
 
   /** [0019] Khoảng cách tới ranh giới (biên) của hộp bao. */
-  public calculateDistanceToBoundary(a?: any, b?: any): any {
+  public calculateDistanceToBoundary(a?: unknown, b?: unknown) {
     return distanceToBox(asPoint(a), asBox(b));
   }
 
   /** [0020] Khoảng cách tới mặt đất (mặt phẳng y = 0 hoặc y của `b`). */
-  public calculateDistanceToGround(a?: any, b?: any): any {
+  public calculateDistanceToGround(a?: unknown, b?: unknown) {
     const groundY = b === undefined ? 0 : asPoint(b).y;
     return Math.abs(asPoint(a).y - groundY);
   }
 
   /** [0021] Khoảng cách tới trần (mặt phẳng y = ceilingY). */
-  public calculateDistanceToCeiling(a?: any, b?: any): any {
+  public calculateDistanceToCeiling(a?: unknown, b?: unknown) {
     const ceilingY = b === undefined ? 0 : asPoint(b).y;
     return Math.abs(ceilingY - asPoint(a).y);
   }
 
   /** [0022] Khoảng cách vuông góc tới một bức tường (mặt phẳng). */
-  public calculateDistanceToWall(a?: any, b?: any): any {
+  public calculateDistanceToWall(a?: unknown, b?: unknown) {
     return distanceToPlane(asPoint(a), asPlane(b));
   }
 
   /** [0023] Khoảng cách tới đối tượng gần nhất trong danh sách. */
-  public calculateDistanceToNearestObject(a?: any, b?: any): any {
+  public calculateDistanceToNearestObject(a?: unknown, b?: unknown) {
     const points = asPointList(b);
     if (points.length === 0) return Infinity;
     const origin = asPoint(a);
@@ -378,7 +380,7 @@ export class DistanceVectorMathSubsystem {
   }
 
   /** [0024] Khoảng cách tới đối tượng xa nhất trong danh sách. */
-  public calculateDistanceToFarthestObject(a?: any, b?: any): any {
+  public calculateDistanceToFarthestObject(a?: unknown, b?: unknown) {
     const points = asPointList(b);
     if (points.length === 0) return Infinity;
     const origin = asPoint(a);
@@ -386,7 +388,7 @@ export class DistanceVectorMathSubsystem {
   }
 
   /** [0025] Khoảng cách nhỏ nhất trong danh sách điểm. */
-  public calculateMinimumDistance(a?: any, b?: any): any {
+  public calculateMinimumDistance(a?: unknown, b?: unknown) {
     const points = asPointList(b);
     if (points.length === 0) return 0;
     const origin = asPoint(a);
@@ -394,7 +396,7 @@ export class DistanceVectorMathSubsystem {
   }
 
   /** [0026] Khoảng cách lớn nhất trong danh sách điểm. */
-  public calculateMaximumDistance(a?: any, b?: any): any {
+  public calculateMaximumDistance(a?: unknown, b?: unknown) {
     const points = asPointList(b);
     if (points.length === 0) return 0;
     const origin = asPoint(a);
@@ -402,7 +404,7 @@ export class DistanceVectorMathSubsystem {
   }
 
   /** [0027] Khoảng cách trung bình trong danh sách điểm. */
-  public calculateAverageDistance(a?: any, b?: any): any {
+  public calculateAverageDistance(a?: unknown, b?: unknown) {
     const points = asPointList(b);
     if (points.length === 0) return 0;
     const origin = asPoint(a);
@@ -411,12 +413,12 @@ export class DistanceVectorMathSubsystem {
   }
 
   /** [0028] Độ dài toàn bộ một polyline. */
-  public calculateDistanceAlongPath(a?: any, b?: any): any {
+  public calculateDistanceAlongPath(a?: unknown, b?: unknown) {
     return pathLength(asPointList(b));
   }
 
   /** [0029] Độ dài cung xấp xỉ của đường cong Bézier bậc 3. */
-  public calculateDistanceAlongCurve(a?: any, b?: any): any {
+  public calculateDistanceAlongCurve(a?: unknown, b?: unknown) {
     const points = asPointList(b);
     if (points.length < 4) return pathLength(points);
     const [p0, p1, p2, p3] = points;
@@ -432,7 +434,7 @@ export class DistanceVectorMathSubsystem {
   }
 
   /** [0030] Độ dài cung xấp xỉ của đường spline Catmull-Rom. */
-  public calculateDistanceAlongSpline(a?: any, b?: any): any {
+  public calculateDistanceAlongSpline(a?: unknown, b?: unknown) {
     const points = asPointList(b);
     if (points.length < 4) return pathLength(points);
     const steps = 32;
@@ -449,14 +451,14 @@ export class DistanceVectorMathSubsystem {
   }
 
   /** [0031] Khoảng cách giữa hai đoạn thẳng. */
-  public calculateDistanceBetweenSegments(a?: any, b?: any): any {
+  public calculateDistanceBetweenSegments(a?: unknown, b?: unknown) {
     const s1 = asCapsule(a);
     const s2 = asCapsule(b);
     return distanceBetweenSegments(s1.start, s1.end, s2.start, s2.end);
   }
 
   /** [0032] Khoảng cách giữa hai tia. */
-  public calculateDistanceBetweenRays(a?: any, b?: any): any {
+  public calculateDistanceBetweenRays(a?: unknown, b?: unknown) {
     return distanceBetweenRays(asRay(a), asRay(b));
   }
 
@@ -474,7 +476,7 @@ export class DistanceVectorMathSubsystem {
    * "khoảng cách giữa hai mặt phẳng", chỉ là mặt phẳng thứ hai được dựng
    * từ dữ liệu đầu vào thay vì hardcode.
    */
-  public calculateDistanceBetweenPlanes(a?: any, b?: any): any {
+  public calculateDistanceBetweenPlanes(a?: unknown, b?: unknown) {
     const first = this.resolvePlane(a);
     const second = this.resolvePlane(b);
     if (first && second) {
@@ -497,92 +499,92 @@ export class DistanceVectorMathSubsystem {
   }
 
   /** [0034] Khoảng hở giữa bề mặt hai mặt cầu. */
-  public calculateDistanceBetweenSpheres(a?: any, b?: any): any {
+  public calculateDistanceBetweenSpheres(a?: unknown, b?: unknown) {
     return distanceBetweenSpheres(asSphere(a), asSphere(b));
   }
 
   /** [0035] Khoảng hở giữa hai hộp bao. */
-  public calculateDistanceBetweenBoxes(a?: any, b?: any): any {
+  public calculateDistanceBetweenBoxes(a?: unknown, b?: unknown) {
     return distanceBetweenBoxes(asBox(a), asBox(b));
   }
 
   /** [0036] Khoảng hở giữa hai capsule. */
-  public calculateDistanceBetweenCapsules(a?: any, b?: any): any {
+  public calculateDistanceBetweenCapsules(a?: unknown, b?: unknown) {
     return distanceBetweenCapsules(asCapsule(a), asCapsule(b));
   }
 
   /** [0037] Khoảng cách giữa hai mesh (dùng hộp bao bao quanh). */
-  public calculateDistanceBetweenMeshes(a?: any, b?: any): any {
+  public calculateDistanceBetweenMeshes(a?: unknown, b?: unknown) {
     return distanceBetweenBoxes(asBox(a), asBox(b));
   }
 
   /** [0038] Khoảng cách giữa hai nhân vật. */
-  public calculateDistanceBetweenCharacters(a?: any, b?: any): any {
+  public calculateDistanceBetweenCharacters(a?: unknown, b?: unknown) {
     return distance3D(entityPosition(a), entityPosition(b));
   }
 
   /** [0039] Khoảng cách giữa hai xương. */
-  public calculateDistanceBetweenBones(a?: any, b?: any): any {
+  public calculateDistanceBetweenBones(a?: unknown, b?: unknown) {
     return distance3D(entityPosition(a), entityPosition(b));
   }
 
   /** [0040] Khoảng cách giữa hai bàn tay. */
-  public calculateDistanceBetweenHands(a?: any, b?: any): any {
+  public calculateDistanceBetweenHands(a?: unknown, b?: unknown) {
     return distance3D(entityPosition(a), entityPosition(b));
   }
 
   /** [0041] Khoảng cách giữa hai bàn chân. */
-  public calculateDistanceBetweenFeet(a?: any, b?: any): any {
+  public calculateDistanceBetweenFeet(a?: unknown, b?: unknown) {
     return distance3D(entityPosition(a), entityPosition(b));
   }
 
   /** [0042] Khoảng cách giữa hai mắt. */
-  public calculateDistanceBetweenEyes(a?: any, b?: any): any {
+  public calculateDistanceBetweenEyes(a?: unknown, b?: unknown) {
     return distance3D(entityPosition(a), entityPosition(b));
   }
 
   /** [0043] Khoảng cách giữa hai vai. */
-  public calculateDistanceBetweenShoulders(a?: any, b?: any): any {
+  public calculateDistanceBetweenShoulders(a?: unknown, b?: unknown) {
     return distance3D(entityPosition(a), entityPosition(b));
   }
 
   /** [0044] Khoảng cách giữa hai hông. */
-  public calculateDistanceBetweenHips(a?: any, b?: any): any {
+  public calculateDistanceBetweenHips(a?: unknown, b?: unknown) {
     return distance3D(entityPosition(a), entityPosition(b));
   }
 
   /** [0045] Khoảng cách giữa hai ngón tay. */
-  public calculateDistanceBetweenFingers(a?: any, b?: any): any {
+  public calculateDistanceBetweenFingers(a?: unknown, b?: unknown) {
     return distance3D(entityPosition(a), entityPosition(b));
   }
 
   /** [0046] Khoảng cách giữa hai đối tượng. */
-  public calculateDistanceBetweenObjects(a?: any, b?: any): any {
+  public calculateDistanceBetweenObjects(a?: unknown, b?: unknown) {
     return distance3D(entityPosition(a), entityPosition(b));
   }
 
   /** [0047] Khoảng cách giữa hai cây. */
-  public calculateDistanceBetweenTrees(a?: any, b?: any): any {
+  public calculateDistanceBetweenTrees(a?: unknown, b?: unknown) {
     return distance3D(entityPosition(a), entityPosition(b));
   }
 
   /** [0048] Khoảng cách giữa hai động vật. */
-  public calculateDistanceBetweenAnimals(a?: any, b?: any): any {
+  public calculateDistanceBetweenAnimals(a?: unknown, b?: unknown) {
     return distance3D(entityPosition(a), entityPosition(b));
   }
 
   /** [0049] Khoảng cách giữa hai NPC. */
-  public calculateDistanceBetweenNPCs(a?: any, b?: any): any {
+  public calculateDistanceBetweenNPCs(a?: unknown, b?: unknown) {
     return distance3D(entityPosition(a), entityPosition(b));
   }
 
   /** [0050] Khoảng cách giữa hai boss. */
-  public calculateDistanceBetweenBosses(a?: any, b?: any): any {
+  public calculateDistanceBetweenBosses(a?: unknown, b?: unknown) {
     return distance3D(entityPosition(a), entityPosition(b));
   }
 
   /** [0114] Góc giữa hai hướng phát ra từ gốc toạ độ. */
-  public calculateAngularDistance(a?: any, b?: any): any {
+  public calculateAngularDistance(a?: unknown, b?: unknown) {
     const va = asPoint(a);
     const vb = asPoint(b);
     const cosine = clamp(dot(normalize(va), normalize(vb)), -1, 1);
@@ -598,12 +600,12 @@ export class DistanceVectorMathSubsystem {
    *
    * Tên gọi đã nói rõ không gian nên không cần gắn nhãn thêm.
    */
-  public getWorldPosition(entity?: any, offset?: Vec3D): any {
+  public getWorldPosition(entity?: unknown, offset?: Vec3D) {
     return offsetPosition(entity, offset);
   }
 
   /** [0052] Vị trí cục bộ của entity. */
-  public getLocalPosition(entity?: any, offset?: Vec3D): any {
+  public getLocalPosition(entity?: unknown, offset?: Vec3D) {
     if (entity && typeof entity === 'object') {
       const local = (entity as Record<string, unknown>).localPosition;
       if (local) return offsetPosition({ position: local }, offset);
@@ -612,7 +614,7 @@ export class DistanceVectorMathSubsystem {
   }
 
   /** [0053] Vị trí của parent. */
-  public getParentPosition(entity?: any, offset?: Vec3D): any {
+  public getParentPosition(entity?: unknown, offset?: Vec3D) {
     if (entity && typeof entity === 'object') {
       const parent = (entity as Record<string, unknown>).parent;
       if (parent) return offsetPosition(parent, offset);
@@ -621,7 +623,7 @@ export class DistanceVectorMathSubsystem {
   }
 
   /** [0054] Vị trí tương đối so với parent. */
-  public getRelativePosition(entity?: any, offset?: Vec3D): any {
+  public getRelativePosition(entity?: unknown, offset?: Vec3D) {
     const position = offsetPosition(entity, offset);
     if (entity && typeof entity === 'object') {
       const parent = (entity as Record<string, unknown>).parent;
@@ -634,12 +636,12 @@ export class DistanceVectorMathSubsystem {
   }
 
   /** [0055] Vị trí tuyệt đối (tương đương world khi không có parent). */
-  public getAbsolutePosition(entity?: any, offset?: Vec3D): any {
+  public getAbsolutePosition(entity?: unknown, offset?: Vec3D) {
     return this.getWorldPosition(entity, offset);
   }
 
   /** [0056] Vị trí trên màn hình (ước lượng theo tỉ lệ world → pixel). */
-  public getScreenPosition(entity?: any, offset?: Vec3D): any {
+  public getScreenPosition(entity?: unknown, offset?: Vec3D) {
     const world = offsetPosition(entity, offset);
     const width = this.config.screenWidth ?? 1920;
     const height = this.config.screenHeight ?? 1080;
@@ -651,7 +653,7 @@ export class DistanceVectorMathSubsystem {
   }
 
   /** [0057] Vị trí trong viewport (đã chuẩn hoá 0..1). */
-  public getViewportPosition(entity?: any, offset?: Vec3D): any {
+  public getViewportPosition(entity?: unknown, offset?: Vec3D) {
     const world = offsetPosition(entity, offset);
     const width = this.config.screenWidth ?? 1920;
     const height = this.config.screenHeight ?? 1080;
@@ -662,7 +664,7 @@ export class DistanceVectorMathSubsystem {
   }
 
   /** [0058] Toạ độ thiết bị chuẩn hoá (NDC) trong khoảng [-1, 1]. */
-  public getNormalizedDeviceCoordinates(a?: any, b?: any, options?: any): any {
+  public getNormalizedDeviceCoordinates(a?: unknown, b?: unknown, options?: unknown) {
     const world = asPoint(a);
     const width = this.config.screenWidth ?? 1920;
     const height = this.config.screenHeight ?? 1080;
@@ -683,7 +685,7 @@ export class DistanceVectorMathSubsystem {
    *  • không có → trả vị trí thế giới kèm `cameraSpace: false` để báo đúng
    *    không gian của kết quả.
    */
-  public getCameraSpacePosition(entity?: any, offset?: Vec3D, options?: any): any {
+  public getCameraSpacePosition(entity?: unknown, offset?: Vec3D, options?: unknown) {
     const world = offsetPosition(entity, offset);
     if (!hasSpaceReference(options, 'camera')) {
       return { ...world, space: 'world', cameraSpace: false };
@@ -700,7 +702,7 @@ export class DistanceVectorMathSubsystem {
    * `options.reference` thì biến đổi thật, không có thì báo rõ là đang ở
    * không gian thế giới.
    */
-  public getObjectSpacePosition(entity?: any, offset?: Vec3D, options?: any): any {
+  public getObjectSpacePosition(entity?: unknown, offset?: Vec3D, options?: unknown) {
     const world = offsetPosition(entity, offset);
     const hasReference =
       hasSpaceReference(options, 'object') || hasSpaceReference(options, 'reference');
@@ -713,21 +715,21 @@ export class DistanceVectorMathSubsystem {
   }
 
   /** [0061] Biến đổi điểm từ không gian cục bộ sang thế giới. */
-  public transformLocalToWorld(a?: any, b?: any, options?: any): any {
+  public transformLocalToWorld(a?: unknown, b?: unknown, options?: unknown) {
     const matrix = this.resolveMatrix(options);
     const world = transformPoint(matrix, asPoint(a));
     return namedResult('transformLocalToWorld', world, { position: world });
   }
 
   /** [0062] Biến đổi điểm từ thế giới sang cục bộ. */
-  public transformWorldToLocal(a?: any, b?: any, options?: any): any {
+  public transformWorldToLocal(a?: unknown, b?: unknown, options?: unknown) {
     const inverse = invertMatrix(this.resolveMatrix(options));
     const local = transformPoint(inverse, asPoint(a));
     return namedResult('transformWorldToLocal', local, { position: local });
   }
 
   /** [0063] Biến đổi điểm từ thế giới sang màn hình. */
-  public transformWorldToScreen(a?: any, b?: any, options?: any): any {
+  public transformWorldToScreen(a?: unknown, b?: unknown, options?: unknown) {
     const width = this.config.screenWidth ?? 1920;
     const height = this.config.screenHeight ?? 1080;
     const world = asPoint(a);
@@ -739,7 +741,7 @@ export class DistanceVectorMathSubsystem {
   }
 
   /** [0064] Biến đổi điểm từ màn hình sang thế giới. */
-  public transformScreenToWorld(a?: any, b?: any, options?: any): any {
+  public transformScreenToWorld(a?: unknown, b?: unknown, options?: unknown) {
     const width = this.config.screenWidth ?? 1920;
     const height = this.config.screenHeight ?? 1080;
     const screen = asPoint(a);
@@ -752,43 +754,43 @@ export class DistanceVectorMathSubsystem {
   }
 
   /** [0065] Biến đổi điểm từ không gian camera sang thế giới. */
-  public transformCameraToWorld(a?: any, b?: any, options?: any): any {
+  public transformCameraToWorld(a?: unknown, b?: unknown, options?: unknown) {
     const world = transformPoint(this.resolveMatrix(options), asPoint(a));
     return namedResult('transformCameraToWorld', world, { position: world });
   }
 
   /** [0066] Biến đổi điểm từ thế giới sang không gian camera. */
-  public transformWorldToCamera(a?: any, b?: any, options?: any): any {
+  public transformWorldToCamera(a?: unknown, b?: unknown, options?: unknown) {
     const camera = transformPoint(invertMatrix(this.resolveMatrix(options)), asPoint(a));
     return namedResult('transformWorldToCamera', camera, { position: camera });
   }
 
   /** [0067] Offset giữa hai vị trí. */
-  public calculatePositionOffset(a?: any, b?: any, options?: any): any {
+  public calculatePositionOffset(a?: unknown, b?: unknown, options?: unknown) {
     const offset = subtract(asPoint(b), asPoint(a));
     return namedResult('calculatePositionOffset', offset, { offset });
   }
 
   /** [0068] Offset tương đối giữa hai vị trí. */
-  public calculateRelativeOffset(a?: any, b?: any, options?: any): any {
+  public calculateRelativeOffset(a?: unknown, b?: unknown, options?: unknown) {
     const offset = subtract(asPoint(b), asPoint(a));
     return namedResult('calculateRelativeOffset', offset, { offset });
   }
 
   /** [0069] Offset trong không gian thế giới. */
-  public calculateWorldOffset(a?: any, b?: any, options?: any): any {
+  public calculateWorldOffset(a?: unknown, b?: unknown, options?: unknown) {
     const offset = subtract(asPoint(b), asPoint(a));
     return namedResult('calculateWorldOffset', offset, { offset });
   }
 
   /** [0070] Offset trong không gian cục bộ. */
-  public calculateLocalOffset(a?: any, b?: any, options?: any): any {
+  public calculateLocalOffset(a?: unknown, b?: unknown, options?: unknown) {
     const offset = subtract(asPoint(b), asPoint(a));
     return namedResult('calculateLocalOffset', offset, { offset });
   }
 
   /** [0071] Độ chênh lệch vị trí kèm độ dài. */
-  public calculatePositionDelta(a?: any, b?: any, options?: any): any {
+  public calculatePositionDelta(a?: unknown, b?: unknown, options?: unknown) {
     const delta = subtract(asPoint(b), asPoint(a));
     return namedResult('calculatePositionDelta', delta, { delta, distance: magnitude(delta) });
   }
@@ -798,50 +800,50 @@ export class DistanceVectorMathSubsystem {
   // ==========================================================================
 
   /** [0072] Vận tốc giữa hai mẫu vị trí liên tiếp. */
-  public calculateVelocityVector(a?: any, b?: any): any {
+  public calculateVelocityVector(a?: unknown, b?: unknown) {
     const velocity = subtract(asPoint(b), asPoint(a));
     return directionResult('calculateVelocityVector', velocity);
   }
 
   /** [0073] Gia tốc giữa hai mẫu vận tốc liên tiếp. */
-  public calculateAccelerationVector(a?: any, b?: any): any {
+  public calculateAccelerationVector(a?: unknown, b?: unknown) {
     const acceleration = subtract(asPoint(b), asPoint(a));
     return directionResult('calculateAccelerationVector', acceleration);
   }
 
   /** [0074] Hướng từ `a` tới `b` (chưa chuẩn hoá). */
-  public calculateDirectionVector(a?: any, b?: any): any {
+  public calculateDirectionVector(a?: unknown, b?: unknown) {
     const direction = subtract(asPoint(b), asPoint(a));
     return directionResult('calculateDirectionVector', direction);
   }
 
   /** [0075] Hướng đơn vị từ `a` tới `b`. */
-  public calculateNormalizedDirection(a?: any, b?: any): any {
+  public calculateNormalizedDirection(a?: unknown, b?: unknown) {
     const direction = normalize(subtract(asPoint(b), asPoint(a)));
     return directionResult('calculateNormalizedDirection', direction);
   }
 
   /** [0076] Hướng trước của entity. */
-  public calculateForwardVector(a?: any, b?: any): any {
+  public calculateForwardVector(a?: unknown, b?: unknown) {
     const forward = entityForward(a);
     return directionResult('calculateForwardVector', forward);
   }
 
   /** [0077] Hướng sau của entity. */
-  public calculateBackwardVector(a?: any, b?: any): any {
+  public calculateBackwardVector(a?: unknown, b?: unknown) {
     const backward = scale(entityForward(a), -1);
     return directionResult('calculateBackwardVector', backward);
   }
 
   /** [0078] Hướng phải của entity. */
-  public calculateRightVector(a?: any, b?: any): any {
+  public calculateRightVector(a?: unknown, b?: unknown) {
     const forward = entityForward(a);
     const right = normalize(cross(forward, UP3));
     return directionResult('calculateRightVector', right);
   }
 
   /** [0079] Hướng trái của entity. */
-  public calculateLeftVector(a?: any, b?: any): any {
+  public calculateLeftVector(a?: unknown, b?: unknown) {
     const right = scale(normalize(cross(entityForward(a), UP3)), -1);
     return directionResult('calculateLeftVector', right);
   }
@@ -853,37 +855,37 @@ export class DistanceVectorMathSubsystem {
    * cục bộ được xoay theo quaternion/Euler của entity, cuối cùng mới
    * fallback về hướng lên dựng từ forward/right.
    */
-  public calculateUpVector(a?: any, b?: any): any {
+  public calculateUpVector(a?: unknown, b?: unknown) {
     const up = this.resolveUpDirection(a) ?? this.resolveUpDirection(b) ?? { ...UP3 };
     return directionResult('calculateUpVector', up);
   }
 
   /** [0081] Hướng xuống của entity (ngược hướng lên). */
-  public calculateDownVector(a?: any, b?: any): any {
+  public calculateDownVector(a?: unknown, b?: unknown) {
     const up = this.resolveUpDirection(a) ?? this.resolveUpDirection(b) ?? { x: 0, y: 1, z: 0 };
     return directionResult('calculateDownVector', scale(up, -1));
   }
 
   /** [0082] Hướng nhìn từ `a` tới `b`. */
-  public calculateLookDirection(a?: any, b?: any): any {
+  public calculateLookDirection(a?: unknown, b?: unknown) {
     const direction = normalize(subtract(asPoint(b), asPoint(a)));
     return directionResult('calculateLookDirection', direction);
   }
 
   /** [0083] Hướng ngắm. */
-  public calculateAimDirection(a?: any, b?: any): any {
+  public calculateAimDirection(a?: unknown, b?: unknown) {
     const direction = normalize(subtract(asPoint(b), asPoint(a)));
     return directionResult('calculateAimDirection', direction);
   }
 
   /** [0084] Hướng di chuyển. */
-  public calculateMovementDirection(a?: any, b?: any): any {
+  public calculateMovementDirection(a?: unknown, b?: unknown) {
     const direction = normalize(subtract(asPoint(b), asPoint(a)));
     return directionResult('calculateMovementDirection', direction);
   }
 
   /** [0085] Pháp tuyến bề mặt (từ tam giác hoặc pháp tuyến cho sẵn). */
-  public calculateSurfaceNormal(a?: any, b?: any): any {
+  public calculateSurfaceNormal(a?: unknown, b?: unknown) {
     if (a && typeof a === 'object' && 'a' in (a as Record<string, unknown>)) {
       const tri = a as { a: unknown; b: unknown; c: unknown };
       const normal = normalize(cross(subtract(asPoint(tri.b), asPoint(tri.a)), subtract(asPoint(tri.c), asPoint(tri.a))));
@@ -894,7 +896,7 @@ export class DistanceVectorMathSubsystem {
   }
 
   /** [0086] Vector tiếp tuyến (vuông góc pháp tuyến). */
-  public calculateTangentVector(a?: any, b?: any): any {
+  public calculateTangentVector(a?: unknown, b?: unknown) {
     const normal = normalize(asPoint(a));
     const reference = Math.abs(normal.y) > 0.9 ? { ...FORWARD3 } : { ...UP3 };
     const tangent = normalize(cross(reference, normal));
@@ -902,7 +904,7 @@ export class DistanceVectorMathSubsystem {
   }
 
   /** [0087] Vector bitangent (vuông góc cả pháp tuyến lẫn tiếp tuyến). */
-  public calculateBitangentVector(a?: any, b?: any): any {
+  public calculateBitangentVector(a?: unknown, b?: unknown) {
     const normal = normalize(asPoint(a));
     const reference = Math.abs(normal.y) > 0.9 ? { ...FORWARD3 } : { ...UP3 };
     const tangent = normalize(cross(reference, normal));
@@ -911,49 +913,49 @@ export class DistanceVectorMathSubsystem {
   }
 
   /** [0088] Tích tử giữa hai vector. */
-  public calculateCrossProduct(a?: any, b?: any, options?: any): any {
+  public calculateCrossProduct(a?: unknown, b?: unknown, options?: unknown) {
     const result = cross(asPoint(a), asPoint(b));
     return namedResult('calculateCrossProduct', result, { vector: result });
   }
 
   /** [0089] Tích vô hướng giữa hai vector. */
-  public calculateDotProduct(a?: any, b?: any, options?: any): any {
+  public calculateDotProduct(a?: unknown, b?: unknown, options?: unknown) {
     const value = dot(asPoint(a), asPoint(b));
     return namedResult('calculateDotProduct', value, { value });
   }
 
   /** [0090] Độ dài vector. */
-  public calculateVectorMagnitude(entity?: any, options?: any): any {
+  public calculateVectorMagnitude(entity?: unknown, options?: unknown) {
     return magnitude(asPoint(entity));
   }
 
   /** [0091] Chuẩn hoá vector về đơn vị. */
-  public normalizeVector(a?: any, b?: any): any {
+  public normalizeVector(a?: unknown, b?: unknown) {
     const result = normalize(asPoint(a));
     return directionResult('normalizeVector', result);
   }
 
   /** [0092] Chiếu vector lên một trục. */
-  public projectVector(a?: any, b?: any): any {
+  public projectVector(a?: unknown, b?: unknown) {
     const result = projectVector(asPoint(a), asPoint(b));
     return directionResult('projectVector', result);
   }
 
   /** [0093] Phản chiếu vector qua mặt phẳng. */
-  public reflectVector(a?: any, b?: any): any {
+  public reflectVector(a?: unknown, b?: unknown) {
     const result = reflectVector(asPoint(a), asPoint(b));
     return directionResult('reflectVector', result);
   }
 
   /** [0094] Khúc xạ vector qua mặt phẳng. */
-  public refractVector(a?: any, b?: any): any {
+  public refractVector(a?: unknown, b?: unknown) {
     const eta = typeof b === 'number' ? b : 1 / 1.5;
     const result = refractVector(asPoint(a), asPoint(b), eta);
     return directionResult('refractVector', result);
   }
 
   /** [0095] Nội suy tuyến tính giữa hai vector. */
-  public lerpVector(a?: any, b?: any): any {
+  public lerpVector(a?: unknown, b?: unknown) {
     const t = typeof b === 'number' ? b : 0.5;
     const target = typeof b === 'number' ? asPoint(a) : asPoint(b);
     const result = lerpVec3(asPoint(a), target, t);
@@ -961,25 +963,25 @@ export class DistanceVectorMathSubsystem {
   }
 
   /** [0099] Chiếu vector `a` lên trục `b`. */
-  public calculateVectorProjection(a?: any, b?: any, options?: any): any {
+  public calculateVectorProjection(a?: unknown, b?: unknown, options?: unknown) {
     const result = projectVector(asPoint(a), asPoint(b));
     return namedResult('calculateVectorProjection', result, { vector: result, length: magnitude(result) });
   }
 
   /** [0100] Phần vector còn lại sau khi chiếu lên trục `b`. */
-  public calculateVectorRejection(a?: any, b?: any, options?: any): any {
+  public calculateVectorRejection(a?: unknown, b?: unknown, options?: unknown) {
     const result = rejectVector(asPoint(a), asPoint(b));
     return namedResult('calculateVectorRejection', result, { vector: result, length: magnitude(result) });
   }
 
   /** [0127] Chuyển quaternion thành góc Euler. */
-  public quaternionToEuler(a?: any, b?: any): any {
+  public quaternionToEuler(a?: unknown, b?: unknown) {
     const euler = quaternionToEuler(asQuaternion(a));
     return { ...namedResult('quaternionToEuler', euler, { euler }), ...euler };
   }
 
   /** [0096] Nội suy trên cầu cầu (slerp) giữa hai hướng. */
-  public slerpVector(a?: any, b?: any): any {
+  public slerpVector(a?: unknown, b?: unknown) {
     const from = normalize(asPoint(a));
     const to = normalize(asPoint(b));
     const dotValue = clamp(dot(from, to), -1, 1);
@@ -996,9 +998,9 @@ export class DistanceVectorMathSubsystem {
   }
 
   /** [0097] Giới hạn độ dài vector. */
-  public clampVectorMagnitude(entity?: any, options?: any): any {
+  public clampVectorMagnitude(entity?: unknown, options?: unknown) {
     const vector = asPoint(entity);
-    const max = typeof options?.max === 'number' ? options.max : 1;
+    const max = num(asRecord(options).max, 1);
     const len = magnitude(vector);
     if (len <= max || len === 0) return vector;
     return scale(vector, max / len);
@@ -1009,46 +1011,46 @@ export class DistanceVectorMathSubsystem {
   // ==========================================================================
 
   /** [0098] Góc giữa hai vector. */
-  public calculateVectorAngle(a?: any, b?: any): any {
+  public calculateVectorAngle(a?: unknown, b?: unknown) {
     const cosine = clamp(dot(normalize(asPoint(a)), normalize(asPoint(b))), -1, 1);
     return Math.acos(cosine);
   }
 
   /** [0101] Góc Euler từ quaternion. */
-  public calculateEulerAngles(a?: any, b?: any): any {
+  public calculateEulerAngles(a?: unknown, b?: unknown) {
     const euler = quaternionToEuler(asQuaternion(a));
     return { ...namedResult('calculateEulerAngles', euler, { euler }), ...euler };
   }
 
   /** [0102] Góc yaw (quanh trục Y) — thành phần z của góc Euler XYZ. */
-  public calculateYaw(a?: any, b?: any): any {
+  public calculateYaw(a?: unknown, b?: unknown) {
     return quaternionToEuler(asQuaternion(a)).z;
   }
 
   /** [0103] Góc pitch (quanh trục X) — thành phần x của góc Euler XYZ. */
-  public calculatePitch(a?: any, b?: any): any {
+  public calculatePitch(a?: unknown, b?: unknown) {
     return quaternionToEuler(asQuaternion(a)).x;
   }
 
   /** [0104] Góc roll (quanh trục Z) — thành phần y của góc Euler XYZ. */
-  public calculateRoll(a?: any, b?: any): any {
+  public calculateRoll(a?: unknown, b?: unknown) {
     return quaternionToEuler(asQuaternion(a)).y;
   }
 
   /** [0105] Góc tại gốc toạ độ giữa hai điểm. */
-  public calculateAngleBetweenPoints(a?: any, b?: any): any {
+  public calculateAngleBetweenPoints(a?: unknown, b?: unknown) {
     const cosine = clamp(dot(normalize(asPoint(a)), normalize(asPoint(b))), -1, 1);
     return Math.acos(cosine);
   }
 
   /** [0106] Góc giữa hai vector. */
-  public calculateAngleBetweenVectors(a?: any, b?: any): any {
+  public calculateAngleBetweenVectors(a?: unknown, b?: unknown) {
     const cosine = clamp(dot(normalize(asPoint(a)), normalize(asPoint(b))), -1, 1);
     return Math.acos(cosine);
   }
 
   /** [0107] Góc từ hướng nhìn của `a` tới mục tiêu `b`. */
-  public calculateAngleToTarget(a?: any, b?: any): any {
+  public calculateAngleToTarget(a?: unknown, b?: unknown) {
     const forward = entityForward(a);
     const toTarget = normalize(subtract(asPoint(b), entityPosition(a)));
     const cosine = clamp(dot(normalize(forward), toTarget), -1, 1);
@@ -1056,7 +1058,7 @@ export class DistanceVectorMathSubsystem {
   }
 
   /** [0108] Góc từ hướng nhìn của `a` tới camera `b`. */
-  public calculateAngleToCamera(a?: any, b?: any): any {
+  public calculateAngleToCamera(a?: unknown, b?: unknown) {
     const forward = entityForward(a);
     const toCamera = normalize(subtract(asPoint(b), entityPosition(a)));
     const cosine = clamp(dot(normalize(forward), toCamera), -1, 1);
@@ -1064,13 +1066,13 @@ export class DistanceVectorMathSubsystem {
   }
 
   /** [0109] Góc giữa vector và mặt phẳng ngang. */
-  public calculateAngleToGround(a?: any, b?: any): any {
+  public calculateAngleToGround(a?: unknown, b?: unknown) {
     const vector = normalize(asPoint(a));
     return Math.asin(clamp(Math.abs(vector.y), -1, 1));
   }
 
   /** [0110] Góc có dấu giữa hai vector quanh một trục. */
-  public calculateSignedAngle(a?: any, b?: any): any {
+  public calculateSignedAngle(a?: unknown, b?: unknown) {
     const va = normalize(asPoint(a));
     const vb = normalize(asPoint(b));
     const axis = normalize(cross(va, vb));
@@ -1080,22 +1082,23 @@ export class DistanceVectorMathSubsystem {
   }
 
   /** [0111] Góc không dấu giữa hai vector. */
-  public calculateUnsignedAngle(a?: any, b?: any): any {
+  public calculateUnsignedAngle(a?: unknown, b?: unknown) {
     const cosine = clamp(dot(normalize(asPoint(a)), normalize(asPoint(b))), -1, 1);
     return Math.acos(cosine);
   }
 
   /** [0116] Chuẩn hoá góc về (-π, π]. */
-  public normalizeAngle(a?: any, b?: any): any {
+  public normalizeAngle(a?: unknown, b?: unknown) {
     if (typeof a === 'number') return normalizeAngle(a);
     return normalizeAngle(quaternionToEuler(asQuaternion(a)).y);
   }
 
   /** [0117] Giới hạn góc trong khoảng cho trước. */
-  public clampAngle(a?: any, b?: any): any {
+  public clampAngle(a?: unknown, b?: unknown) {
     const angle = typeof a === 'number' ? a : quaternionToEuler(asQuaternion(a)).y;
-    const min = typeof b?.min === 'number' ? b.min : -Math.PI;
-    const max = typeof b?.max === 'number' ? b.max : Math.PI;
+    const bounds = asRecord(b);
+    const min = typeof bounds.min === 'number' ? bounds.min : -Math.PI;
+    const max = typeof bounds.max === 'number' ? bounds.max : Math.PI;
     return clamp(angle, min, max);
   }
 
@@ -1110,7 +1113,7 @@ export class DistanceVectorMathSubsystem {
    *
    * Nội suy ở giữa hai góc ⇒ kết quả thay đổi theo cả hai đầu vào.
    */
-  public interpolateAngle(a?: any, b?: any): any {
+  public interpolateAngle(a?: unknown, b?: unknown) {
     const from = this.resolveAngle(a, 0);
     const to = this.resolveAngle(b, from);
     return lerp(from, to, 0.5);
@@ -1121,21 +1124,21 @@ export class DistanceVectorMathSubsystem {
   // ==========================================================================
 
   /** [0112] Vận tốc góc của entity. */
-  public calculateAngularVelocity(entity?: any, dt = 0.016): any {
+  public calculateAngularVelocity(entity?: unknown, dt = 0.016) {
     const value = entity && typeof entity === 'object' ? (entity as Record<string, unknown>).angularVelocity : undefined;
     const result = value && typeof value === 'object' ? toVec3(value) : { x: 0, y: 0, z: 0 };
     return directionResult('calculateAngularVelocity', result, { deltaTime: dt });
   }
 
   /** [0113] Gia tốc góc của entity. */
-  public calculateAngularAcceleration(entity?: any, dt = 0.016): any {
+  public calculateAngularAcceleration(entity?: unknown, dt = 0.016) {
     const value = entity && typeof entity === 'object' ? (entity as Record<string, unknown>).angularAcceleration : undefined;
     const result = value && typeof value === 'object' ? toVec3(value) : { x: 0, y: 0, z: 0 };
     return directionResult('calculateAngularAcceleration', result, { deltaTime: dt });
   }
 
   /** [0115] Chênh lệch góc giữa hai trạng thái xoay. */
-  public calculateAngularDifference(a?: any, b?: any, options?: any): any {
+  public calculateAngularDifference(a?: unknown, b?: unknown, options?: unknown) {
     const from = asQuaternion(a);
     const to = asQuaternion(b);
     const dotValue = clamp(from.x * to.x + from.y * to.y + from.z * to.z + from.w * to.w, -1, 1);
@@ -1148,7 +1151,7 @@ export class DistanceVectorMathSubsystem {
   // ==========================================================================
 
   /** [0119] Ma trận xoay 4x4 từ quaternion của entity. */
-  public calculateRotationMatrix(entityOrAngle?: any, options?: any): any {
+  public calculateRotationMatrix(entityOrAngle?: unknown, options?: unknown) {
     const q = asQuaternion(entityOrAngle);
     const x = q.x, y = q.y, z = q.z, w = q.w;
     const matrix: number[] = [
@@ -1161,25 +1164,25 @@ export class DistanceVectorMathSubsystem {
   }
 
   /** [0120] Ma trận xoay nghịch đảo. */
-  public calculateInverseRotation(entityOrAngle?: any, options?: any): any {
+  public calculateInverseRotation(entityOrAngle?: unknown, options?: unknown) {
     const q = invertQuaternion(asQuaternion(entityOrAngle));
     return this.calculateRotationMatrix(q);
   }
 
   /** [0121] Quaternion của entity. */
-  public calculateQuaternion(entityOrAngle?: any, options?: any): any {
+  public calculateQuaternion(entityOrAngle?: unknown, options?: unknown) {
     const q = asQuaternion(entityOrAngle);
     return orientationResult('calculateQuaternion', q);
   }
 
   /** [0122] Quaternion chuẩn hoá. */
-  public normalizeQuaternion(entityOrAngle?: any, options?: any): any {
+  public normalizeQuaternion(entityOrAngle?: unknown, options?: unknown) {
     const q = normalizeQuaternion(asQuaternion(entityOrAngle));
     return orientationResult('normalizeQuaternion', q);
   }
 
   /** [0123] Nhân hai quaternion. */
-  public multiplyQuaternions(entityOrAngle?: any, options?: any): any {
+  public multiplyQuaternions(entityOrAngle?: unknown, options?: unknown) {
     const a = asQuaternion(entityOrAngle);
     const b = asQuaternion(secondOperand(options));
     const q = multiplyQuaternions(a, b);
@@ -1187,31 +1190,31 @@ export class DistanceVectorMathSubsystem {
   }
 
   /** [0124] Nghịch đảo quaternion. */
-  public invertQuaternion(entityOrAngle?: any, options?: any): any {
+  public invertQuaternion(entityOrAngle?: unknown, options?: unknown) {
     const q = invertQuaternion(asQuaternion(entityOrAngle));
     return orientationResult('invertQuaternion', q);
   }
 
   /** [0125] Nội suy quaternion bằng slerp. */
-  public slerpQuaternion(entityOrAngle?: any, options?: any): any {
+  public slerpQuaternion(entityOrAngle?: unknown, options?: unknown) {
     const a = asQuaternion(entityOrAngle);
     const b = asQuaternion(secondOperand(options));
-    const t = typeof options?.t === 'number' ? options.t : 0.5;
+    const t = num(asRecord(options).t, 0.5);
     const q = slerpQuaternion(a, b, t);
     return orientationResult('slerpQuaternion', q);
   }
 
   /** [0126] Nội suy quaternion bằng nlerp. */
-  public nlerpQuaternion(entityOrAngle?: any, options?: any): any {
+  public nlerpQuaternion(entityOrAngle?: unknown, options?: unknown) {
     const a = asQuaternion(entityOrAngle);
     const b = asQuaternion(secondOperand(options));
-    const t = typeof options?.t === 'number' ? options.t : 0.5;
+    const t = num(asRecord(options).t, 0.5);
     const q = nlerpQuaternion(a, b, t);
     return orientationResult('nlerpQuaternion', q);
   }
 
   /** [0128] Quaternion từ góc Euler. */
-  public eulerToQuaternion(entityOrAngle?: any, options?: any): any {
+  public eulerToQuaternion(entityOrAngle?: unknown, options?: unknown) {
     const source = (options ?? entityOrAngle) as Record<string, unknown> | undefined;
     const x = typeof source?.x === 'number' ? source.x : 0;
     const y = typeof source?.y === 'number' ? source.y : 0;
@@ -1221,8 +1224,8 @@ export class DistanceVectorMathSubsystem {
   }
 
   /** [0130] Quaternion từ ma trận 4x4. */
-  public matrixToQuaternion(entityOrAngle?: any, options?: any): any {
-    const matrix = (options?.matrix ?? entityOrAngle) as number[] | undefined;
+  public matrixToQuaternion(entityOrAngle?: unknown, options?: unknown) {
+    const matrix = (asRecord(options).matrix ?? entityOrAngle) as number[] | undefined;
     if (!Array.isArray(matrix) || matrix.length < 16) {
       return orientationResult('matrixToQuaternion', { ...IDENTITY_QUAT });
     }
@@ -1246,7 +1249,7 @@ export class DistanceVectorMathSubsystem {
   }
 
   /** [0129] Ma trận 4x4 từ quaternion. */
-  public quaternionToMatrix(target?: any, options?: any): any {
+  public quaternionToMatrix(target?: unknown, options?: unknown) {
     const q = asQuaternion(target ?? options);
     const x = q.x, y = q.y, z = q.z, w = q.w;
     const matrix: number[] = [
@@ -1259,25 +1262,28 @@ export class DistanceVectorMathSubsystem {
   }
 
   /** [0132] Quaternion nhìn về một mục tiêu. */
-  public calculateLookAtQuaternion(entityOrAngle?: any, options?: any): any {
+  public calculateLookAtQuaternion(entityOrAngle?: unknown, options?: unknown) {
     const from = entityPosition(entityOrAngle);
-    const target = asPoint(options?.target ?? options?.to ?? entityOrAngle);
+    const bag = asRecord(options);
+    const target = asPoint(bag.target ?? bag.to ?? entityOrAngle);
     const q = lookAtQuaternion(from, target);
     return orientationResult('calculateLookAtQuaternion', q);
   }
 
   /** [0131] Ma trận nhìn về một mục tiêu. */
-  public calculateLookAtRotation(entityOrAngle?: any, options?: any): any {
+  public calculateLookAtRotation(entityOrAngle?: unknown, options?: unknown) {
     const from = entityPosition(entityOrAngle);
-    const target = asPoint(options?.target ?? options?.to ?? entityOrAngle);
+    const bag = asRecord(options);
+    const target = asPoint(bag.target ?? bag.to ?? entityOrAngle);
     const matrix = lookAtMatrix(from, target);
     return namedResult('calculateLookAtRotation', matrix, { matrix });
   }
 
   /** [0133] Quaternion xoay quanh một trục. */
-  public calculateRotationAroundAxis(entityOrAngle?: any, options?: any): any {
-    const axis = asPoint(options?.axis ?? entityOrAngle);
-    const angle = typeof options?.angle === 'number' ? options.angle : 0;
+  public calculateRotationAroundAxis(entityOrAngle?: unknown, options?: unknown) {
+    const bag = asRecord(options);
+    const axis = asPoint(bag.axis ?? entityOrAngle);
+    const angle = typeof bag.angle === 'number' ? bag.angle : 0;
     const q = rotateAroundAxis(axis, angle);
     return orientationResult('calculateRotationAroundAxis', q);
   }
@@ -1288,7 +1294,7 @@ export class DistanceVectorMathSubsystem {
    * Hai hướng được đọc theo VAI TRÒ (`from` / `to`) nên hàm nhận được cả
    * (entity, options), (vector, vector) lẫn (options, entity).
    */
-  public calculateRotationBetweenVectors(entityOrAngle?: any, options?: any): any {
+  public calculateRotationBetweenVectors(entityOrAngle?: unknown, options?: unknown) {
     const from =
       this.pickDirection(entityOrAngle, 'from') ?? this.pickDirection(options, 'from') ?? { ...FORWARD3 };
     const to = this.pickDirection(options, 'to') ?? this.pickDirection(entityOrAngle, 'to') ?? { ...FORWARD3 };
@@ -1303,7 +1309,7 @@ export class DistanceVectorMathSubsystem {
    * (forward thật từ quaternion) khi đối số là entity; vector thô thì được
    * dùng làm hướng trực tiếp.
    */
-  public calculateRelativeRotation(entityOrAngle?: any, options?: any): any {
+  public calculateRelativeRotation(entityOrAngle?: unknown, options?: unknown) {
     const from =
       this.pickDirection(options, 'from') ?? this.pickDirection(entityOrAngle, 'from') ?? { ...FORWARD3 };
     const to = this.pickDirection(options, 'to') ?? this.pickDirection(entityOrAngle, 'to') ?? { ...FORWARD3 };
@@ -1312,79 +1318,79 @@ export class DistanceVectorMathSubsystem {
   }
 
   /** [0136] Xoay thế giới của entity. */
-  public calculateWorldRotation(entityOrAngle?: any, options?: any): any {
+  public calculateWorldRotation(entityOrAngle?: unknown, options?: unknown) {
     const q = asQuaternion(entityOrAngle);
     return orientationResult('calculateWorldRotation', q);
   }
 
   /** [0137] Xoay cục bộ của entity. */
-  public calculateLocalRotation(entityOrAngle?: any, options?: any): any {
+  public calculateLocalRotation(entityOrAngle?: unknown, options?: unknown) {
     const q = asQuaternion(entityOrAngle);
     return orientationResult('calculateLocalRotation', q);
   }
 
   /** [0138] Xoay của một xương theo tên. */
-  public calculateBoneRotation(entityOrAngle?: any, options?: any): any {
+  public calculateBoneRotation(entityOrAngle?: unknown, options?: unknown) {
     return this.boneRotation(entityOrAngle, options, 'calculateBoneRotation');
   }
 
   /** [0139] Xoay của một khớp theo tên. */
-  public calculateJointRotation(entityOrAngle?: any, options?: any): any {
+  public calculateJointRotation(entityOrAngle?: unknown, options?: unknown) {
     return this.boneRotation(entityOrAngle, options, 'calculateJointRotation');
   }
 
   /** [0140] Xoay của đầu. */
-  public calculateHeadRotation(entityOrAngle?: any, options?: any): any {
+  public calculateHeadRotation(entityOrAngle?: unknown, options?: unknown) {
     return this.boneRotation(entityOrAngle, options, 'calculateHeadRotation', 'head');
   }
 
   /** [0141] Xoay của bàn tay. */
-  public calculateHandRotation(entityOrAngle?: any, options?: any): any {
+  public calculateHandRotation(entityOrAngle?: unknown, options?: unknown) {
     return this.boneRotation(entityOrAngle, options, 'calculateHandRotation', 'hand');
   }
 
   /** [0884] Xoay của bàn chân. */
-  public calculateFootRotation(entityOrAngle?: any, options?: any): any {
+  public calculateFootRotation(entityOrAngle?: unknown, options?: unknown) {
     return this.boneRotation(entityOrAngle, options, 'calculateFootRotation', 'foot');
   }
 
   /** [0143] Xoay của vai. */
-  public calculateShoulderRotation(entityOrAngle?: any, options?: any): any {
+  public calculateShoulderRotation(entityOrAngle?: unknown, options?: unknown) {
     return this.boneRotation(entityOrAngle, options, 'calculateShoulderRotation', 'shoulder');
   }
 
   /** [0144] Xoay của hông. */
-  public calculateHipRotation(entityOrAngle?: any, options?: any): any {
+  public calculateHipRotation(entityOrAngle?: unknown, options?: unknown) {
     return this.boneRotation(entityOrAngle, options, 'calculateHipRotation', 'hip');
   }
 
   /** [0145] Xoay của cổ tay. */
-  public calculateWristRotation(entityOrAngle?: any, options?: any): any {
+  public calculateWristRotation(entityOrAngle?: unknown, options?: unknown) {
     return this.boneRotation(entityOrAngle, options, 'calculateWristRotation', 'wrist');
   }
 
   /** [0146] Xoay của khuỷu tay. */
-  public calculateElbowRotation(entityOrAngle?: any, options?: any): any {
+  public calculateElbowRotation(entityOrAngle?: unknown, options?: unknown) {
     return this.boneRotation(entityOrAngle, options, 'calculateElbowRotation', 'elbow');
   }
 
   /** [0811] Xoay của đầu gối. */
-  public calculateKneeRotation(entityOrAngle?: any, options?: any): any {
+  public calculateKneeRotation(entityOrAngle?: unknown, options?: unknown) {
     return this.boneRotation(entityOrAngle, options, 'calculateKneeRotation', 'knee');
   }
 
   /** [0148] Xoay của cột sống. */
-  public calculateSpineRotation(entityOrAngle?: any, options?: any): any {
+  public calculateSpineRotation(entityOrAngle?: unknown, options?: unknown) {
     return this.boneRotation(entityOrAngle, options, 'calculateSpineRotation', 'spine');
   }
 
   /** [0149] Xoay của đuôi. */
-  public calculateTailRotation(entityOrAngle?: any, options?: any): any {
+  public calculateTailRotation(entityOrAngle?: unknown, options?: unknown) {
     return this.boneRotation(entityOrAngle, options, 'calculateTailRotation', 'tail');
   }
 
   /** [0150] Xoay của cánh. */
-  public calculateWingRotation(entityOrAngle?: any, options?: any): any {
+  public calculateWingRotation(entityOrAngle?: unknown, options?: unknown) {
     return this.boneRotation(entityOrAngle, options, 'calculateWingRotation', 'wing');
   }
 
@@ -1398,7 +1404,7 @@ export class DistanceVectorMathSubsystem {
    *
    * Không có cây xương → quaternion đơn vị (w = 1) = tư thế trung tính.
    */
-  private boneRotation(entityOrAngle: any, options: any, name: string, boneName?: string): Record<string, unknown> {
+  private boneRotation(entityOrAngle: unknown, options: unknown, name: string, boneName?: string): Record<string, unknown> {
     const skeleton = this.resolveSkeleton(entityOrAngle, options);
     const candidates = this.boneCandidates(boneName, options, entityOrAngle);
     // Không có tên xương → dùng xương gốc của cây (dữ liệu thật).
@@ -1429,7 +1435,7 @@ export class DistanceVectorMathSubsystem {
    * riêng…). `buildSkeleton` chỉ giữ gốc đầu tiên, nên các gốc còn lại
    * được gộp vào một gốc ảo (đơn vị) để mọi xương đều tìm được.
    */
-  private resolveSkeleton(entity: any, options: any): BoneDesc | undefined {
+  private resolveSkeleton(entity: unknown, options: unknown): BoneDesc | undefined {
     for (const source of [entity, options]) {
       const list = this.skeletonRootList(source);
       if (list.length === 0) continue;
@@ -1456,13 +1462,13 @@ export class DistanceVectorMathSubsystem {
     return (
       buildSkeleton(entity) ??
       buildSkeleton(options) ??
-      buildSkeleton({ bones: entity?.children }) ??
-      buildSkeleton({ bones: options?.children })
+      buildSkeleton({ bones: asRecord(entity).children }) ??
+      buildSkeleton({ bones: asRecord(options).children })
     );
   }
 
   /** Danh sách gốc cây xương thô của một nguồn dữ liệu. */
-  private skeletonRootList(source: any): unknown[] {
+  private skeletonRootList(source: unknown): unknown[] {
     if (!source || typeof source !== 'object') return [];
     const o = source as Record<string, unknown>;
     const list = o.skeleton ?? o.bones ?? o.nodes;
@@ -1480,9 +1486,10 @@ export class DistanceVectorMathSubsystem {
    * `options.jointName`, nên nếu chỉ đọc `options` thì tên xương sẽ không bao
    * giờ được lấy từ người gọi mà chỉ từ dữ liệu entity.
    */
-  private boneCandidates(boneName: string | undefined, options: any, source?: any): string[] {
+  private boneCandidates(boneName: string | undefined, options: unknown, source?: unknown): string[] {
     if (boneName) return BONE_ALIASES[boneName] ?? [boneName];
-    const named = [options?.bone, options?.boneName, options?.joint];
+    const bag = asRecord(options);
+    const named = [bag.bone, bag.boneName, bag.joint];
     const fromOptions = named.filter((n): n is string => typeof n === 'string' && n.length > 0);
     if (fromOptions.length > 0) return fromOptions;
     const record = source && typeof source === 'object' ? (source as Record<string, unknown>) : null;
@@ -1521,7 +1528,7 @@ export class DistanceVectorMathSubsystem {
   }
 
   /** Khớp khai báo riêng (`entity.joints`) — dùng khi không có cây xương. */
-  private findJoint(entity: any, candidates: string[]): { name: string; value: unknown } | null {
+  private findJoint(entity: unknown, candidates: string[]): { name: string; value: unknown } | null {
     if (!entity || typeof entity !== 'object') return null;
     const joints = (entity as Record<string, unknown>).joints;
     if (!joints || typeof joints !== 'object') return null;
@@ -1565,7 +1572,7 @@ export class DistanceVectorMathSubsystem {
   }
 
   /** Hướng "lên" thật của entity (trục +Y cục bộ trong không gian thế giới). */
-  private resolveUpDirection(entity: any): Vec3D | null {
+  private resolveUpDirection(entity: unknown): Vec3D | null {
     if (!entity || typeof entity !== 'object') return null;
     const o = entity as Record<string, unknown>;
     if (o.up && typeof o.up === 'object') {
@@ -1610,7 +1617,7 @@ export class DistanceVectorMathSubsystem {
   }
 
   /** Điểm tham chiếu để dựng mặt phẳng song song với mặt phẳng đã biết. */
-  private planeReferencePoint(value: any): Vec3D {
+  private planeReferencePoint(value: unknown): Vec3D {
     if (!value || typeof value !== 'object') return { ...ZERO3 };
     const o = value as Record<string, unknown>;
     if (o.position && typeof o.position === 'object') return toVec3(o.position);
@@ -1623,19 +1630,22 @@ export class DistanceVectorMathSubsystem {
   }
 
   /** Lấy ma trận 4x4 từ options, nếu không có thì dùng ma trận đơn vị. */
-  private resolveMatrix(options: any): number[] {
-    if (Array.isArray(options?.matrix) && options.matrix.length >= 16) return options.matrix as number[];
-    if (options?.camera) {
-      const eye = entityPosition(options.camera.position ?? options.camera);
-      const target = entityPosition(options.target ?? options.camera);
+  private resolveMatrix(options: unknown): number[] {
+    const bag = asRecord(options);
+    if (Array.isArray(bag.matrix) && bag.matrix.length >= 16) return bag.matrix as number[];
+    if (bag.camera) {
+      const camera = asRecord(bag.camera);
+      const eye = entityPosition(camera.position ?? bag.camera);
+      const target = entityPosition(bag.target ?? bag.camera);
       return lookAtMatrix(eye, target);
     }
     // Đối tượng tham chiếu: dùng ma trận của nó nếu có, không thì dựng ma
     // trận tịnh tiến từ vị trí.
-    const reference = options?.object ?? options?.reference;
+    const reference = bag.object ?? bag.reference;
     if (reference) {
-      if (Array.isArray(reference.matrix) && reference.matrix.length >= 16) {
-        return reference.matrix as number[];
+      const referenceMatrix = asRecord(reference).matrix;
+      if (Array.isArray(referenceMatrix) && referenceMatrix.length >= 16) {
+        return referenceMatrix as number[];
       }
       return translationMatrix(entityPosition(reference));
     }

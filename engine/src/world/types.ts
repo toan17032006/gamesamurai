@@ -32,7 +32,7 @@ export interface WorldState {
   currentSeason: 'spring' | 'summer' | 'autumn' | 'winter';
 }
 
-export interface WorldObject<T = any> {
+export interface WorldObject<T = unknown> {
   id: string;
   type: string;
   position: Vec3;

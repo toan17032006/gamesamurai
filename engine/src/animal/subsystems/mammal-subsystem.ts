@@ -91,9 +91,9 @@ export class MammalSubsystem {
   public scratchWithHindLeg(): void { recordSubsystemAction(this, 'scratchWithHindLeg', 'MammalSubsystem'); }
   public scratchWithForepaw(): void { recordSubsystemAction(this, 'scratchWithForepaw', 'MammalSubsystem'); }
   public groomFur(): void { recordSubsystemAction(this, 'groomFur', 'MammalSubsystem'); }
-  public groomAnotherAnimal(target: any): void { recordSubsystemAction(this, 'groomAnotherAnimal', 'MammalSubsystem'); }
+  public groomAnotherAnimal(target: unknown): void { recordSubsystemAction(this, 'groomAnotherAnimal', 'MammalSubsystem'); }
   public cleanFaceWithPaw(): void { recordSubsystemAction(this, 'cleanFaceWithPaw', 'MammalSubsystem'); }
-  public rubBodyAgainstObject(object: any): void { recordSubsystemAction(this, 'rubBodyAgainstObject', 'MammalSubsystem'); }
+  public rubBodyAgainstObject(object: unknown): void { recordSubsystemAction(this, 'rubBodyAgainstObject', 'MammalSubsystem'); }
   public sniffGroundWhileWalking(): void { recordSubsystemAction(this, 'sniffGroundWhileWalking', 'MammalSubsystem'); }
   public raiseBodyToInvestigate(): void { recordSubsystemAction(this, 'raiseBodyToInvestigate', 'MammalSubsystem'); }
   public lowerBodyToRest(): void { this.posture = 'lying'; }

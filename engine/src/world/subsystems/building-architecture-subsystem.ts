@@ -39,19 +39,68 @@ const WINDOW_AREA = 1.5;
 
 import { recordSubsystemAction } from '../../core/subsystem-activity.js';
 
+/** Cửa thuộc một công trình. */
+export interface BuildingDoor {
+  id: string;
+  buildingId: string | null;
+  isOpen: boolean;
+  isBroken: boolean;
+  health: number;
+  position: Vec3;
+  width: number;
+  height: number;
+  breakForce?: number;
+}
+
+/** Cửa sổ thuộc một công trình. */
+export interface BuildingWindow {
+  id: string;
+  buildingId: string | null;
+  isCracked: boolean;
+  isShattered: boolean;
+  health: number;
+  cracks: number;
+  shards: number;
+  impactEnergy: number;
+  position: Vec3;
+  area: number;
+}
+
+/** Một mảnh vỡ kết cấu tách khỏi công trình. */
+export interface BuildingDebris {
+  id: string;
+  sourceId: string;
+  mass: number;
+  index: number;
+}
+
+/** Một mảnh vỡ tường của công trình. */
+export interface BuildingFragment {
+  id: string;
+  sourceId: string;
+  wallId: string | null;
+  index: number;
+}
+
+/** Đọc một giá trị bất kỳ dưới dạng bản ghi khoá–giá trị. */
+function asRecord(value: unknown): Record<string, unknown> | null {
+  return typeof value === 'object' && value !== null ? (value as Record<string, unknown>) : null;
+}
+
 export class BuildingArchitectureSubsystem {
   public buildings: Map<string, BuildingEntity> = new Map();
   public walls: Map<string, WallSection> = new Map();
   public roofs: Map<string, RoofSection> = new Map();
-  public doors: Map<string, any> = new Map();
-  public windows: Map<string, any> = new Map();
+  public doors: Map<string, BuildingDoor> = new Map();
+  public windows: Map<string, BuildingWindow> = new Map();
   public furniture: Map<string, FurnitureEntity> = new Map();
 
   /** Đọc số từ nhiều khoá, có giá trị thay thế khi dữ liệu thiếu. */
-  private numOf(source: any, keys: string[], fallback: number): number {
-    if (source && typeof source === 'object') {
+  private numOf(source: unknown, keys: string[], fallback: number): number {
+    const record = asRecord(source);
+    if (record) {
       for (const key of keys) {
-        const value = (source as Record<string, unknown>)[key];
+        const value = record[key];
         if (typeof value === 'number' && Number.isFinite(value)) return value;
       }
     }
@@ -59,11 +108,13 @@ export class BuildingArchitectureSubsystem {
   }
 
   /** Kích thước đặc trưng (bán kính / cạnh lớn nhất) của đối tượng. */
-  private extentOf(source: any, fallback = 1): number {
-    const size = source?.size ?? source?.radius ?? source?.scale;
+  private extentOf(source: unknown, fallback = 1): number {
+    const record = asRecord(source);
+    const size = record?.size ?? record?.radius ?? record?.scale;
     if (typeof size === 'number' && Number.isFinite(size) && size > 0) return size;
-    if (size && typeof size === 'object') {
-      const values = [size.x, size.y, size.z, size.max, size.width, size.height]
+    const sizeRecord = asRecord(size);
+    if (sizeRecord) {
+      const values = [sizeRecord.x, sizeRecord.y, sizeRecord.z, sizeRecord.max, sizeRecord.width, sizeRecord.height]
         .map((v) => Number(v))
         .filter((v) => Number.isFinite(v) && v > 0)
         .sort((a, b) => b - a);
@@ -73,9 +124,10 @@ export class BuildingArchitectureSubsystem {
   }
 
   /** Vị trí thế giới của đối tượng. */
-  private positionOf(source: any): Vec3 {
-    const p = source?.position ?? source?.origin ?? source?.center;
-    if (p && typeof p === 'object') {
+  private positionOf(source: unknown): Vec3 {
+    const record = asRecord(source);
+    const p = asRecord(record?.position ?? record?.origin ?? record?.center);
+    if (p) {
       const x = Number(p.x ?? 0);
       const y = Number(p.y ?? 0);
       const z = Number(p.z ?? 0);
@@ -305,7 +357,7 @@ export class BuildingArchitectureSubsystem {
    * Trước đây `force` bị bỏ qua hoàn toàn — mọi lần gọi chỉ đặt `isCracked`.
    * Nay lực quyết định số vết nứt, hao hụt sức bền và ảnh hưởng tới công trình.
    */
-  public crackWall(wall: WallSection | string, force: any): void {
+  public crackWall(wall: WallSection | string, force: unknown): void {
     const w = typeof wall === 'string' ? this.walls.get(wall) : wall;
     if (!w) return;
     const magnitude = forceMagnitude(force);
@@ -325,7 +377,7 @@ export class BuildingArchitectureSubsystem {
     );
   }
 
-  public chipWallSurface(wall: WallSection | string, impact: any): void { recordSubsystemAction(this, 'chipWallSurface', 'BuildingArchitectureSubsystem'); }
+  public chipWallSurface(wall: WallSection | string, impact: unknown): void { recordSubsystemAction(this, 'chipWallSurface', 'BuildingArchitectureSubsystem'); }
 
   /**
    * Phá tường.
@@ -333,7 +385,7 @@ export class BuildingArchitectureSubsystem {
    * Trước đây `force` bị bỏ qua — mọi lần phá đều cho kết quả giống nhau.
    * Nay lực được ghi vào ứng lực, số vết nứt và năng lượng va chạm.
    */
-  public breakWall(wall: WallSection | string, force: any): void {
+  public breakWall(wall: WallSection | string, force: unknown): void {
     const w = typeof wall === 'string' ? this.walls.get(wall) : wall;
     if (!w) return;
     const magnitude = forceMagnitude(force);
@@ -348,7 +400,7 @@ export class BuildingArchitectureSubsystem {
     this.damageBuilding(w.buildingId, 1, owner ? Math.max(1, owner.walls.length) : 1);
   }
 
-  public collapseWallSection(wall: WallSection | string, section: any): void {
+  public collapseWallSection(wall: WallSection | string, section: unknown): void {
     this.breakWall(wall, section);
   }
 
@@ -364,9 +416,9 @@ export class BuildingArchitectureSubsystem {
     return roof;
   }
 
-  public bendRoof(roof: RoofSection | string, load: any): void { recordSubsystemAction(this, 'bendRoof', 'BuildingArchitectureSubsystem'); }
-  public crackRoof(roof: RoofSection | string, force: any): void { recordSubsystemAction(this, 'crackRoof', 'BuildingArchitectureSubsystem'); }
-  public detachRoofPanel(roof: RoofSection | string, panel: any): void { recordSubsystemAction(this, 'detachRoofPanel', 'BuildingArchitectureSubsystem'); }
+  public bendRoof(roof: RoofSection | string, load: unknown): void { recordSubsystemAction(this, 'bendRoof', 'BuildingArchitectureSubsystem'); }
+  public crackRoof(roof: RoofSection | string, force: unknown): void { recordSubsystemAction(this, 'crackRoof', 'BuildingArchitectureSubsystem'); }
+  public detachRoofPanel(roof: RoofSection | string, panel: unknown): void { recordSubsystemAction(this, 'detachRoofPanel', 'BuildingArchitectureSubsystem'); }
   /**
    * Làm sập mái.
    *
@@ -374,7 +426,7 @@ export class BuildingArchitectureSubsystem {
    * tải của mái (tổng tải trọng công trình chia đều cho các mái) để tính
    * mức quá tải và mức hao sức bền của công trình.
    */
-  public collapseRoof(roof: RoofSection | string, load: any): void {
+  public collapseRoof(roof: RoofSection | string, load: unknown): void {
     const r = typeof roof === 'string' ? this.roofs.get(roof) : roof;
     if (!r) return;
     const magnitude = forceMagnitude(load);
@@ -400,7 +452,7 @@ export class BuildingArchitectureSubsystem {
    * Trước đây `building` bị bỏ qua hoàn toàn. Nay cửa gắn với công trình,
    * đặt tại tâm móng của công trình và được đăng ký vào danh sách cửa.
    */
-  public createDoor(building: any): any {
+  public createDoor(building: BuildingEntity | string): BuildingDoor {
     const id = `door_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
     const owner = typeof building === 'string' ? this.buildings.get(building) : building;
     const buildingId = typeof building === 'string' ? building : (building?.id ?? null);
@@ -421,12 +473,12 @@ export class BuildingArchitectureSubsystem {
     return door;
   }
 
-  public openDoor(door: any): void {
+  public openDoor(door: BuildingDoor | string): void {
     const d = typeof door === 'string' ? this.doors.get(door) : door;
     if (d) d.isOpen = true;
   }
 
-  public closeDoor(door: any): void {
+  public closeDoor(door: BuildingDoor | string): void {
     const d = typeof door === 'string' ? this.doors.get(door) : door;
     if (d) d.isOpen = false;
   }
@@ -437,7 +489,7 @@ export class BuildingArchitectureSubsystem {
    * Trước đây `force` bị bỏ qua hoàn toàn. Nay lực quyết định mức hư hại
    * còn lại của cánh cửa; khi không truyền lực thì dùng lực cạy khung mặc định.
    */
-  public breakDoor(door: any, force?: any): void {
+  public breakDoor(door: BuildingDoor | string, force?: unknown): void {
     const d = typeof door === 'string' ? this.doors.get(door) : door;
     if (!d) return;
     const magnitude = force == null ? DOOR_PRY_FORCE : forceMagnitude(force);
@@ -446,7 +498,7 @@ export class BuildingArchitectureSubsystem {
     d.isBroken = true;
   }
 
-  public detachDoorFromFrame(door: any): void { this.breakDoor(door); }
+  public detachDoorFromFrame(door: BuildingDoor | string): void { this.breakDoor(door); }
 
   /**
    * Tạo cửa sổ cho một công trình.
@@ -454,7 +506,7 @@ export class BuildingArchitectureSubsystem {
    * Trước đây `building` bị bỏ qua hoàn toàn. Nay cửa sổ gắn với công trình,
    * đặt ở nửa chiều cao công trình và được đăng ký vào danh sách cửa sổ.
    */
-  public createWindow(building: any): any {
+  public createWindow(building: BuildingEntity | string): BuildingWindow {
     const id = `window_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
     const owner = typeof building === 'string' ? this.buildings.get(building) : building;
     const buildingId = typeof building === 'string' ? building : (building?.id ?? null);
@@ -483,7 +535,7 @@ export class BuildingArchitectureSubsystem {
    * Trước đây `impact` bị bỏ qua hoàn toàn. Nay năng lượng va chạm quyết định
    * số vết nứt, sức bền còn lại và năng lượng đã hấp thụ.
    */
-  public crackWindowGlass(window: any, impact: any): void {
+  public crackWindowGlass(window: BuildingWindow | string, impact: unknown): void {
     const w = typeof window === 'string' ? this.windows.get(window) : window;
     if (!w) return;
     const magnitude = forceMagnitude(impact);
@@ -499,7 +551,7 @@ export class BuildingArchitectureSubsystem {
    * Trước đây `force` bị bỏ qua hoàn toàn. Nay lực quyết định số mảnh kính
    * vỡ và năng lượng va chạm; không truyền lực thì dùng lực vỡ kính mặc định.
    */
-  public shatterWindowGlass(window: any, force?: any): void {
+  public shatterWindowGlass(window: BuildingWindow | string, force?: unknown): void {
     const w = typeof window === 'string' ? this.windows.get(window) : window;
     if (!w) return;
     const magnitude = force == null ? GLASS_BREAK_FORCE : forceMagnitude(force);
@@ -512,7 +564,7 @@ export class BuildingArchitectureSubsystem {
   }
 
   /** Mảnh kính văng ra — số mảnh và bán kính văng theo kích thước cửa sổ. */
-  public scatterGlassFragments(window: any): any {
+  public scatterGlassFragments(window: unknown) {
     const extent = this.extentOf(window, 1);
     const fragments = Math.max(4, Math.min(120, Math.round(extent * extent * 60)));
     return {
@@ -522,7 +574,7 @@ export class BuildingArchitectureSubsystem {
     };
   }
 
-  public repairWindow(window: any): void {
+  public repairWindow(window: BuildingWindow | string): void {
     const w = typeof window === 'string' ? this.windows.get(window) : window;
     if (w) {
       w.isCracked = false;
@@ -564,17 +616,17 @@ export class BuildingArchitectureSubsystem {
     return [...order].sort((a, c) => scores[c] - scores[a]);
   }
 
-  public weakenStructuralSupport(support: any): void { recordSubsystemAction(this, 'weakenStructuralSupport', 'BuildingArchitectureSubsystem'); }
-  public removeStructuralSupport(support: any): void { recordSubsystemAction(this, 'removeStructuralSupport', 'BuildingArchitectureSubsystem'); }
-  public fractureStructuralJoint(joint: any): void { recordSubsystemAction(this, 'fractureStructuralJoint', 'BuildingArchitectureSubsystem'); }
-  public breakStructuralBeam(beam: any, force: any): void { recordSubsystemAction(this, 'breakStructuralBeam', 'BuildingArchitectureSubsystem'); }
-  public buckleStructuralColumn(column: any, load: any): void { recordSubsystemAction(this, 'buckleStructuralColumn', 'BuildingArchitectureSubsystem'); }
+  public weakenStructuralSupport(support: unknown): void { recordSubsystemAction(this, 'weakenStructuralSupport', 'BuildingArchitectureSubsystem'); }
+  public removeStructuralSupport(support: unknown): void { recordSubsystemAction(this, 'removeStructuralSupport', 'BuildingArchitectureSubsystem'); }
+  public fractureStructuralJoint(joint: unknown): void { recordSubsystemAction(this, 'fractureStructuralJoint', 'BuildingArchitectureSubsystem'); }
+  public breakStructuralBeam(beam: unknown, force: unknown): void { recordSubsystemAction(this, 'breakStructuralBeam', 'BuildingArchitectureSubsystem'); }
+  public buckleStructuralColumn(column: unknown, load: unknown): void { recordSubsystemAction(this, 'buckleStructuralColumn', 'BuildingArchitectureSubsystem'); }
   public triggerProgressiveCollapse(building: BuildingEntity | string): void {
     this.initiateStructuralCollapse(building);
   }
 
-  public simulateFloorCollapse(floor: any): void { recordSubsystemAction(this, 'simulateFloorCollapse', 'BuildingArchitectureSubsystem'); }
-  public simulateRoofCollapse(roof: any): void {
+  public simulateFloorCollapse(floor: unknown): void { recordSubsystemAction(this, 'simulateFloorCollapse', 'BuildingArchitectureSubsystem'); }
+  public simulateRoofCollapse(roof: RoofSection | string): void {
     this.collapseRoof(roof, 100);
   }
 
@@ -585,12 +637,12 @@ export class BuildingArchitectureSubsystem {
    * Nay số mảnh bằng số bộ phận thật (tường + mái), khối lượng chia đều theo
    * khối lượng công trình.
    */
-  public detachStructuralDebris(building: BuildingEntity | string): any[] {
+  public detachStructuralDebris(building: BuildingEntity | string): BuildingDebris[] {
     const b = typeof building === 'string' ? this.buildings.get(building) : building;
     if (!b) return [];
     const count = Math.max(1, b.walls.length + b.roofs.length);
     const mass = b.mass / count;
-    const debris: any[] = [];
+    const debris: BuildingDebris[] = [];
     for (let i = 0; i < count; i++) {
       debris.push({ id: `debris_${b.id}_${i + 1}`, sourceId: b.id, mass, index: i + 1 });
     }
@@ -603,11 +655,11 @@ export class BuildingArchitectureSubsystem {
    * Trước đây `building` bị bỏ qua và luôn trả về đúng hai mảnh cố định.
    * Nay mỗi bức tường thật của công trình sinh ra một mảnh.
    */
-  public spawnBuildingFragments(building: BuildingEntity | string): any[] {
+  public spawnBuildingFragments(building: BuildingEntity | string): BuildingFragment[] {
     const b = typeof building === 'string' ? this.buildings.get(building) : building;
     if (!b) return [];
     const count = Math.max(1, b.walls.length);
-    const fragments: any[] = [];
+    const fragments: BuildingFragment[] = [];
     for (let i = 0; i < count; i++) {
       fragments.push({
         id: `frag_${b.id}_${i + 1}`,
@@ -619,10 +671,10 @@ export class BuildingArchitectureSubsystem {
     return fragments;
   }
 
-  public applyImpulseToDebris(debris: any, impulse: any): void { recordSubsystemAction(this, 'applyImpulseToDebris', 'BuildingArchitectureSubsystem'); }
-  public simulateDebrisCollision(debris: any): void { recordSubsystemAction(this, 'simulateDebrisCollision', 'BuildingArchitectureSubsystem'); }
+  public applyImpulseToDebris(debris: unknown, impulse: unknown): void { recordSubsystemAction(this, 'applyImpulseToDebris', 'BuildingArchitectureSubsystem'); }
+  public simulateDebrisCollision(debris: unknown): void { recordSubsystemAction(this, 'simulateDebrisCollision', 'BuildingArchitectureSubsystem'); }
   /** Đống mảnh vụn — chiều cao đống theo khối lượng và thể tích mảnh. */
-  public simulateDebrisPile(debris: any): any {
+  public simulateDebrisPile(debris: unknown) {
     const count = Array.isArray(debris)
       ? debris.length
       : this.numOf(debris, ['fragmentCount', 'count', 'debrisCount'], 1);
@@ -634,7 +686,7 @@ export class BuildingArchitectureSubsystem {
   }
 
   /** Đám bụi phát sinh khi đống mục vỡ — bán kính theo khối lượng mảnh. */
-  public generateDustCloud(debris: any): any {
+  public generateDustCloud(debris: unknown) {
     const count = Array.isArray(debris)
       ? debris.length
       : this.numOf(debris, ['fragmentCount', 'count', 'debrisCount'], 1);
@@ -643,8 +695,8 @@ export class BuildingArchitectureSubsystem {
     return { radius, particleCount: Math.round(count * 12), settledMass: mass };
   }
 
-  public settleDebrisPile(debris: any): void { recordSubsystemAction(this, 'settleDebrisPile', 'BuildingArchitectureSubsystem'); }
-  public dissipateCollapseDust(dust: any): void { recordSubsystemAction(this, 'dissipateCollapseDust', 'BuildingArchitectureSubsystem'); }
+  public settleDebrisPile(debris: unknown): void { recordSubsystemAction(this, 'settleDebrisPile', 'BuildingArchitectureSubsystem'); }
+  public dissipateCollapseDust(dust: unknown): void { recordSubsystemAction(this, 'dissipateCollapseDust', 'BuildingArchitectureSubsystem'); }
   public updateCollapsedBuilding(building: BuildingEntity | string): void { recordSubsystemAction(this, 'updateCollapsedBuilding', 'BuildingArchitectureSubsystem'); }
   public clearBuildingDebris(building: BuildingEntity | string): void { recordSubsystemAction(this, 'clearBuildingDebris', 'BuildingArchitectureSubsystem'); }
 
@@ -668,23 +720,23 @@ export class BuildingArchitectureSubsystem {
   }
 
   public rotateFurniture(furniture: FurnitureEntity | string, angle: number): void { recordSubsystemAction(this, 'rotateFurniture', 'BuildingArchitectureSubsystem'); }
-  public slideFurniture(furniture: FurnitureEntity | string, surface: any): void { recordSubsystemAction(this, 'slideFurniture', 'BuildingArchitectureSubsystem'); }
+  public slideFurniture(furniture: FurnitureEntity | string, surface: unknown): void { recordSubsystemAction(this, 'slideFurniture', 'BuildingArchitectureSubsystem'); }
   /**
    * Đổ đồ nội thất.
    *
    * Trước đây `force` bị bỏ qua hoàn toàn. Nay lực quyết định hướng đổ
    * (suy từ vector lực), lực tích luỹ và mức độ vỡ của món đồ.
    */
-  public toppleChair(chair: FurnitureEntity | string, force?: any): void {
+  public toppleChair(chair: FurnitureEntity | string, force?: unknown): void {
     const f = typeof chair === 'string' ? this.furniture.get(chair) : chair;
     if (!f) return;
     const magnitude = forceMagnitude(force);
     const state = this.stateOf(f.id);
     state.toppleForce = (state.toppleForce ?? 0) + magnitude;
-    const direction =
-      force && typeof force === 'object'
-        ? { x: Number(force.x ?? 0), y: Number(force.y ?? 0), z: Number(force.z ?? 0) }
-        : { x: 1, y: 0, z: 0 };
+    const forceRecord = asRecord(force);
+    const direction = forceRecord
+      ? { x: Number(forceRecord.x ?? 0), y: Number(forceRecord.y ?? 0), z: Number(forceRecord.z ?? 0) }
+      : { x: 1, y: 0, z: 0 };
     Object.assign(f as unknown as Record<string, unknown>, {
       toppleForce: state.toppleForce,
       toppleDirection: direction,
@@ -694,27 +746,29 @@ export class BuildingArchitectureSubsystem {
     f.isToppled = true;
   }
 
-  public pullChair(chair: FurnitureEntity | string, direction: any): void { recordSubsystemAction(this, 'pullChair', 'BuildingArchitectureSubsystem'); }
-  public pushTable(table: FurnitureEntity | string, force: any): void { recordSubsystemAction(this, 'pushTable', 'BuildingArchitectureSubsystem'); }
-  public overturnTable(table: FurnitureEntity | string, force: any): void {
+  public pullChair(chair: FurnitureEntity | string, direction: unknown): void { recordSubsystemAction(this, 'pullChair', 'BuildingArchitectureSubsystem'); }
+  public pushTable(table: FurnitureEntity | string, force: unknown): void { recordSubsystemAction(this, 'pushTable', 'BuildingArchitectureSubsystem'); }
+  public overturnTable(table: FurnitureEntity | string, force: unknown): void {
     this.toppleChair(table, force);
   }
 
-  public openDrawer(drawer: any): void { recordSubsystemAction(this, 'openDrawer', 'BuildingArchitectureSubsystem'); }
-  public closeDrawer(drawer: any): void { recordSubsystemAction(this, 'closeDrawer', 'BuildingArchitectureSubsystem'); }
-  public openCabinet(cabinet: any): void { recordSubsystemAction(this, 'openCabinet', 'BuildingArchitectureSubsystem'); }
-  public closeCabinet(cabinet: any): void { recordSubsystemAction(this, 'closeCabinet', 'BuildingArchitectureSubsystem'); }
+  public openDrawer(drawer: unknown): void { recordSubsystemAction(this, 'openDrawer', 'BuildingArchitectureSubsystem'); }
+  public closeDrawer(drawer: unknown): void { recordSubsystemAction(this, 'closeDrawer', 'BuildingArchitectureSubsystem'); }
+  public openCabinet(cabinet: unknown): void { recordSubsystemAction(this, 'openCabinet', 'BuildingArchitectureSubsystem'); }
+  public closeCabinet(cabinet: unknown): void { recordSubsystemAction(this, 'closeCabinet', 'BuildingArchitectureSubsystem'); }
   /**
    * Gãy khớp của đồ nội thất.
    *
    * Trước đây `joint` bị bỏ qua hoàn toàn. Nay khớp gãy được ghi lại để
    * biết món đồ hỏng ở vị trí nào.
    */
-  public breakFurnitureJoint(furniture: FurnitureEntity | string, joint: any): void {
+  public breakFurnitureJoint(furniture: FurnitureEntity | string, joint: unknown): void {
     const f = typeof furniture === 'string' ? this.furniture.get(furniture) : furniture;
     if (!f) return;
-    const jointId =
-      joint && typeof joint === 'object' ? (joint.id ?? joint.name ?? joint.boneId ?? null) : (joint ?? null);
+    const jointRecord = asRecord(joint);
+    const rawJoint =
+      jointRecord ? (jointRecord.id ?? jointRecord.name ?? jointRecord.boneId ?? null) : (joint ?? null);
+    const jointId = typeof rawJoint === 'string' ? rawJoint : rawJoint == null ? undefined : String(rawJoint);
     const state = this.stateOf(f.id);
     state.brokenJoint = jointId;
     Object.assign(f as unknown as Record<string, unknown>, { brokenJoint: jointId });
@@ -731,7 +785,7 @@ export class BuildingArchitectureSubsystem {
    * Trước đây luôn `{ shattered: true }`. Nay số mảnh, kích thước mảnh và
    * năng lượng hấp thụ tính từ kích thước vật thể và lực va chạm.
    */
-  public shatterCeramicObject(object: any, impact: any): any {
+  public shatterCeramicObject(object: unknown, impact: unknown) {
     const extent = this.extentOf(object, 0.2);
     const energy = this.numOf(impact, ['energy', 'kineticEnergy', 'force'], 0);
     const fragments = Math.max(3, Math.min(64, Math.round(extent * 40 + energy * 0.5)));
@@ -751,7 +805,7 @@ export class BuildingArchitectureSubsystem {
    * Trước đây luôn `{ broken: true }`. Nay số mảnh và năng lượng hấp thụ tính
    * từ diện tích kính và lực va chạm.
    */
-  public breakGlassObject(object: any, impact: any): any {
+  public breakGlassObject(object: unknown, impact: unknown) {
     const extent = this.extentOf(object, 0.5);
     const energy = this.numOf(impact, ['energy', 'kineticEnergy', 'force'], 0);
     const fragments = Math.max(4, Math.min(120, Math.round(extent * extent * 60 + energy * 0.3)));
@@ -765,9 +819,9 @@ export class BuildingArchitectureSubsystem {
     };
   }
 
-  public deformMetalObject(object: any, force: any): void { recordSubsystemAction(this, 'deformMetalObject', 'BuildingArchitectureSubsystem'); }
-  public tearFabricObject(object: any, force: any): void { recordSubsystemAction(this, 'tearFabricObject', 'BuildingArchitectureSubsystem'); }
-  public scatterHouseholdObjects(objects: any[], impulse: any): void { recordSubsystemAction(this, 'scatterHouseholdObjects', 'BuildingArchitectureSubsystem'); }
+  public deformMetalObject(object: unknown, force: unknown): void { recordSubsystemAction(this, 'deformMetalObject', 'BuildingArchitectureSubsystem'); }
+  public tearFabricObject(object: unknown, force: unknown): void { recordSubsystemAction(this, 'tearFabricObject', 'BuildingArchitectureSubsystem'); }
+  public scatterHouseholdObjects(objects: unknown[], impulse: unknown): void { recordSubsystemAction(this, 'scatterHouseholdObjects', 'BuildingArchitectureSubsystem'); }
   public restoreFurnitureState(furniture: FurnitureEntity | string): void {
     const f = typeof furniture === 'string' ? this.furniture.get(furniture) : furniture;
     if (f) { f.isToppled = false; f.isBroken = false; }

@@ -8,10 +8,73 @@ import { RigidBodyData, SoftBodyData } from '../types.js';
 import type { Vec3 } from '../../types/index.js';
 import { forceMagnitude } from './vegetation-subsystem.js';
 
+/** Đọc một giá trị bất kỳ dưới dạng bản ghi khoá–giá trị. */
+function asRecord(value: unknown): Record<string, unknown> | null {
+  return typeof value === 'object' && value !== null ? (value as Record<string, unknown>) : null;
+}
+
+/** Vật thể tối thiểu mà hệ vật lý thao tác. */
+export interface PhysicsBodyLike {
+  id?: string;
+  position?: Vec3;
+  velocity?: Vec3;
+  acceleration?: Vec3;
+  angularVelocity?: Vec3;
+  normal?: Vec3;
+  mass?: number;
+  radius?: number;
+  volume?: number;
+  size?: Vec3 | Record<string, unknown>;
+  dimensions?: Vec3 | Record<string, unknown>;
+  hardness?: number;
+  material?: { hardness?: number } | null;
+  dt?: number;
+  sharpness?: number;
+  sharp?: number;
+  speed?: number;
+  power?: number;
+  force?: number;
+  flexForce?: number;
+  health?: number;
+  length?: number;
+  isBroken?: boolean;
+  isFelled?: boolean;
+  vertices?: unknown[];
+  points?: unknown[];
+  [key: string]: unknown;
+}
+
+/** Một vùng có thể gãy trên vật thể. */
+export interface FractureRegion {
+  id: string;
+  index: number;
+}
+
+/** Một mảnh tách ra từ vật thể. */
+export interface FracturePiece {
+  id: string;
+  sourceId: string;
+  index?: number;
+  length?: number;
+  quality?: number;
+}
+
+/** Một chi tiết cơ khí (bánh răng, khớp, trục…). */
+export interface MechanicalObject {
+  id: string;
+  type: string;
+  isLocked: boolean;
+  isJammed: boolean;
+  wear: number;
+  angle?: number;
+  offset?: number;
+  [key: string]: unknown;
+}
+
 export class PhysicsMaterialsSubsystem {
   public rigidBodies: Map<string, RigidBodyData> = new Map();
   public softBodies: Map<string, SoftBodyData> = new Map();
-  public mechanicalJoints: Map<string, any> = new Map();
+  public mechanicalJoints: Map<string, MechanicalObject> = new Map();
 
   /**
    * Trạng thái phá hủy của từng vật thể.
@@ -28,9 +91,9 @@ export class PhysicsMaterialsSubsystem {
     /** Số vết nứt đã hình thành. */
     cracks: number;
     /** Các mảnh vỡ đã tách ra. */
-    pieces: any[];
+    pieces: FracturePiece[];
     /** Các phần đã tách rời. */
-    detachedParts: any[];
+    detachedParts: unknown[];
   }> = new Map();
 
   /** Vận tốc ở bước trước — dùng để tính gia tốc thật. */
@@ -38,11 +101,13 @@ export class PhysicsMaterialsSubsystem {
   /** Bước thời gian của bước mô phỏng gần nhất. */
   private lastDeltaTime = 1 / 60;
 
-  private idOf(object: any): string {
-    return typeof object === 'string' ? object : (object?.id ?? 'obj');
+  private idOf(object: unknown, fallback = 'obj'): string {
+    if (typeof object === 'string') return object;
+    const id = asRecord(object)?.id;
+    return typeof id === 'string' ? id : fallback;
   }
 
-  private stateOf(object: any) {
+  private stateOf(object: unknown) {
     const id = this.idOf(object);
     let state = this.destructionStates.get(id);
     if (!state) {
@@ -59,21 +124,48 @@ export class PhysicsMaterialsSubsystem {
   }
 
   /** Độ lớn vector 3D (dùng cho lực / động lượng). */
-  private magnitudeOf(value: any): number {
+  private magnitudeOf(value: unknown): number {
     if (typeof value === 'number') return Number.isFinite(value) ? Math.abs(value) : 0;
-    if (value && typeof value === 'object') {
-      const x = Number(value.x ?? 0);
-      const y = Number(value.y ?? 0);
-      const z = Number(value.z ?? 0);
+    const record = asRecord(value);
+    if (record) {
+      const x = Number(record.x ?? 0);
+      const y = Number(record.y ?? 0);
+      const z = Number(record.z ?? 0);
       if (!Number.isFinite(x) || !Number.isFinite(y) || !Number.isFinite(z)) return 0;
       return Math.hypot(x, y, z);
     }
     return 0;
   }
 
+  /** Pháp tuyến bề mặt — mặc định hướng lên khi không khai báo. */
+  private normalOf(surface: unknown): Vec3 {
+    const normal = asRecord(asRecord(surface)?.normal);
+    const x = Number(normal?.x ?? 0);
+    const y = Number(normal?.y ?? 1);
+    const z = Number(normal?.z ?? 0);
+    return {
+      x: Number.isFinite(x) ? x : 0,
+      y: Number.isFinite(y) ? y : 1,
+      z: Number.isFinite(z) ? z : 0,
+    };
+  }
+
+  /** Đọc vector vận tốc từ dữ liệu động. */
+  private velocityOf(value: unknown): Vec3 {
+    const record = asRecord(value);
+    const x = Number(record?.x ?? 0);
+    const y = Number(record?.y ?? 0);
+    const z = Number(record?.z ?? 0);
+    return {
+      x: Number.isFinite(x) ? x : 0,
+      y: Number.isFinite(y) ? y : 0,
+      z: Number.isFinite(z) ? z : 0,
+    };
+  }
+
   // 501–520. Vật thể rắn và cơ học va chạm
-  public initializeRigidBody(object: any): RigidBodyData {
-    const id = typeof object === 'string' ? object : (object?.id ?? 'rb');
+  public initializeRigidBody(object: PhysicsBodyLike): RigidBodyData {
+    const id = this.idOf(object, 'rb');
     const rb: RigidBodyData = {
       mass: 1.0,
       density: 1.0,
@@ -86,31 +178,31 @@ export class PhysicsMaterialsSubsystem {
     return rb;
   }
 
-  public setObjectMass(object: any, mass: number): void {
-    const id = typeof object === 'string' ? object : object?.id;
+  public setObjectMass(object: PhysicsBodyLike, mass: number): void {
+    const id = this.idOf(object);
     const rb = this.rigidBodies.get(id);
     if (rb) rb.mass = Math.max(0.001, mass);
   }
 
-  public setObjectDensity(object: any, density: number): void {
-    const id = typeof object === 'string' ? object : object?.id;
+  public setObjectDensity(object: PhysicsBodyLike, density: number): void {
+    const id = this.idOf(object);
     const rb = this.rigidBodies.get(id);
     if (rb) rb.density = density;
   }
 
-  public setObjectFriction(object: any, friction: number): void {
-    const id = typeof object === 'string' ? object : object?.id;
+  public setObjectFriction(object: PhysicsBodyLike, friction: number): void {
+    const id = this.idOf(object);
     const rb = this.rigidBodies.get(id);
     if (rb) rb.friction = friction;
   }
 
-  public setObjectRestitution(object: any, restitution: number): void {
-    const id = typeof object === 'string' ? object : object?.id;
+  public setObjectRestitution(object: PhysicsBodyLike, restitution: number): void {
+    const id = this.idOf(object);
     const rb = this.rigidBodies.get(id);
     if (rb) rb.restitution = restitution;
   }
 
-  public applyForceToObject(object: any, force: Vec3): void {
+  public applyForceToObject(object: PhysicsBodyLike, force: Vec3): void {
     const id = this.idOf(object);
     const rb = this.rigidBodies.get(id);
     if (rb) {
@@ -122,12 +214,12 @@ export class PhysicsMaterialsSubsystem {
     }
   }
 
-  public applyImpulseToObject(object: any, impulse: Vec3): void {
+  public applyImpulseToObject(object: PhysicsBodyLike, impulse: Vec3): void {
     this.applyForceToObject(object, impulse);
   }
 
-  public applyTorqueToObject(object: any, torque: Vec3): void {
-    const id = typeof object === 'string' ? object : object?.id;
+  public applyTorqueToObject(object: PhysicsBodyLike, torque: Vec3): void {
+    const id = this.idOf(object);
     const rb = this.rigidBodies.get(id);
     if (rb) {
       rb.angularVelocity.x += torque.x;
@@ -136,8 +228,8 @@ export class PhysicsMaterialsSubsystem {
     }
   }
 
-  public calculateObjectVelocity(object: any): Vec3 {
-    const id = typeof object === 'string' ? object : object?.id;
+  public calculateObjectVelocity(object: PhysicsBodyLike): Vec3 {
+    const id = this.idOf(object);
     const stored = this.rigidBodies.get(id)?.velocity;
     if (stored) return { x: stored.x, y: stored.y, z: stored.z };
     // Chưa đăng ký thành thân cứng ⇒ dùng vận tốc khai báo trên chính vật thể.
@@ -151,7 +243,7 @@ export class PhysicsMaterialsSubsystem {
     return { x: 0, y: 0, z: 0 };
   }
 
-  public calculateObjectAcceleration(object: any): Vec3 {
+  public calculateObjectAcceleration(object: PhysicsBodyLike): Vec3 {
     const id = this.idOf(object);
     const rb = this.rigidBodies.get(id);
     if (!rb) {
@@ -176,7 +268,7 @@ export class PhysicsMaterialsSubsystem {
       }
       return { x: 0, y: 0, z: 0 };
     }
-    const objectDt = object && typeof object === 'object' ? Number((object as any).dt) : NaN;
+    const objectDt = object && typeof object === 'object' ? Number((object as { dt?: unknown }).dt) : NaN;
     const dt = Number.isFinite(objectDt) && objectDt > 0 ? objectDt : this.lastDeltaTime > 0 ? this.lastDeltaTime : 1 / 60;
     return {
       x: (rb.velocity.x - previous.x) / dt,
@@ -184,8 +276,8 @@ export class PhysicsMaterialsSubsystem {
       z: (rb.velocity.z - previous.z) / dt,
     };
   }
-  public calculateAngularVelocity(object: any): Vec3 {
-    const id = typeof object === 'string' ? object : object?.id;
+  public calculateAngularVelocity(object: PhysicsBodyLike): Vec3 {
+    const id = this.idOf(object);
     const stored = this.rigidBodies.get(id)?.angularVelocity;
     if (stored) return { x: stored.x, y: stored.y, z: stored.z };
     const own = object?.angularVelocity;
@@ -198,11 +290,11 @@ export class PhysicsMaterialsSubsystem {
     return { x: 0, y: 0, z: 0 };
   }
 
-  public simulateObjectGravity(object: any): void {
+  public simulateObjectGravity(object: PhysicsBodyLike): void {
     this.applyForceToObject(object, { x: 0, y: -9.81, z: 0 });
   }
 
-  public simulateObjectAirResistance(object: any): void {
+  public simulateObjectAirResistance(object: PhysicsBodyLike): void {
     const id = this.idOf(object);
     const rb = this.rigidBodies.get(id);
     if (!rb) return;
@@ -217,13 +309,13 @@ export class PhysicsMaterialsSubsystem {
   }
 
   /** Hai vật có va chạm không — dựa trên khoảng cách và bán kính. */
-  public detectObjectCollision(objectA: any, objectB: any): boolean {
+  public detectObjectCollision(objectA: PhysicsBodyLike, objectB: PhysicsBodyLike): boolean {
     const a = this.rigidBodies.get(this.idOf(objectA));
     const b = this.rigidBodies.get(this.idOf(objectB));
     const posA = objectA?.position ?? { x: 0, y: 0, z: 0 };
     const posB = objectB?.position ?? { x: 0, y: 0, z: 0 };
-    const radiusOf = (source: any, body: RigidBodyData | undefined): number => {
-      const declared = Number(source?.radius);
+    const radiusOf = (source: unknown, body: RigidBodyData | undefined): number => {
+      const declared = Number(asRecord(source)?.radius);
       if (Number.isFinite(declared) && declared > 0) return declared;
       if (body && body.density > 0 && body.mass > 0) {
         return Math.cbrt(body.mass / body.density) * 0.5;
@@ -241,7 +333,7 @@ export class PhysicsMaterialsSubsystem {
   }
 
   /** Giải quyết va chạm — trao đổi động lượng theo vật nặng/nhẹ. */
-  public resolveObjectCollision(objectA: any, objectB: any): void {
+  public resolveObjectCollision(objectA: PhysicsBodyLike, objectB: PhysicsBodyLike): void {
     const a = this.rigidBodies.get(this.idOf(objectA));
     const b = this.rigidBodies.get(this.idOf(objectB));
     if (!a || !b) return;
@@ -261,7 +353,7 @@ export class PhysicsMaterialsSubsystem {
   }
 
   /** Năng lượng va chạm — ½·m·v² tương đối của hai vật. */
-  public calculateImpactEnergy(objectA: any, objectB: any): number {
+  public calculateImpactEnergy(objectA: PhysicsBodyLike, objectB: PhysicsBodyLike): number {
     const a = this.rigidBodies.get(this.idOf(objectA));
     const b = this.rigidBodies.get(this.idOf(objectB));
     // Chưa đăng ký thành thân cứng ⇒ lấy khối lượng / vận tốc khai báo trên
@@ -282,7 +374,7 @@ export class PhysicsMaterialsSubsystem {
   }
 
   /** Sát thương do va chạm — tỉ lệ năng lượng va chạm với độ bền vật liệu. */
-  public calculateImpactDamage(object: any, impact: any): number {
+  public calculateImpactDamage(object: PhysicsBodyLike, impact: unknown): number {
     const energy = this.magnitudeOf(impact);
     const hardness = Number(object?.hardness ?? object?.material?.hardness ?? 1);
     const resistance = Number.isFinite(hardness) && hardness > 0 ? hardness : 1;
@@ -290,33 +382,33 @@ export class PhysicsMaterialsSubsystem {
   }
 
   /** Xuyên vào bề mặt — vật bị đẩy ngược lại theo hướng bề mặt. */
-  public simulateObjectPenetration(object: any, surface: any): void {
+  public simulateObjectPenetration(object: PhysicsBodyLike, surface: unknown): void {
     const id = this.idOf(object);
     const rb = this.rigidBodies.get(id);
     if (!rb) return;
-    const normal = surface?.normal ?? { x: 0, y: 1, z: 0 };
-    const dot = rb.velocity.x * (normal.x ?? 0) + rb.velocity.y * (normal.y ?? 0) + rb.velocity.z * (normal.z ?? 0);
+    const normal = this.normalOf(surface);
+    const dot = rb.velocity.x * normal.x + rb.velocity.y * normal.y + rb.velocity.z * normal.z;
     if (dot < 0) {
-      rb.velocity.x -= dot * (normal.x ?? 0);
-      rb.velocity.y -= dot * (normal.y ?? 0);
-      rb.velocity.z -= dot * (normal.z ?? 0);
+      rb.velocity.x -= dot * normal.x;
+      rb.velocity.y -= dot * normal.y;
+      rb.velocity.z -= dot * normal.z;
     }
   }
 
   /** Nảy lại — vận tốc phản chiếu theo hệ số hồi phục. */
-  public simulateObjectBounce(object: any, surface: any): void {
+  public simulateObjectBounce(object: PhysicsBodyLike, surface: unknown): void {
     const id = this.idOf(object);
     const rb = this.rigidBodies.get(id);
     if (!rb) return;
-    const normal = surface?.normal ?? { x: 0, y: 1, z: 0 };
-    const dot = rb.velocity.x * (normal.x ?? 0) + rb.velocity.y * (normal.y ?? 0) + rb.velocity.z * (normal.z ?? 0);
+    const normal = this.normalOf(surface);
+    const dot = rb.velocity.x * normal.x + rb.velocity.y * normal.y + rb.velocity.z * normal.z;
     const restitution = rb.restitution;
-    rb.velocity.x -= (1 + restitution) * dot * (normal.x ?? 0);
-    rb.velocity.y -= (1 + restitution) * dot * (normal.y ?? 0);
-    rb.velocity.z -= (1 + restitution) * dot * (normal.z ?? 0);
+    rb.velocity.x -= (1 + restitution) * dot * normal.x;
+    rb.velocity.y -= (1 + restitution) * dot * normal.y;
+    rb.velocity.z -= (1 + restitution) * dot * normal.z;
   }
-  public settleRigidBody(object: any): void {
-    const id = typeof object === 'string' ? object : object?.id;
+  public settleRigidBody(object: PhysicsBodyLike): void {
+    const id = this.idOf(object);
     const rb = this.rigidBodies.get(id);
     if (rb) {
       rb.velocity = { x: 0, y: 0, z: 0 };
@@ -326,7 +418,7 @@ export class PhysicsMaterialsSubsystem {
 
   // 521–540. Gãy, chém, cắt và tách vật thể
   /** Khởi tạo hệ thống phá hủy cho vật — ghi nhận ngưỡng gãy ban đầu. */
-  public initializeDestructionSystem(object: any): void {
+  public initializeDestructionSystem(object: PhysicsBodyLike): void {
     const state = this.stateOf(object);
     state.fractureThreshold = this.calculateFractureThreshold(object);
     state.isDestroyed = false;
@@ -338,13 +430,13 @@ export class PhysicsMaterialsSubsystem {
   /**
    * Các vùng gãy của vật — suy từ kích thước thật, không phải danh sách cứng.
    */
-  public defineFractureRegions(object: any): any[] {
+  public defineFractureRegions(object: PhysicsBodyLike): FractureRegion[] {
     const size = object?.size ?? object?.dimensions;
     const longest = size && typeof size === 'object'
       ? Math.max(Number(size.x ?? 1), Number(size.y ?? 1), Number(size.z ?? 1))
       : 1;
     const count = Math.max(1, Math.min(6, Math.round(longest)));
-    const regions: any[] = [];
+    const regions: FractureRegion[] = [];
     for (let i = 0; i < count; i++) {
       regions.push({ id: `${this.idOf(object)}_region_${i + 1}`, index: i });
     }
@@ -352,7 +444,7 @@ export class PhysicsMaterialsSubsystem {
   }
 
   /** Ngưỡng gãy — phụ thuộc độ cứng vật liệu và khối lượng. */
-  public calculateFractureThreshold(object: any): number {
+  public calculateFractureThreshold(object: PhysicsBodyLike): number {
     const hardness = Number(object?.hardness ?? object?.material?.hardness ?? 1);
     const volume = Number(object?.volume ?? object?.mass ?? 1);
     const base = Number.isFinite(hardness) && hardness > 0 ? hardness : 1;
@@ -361,7 +453,7 @@ export class PhysicsMaterialsSubsystem {
   }
 
   /** Có chạm cắt hay không — dựa trên độ sắc của công cụ và vật thể. */
-  public detectCuttingContact(object: any, tool: any): boolean {
+  public detectCuttingContact(object: PhysicsBodyLike, tool: PhysicsBodyLike): boolean {
     const sharpness = Number(
       tool?.sharpness ?? tool?.sharp ?? object?.sharpness ?? object?.sharp ?? 0,
     );
@@ -378,7 +470,7 @@ export class PhysicsMaterialsSubsystem {
   }
 
   /** Lực cắt tích luỹ thành vết nứt. */
-  public applyCuttingForce(object: any, tool: any): void {
+  public applyCuttingForce(object: PhysicsBodyLike, tool: PhysicsBodyLike): void {
     const state = this.stateOf(object);
     const sharpness = Number(tool?.sharpness ?? tool?.sharp ?? 0);
     const power = Number(tool?.power ?? tool?.force ?? 0);
@@ -394,12 +486,12 @@ export class PhysicsMaterialsSubsystem {
    *
    * Trước đây `plane` bị bỏ qua và luôn trả về đúng 2 lát cứng.
    */
-  public sliceObject(object: any, plane: any): any[] {
+  public sliceObject(object: PhysicsBodyLike, plane: unknown): FracturePiece[] {
     const state = this.stateOf(object);
     const baseId = this.idOf(object);
     // Số lát = số mặt phẳng cắt (mặc định 1 mặt → 2 lát).
     const planeCount = Array.isArray(plane) ? Math.max(1, plane.length) : plane ? 1 : 1;
-    const slices: any[] = [];
+    const slices: FracturePiece[] = [];
     for (let i = 0; i < planeCount + 1; i++) {
       slices.push({ id: `${baseId}_slice_${i + 1}`, sourceId: baseId, index: i });
     }
@@ -407,12 +499,12 @@ export class PhysicsMaterialsSubsystem {
     return slices;
   }
 
-  public cutObjectIntoPieces(object: any, cutPath: any): any[] {
+  public cutObjectIntoPieces(object: PhysicsBodyLike, cutPath: unknown): FracturePiece[] {
     return this.sliceObject(object, cutPath);
   }
 
   /** Cưa cành bằng lưỡi — lưỡi sắc quyết định lực cắt. */
-  public severBranchWithBlade(branch: any, blade: any): void {
+  public severBranchWithBlade(branch: PhysicsBodyLike, blade: PhysicsBodyLike): void {
     const sharpness = Number(blade?.sharpness ?? blade?.sharp ?? 0);
     if (Number.isFinite(sharpness) && sharpness > 0) {
       branch.flexForce = (branch.flexForce ?? 0) + sharpness * 10;
@@ -421,7 +513,7 @@ export class PhysicsMaterialsSubsystem {
   }
 
   /** Chặt thân cây bằng lưỡi cưa. */
-  public chopTreeTrunk(tree: any, blade: any): void {
+  public chopTreeTrunk(tree: PhysicsBodyLike, blade: PhysicsBodyLike): void {
     const sharpness = Number(blade?.sharpness ?? blade?.sharp ?? 0);
     if (!Number.isFinite(sharpness) || sharpness <= 0) return;
     tree.health = Math.max(0, (tree.health ?? 100) - sharpness * 5);
@@ -433,7 +525,7 @@ export class PhysicsMaterialsSubsystem {
    *
    * Trước đây `log` và `tool` bị bỏ qua hoàn toàn.
    */
-  public splitWoodLog(log: any, tool: any): any[] {
+  public splitWoodLog(log: PhysicsBodyLike, tool: PhysicsBodyLike): FracturePiece[] {
     const logId = this.idOf(log);
     const length = Number(log?.length ?? 1);
     const sharpness = Number(tool?.sharpness ?? tool?.sharp ?? 0);
@@ -447,7 +539,7 @@ export class PhysicsMaterialsSubsystem {
   }
 
   /** Gãy tại khớp — vị trí khớp được ghi lại. */
-  public breakObjectAtJoint(object: any, joint: any): void {
+  public breakObjectAtJoint(object: PhysicsBodyLike, joint: MechanicalObject | string): void {
     const state = this.stateOf(object);
     state.isDestroyed = true;
     (object as unknown as { brokenAtJoint?: unknown }).brokenAtJoint =
@@ -459,7 +551,7 @@ export class PhysicsMaterialsSubsystem {
    *
    * Trước đây `force` bị bỏ qua hoàn toàn.
    */
-  public snapObjectInHalf(object: any, force: any): any[] {
+  public snapObjectInHalf(object: PhysicsBodyLike, force: unknown): FracturePiece[] {
     const state = this.stateOf(object);
     const effort = this.magnitudeOf(force);
     state.cracks += effort;
@@ -468,7 +560,7 @@ export class PhysicsMaterialsSubsystem {
   }
 
   /** Nứt bề mặt do va chạm — động lượng quyết định số vết nứt. */
-  public fractureObjectSurface(object: any, impact: any): void {
+  public fractureObjectSurface(object: PhysicsBodyLike, impact: unknown): void {
     const state = this.stateOf(object);
     const effort = this.magnitudeOf(impact);
     state.cracks += effort * 0.5;
@@ -480,12 +572,12 @@ export class PhysicsMaterialsSubsystem {
    *
    * Trước đây `object` và `impulse` bị bỏ qua, luôn trả về đúng 3 mảnh.
    */
-  public shatterObject(object: any, impulse: any): any[] {
+  public shatterObject(object: PhysicsBodyLike, impulse: unknown): FracturePiece[] {
     const state = this.stateOf(object);
     const baseId = this.idOf(object);
     const effort = this.magnitudeOf(impulse);
     const pieceCount = Math.max(2, Math.min(12, Math.round(3 + effort * 0.05)));
-    const fragments: any[] = [];
+    const fragments: FracturePiece[] = [];
     for (let i = 0; i < pieceCount; i++) {
       fragments.push({ id: `${baseId}_frag_${i + 1}`, sourceId: baseId, index: i });
     }
@@ -494,12 +586,12 @@ export class PhysicsMaterialsSubsystem {
     return fragments;
   }
 
-  public splitRockWithImpact(rock: any, impact: any): any[] {
+  public splitRockWithImpact(rock: PhysicsBodyLike, impact: unknown): FracturePiece[] {
     return this.shatterObject(rock, impact);
   }
 
   /** Tách một phần khỏi vật — phần tách được ghi nhận trong trạng thái. */
-  public detachObjectPart(object: any, part: any): void {
+  public detachObjectPart(object: PhysicsBodyLike, part: unknown): void {
     const state = this.stateOf(object);
     if (!part) return;
     const detached = part as { detached?: boolean; sourceId?: string };
@@ -513,24 +605,23 @@ export class PhysicsMaterialsSubsystem {
    *
    * Trước đây luôn trả `{x:1, y:2, z:0}` cho mọi phần.
    */
-  public calculateDetachedPartVelocity(part: any): Vec3 {
-    if (part?.velocity && typeof part.velocity === 'object') {
-      const v = part.velocity as Vec3;
-      return { x: Number(v.x ?? 0), y: Number(v.y ?? 0), z: Number(v.z ?? 0) };
-    }
+  public calculateDetachedPartVelocity(part: unknown): Vec3 {
+    const velocity = asRecord(part)?.velocity;
+    if (asRecord(velocity)) return this.velocityOf(velocity);
     const rb = this.rigidBodies.get(this.idOf(part));
     if (rb) return { ...rb.velocity };
     return { x: 0, y: 0, z: 0 };
   }
 
-  public spawnDetachedFragments(object: any): any[] { return this.shatterObject(object, null); }
+  public spawnDetachedFragments(object: PhysicsBodyLike): FracturePiece[] { return this.shatterObject(object, null); }
 
   /** Vật lý mảnh vỡ — mỗi mảnh rơi theo trọng lực và ma sát. */
-  public applyDebrisPhysics(fragments: any[]): void {
+  public applyDebrisPhysics(fragments: unknown[]): void {
     if (!Array.isArray(fragments)) return;
-    for (const fragment of fragments) {
-      if (!fragment || typeof fragment !== 'object') continue;
-      const velocity = (fragment.velocity as Vec3 | undefined) ?? { x: 0, y: 0, z: 0 };
+    for (const raw of fragments) {
+      const fragment = asRecord(raw);
+      if (!fragment) continue;
+      const velocity = this.velocityOf(fragment.velocity);
       velocity.y -= 9.81 * 0.016;
       // Ma sát không khí: giảm tốc độ theo tỉ lệ.
       velocity.x *= 0.99;
@@ -541,7 +632,7 @@ export class PhysicsMaterialsSubsystem {
   }
 
   /** Chốt trạng thái phá hủy — vật bị phá hủy hoàn toàn. */
-  public finalizeObjectDestruction(object: any): void {
+  public finalizeObjectDestruction(object: PhysicsBodyLike): void {
     const state = this.stateOf(object);
     state.isDestroyed = true;
     const rb = this.rigidBodies.get(this.idOf(object));
@@ -552,8 +643,8 @@ export class PhysicsMaterialsSubsystem {
   }
 
   // 541–560. Vải, dây, giấy và vật thể mềm
-  public createSoftBody(object: any): SoftBodyData {
-    const id = typeof object === 'string' ? object : (object?.id ?? 'soft');
+  public createSoftBody(object: PhysicsBodyLike): SoftBodyData {
+    const id = this.idOf(object, 'soft');
     const sb: SoftBodyData = { stiffness: 0.5, damping: 0.1, stretchResistance: 0.8 };
     this.softBodies.set(id, sb);
     return sb;
@@ -577,7 +668,7 @@ export class PhysicsMaterialsSubsystem {
     burned: number;
   }> = new Map();
 
-  private softStateOf(object: any) {
+  private softStateOf(object: PhysicsBodyLike) {
     const id = this.idOf(object);
     let state = this.softBodyStates.get(id);
     if (!state) {
@@ -597,7 +688,7 @@ export class PhysicsMaterialsSubsystem {
   }
 
   /** Khởi tạo vật lý cho vật thể mềm. */
-  public initializeSoftBodyPhysics(object: any): void {
+  public initializeSoftBodyPhysics(object: PhysicsBodyLike): void {
     const state = this.softStateOf(object);
     state.deformation = 0;
     state.stretch = 0;
@@ -610,7 +701,7 @@ export class PhysicsMaterialsSubsystem {
   }
 
   /** Biến dạng — lực chia cho độ cứng. */
-  public deformSoftBody(object: any, force: any): void {
+  public deformSoftBody(object: PhysicsBodyLike, force: unknown): void {
     const state = this.softStateOf(object);
     const sb = this.softBodies.get(this.idOf(object));
     const stiffness = sb?.stiffness && sb.stiffness > 0 ? sb.stiffness : 0.5;
@@ -618,7 +709,7 @@ export class PhysicsMaterialsSubsystem {
   }
 
   /** Kéo giãn — vượt độ chống giãn thì vật rách. */
-  public stretchSoftBody(object: any, amount: number): void {
+  public stretchSoftBody(object: PhysicsBodyLike, amount: number): void {
     const state = this.softStateOf(object);
     const sb = this.softBodies.get(this.idOf(object));
     const resistance = sb?.stretchResistance ?? 0.8;
@@ -628,25 +719,25 @@ export class PhysicsMaterialsSubsystem {
   }
 
   /** Nén — tích luỹ mức nén. */
-  public compressSoftBody(object: any, amount: number): void {
+  public compressSoftBody(object: PhysicsBodyLike, amount: number): void {
     const state = this.softStateOf(object);
     state.compression += Number.isFinite(amount) ? Math.abs(amount) : 0;
   }
 
   /** Uốn — lực quyết định góc uốn. */
-  public bendSoftBody(object: any, force: any): void {
+  public bendSoftBody(object: PhysicsBodyLike, force: unknown): void {
     const state = this.softStateOf(object);
     state.bend += this.magnitudeOf(force) * 0.1;
   }
 
   /** Xoắn — mô-men xoắn quyết định góc xoắn. */
-  public twistSoftBody(object: any, torque: any): void {
+  public twistSoftBody(object: PhysicsBodyLike, torque: unknown): void {
     const state = this.softStateOf(object);
     state.twist += this.magnitudeOf(torque) * 0.1;
   }
 
   /** Trả về hình dạng gốc. */
-  public restoreSoftBodyShape(object: any): void {
+  public restoreSoftBodyShape(object: PhysicsBodyLike): void {
     const state = this.softStateOf(object);
     state.deformation = 0;
     state.stretch = 0;
@@ -656,87 +747,93 @@ export class PhysicsMaterialsSubsystem {
   }
 
   /** Mô phỏng chuyển động vải — điểm vải rơi theo trọng lực. */
-  public simulateClothMotion(cloth: any): void {
+  public simulateClothMotion(cloth: PhysicsBodyLike): void {
     const vertices = Array.isArray(cloth?.vertices) ? cloth.vertices : [];
-    for (const vertex of vertices) {
-      if (!vertex || typeof vertex !== 'object') continue;
-      const velocity = (vertex.velocity as Vec3 | undefined) ?? { x: 0, y: 0, z: 0 };
+    for (const raw of vertices) {
+      const vertex = asRecord(raw);
+      if (!vertex) continue;
+      const velocity = this.velocityOf(vertex.velocity);
       velocity.y -= 9.81 * 0.016;
       vertex.velocity = velocity;
     }
   }
 
   /** Gió thổi vải — lực gió đẩy các điểm vải. */
-  public simulateClothWind(cloth: any, wind: any): void {
+  public simulateClothWind(cloth: PhysicsBodyLike, wind: unknown): void {
     const vertices = Array.isArray(cloth?.vertices) ? cloth.vertices : [];
-    const speed = this.magnitudeOf(wind?.speed !== undefined ? { x: wind.speed, y: 0, z: 0 } : wind);
-    for (const vertex of vertices) {
-      if (!vertex || typeof vertex !== 'object') continue;
-      const velocity = (vertex.velocity as Vec3 | undefined) ?? { x: 0, y: 0, z: 0 };
+    const windRecord = asRecord(wind);
+    const speed = this.magnitudeOf(
+      typeof windRecord?.speed === 'number' ? { x: windRecord.speed, y: 0, z: 0 } : wind,
+    );
+    for (const raw of vertices) {
+      const vertex = asRecord(raw);
+      if (!vertex) continue;
+      const velocity = this.velocityOf(vertex.velocity);
       velocity.x += speed * 0.01;
       vertex.velocity = velocity;
     }
   }
 
-  public foldCloth(cloth: any): void {
+  public foldCloth(cloth: PhysicsBodyLike): void {
     this.softStateOf(cloth).folded = true;
   }
-  public unfoldCloth(cloth: any): void {
+  public unfoldCloth(cloth: PhysicsBodyLike): void {
     this.softStateOf(cloth).folded = false;
   }
   /** Rách vải — lực phải vượt ngưỡng mới rách. */
-  public tearCloth(cloth: any, force: any): void {
+  public tearCloth(cloth: PhysicsBodyLike, force: unknown): void {
     const state = this.softStateOf(cloth);
     const sb = this.softBodies.get(this.idOf(cloth));
     const resistance = sb?.stretchResistance ?? 0.8;
     if (this.magnitudeOf(force) >= resistance) state.torn = true;
   }
   /** Uốn giấy theo lực. */
-  public simulatePaperBending(paper: any, force: any): void {
+  public simulatePaperBending(paper: PhysicsBodyLike, force: unknown): void {
     const state = this.softStateOf(paper);
     state.bend += this.magnitudeOf(force) * 0.1;
   }
   /** Nhàu giấy — biến dạng tăng mạnh. */
-  public crumplePaper(paper: any): void {
+  public crumplePaper(paper: PhysicsBodyLike): void {
     const state = this.softStateOf(paper);
     state.deformation += 1;
     state.bend += 0.5;
   }
   /** Rách giấy theo lực. */
-  public tearPaper(paper: any, force: any): void {
+  public tearPaper(paper: PhysicsBodyLike, force: unknown): void {
     const state = this.softStateOf(paper);
     if (this.magnitudeOf(force) >= 0.5) state.torn = true;
   }
   /** Cháy giấy — tốc độ cháy quyết định mức cháy. */
-  public burnPaper(paper: any, rate: number): void {
+  public burnPaper(paper: PhysicsBodyLike, rate: number): void {
     const state = this.softStateOf(paper);
     state.burned += Number.isFinite(rate) ? Math.max(0, rate) : 0;
   }
   /** Chuyển động dây — đầu dây rơi theo trọng lực. */
-  public simulateRopeMotion(rope: any): void {
+  public simulateRopeMotion(rope: PhysicsBodyLike): void {
     const points = Array.isArray(rope?.points) ? rope.points : [];
-    for (const point of points) {
-      if (!point || typeof point !== 'object') continue;
-      const velocity = (point.velocity as Vec3 | undefined) ?? { x: 0, y: 0, z: 0 };
+    for (const raw of points) {
+      const point = asRecord(raw);
+      if (!point) continue;
+      const velocity = this.velocityOf(point.velocity);
       velocity.y -= 9.81 * 0.016;
       point.velocity = velocity;
     }
   }
   /** Kéo dây — độ giãn tích luỹ. */
-  public stretchRope(rope: any, force: any): void {
+  public stretchRope(rope: PhysicsBodyLike, force: unknown): void {
     const state = this.softStateOf(rope);
     state.stretch += this.magnitudeOf(force) * 0.1;
   }
   /** Đứt dây — lực phải vượt ngưỡng mới đứt. */
-  public snapRope(rope: any, force: any): void {
+  public snapRope(rope: PhysicsBodyLike, force: unknown): void {
     const state = this.softStateOf(rope);
     if (this.magnitudeOf(force) >= 1) state.torn = true;
   }
 
   // 561–580. Kim loại, máy móc và bộ phận cơ khí
-  public createMechanicalObject(type = 'gear'): any {
+  public createMechanicalObject(type = 'gear') {
     const id = `mech_${Date.now()}`;
-    const obj = { id, type, isLocked: false, isJammed: false, wear: 0 };
+    const obj: MechanicalObject = { id, type, isLocked: false, isJammed: false, wear: 0 };
     this.mechanicalJoints.set(id, obj);
     return obj;
   }
@@ -756,7 +853,7 @@ export class PhysicsMaterialsSubsystem {
     expansion: number;
   }> = new Map();
 
-  private metalStateOf(object: any) {
+  private metalStateOf(object: PhysicsBodyLike) {
     const id = this.idOf(object);
     let state = this.metalStates.get(id);
     if (!state) {
@@ -775,7 +872,7 @@ export class PhysicsMaterialsSubsystem {
   }
 
   /** Khởi tạo khớp cơ khí — ghi nhận trạng thái ban đầu. */
-  public initializeMechanicalJoints(object: any): void {
+  public initializeMechanicalJoints(object: PhysicsBodyLike): void {
     const state = this.metalStateOf(object);
     state.deformation = 0;
     state.cracks = 0;
@@ -783,7 +880,7 @@ export class PhysicsMaterialsSubsystem {
   }
 
   /** Xoay khớp — góc cộng dồn. */
-  public rotateMechanicalJoint(joint: any, angle: number): void {
+  public rotateMechanicalJoint(joint: MechanicalObject | string, angle: number): void {
     const j = typeof joint === 'string' ? this.mechanicalJoints.get(joint) : joint;
     if (!j) return;
     const delta = Number.isFinite(angle) ? angle : 0;
@@ -791,92 +888,92 @@ export class PhysicsMaterialsSubsystem {
   }
 
   /** Trượt khớp — độ dời cộng dồn. */
-  public slideMechanicalJoint(joint: any, distance: number): void {
+  public slideMechanicalJoint(joint: MechanicalObject | string, distance: number): void {
     const j = typeof joint === 'string' ? this.mechanicalJoints.get(joint) : joint;
     if (!j) return;
     const delta = Number.isFinite(distance) ? distance : 0;
     j.offset = (j.offset ?? 0) + delta;
   }
-  public lockMechanicalJoint(joint: any): void {
+  public lockMechanicalJoint(joint: MechanicalObject | string): void {
     const j = typeof joint === 'string' ? this.mechanicalJoints.get(joint) : joint;
     if (j) j.isLocked = true;
   }
 
-  public unlockMechanicalJoint(joint: any): void {
+  public unlockMechanicalJoint(joint: MechanicalObject | string): void {
     const j = typeof joint === 'string' ? this.mechanicalJoints.get(joint) : joint;
     if (j) j.isLocked = false;
   }
 
   /** Mô-men xoắn cơ khí — biến dạng tỉ lệ với mô-men. */
-  public applyMechanicalTorque(object: any, torque: any): void {
+  public applyMechanicalTorque(object: PhysicsBodyLike, torque: unknown): void {
     const state = this.metalStateOf(object);
     state.deformation += this.magnitudeOf(torque) * 0.1;
   }
   /** Uốn tấm kim loại. */
-  public bendMetalSheet(sheet: any, force: any): void {
+  public bendMetalSheet(sheet: PhysicsBodyLike, force: unknown): void {
     const state = this.metalStateOf(sheet);
     state.deformation += this.magnitudeOf(force) * 0.05;
   }
   /** Dập/va mặt kim loại — mỗi lần va thêm một vết. */
-  public dentMetalSurface(object: any, impact: any): void {
+  public dentMetalSurface(object: PhysicsBodyLike, impact: unknown): void {
     const state = this.metalStateOf(object);
     state.dents += this.magnitudeOf(impact) * 0.1;
     state.deformation += this.magnitudeOf(impact) * 0.02;
   }
   /** Biến dạng kết cấu kim loại theo tải trọng. */
-  public deformMetalStructure(object: any, load: any): void {
+  public deformMetalStructure(object: PhysicsBodyLike, load: unknown): void {
     const state = this.metalStateOf(object);
     state.deformation += this.magnitudeOf(load) * 0.02;
   }
   /** Gãy chi tiết kim loại — lực phải vượt ngưỡng mới gãy. */
-  public fractureMetalPart(object: any, force: any): void {
+  public fractureMetalPart(object: PhysicsBodyLike, force: unknown): void {
     const state = this.metalStateOf(object);
     const effort = this.magnitudeOf(force);
     state.cracks += effort;
     if (effort >= 1) state.deformation += effort;
   }
   /** Mỏi kim loại — số chu kỳ tải tích luỹ. */
-  public fatigueMetalMaterial(object: any, cycles: number): void {
+  public fatigueMetalMaterial(object: PhysicsBodyLike, cycles: number): void {
     const state = this.metalStateOf(object);
     state.fatigueCycles += Number.isFinite(cycles) ? Math.max(0, cycles) : 0;
   }
   /** Ăn mòn — tốc độ ăn mòn tích luỹ. */
-  public corrodeMetalSurface(object: any, rate: number): void {
+  public corrodeMetalSurface(object: PhysicsBodyLike, rate: number): void {
     const state = this.metalStateOf(object);
     state.corrosion += Number.isFinite(rate) ? Math.max(0, rate) : 0;
   }
   /** Rỉ sét — độ ẩm quyết định mức gỉ. */
-  public rustMetalObject(object: any, moisture: number): void {
+  public rustMetalObject(object: PhysicsBodyLike, moisture: number): void {
     const state = this.metalStateOf(object);
     state.corrosion += Number.isFinite(moisture) ? Math.max(0, moisture) * 0.1 : 0;
   }
   /** Nung nóng — nhiệt độ được đặt theo tham số. */
-  public heatMetalObject(object: any, temperature: number): void {
+  public heatMetalObject(object: PhysicsBodyLike, temperature: number): void {
     const state = this.metalStateOf(object);
     if (Number.isFinite(temperature)) state.temperature = temperature;
   }
   /** Làm nguội — nhiệt độ giảm theo tốc độ truyền nhiệt. */
-  public coolMetalObject(object: any, rate: number): void {
+  public coolMetalObject(object: PhysicsBodyLike, rate: number): void {
     const state = this.metalStateOf(object);
     const cooling = Number.isFinite(rate) ? rate : 0;
     state.temperature = Math.max(-273.15, state.temperature - cooling);
   }
   /** Giãn nở do nhiệt — mức giãn tỉ lệ với nhiệt độ. */
-  public expandMetalObject(object: any, temperature: number): void {
+  public expandMetalObject(object: PhysicsBodyLike, temperature: number): void {
     const state = this.metalStateOf(object);
     if (Number.isFinite(temperature)) state.expansion += temperature * 1.2e-5;
   }
   /** Co lại do nhiệt. */
-  public contractMetalObject(object: any, temperature: number): void {
+  public contractMetalObject(object: PhysicsBodyLike, temperature: number): void {
     const state = this.metalStateOf(object);
     if (Number.isFinite(temperature)) state.expansion -= temperature * 1.2e-5;
   }
-  public jamMechanicalJoint(joint: any): void {
+  public jamMechanicalJoint(joint: MechanicalObject | string): void {
     const j = typeof joint === 'string' ? this.mechanicalJoints.get(joint) : joint;
     if (j) j.isJammed = true;
   }
 
-  public repairMechanicalObject(object: any): void {
+  public repairMechanicalObject(object: PhysicsBodyLike): void {
     const j = typeof object === 'string' ? this.mechanicalJoints.get(object) : object;
     if (j) j.isJammed = false;
   }

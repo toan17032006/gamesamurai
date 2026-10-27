@@ -48,6 +48,7 @@ import {
   lerp,
   lerpVec3,
   num,
+  asRecord,
   toVec3,
   entityPosition,
   boundingBox,
@@ -240,12 +241,12 @@ export class CurvesMatricesEnvironmentSubsystem {
   }
 
   /** Kích thước lưới. */
-  private cellSize(options?: any): number {
+  private cellSize(options?: unknown): number {
     return Math.max(1e-6, opt(options, ['cellSize', 'gridSize', 'resolution'], DEFAULT_CELL_SIZE));
   }
 
   /** Tham số địa hình. */
-  private terrainParams(options?: any): { amplitude: number; frequency: number } {
+  private terrainParams(options?: unknown): { amplitude: number; frequency: number } {
     return {
       amplitude: opt(options, ['amplitude', 'terrainAmplitude', 'height'], DEFAULT_TERRAIN_AMPLITUDE),
       frequency: opt(options, ['frequency', 'terrainFrequency'], DEFAULT_TERRAIN_FREQUENCY),
@@ -260,7 +261,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1551] calculateLinearInterpolation
    * Nội suy tuyến tính giữa hai giá trị (số hoặc vector).
    */
-  public calculateLinearInterpolation(a?: any, b?: any, options?: any): any {
+  public calculateLinearInterpolation(a?: unknown, b?: unknown, options?: unknown) {
     const t = opt(options, ['t', 'time', 'progress'], 0.5);
     const from = this.worldOf(a);
     const to = this.worldOf(b);
@@ -271,7 +272,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1552] calculateBilinearInterpolation
    * Nội suy song tuyến trên mặt phẳng (4 góc).
    */
-  public calculateBilinearInterpolation(a?: any, b?: any, options?: any): any {
+  public calculateBilinearInterpolation(a?: unknown, b?: unknown, options?: unknown) {
     const u = opt(options, ['u', 'x'], 0);
     const v = opt(options, ['v', 'y'], 0);
     const corners = this.pointsOf(a).slice(0, 4);
@@ -288,7 +289,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1553] calculateTrilinearInterpolation
    * Nội suy ba chiều trên khối (8 đỉnh).
    */
-  public calculateTrilinearInterpolation(a?: any, b?: any, options?: any): any {
+  public calculateTrilinearInterpolation(a?: unknown, b?: unknown, options?: unknown) {
     const u = opt(options, ['u', 'x'], 0);
     const v = opt(options, ['v', 'y'], 0);
     const w = opt(options, ['w', 'z'], 0);
@@ -318,7 +319,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1554] calculateCubicInterpolation
    * Nội suy bậc 3 (Hermite) trên tập điểm.
    */
-  public calculateCubicInterpolation(a?: any, b?: any, options?: any): any {
+  public calculateCubicInterpolation(a?: unknown, b?: unknown, options?: unknown) {
     const t = opt(options, ['t', 'time', 'progress'], 0.5);
     const points = this.splineControls(a);
     if (points.length < 2) {
@@ -350,7 +351,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1555] calculateCatmullRomSpline
    * Điểm trên spline Catmull-Rom.
    */
-  public calculateCatmullRomSpline(a?: any, b?: any, options?: any): any {
+  public calculateCatmullRomSpline(a?: unknown, b?: unknown, options?: unknown) {
     const t = opt(options, ['t', 'time', 'progress'], 0.5);
     const points = this.splineControls(a);
     const scaled = clamp01(t) * (points.length - 1);
@@ -367,7 +368,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1556] calculateBezierCurve
    * Điểm trên đường cong Bézier bậc 3.
    */
-  public calculateBezierCurve(a?: any, b?: any, options?: any): any {
+  public calculateBezierCurve(a?: unknown, b?: unknown, options?: unknown) {
     const t = opt(options, ['t', 'time', 'progress'], 0.5);
     const [p0, p1, p2, p3] = this.bezierControls(a);
     const value = cubicBezier(p0, p1, p2, p3, t);
@@ -377,7 +378,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1557] calculateQuadraticBezier
    * Điểm trên đường cong Bézier bậc 2.
    */
-  public calculateQuadraticBezier(a?: any, b?: any, options?: any): any {
+  public calculateQuadraticBezier(a?: unknown, b?: unknown, options?: unknown) {
     const t = opt(options, ['t', 'time', 'progress'], 0.5);
     const controls = this.bezierControls(a);
     const value = quadraticBezier(controls[0], controls[1], controls[2], t);
@@ -387,7 +388,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1558] calculateCubicBezier
    * Điểm trên đường cong Bézier bậc 3 (dạng khối).
    */
-  public calculateCubicBezier(a?: any, b?: any, options?: any): any {
+  public calculateCubicBezier(a?: unknown, b?: unknown, options?: unknown) {
     const t = opt(options, ['t', 'time', 'progress'], 0.5);
     const [p0, p1, p2, p3] = this.bezierControls(a);
     const value = cubicBezier(p0, p1, p2, p3, t);
@@ -397,7 +398,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1559] calculateBezierTangent
    * Tiếp tuyến của đường cong Bézier.
    */
-  public calculateBezierTangent(a?: any, b?: any): any {
+  public calculateBezierTangent(a?: unknown, b?: unknown) {
     const t = opt(b, ['t', 'time', 'progress'], 0.5);
     const [p0, p1, p2, p3] = this.bezierControls(a);
     const tangent = cubicBezierTangent(p0, p1, p2, p3, t);
@@ -408,7 +409,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1560] calculateBezierNormal
    * Pháp tuyến của đường cong Bézier.
    */
-  public calculateBezierNormal(a?: any, b?: any): any {
+  public calculateBezierNormal(a?: unknown, b?: unknown) {
     const t = opt(b, ['t', 'time', 'progress'], 0.5);
     const [p0, p1, p2, p3] = this.bezierControls(a);
     const tangent = normalize(cubicBezierTangent(p0, p1, p2, p3, t));
@@ -421,7 +422,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1561] calculateBezierCurvature
    * Độ cong của đường cong Bézier.
    */
-  public calculateBezierCurvature(entity?: any, options?: any): any {
+  public calculateBezierCurvature(entity?: unknown, options?: unknown) {
     const t = opt(options, ['t', 'time', 'progress'], 0.5);
     const [p0, p1, p2, p3] = this.bezierControls(entity);
     const curvature = cubicBezierCurvature(p0, p1, p2, p3, t);
@@ -431,7 +432,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1562] calculateSplinePosition
    * Vị trí trên spline.
    */
-  public calculateSplinePosition(a?: any, b?: any, options?: any): any {
+  public calculateSplinePosition(a?: unknown, b?: unknown, options?: unknown) {
     const t = opt(options, ['t', 'time', 'progress'], 0.5);
     const points = this.splineControls(a);
     const sampled = sampleCatmullRom(points, Math.max(8, points.length * 8));
@@ -445,7 +446,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1563] calculateSplineTangent
    * Tiếp tuyến của spline.
    */
-  public calculateSplineTangent(a?: any, b?: any): any {
+  public calculateSplineTangent(a?: unknown, b?: unknown) {
     const t = opt(b, ['t', 'time', 'progress'], 0.5);
     const points = this.splineControls(a);
     const sampled = sampleCatmullRom(points, Math.max(8, points.length * 8));
@@ -457,7 +458,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1564] calculateSplineNormal
    * Pháp tuyến của spline.
    */
-  public calculateSplineNormal(a?: any, b?: any): any {
+  public calculateSplineNormal(a?: unknown, b?: unknown) {
     const t = opt(b, ['t', 'time', 'progress'], 0.5);
     const points = this.splineControls(a);
     const sampled = sampleCatmullRom(points, Math.max(8, points.length * 8));
@@ -469,7 +470,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1565] calculateSplineBinormal
    * Pháp tuyến nhị của spline.
    */
-  public calculateSplineBinormal(a?: any, b?: any): any {
+  public calculateSplineBinormal(a?: unknown, b?: unknown) {
     const t = opt(b, ['t', 'time', 'progress'], 0.5);
     const points = this.splineControls(a);
     const sampled = sampleCatmullRom(points, Math.max(8, points.length * 8));
@@ -481,7 +482,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1566] calculateSplineCurvature
    * Độ cong của spline.
    */
-  public calculateSplineCurvature(entity?: any, options?: any): any {
+  public calculateSplineCurvature(entity?: unknown, options?: unknown) {
     const points = this.splineControls(entity);
     const sampled = sampleCatmullRom(points, Math.max(8, points.length * 8));
     const index = clamp(Math.round(opt(options, ['t'], 0.5) * (sampled.length - 1)), 0, sampled.length - 1);
@@ -492,7 +493,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1567] calculateSplineArcLength
    * Độ dài cung của spline.
    */
-  public calculateSplineArcLength(entity?: any, options?: any): any {
+  public calculateSplineArcLength(entity?: unknown, options?: unknown) {
     const points = this.splineControls(entity);
     const sampled = sampleCatmullRom(points, Math.max(8, points.length * 8));
     let length = 0;
@@ -503,7 +504,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1568] calculateSplineParameterAtDistance
    * Tham số tương ứng với khoảng cách cho trước trên spline.
    */
-  public calculateSplineParameterAtDistance(a?: any, b?: any): any {
+  public calculateSplineParameterAtDistance(a?: unknown, b?: unknown) {
     const distance = readNum(b, ['distance', 'length', 'targetDistance'], readNum(a, ['distance'], 1));
     const points = this.splineControls(a);
     const sampled = sampleCatmullRom(points, Math.max(8, points.length * 8));
@@ -514,7 +515,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1569] calculateSplineClosestPoint
    * Điểm gần nhất trên spline.
    */
-  public calculateSplineClosestPoint(a?: any, b?: any, options?: any): any {
+  public calculateSplineClosestPoint(a?: unknown, b?: unknown, options?: unknown) {
     const point = this.worldOf(a);
     const points = this.splineControls(a);
     const sampled = sampleCatmullRom(points, Math.max(8, points.length * 8));
@@ -528,7 +529,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1570] calculateSplineProjection
    * Chiếu một điểm lên spline.
    */
-  public calculateSplineProjection(a?: any, b?: any, options?: any): any {
+  public calculateSplineProjection(a?: unknown, b?: unknown, options?: unknown) {
     const point = this.worldOf(a);
     const points = this.splineControls(a);
     const sampled = sampleCatmullRom(points, Math.max(8, points.length * 8));
@@ -544,7 +545,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1571] calculateSplineUniformSampling
    * Lấy mẫu spline theo khoảng cách đều.
    */
-  public calculateSplineUniformSampling(a?: any, b?: any, options?: any): any {
+  public calculateSplineUniformSampling(a?: unknown, b?: unknown, options?: unknown) {
     const count = Math.max(2, Math.floor(opt(options, ['samples', 'count'], 16)));
     const points = this.splineControls(a);
     const sampled = sampleCatmullRom(points, Math.max(8, points.length * 8));
@@ -561,7 +562,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1572] calculateSplineFrame
    * Khung Frenet của spline (tangent / normal / binormal).
    */
-  public calculateSplineFrame(a?: any, b?: any, options?: any): any {
+  public calculateSplineFrame(a?: unknown, b?: unknown, options?: unknown) {
     const points = this.splineControls(a);
     const sampled = sampleCatmullRom(points, Math.max(8, points.length * 8));
     const index = clamp(Math.round(opt(options, ['t'], 0.5) * (sampled.length - 1)), 0, sampled.length - 1);
@@ -572,7 +573,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1573] calculateTrajectoryPosition
    * Vị trí trên quỹ đạo tại thời gian cho trước.
    */
-  public calculateTrajectoryPosition(a?: any, b?: any, options?: any): any {
+  public calculateTrajectoryPosition(a?: unknown, b?: unknown, options?: unknown) {
     const time = opt(options, ['time', 't'], 0);
     const points = this.splineControls(a);
     const sampled = sampleCatmullRom(points, Math.max(8, points.length * 8));
@@ -587,7 +588,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1574] calculateTrajectoryVelocity
    * Vận tốc trên quỹ đạo.
    */
-  public calculateTrajectoryVelocity(entity?: any, dt = 0.016): any {
+  public calculateTrajectoryVelocity(entity?: unknown, dt = 0.016) {
     const points = this.splineControls(entity);
     const sampled = sampleCatmullRom(points, Math.max(8, points.length * 8));
     const step = Math.max(1e-6, dt) * (sampled.length - 1);
@@ -598,7 +599,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1575] calculateTrajectoryAcceleration
    * Gia tốc trên quỹ đạo.
    */
-  public calculateTrajectoryAcceleration(entity?: any, dt = 0.016): any {
+  public calculateTrajectoryAcceleration(entity?: unknown, dt = 0.016) {
     const points = this.splineControls(entity);
     const sampled = sampleCatmullRom(points, Math.max(8, points.length * 8));
     const step = Math.max(1e-6, dt) * (sampled.length - 1);
@@ -611,7 +612,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1576] calculateTrajectoryCurvature
    * Độ cong của quỹ đạo.
    */
-  public calculateTrajectoryCurvature(entity?: any, options?: any): any {
+  public calculateTrajectoryCurvature(entity?: unknown, options?: unknown) {
     const points = this.splineControls(entity);
     const sampled = sampleCatmullRom(points, Math.max(8, points.length * 8));
     const index = clamp(Math.round(opt(options, ['t'], 0.5) * (sampled.length - 1)), 0, sampled.length - 1);
@@ -621,7 +622,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1577] calculateTrajectoryTangent
    * Tiếp tuyến của quỹ đạo.
    */
-  public calculateTrajectoryTangent(a?: any, b?: any): any {
+  public calculateTrajectoryTangent(a?: unknown, b?: unknown) {
     const points = this.splineControls(a);
     const sampled = sampleCatmullRom(points, Math.max(8, points.length * 8));
     const index = clamp(Math.round(opt(b, ['t'], 0.5) * (sampled.length - 1)), 0, sampled.length - 1);
@@ -632,7 +633,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1578] calculateTrajectoryNormal
    * Pháp tuyến của quỹ đạo.
    */
-  public calculateTrajectoryNormal(a?: any, b?: any): any {
+  public calculateTrajectoryNormal(a?: unknown, b?: unknown) {
     const points = this.splineControls(a);
     const sampled = sampleCatmullRom(points, Math.max(8, points.length * 8));
     const index = clamp(Math.round(opt(b, ['t'], 0.5) * (sampled.length - 1)), 0, sampled.length - 1);
@@ -643,7 +644,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1579] calculateTrajectoryBinormal
    * Pháp tuyến nhị của quỹ đạo.
    */
-  public calculateTrajectoryBinormal(a?: any, b?: any): any {
+  public calculateTrajectoryBinormal(a?: unknown, b?: unknown) {
     const points = this.splineControls(a);
     const sampled = sampleCatmullRom(points, Math.max(8, points.length * 8));
     const index = clamp(Math.round(opt(b, ['t'], 0.5) * (sampled.length - 1)), 0, sampled.length - 1);
@@ -654,7 +655,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1580] calculateTrajectoryClosestPoint
    * Điểm gần nhất trên quỹ đạo.
    */
-  public calculateTrajectoryClosestPoint(a?: any, b?: any, options?: any): any {
+  public calculateTrajectoryClosestPoint(a?: unknown, b?: unknown, options?: unknown) {
     const point = this.worldOf(a);
     const points = this.splineControls(a);
     const sampled = sampleCatmullRom(points, Math.max(8, points.length * 8));
@@ -668,7 +669,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1581] calculateTrajectoryDeviation
    * Độ lệch của quỹ đạo so với đường thẳng nối hai đầu.
    */
-  public calculateTrajectoryDeviation(a?: any, b?: any, options?: any): any {
+  public calculateTrajectoryDeviation(a?: unknown, b?: unknown, options?: unknown) {
     const points = this.splineControls(a);
     const sampled = sampleCatmullRom(points, Math.max(8, points.length * 8));
     const start = sampled[0];
@@ -688,7 +689,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1582] calculateTrajectoryLength
    * Độ dài quỹ đạo.
    */
-  public calculateTrajectoryLength(entity?: any, options?: any): any {
+  public calculateTrajectoryLength(entity?: unknown, options?: unknown) {
     const points = this.splineControls(entity);
     const sampled = sampleCatmullRom(points, Math.max(8, points.length * 8));
     let length = 0;
@@ -699,7 +700,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1583] calculateTrajectoryDuration
    * Thời lượng quỹ đạo (theo tốc độ trung bình).
    */
-  public calculateTrajectoryDuration(entity?: any, options?: any): any {
+  public calculateTrajectoryDuration(entity?: unknown, options?: unknown) {
     const points = this.splineControls(entity);
     const sampled = sampleCatmullRom(points, Math.max(8, points.length * 8));
     let length = 0;
@@ -711,7 +712,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1584] calculateTrajectorySpeedProfile
    * Hồ sơ tốc độ dọc quỹ đạo.
    */
-  public calculateTrajectorySpeedProfile(entity?: any, options?: any): any {
+  public calculateTrajectorySpeedProfile(entity?: unknown, options?: unknown) {
     const points = this.splineControls(entity);
     const sampled = sampleCatmullRom(points, Math.max(8, points.length * 8));
     const profile = sampled.map((p, i) => {
@@ -727,7 +728,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1585] calculateTrajectoryTimeParameterization
    * Ánh xạ thời gian → vị trí trên quỹ đạo.
    */
-  public calculateTrajectoryTimeParameterization(a?: any, b?: any, options?: any): any {
+  public calculateTrajectoryTimeParameterization(a?: unknown, b?: unknown, options?: unknown) {
     const points = this.splineControls(a);
     const sampled = sampleCatmullRom(points, Math.max(8, points.length * 8));
     const duration = opt(options, ['duration'], 1);
@@ -741,7 +742,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1586] calculateTrajectorySmoothing
    * Làm mượt quỹ đạo.
    */
-  public calculateTrajectorySmoothing(a?: any, b?: any, options?: any): any {
+  public calculateTrajectorySmoothing(a?: unknown, b?: unknown, options?: unknown) {
     const points = this.splineControls(a);
     const passes = Math.max(1, Math.floor(opt(options, ['passes', 'iterations'], 1)));
     const smoothed = smoothPolyline(points, passes);
@@ -751,7 +752,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1587] calculateTrajectoryOptimization
    * Tối ưu quỹ đạo (làm mượt + rút gọn các điểm gần trùng nhau).
    */
-  public calculateTrajectoryOptimization(a?: any, b?: any, options?: any): any {
+  public calculateTrajectoryOptimization(a?: unknown, b?: unknown, options?: unknown) {
     const points = this.splineControls(a);
     const tolerance = opt(options, ['tolerance'], 0.01);
     const simplified: Vec3D[] = [];
@@ -773,7 +774,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1588] calculateTrajectoryCollisionAvoidance
    * Nhánh tránh vật cản của quỹ đạo.
    */
-  public calculateTrajectoryCollisionAvoidance(a?: any, b?: any): any {
+  public calculateTrajectoryCollisionAvoidance(a?: unknown, b?: unknown) {
     const origin = this.worldOf(a);
     const obstacle = this.worldOf(b);
     const direction = normalize(subtract(obstacle, origin));
@@ -792,7 +793,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1589] calculateTrajectoryReachability
    * Quỹ đạo có với tới được mục tiêu không.
    */
-  public calculateTrajectoryReachability(a?: any, b?: any, options?: any): any {
+  public calculateTrajectoryReachability(a?: unknown, b?: unknown, options?: unknown) {
     const origin = this.worldOf(a);
     const target = this.worldOf(b);
     const points = this.splineControls(a);
@@ -811,7 +812,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1590] calculateTrajectoryPrediction
    * Dự đoán vị trí quỹ đạo sau một khoảng thời gian.
    */
-  public calculateTrajectoryPrediction(a?: any, b?: any, options?: any): any {
+  public calculateTrajectoryPrediction(a?: unknown, b?: unknown, options?: unknown) {
     const time = opt(options, ['time', 'ahead'], 0.5);
     const points = this.splineControls(a);
     const sampled = sampleCatmullRom(points, Math.max(8, points.length * 8));
@@ -834,30 +835,30 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1591] calculateMatrixMultiplication
    * Nhân hai ma trận 4x4.
    */
-  public calculateMatrixMultiplication(target?: any, options?: any): any {
+  public calculateMatrixMultiplication(target?: unknown, options?: unknown) {
     const a = resolveMatrix(target);
-    const b = resolveMatrix((options as any)?.matrix ?? (options as any)?.b ?? (options as any)?.right);
+    const b = resolveMatrix(asRecord(options).matrix ?? asRecord(options).b ?? asRecord(options).right);
     return multiplyMatrices(a, b);
   }
   /**
    * [1592] calculateMatrixInverse
    * Nghịch đảo ma trận 4x4.
    */
-  public calculateMatrixInverse(target?: any, options?: any): any {
+  public calculateMatrixInverse(target?: unknown, options?: unknown) {
     return invertMatrix(resolveMatrix(target));
   }
   /**
    * [1593] calculateMatrixTranspose
    * Chuyển vị ma trận 4x4.
    */
-  public calculateMatrixTranspose(target?: any, options?: any): any {
+  public calculateMatrixTranspose(target?: unknown, options?: unknown) {
     return transposeMatrix(resolveMatrix(target));
   }
   /**
    * [1594] calculateMatrixDeterminant
    * Định thức ma trận 4x4.
    */
-  public calculateMatrixDeterminant(target?: any, options?: any): any {
+  public calculateMatrixDeterminant(target?: unknown, options?: unknown) {
     const matrix = resolveMatrix(target);
     return scalar('calculateMatrixDeterminant', determinant4x4(matrix), 'det', {
       singular: Math.abs(determinant4x4(matrix)) < 1e-12,
@@ -867,7 +868,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1595] calculateMatrixTrace
    * Vết ma trận 4x4.
    */
-  public calculateMatrixTrace(target?: any, options?: any): any {
+  public calculateMatrixTrace(target?: unknown, options?: unknown) {
     const matrix = resolveMatrix(target);
     return scalar('calculateMatrixTrace', traceMatrix(matrix), 'trace');
   }
@@ -875,7 +876,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1596] calculateMatrixDecomposition
    * Phân rã ma trận thành vị trí / xoay / tỉ lệ.
    */
-  public calculateMatrixDecomposition(target?: any, options?: any): any {
+  public calculateMatrixDecomposition(target?: unknown, options?: unknown) {
     const matrix = resolveMatrix(target);
     const decomposition = decomposeMatrix(matrix);
     return named('calculateMatrixDecomposition', decomposition, { matrix });
@@ -884,21 +885,21 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1597] calculateMatrixOrthogonalization
    * Trực giao hoá Gram–Schmidt các cột ma trận.
    */
-  public calculateMatrixOrthogonalization(target?: any, options?: any): any {
+  public calculateMatrixOrthogonalization(target?: unknown, options?: unknown) {
     return orthogonalizeMatrix(resolveMatrix(target));
   }
   /**
    * [1598] calculateMatrixOrthonormalization
    * Chuẩn hoá ma trận thành hệ trực giao đơn vị.
    */
-  public calculateMatrixOrthonormalization(target?: any, options?: any): any {
+  public calculateMatrixOrthonormalization(target?: unknown, options?: unknown) {
     return orthonormalizeMatrix(resolveMatrix(target));
   }
   /**
    * [1599] calculateAffineTransform
    * Ma trận biến đổi affine (hàng cuối 0,0,0,1).
    */
-  public calculateAffineTransform(target?: any, options?: any): any {
+  public calculateAffineTransform(target?: unknown, options?: unknown) {
     const matrix = resolveMatrix(target);
     const out = [...matrix];
     out[3] = 0;
@@ -911,14 +912,14 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1600] calculateHomogeneousTransform
    * Ma trận biến đổi đồng nhất (homogeneous).
    */
-  public calculateHomogeneousTransform(target?: any, options?: any): any {
+  public calculateHomogeneousTransform(target?: unknown, options?: unknown) {
     return resolveMatrix(target);
   }
   /**
    * [1601] calculateTranslationMatrix
    * Ma trận tịnh tiến.
    */
-  public calculateTranslationMatrix(target?: any, options?: any): any {
+  public calculateTranslationMatrix(target?: unknown, options?: unknown) {
     const offset = readVec(target, ['offset', 'translation']) ?? { x: 0, y: 0, z: 0 };
     const position = this.worldOf(target);
     const used = magnitude(offset) > 0 ? offset : position;
@@ -928,7 +929,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1602] calculateScaleMatrix
    * Ma trận tỉ lệ.
    */
-  public calculateScaleMatrix(target?: any, options?: any): any {
+  public calculateScaleMatrix(target?: unknown, options?: unknown) {
     const scale = readVec(target, ['scale']) ?? { x: 1, y: 1, z: 1 };
     const used = magnitude(scale) > 0 ? scale : { x: 1, y: 1, z: 1 };
     return scaleMatrix(used);
@@ -937,7 +938,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1603] calculateRotationXMatrix
    * Ma trận xoay quanh trục X.
    */
-  public calculateRotationXMatrix(entityOrAngle?: any, options?: any): any {
+  public calculateRotationXMatrix(entityOrAngle?: unknown, options?: unknown) {
     const angle = readNum(entityOrAngle, ['angle', 'rotation', 'x'], opt(options, ['angle'], 0));
     return eulerMatrix('x', angle);
   }
@@ -945,7 +946,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1604] calculateRotationYMatrix
    * Ma trận xoay quanh trục Y.
    */
-  public calculateRotationYMatrix(entityOrAngle?: any, options?: any): any {
+  public calculateRotationYMatrix(entityOrAngle?: unknown, options?: unknown) {
     const angle = readNum(entityOrAngle, ['angle', 'rotation', 'y'], opt(options, ['angle'], 0));
     return eulerMatrix('y', angle);
   }
@@ -953,7 +954,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1605] calculateRotationZMatrix
    * Ma trận xoay quanh trục Z.
    */
-  public calculateRotationZMatrix(entityOrAngle?: any, options?: any): any {
+  public calculateRotationZMatrix(entityOrAngle?: unknown, options?: unknown) {
     const angle = readNum(entityOrAngle, ['angle', 'rotation', 'z'], opt(options, ['angle'], 0));
     return eulerMatrix('z', angle);
   }
@@ -961,14 +962,14 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1606] calculateNormalMatrix
    * Ma trận phản chuyển (cho pháp tuyến bề mặt).
    */
-  public calculateNormalMatrix(target?: any, options?: any): any {
+  public calculateNormalMatrix(target?: unknown, options?: unknown) {
     return normalMatrix(resolveMatrix(target));
   }
   /**
    * [1607] calculateTransformHierarchy
    * Tổng hợp ma trận của một cây phép biến đổi.
    */
-  public calculateTransformHierarchy(target?: any, options?: any): any {
+  public calculateTransformHierarchy(target?: unknown, options?: unknown) {
     const source = (target ?? {}) as Record<string, unknown>;
     const children = Array.isArray(source.children) ? source.children : [];
     let matrix = resolveMatrix(target);
@@ -981,16 +982,16 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1608] calculateTransformComposition
    * Ghép hai phép biến đổi.
    */
-  public calculateTransformComposition(target?: any, options?: any): any {
+  public calculateTransformComposition(target?: unknown, options?: unknown) {
     const a = resolveMatrix(target);
-    const b = resolveMatrix((options as any)?.matrix ?? (options as any)?.b ?? (options as any)?.child);
+    const b = resolveMatrix(asRecord(options).matrix ?? asRecord(options).b ?? asRecord(options).child);
     return multiplyMatrices(a, b);
   }
   /**
    * [1609] calculateTransformDecomposition
    * Phân rã phép biến đổi thành TRS.
    */
-  public calculateTransformDecomposition(target?: any, options?: any): any {
+  public calculateTransformDecomposition(target?: unknown, options?: unknown) {
     const matrix = resolveMatrix(target);
     const decomposition = decomposeMatrix(matrix);
     return named('calculateTransformDecomposition', decomposition, { matrix });
@@ -999,9 +1000,9 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1610] calculateTransformInterpolation
    * Nội suy giữa hai phép biến đổi.
    */
-  public calculateTransformInterpolation(target?: any, options?: any): any {
+  public calculateTransformInterpolation(target?: unknown, options?: unknown) {
     const a = resolveMatrix(target);
-    const b = resolveMatrix((options as any)?.matrix ?? (options as any)?.to ?? (options as any)?.b);
+    const b = resolveMatrix(asRecord(options).matrix ?? asRecord(options).to ?? asRecord(options).b);
     const t = opt(options, ['t', 'time', 'progress'], 0.5);
     return interpolateMatrices(a, b, t);
   }
@@ -1009,9 +1010,9 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1611] calculateTransformError
    * Sai số giữa hai phép biến đổi.
    */
-  public calculateTransformError(target?: any, options?: any): any {
+  public calculateTransformError(target?: unknown, options?: unknown) {
     const a = resolveMatrix(target);
-    const b = resolveMatrix((options as any)?.matrix ?? (options as any)?.expected ?? (options as any)?.b);
+    const b = resolveMatrix(asRecord(options).matrix ?? asRecord(options).expected ?? asRecord(options).b);
     return scalar('calculateTransformError', matrixError(a, b), 'frobenius');
   }
 
@@ -1023,7 +1024,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1612] calculateCoordinateBasis
    * Hệ trục trực chuẩn từ một hướng.
    */
-  public calculateCoordinateBasis(a?: any, b?: any, options?: any): any {
+  public calculateCoordinateBasis(a?: unknown, b?: unknown, options?: unknown) {
     const direction = this.worldOf(a);
     const basis = coordinateBasis(direction);
     return named('calculateCoordinateBasis', basis, { direction });
@@ -1032,7 +1033,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1613] calculateCoordinateConversion
    * Chuyển điểm giữa hai hệ toạ độ.
    */
-  public calculateCoordinateConversion(a?: any, b?: any, options?: any): any {
+  public calculateCoordinateConversion(a?: unknown, b?: unknown, options?: unknown) {
     const point = this.worldOf(a);
     const from = readVec(b, ['from', 'source']) ?? this.worldOf(b);
     const to = readVec(options, ['to', 'target']) ?? { x: 0, y: 0, z: 1 };
@@ -1043,7 +1044,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1614] calculateCoordinateNormalization
    * Chuẩn hoá vector về đơn vị.
    */
-  public calculateCoordinateNormalization(a?: any, b?: any): any {
+  public calculateCoordinateNormalization(a?: unknown, b?: unknown) {
     const value = this.worldOf(a);
     const normalized = magnitude(value) > 0 ? normalize(value) : { x: 0, y: 0, z: 0 };
     return { name: 'calculateCoordinateNormalization', valid: true, direction: normalized, magnitude: magnitude(normalized), timestamp: Date.now() };
@@ -1052,7 +1053,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1615] calculateCoordinateQuantization
    * Lượng tử hoá vector theo bước.
    */
-  public calculateCoordinateQuantization(a?: any, b?: any): any {
+  public calculateCoordinateQuantization(a?: unknown, b?: unknown) {
     const value = this.worldOf(a);
     const step = readNum(b, ['step', 'quantum', 'precision'], 0.1);
     const quantized = quantizeVector(value, step);
@@ -1062,7 +1063,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1616] calculateCoordinateClamping
    * Kẹp tọa độ trong hộp giới hạn.
    */
-  public calculateCoordinateClamping(a?: any, b?: any): any {
+  public calculateCoordinateClamping(a?: unknown, b?: unknown) {
     const value = this.worldOf(a);
     const min = readVec(b, ['min']) ?? { x: -1, y: -1, z: -1 };
     const max = readVec(b, ['max']) ?? { x: 1, y: 1, z: 1 };
@@ -1077,7 +1078,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1617] calculateCoordinateWrapping
    * Quấn tọa độ vào khoảng tuần hoàn.
    */
-  public calculateCoordinateWrapping(a?: any, b?: any): any {
+  public calculateCoordinateWrapping(a?: unknown, b?: unknown) {
     const value = this.worldOf(a);
     const range = readNum(b, ['range', 'period', 'size'], 1);
     const wrapped = {
@@ -1091,7 +1092,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1618] calculateCoordinateSnapping
    * Bám tọa độ vào lưới.
    */
-  public calculateCoordinateSnapping(a?: any, b?: any): any {
+  public calculateCoordinateSnapping(a?: unknown, b?: unknown) {
     const value = this.worldOf(a);
     const step = readNum(b, ['step', 'gridSize', 'cellSize'], 1);
     const snapped = {
@@ -1105,7 +1106,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1619] calculateCoordinateRounding
    * Làm tròn tọa độ theo số chữ số thập phân.
    */
-  public calculateCoordinateRounding(a?: any, b?: any): any {
+  public calculateCoordinateRounding(a?: unknown, b?: unknown) {
     const value = this.worldOf(a);
     const decimals = readNum(b, ['decimals', 'precision'], 3);
     const rounded = {
@@ -1119,7 +1120,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1620] calculateCoordinatePrecisionError
    * Sai số do lượng tử hoá.
    */
-  public calculateCoordinatePrecisionError(a?: any, b?: any): any {
+  public calculateCoordinatePrecisionError(a?: unknown, b?: unknown) {
     const value = this.worldOf(a);
     const step = readNum(b, ['step', 'quantum'], 0.1);
     const quantized = quantizeVector(value, step);
@@ -1138,8 +1139,8 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1621] getGridCellPosition
    * Vị trí góc dưới của ô lưới chứa điểm.
    */
-  public getGridCellPosition(entity?: any, offset?: Vec3D): any {
-    const size = this.cellSize((entity as any)?.options);
+  public getGridCellPosition(entity?: unknown, offset?: Vec3D) {
+    const size = this.cellSize(asRecord(entity).options);
     const index = gridCellIndex(this.worldOf(entity), size);
     const center = gridCellCenter(index, size);
     return {
@@ -1152,8 +1153,8 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1622] getGridCellCenter
    * Tâm ô lưới chứa điểm.
    */
-  public getGridCellCenter(entity?: any, offset?: Vec3D): any {
-    const size = this.cellSize((entity as any)?.options);
+  public getGridCellCenter(entity?: unknown, offset?: Vec3D) {
+    const size = this.cellSize(asRecord(entity).options);
     const center = gridCellCenter(gridCellIndex(this.worldOf(entity), size), size);
     return {
       x: center.x + (offset?.x ?? 0),
@@ -1165,8 +1166,8 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1623] getGridCellBounds
    * Hộp giới hạn của ô lưới chứa điểm.
    */
-  public getGridCellBounds(entity?: any, size?: Vec3D): any {
-    const cellSize = this.cellSize((entity as any)?.options);
+  public getGridCellBounds(entity?: unknown, size?: Vec3D) {
+    const cellSize = this.cellSize(asRecord(entity).options);
     const box = gridCellBounds(gridCellIndex(this.worldOf(entity), cellSize), cellSize);
     return bounds('getGridCellBounds', box, { cellSize });
   }
@@ -1174,7 +1175,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1624] calculateGridCellIndex
    * Chỉ số ô lưới chứa một điểm.
    */
-  public calculateGridCellIndex(a?: any, b?: any, options?: any): any {
+  public calculateGridCellIndex(a?: unknown, b?: unknown, options?: unknown) {
     const cellSize = this.cellSize(options);
     const index = gridCellIndex(this.worldOf(a), cellSize);
     return named('calculateGridCellIndex', index, { cellSize });
@@ -1183,7 +1184,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1625] calculateGridCoordinates
    * Toạ độ thế giới của một ô lưới.
    */
-  public calculateGridCoordinates(a?: any, b?: any, options?: any): any {
+  public calculateGridCoordinates(a?: unknown, b?: unknown, options?: unknown) {
     const cellSize = this.cellSize(options);
     const source = (a ?? {}) as Record<string, unknown>;
     const index = source.index && typeof source.index === 'object'
@@ -1196,7 +1197,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1626] calculateGridDistance
    * Khoảng cách giữa hai ô lưới (tính bằng số ô).
    */
-  public calculateGridDistance(a?: any, b?: any): any {
+  public calculateGridDistance(a?: unknown, b?: unknown) {
     const cellSize = this.cellSize();
     const indexA = gridCellIndex(this.worldOf(a), cellSize);
     const indexB = gridCellIndex(this.worldOf(b), cellSize);
@@ -1207,7 +1208,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1627] calculateGridNeighborCells
    * Các ô lượng xung quanh một ô.
    */
-  public calculateGridNeighborCells(a?: any, b?: any, options?: any): any {
+  public calculateGridNeighborCells(a?: unknown, b?: unknown, options?: unknown) {
     const cellSize = this.cellSize(options);
     const index = gridCellIndex(this.worldOf(a), cellSize);
     const neighbors = gridNeighborCells(index);
@@ -1217,7 +1218,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1628] calculateGridWorldPosition
    * Vị trí thế giới của một ô lưới.
    */
-  public calculateGridWorldPosition(a?: any, b?: any, options?: any): any {
+  public calculateGridWorldPosition(a?: unknown, b?: unknown, options?: unknown) {
     const cellSize = this.cellSize(options);
     const source = (a ?? {}) as Record<string, unknown>;
     const index = source.index && typeof source.index === 'object'
@@ -1230,7 +1231,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1629] calculateGridWorldToCell
    * Chuyển tọa độ thế giới sang chỉ số ô lưới.
    */
-  public calculateGridWorldToCell(a?: any, b?: any, options?: any): any {
+  public calculateGridWorldToCell(a?: unknown, b?: unknown, options?: unknown) {
     const cellSize = this.cellSize(options);
     const index = gridCellIndex(this.worldOf(a), cellSize);
     const center = gridCellCenter(index, cellSize);
@@ -1240,7 +1241,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1630] calculateGridOccupancy
    * Trạng thái chiếm dụng của một ô lưới.
    */
-  public calculateGridOccupancy(a?: any, b?: any): any {
+  public calculateGridOccupancy(a?: unknown, b?: unknown) {
     const cellSize = this.cellSize();
     const index = gridCellIndex(this.worldOf(a), cellSize);
     const source = (a ?? {}) as Record<string, unknown>;
@@ -1266,7 +1267,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1631] calculateGridTraversalCost
    * Chi phí đi giữa hai ô lưới.
    */
-  public calculateGridTraversalCost(entity?: any, options?: any): any {
+  public calculateGridTraversalCost(entity?: unknown, options?: unknown) {
     const cellSize = this.cellSize(options);
     const source = (entity ?? {}) as Record<string, unknown>;
     const from = source.from && typeof source.from === 'object'
@@ -1282,7 +1283,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1632] calculateGridPathDistance
    * Quãng đường đi trên lưới giữa hai ô.
    */
-  public calculateGridPathDistance(a?: any, b?: any): any {
+  public calculateGridPathDistance(a?: unknown, b?: unknown) {
     const cellSize = this.cellSize();
     const indexA = gridCellIndex(this.worldOf(a), cellSize);
     const indexB = gridCellIndex(this.worldOf(b), cellSize);
@@ -1298,7 +1299,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1633] calculateTerrainHeight
    * Độ cao địa hình tại một điểm.
    */
-  public calculateTerrainHeight(entity?: any, options?: any): any {
+  public calculateTerrainHeight(entity?: unknown, options?: unknown) {
     const { amplitude, frequency } = this.terrainParams(options);
     const point = this.worldOf(entity);
     const height = terrainHeightAt(point.x, point.z, amplitude, frequency);
@@ -1308,7 +1309,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1634] calculateTerrainNormal
    * Pháp tuyến bề mặt địa hình.
    */
-  public calculateTerrainNormal(a?: any, b?: any): any {
+  public calculateTerrainNormal(a?: unknown, b?: unknown) {
     const { amplitude, frequency } = this.terrainParams(b);
     const point = this.worldOf(a);
     const normal = terrainNormalAt(point.x, point.z, amplitude, frequency);
@@ -1318,7 +1319,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1635] calculateTerrainSlope
    * Độ dốc địa hình.
    */
-  public calculateTerrainSlope(a?: any, b?: any, options?: any): any {
+  public calculateTerrainSlope(a?: unknown, b?: unknown, options?: unknown) {
     const { amplitude, frequency } = this.terrainParams(options);
     const point = this.worldOf(a);
     const slope = terrainSlopeAt(point.x, point.z, amplitude, frequency);
@@ -1328,7 +1329,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1636] calculateTerrainCurvature
    * Độ cong địa hình.
    */
-  public calculateTerrainCurvature(entity?: any, options?: any): any {
+  public calculateTerrainCurvature(entity?: unknown, options?: unknown) {
     const { amplitude, frequency } = this.terrainParams(options);
     const point = this.worldOf(entity);
     const curvature = terrainCurvatureAt(point.x, point.z, amplitude, frequency);
@@ -1338,7 +1339,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1637] calculateTerrainSurfaceArea
    * Diện tích bề mặt địa hình trong vùng.
    */
-  public calculateTerrainSurfaceArea(entity?: any, options?: any): any {
+  public calculateTerrainSurfaceArea(entity?: unknown, options?: unknown) {
     const { amplitude, frequency } = this.terrainParams(options);
     const size = opt(options, ['size', 'extent', 'radius'], 10);
     const samples = Math.max(4, Math.floor(opt(options, ['samples'], 24)));
@@ -1349,7 +1350,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1638] calculateTerrainVolume
    * Thể tích địa hình trong vùng.
    */
-  public calculateTerrainVolume(entity?: any, options?: any): any {
+  public calculateTerrainVolume(entity?: unknown, options?: unknown) {
     const { amplitude, frequency } = this.terrainParams(options);
     const size = opt(options, ['size', 'extent', 'radius'], 10);
     const samples = Math.max(4, Math.floor(opt(options, ['samples'], 24)));
@@ -1360,7 +1361,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1639] calculateTerrainBounds
    * Hộp giới hạn của vùng địa hình.
    */
-  public calculateTerrainBounds(entity?: any, size?: Vec3D): any {
+  public calculateTerrainBounds(entity?: unknown, size?: Vec3D) {
     const center = this.worldOf(entity);
     const extent = size ?? { x: 10, y: 10, z: 10 };
     return bounds('calculateTerrainBounds', boundingBox(center, extent), { center });
@@ -1369,7 +1370,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1640] calculateTerrainClosestPoint
    * Điểm địa hình gần nhất.
    */
-  public calculateTerrainClosestPoint(a?: any, b?: any, options?: any): any {
+  public calculateTerrainClosestPoint(a?: unknown, b?: unknown, options?: unknown) {
     const { amplitude, frequency } = this.terrainParams(options);
     const point = this.worldOf(a);
     const closest = closestTerrainPoint(point, amplitude, frequency);
@@ -1386,7 +1387,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * địa hình, kết quả vẫn báo điểm gần nhất của tia với mặt địa hình cùng
    * khoảng hở tương ứng, thay vì trả về `null` trống không.
    */
-  public calculateTerrainRayIntersection(origin?: Vec3D, direction?: Vec3D): any {
+  public calculateTerrainRayIntersection(origin?: Vec3D, direction?: Vec3D) {
     const start = this.worldOf(origin);
     const raw = (direction ?? {}) as Record<string, unknown>;
     const hasAxis = typeof raw.x === 'number' || typeof raw.y === 'number' || typeof raw.z === 'number';
@@ -1427,7 +1428,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1642] calculateTerrainCollision
    * Va chạm với mặt đất địa hình.
    */
-  public calculateTerrainCollision(a?: any, b?: any): any {
+  public calculateTerrainCollision(a?: unknown, b?: unknown) {
     const { amplitude, frequency } = this.terrainParams(b);
     const point = this.worldOf(a);
     const ground = terrainHeightAt(point.x, point.z, amplitude, frequency);
@@ -1450,7 +1451,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1643] calculateTerrainGroundClearance
    * Khoảng hở giữa vật thể và mặt đất.
    */
-  public calculateTerrainGroundClearance(entity?: any, options?: any): any {
+  public calculateTerrainGroundClearance(entity?: unknown, options?: unknown) {
     const { amplitude, frequency } = this.terrainParams(options);
     const point = this.worldOf(entity);
     const ground = terrainHeightAt(point.x, point.z, amplitude, frequency);
@@ -1460,7 +1461,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1644] calculateTerrainPathSlope
    * Độ dốc dọc theo một đoạn đường trên địa hình.
    */
-  public calculateTerrainPathSlope(a?: any, b?: any, options?: any): any {
+  public calculateTerrainPathSlope(a?: unknown, b?: unknown, options?: unknown) {
     const { amplitude, frequency } = this.terrainParams(options);
     const from = this.worldOf(a);
     const to = this.worldOf(b);
@@ -1474,7 +1475,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1645] calculateTerrainNavigationCost
    * Chi phí đi bộ trên địa hình (độ dốc + độ cao).
    */
-  public calculateTerrainNavigationCost(entity?: any, options?: any): any {
+  public calculateTerrainNavigationCost(entity?: unknown, options?: unknown) {
     const { amplitude, frequency } = this.terrainParams(options);
     const point = this.worldOf(entity);
     const slope = terrainSlopeAt(point.x, point.z, amplitude, frequency);
@@ -1487,7 +1488,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1646] calculateWaterSurfaceHeight
    * Mực nước tại một điểm.
    */
-  public calculateWaterSurfaceHeight(entity?: any, options?: any): any {
+  public calculateWaterSurfaceHeight(entity?: unknown, options?: unknown) {
     const waterLevel = opt(options, ['waterLevel', 'level'], 0);
     const waveAmplitude = opt(options, ['waveAmplitude'], 0);
     const waveFrequency = opt(options, ['waveFrequency'], 0.2);
@@ -1504,7 +1505,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * `waveFrequency`). Nhờ vậy pháp tuyến phản ánh mặt nước thật (có sóng) thay
    * vì luôn trả về trục Y.
    */
-  public calculateWaterSurfaceNormal(a?: any, b?: any): any {
+  public calculateWaterSurfaceNormal(a?: unknown, b?: unknown) {
     const waterLevel = opt(b, ['waterLevel', 'level'], readNum(a, ['waterLevel', 'level', 'waterHeight'], 0));
     const waveAmplitude = opt(b, ['waveAmplitude'], readNum(a, ['waveAmplitude', 'waveHeight'], 0));
     const waveFrequency = opt(b, ['waveFrequency'], readNum(a, ['waveFrequency'], 0.2));
@@ -1520,7 +1521,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * Vì mặt nước có sóng nên độ sâu đo tới **bề mặt sóng** thật chứ không tới
    * mặt phẳng mực nước, và đáy là địa hình thật.
    */
-  public calculateWaterDepth(entity?: any, options?: any): any {
+  public calculateWaterDepth(entity?: unknown, options?: unknown) {
     const waterLevel = opt(options, ['waterLevel', 'level'], readNum(entity, ['waterLevel', 'level', 'waterHeight'], 0));
     const waveAmplitude = opt(options, ['waveAmplitude'], readNum(entity, ['waveAmplitude', 'waveHeight'], 0));
     const waveFrequency = opt(options, ['waveFrequency'], readNum(entity, ['waveFrequency'], 0.2));
@@ -1535,7 +1536,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1649] calculateWaterBuoyancy
    * Lực đẩy của nước.
    */
-  public calculateWaterBuoyancy(a?: any, b?: any, options?: any): any {
+  public calculateWaterBuoyancy(a?: unknown, b?: unknown, options?: unknown) {
     const volume = opt(options, ['volume'], 1);
     const density = opt(options, ['density'], 1000);
     const waterDensity = opt(options, ['waterDensity'], 1000);
@@ -1552,7 +1553,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1650] calculateEnvironmentWindVector
    * Vector gió môi trường.
    */
-  public calculateEnvironmentWindVector(a?: any, b?: any): any {
+  public calculateEnvironmentWindVector(a?: unknown, b?: unknown) {
     const source = (a ?? {}) as Record<string, unknown>;
     const direction = readVec(source, ['direction', 'windDirection']);
     const speed = readNum(source, ['speed', 'windSpeed', 'strength'], 0);
@@ -1571,56 +1572,56 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1651] calculateObjectLOD
    * Mức LOD của vật thể theo khoảng cách camera.
    */
-  public calculateObjectLOD(entity?: any, camera?: any): any {
+  public calculateObjectLOD(entity?: unknown, camera?: unknown) {
     return this.lodFor('calculateObjectLOD', entity, camera, 1);
   }
   /**
    * [1652] calculateCharacterLOD
    * Mức LOD của nhân vật.
    */
-  public calculateCharacterLOD(entity?: any, camera?: any): any {
+  public calculateCharacterLOD(entity?: unknown, camera?: unknown) {
     return this.lodFor('calculateCharacterLOD', entity, camera, 1.8);
   }
   /**
    * [1653] calculateMeshLOD
    * Mức LOD của lưới hình học.
    */
-  public calculateMeshLOD(entity?: any, camera?: any): any {
+  public calculateMeshLOD(entity?: unknown, camera?: unknown) {
     return this.lodFor('calculateMeshLOD', entity, camera, 1);
   }
   /**
    * [1654] calculateAnimationLOD
    * Mức LOD của animation.
    */
-  public calculateAnimationLOD(entity?: any, camera?: any): any {
+  public calculateAnimationLOD(entity?: unknown, camera?: unknown) {
     return this.lodFor('calculateAnimationLOD', entity, camera, 1);
   }
   /**
    * [1655] calculateSkeletonLOD
    * Mức LOD của skeleton.
    */
-  public calculateSkeletonLOD(entity?: any, camera?: any): any {
+  public calculateSkeletonLOD(entity?: unknown, camera?: unknown) {
     return this.lodFor('calculateSkeletonLOD', entity, camera, 1.5);
   }
   /**
    * [1656] calculateShadowLOD
    * Mức LOD của bóng đổ.
    */
-  public calculateShadowLOD(entity?: any, camera?: any): any {
+  public calculateShadowLOD(entity?: unknown, camera?: unknown) {
     return this.lodFor('calculateShadowLOD', entity, camera, 1);
   }
   /**
    * [1657] calculateParticleLOD
    * Mức LOD của hệ hạt.
    */
-  public calculateParticleLOD(entity?: any, camera?: any): any {
+  public calculateParticleLOD(entity?: unknown, camera?: unknown) {
     return this.lodFor('calculateParticleLOD', entity, camera, 0.5);
   }
   /**
    * [1658] calculateLODTransition
    * Ngưỡng chuyển đổi giữa hai mức LOD.
    */
-  public calculateLODTransition(entity?: any, camera?: any): any {
+  public calculateLODTransition(entity?: unknown, camera?: unknown) {
     const frame = this.lodFrame(entity, camera);
     const level = lodLevelForScreenSize(frame.screenSize);
     const current = lodThreshold(level);
@@ -1635,7 +1636,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1659] calculateLODThreshold
    * Ngưỡng kích thước chiếu của một mức LOD.
    */
-  public calculateLODThreshold(entity?: any, camera?: any): any {
+  public calculateLODThreshold(entity?: unknown, camera?: unknown) {
     const frame = this.lodFrame(entity, camera);
     const level = lodLevelForScreenSize(frame.screenSize);
     return scalar('calculateLODThreshold', lodThreshold(level), 'screen', { level });
@@ -1644,7 +1645,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1660] calculateLODScreenSize
    * Kích thước chiếu của vật thể trên màn hình.
    */
-  public calculateLODScreenSize(entity?: any, camera?: any): any {
+  public calculateLODScreenSize(entity?: unknown, camera?: unknown) {
     const frame = this.lodFrame(entity, camera);
     return scalar('calculateLODScreenSize', frame.screenSize, 'screen', {
       distance: frame.distance,
@@ -1655,7 +1656,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1661] calculateLODProjectedError
    * Sai số chiếu theo mức LOD.
    */
-  public calculateLODProjectedError(entity?: any, camera?: any): any {
+  public calculateLODProjectedError(entity?: unknown, camera?: unknown) {
     const frame = this.lodFrame(entity, camera);
     const level = lodLevelForScreenSize(frame.screenSize);
     const baseError = readNum(entity, ['baseError'], 0.01);
@@ -1665,7 +1666,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1662] calculateLODVisibility
    * Vật thể có hiển thị được ở mức LOD hiện tại không.
    */
-  public calculateLODVisibility(entity?: any, camera?: any): any {
+  public calculateLODVisibility(entity?: unknown, camera?: unknown) {
     const frame = this.lodFrame(entity, camera);
     const visible = frame.distance <= readNum(entity, ['maxDistance', 'cullDistance'], Infinity);
     return named('calculateLODVisibility', visible, {
@@ -1684,7 +1685,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * che được tính theo độ sâu xâm nhập (`occlusion`), ngược lại vật thể nhìn
    * thấy trọn vẹn (`occlusion = 0`).
    */
-  public calculateOcclusionVisibility(entity?: any, camera?: any): any {
+  public calculateOcclusionVisibility(entity?: unknown, camera?: unknown) {
     const frame = this.lodFrame(entity, camera);
     const occluders = this.occluderSpheres(entity);
     const axis = subtract(frame.position, frame.cameraPosition);
@@ -1722,7 +1723,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1667] calculateFrustumCulling
    * Có cần cull vật thể khỏi thể tích nhìn không.
    */
-  public calculateFrustumCulling(entity?: any, camera?: any): any {
+  public calculateFrustumCulling(entity?: unknown, camera?: unknown) {
     const frame = this.lodFrame(entity, camera);
     const culled = frame.distance > readNum(entity, ['farDistance', 'cullDistance'], Infinity);
     return named('calculateFrustumCulling', culled, {
@@ -1734,7 +1735,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1668] calculateDistanceCulling
    * Culling theo khoảng cách.
    */
-  public calculateDistanceCulling(a?: any, b?: any): any {
+  public calculateDistanceCulling(a?: unknown, b?: unknown) {
     const distance = distance3D(this.worldOf(a), this.worldOf(b));
     const maxDistance = readNum(b, ['maxDistance', 'cullDistance'], Infinity);
     return distance;
@@ -1743,7 +1744,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1669] calculateScreenSizeCulling
    * Culling theo kích thước chiếu.
    */
-  public calculateScreenSizeCulling(entity?: any, camera?: any): any {
+  public calculateScreenSizeCulling(entity?: unknown, camera?: unknown) {
     const frame = this.lodFrame(entity, camera);
     const minSize = readNum(entity, ['minScreenSize', 'cullScreenSize'], 0);
     const culled = frame.screenSize < minSize;
@@ -1756,8 +1757,8 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1663] calculateLODUpdateFrequency
    * Tần số cập nhật theo mức LOD.
    */
-  public calculateLODUpdateFrequency(entity?: any, options?: any): any {
-    const frame = this.lodFrame(entity, (options as any)?.camera);
+  public calculateLODUpdateFrequency(entity?: unknown, options?: unknown) {
+    const frame = this.lodFrame(entity, asRecord(options).camera);
     const level = lodLevelForScreenSize(frame.screenSize);
     const base = opt(options, ['baseFrequency'], 60);
     return lodUpdateFrequency(level, base);
@@ -1766,8 +1767,8 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1664] calculateLODSelectionScore
    * Điểm chọn LOD (cao hơn = ưu tiên cập nhật).
    */
-  public calculateLODSelectionScore(entity?: any, options?: any): any {
-    const frame = this.lodFrame(entity, (options as any)?.camera);
+  public calculateLODSelectionScore(entity?: unknown, options?: unknown) {
+    const frame = this.lodFrame(entity, asRecord(options).camera);
     const level = lodLevelForScreenSize(frame.screenSize);
     const importance = readNum(entity, ['importance', 'priority'], 1);
     return lodSelectionScore(level, frame.distance, importance);
@@ -1776,7 +1777,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1665] calculateOcclusionBounds
    * Hộp bao dùng cho kiểm tra che khuất.
    */
-  public calculateOcclusionBounds(entity?: any, size?: Vec3D): any {
+  public calculateOcclusionBounds(entity?: unknown, size?: Vec3D) {
     const center = this.worldOf(entity);
     const extent = size ?? { x: 1, y: 1, z: 1 };
     return bounds('calculateOcclusionBounds', boundingBox(center, extent), { center });
@@ -1785,36 +1786,36 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1670] calculateAnimationUpdatePriority
    * Ưu tiên cập nhật animation.
    */
-  public calculateAnimationUpdatePriority(a?: any, b?: any, options?: any): any {
+  public calculateAnimationUpdatePriority(a?: unknown, b?: unknown, options?: unknown) {
     return this.updatePriority('calculateAnimationUpdatePriority', a, b, options, 1);
   }
   /**
    * [1671] calculateBoneUpdatePriority
    * Ưu tiên cập nhật xương.
    */
-  public calculateBoneUpdatePriority(a?: any, b?: any, options?: any): any {
+  public calculateBoneUpdatePriority(a?: unknown, b?: unknown, options?: unknown) {
     return this.updatePriority('calculateBoneUpdatePriority', a, b, options, 1);
   }
   /**
    * [1672] calculatePhysicsUpdatePriority
    * Ưu tiên cập nhật vật lý.
    */
-  public calculatePhysicsUpdatePriority(a?: any, b?: any, options?: any): any {
+  public calculatePhysicsUpdatePriority(a?: unknown, b?: unknown, options?: unknown) {
     return this.updatePriority('calculatePhysicsUpdatePriority', a, b, options, 1);
   }
   /**
    * [1673] calculateCollisionUpdatePriority
    * Ưu tiên cập nhật va chạm.
    */
-  public calculateCollisionUpdatePriority(a?: any, b?: any): any {
+  public calculateCollisionUpdatePriority(a?: unknown, b?: unknown) {
     return this.updatePriority('calculateCollisionUpdatePriority', a, b, undefined, 1);
   }
   /**
    * [1674] calculateSpatialUpdateFrequency
    * Tần số cập nhật phần không gian.
    */
-  public calculateSpatialUpdateFrequency(entity?: any, options?: any): any {
-    const frame = this.lodFrame(entity, (options as any)?.camera);
+  public calculateSpatialUpdateFrequency(entity?: unknown, options?: unknown) {
+    const frame = this.lodFrame(entity, asRecord(options).camera);
     const level = lodLevelForScreenSize(frame.screenSize);
     return lodUpdateFrequency(level, opt(options, ['baseFrequency'], 60));
   }
@@ -1822,8 +1823,8 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1675] calculateTransformUpdateFrequency
    * Tần số cập nhật phép biến đổi.
    */
-  public calculateTransformUpdateFrequency(target?: any, options?: any): any {
-    const frame = this.lodFrame(target, (options as any)?.camera);
+  public calculateTransformUpdateFrequency(target?: unknown, options?: unknown) {
+    const frame = this.lodFrame(target, asRecord(options).camera);
     const level = lodLevelForScreenSize(frame.screenSize);
     return scalar('calculateTransformUpdateFrequency', lodUpdateFrequency(level, opt(options, ['baseFrequency'], 60)), 'Hz', {
       level,
@@ -1834,8 +1835,8 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1676] calculateBoundingVolumeUpdate
    * Tần số cập nhật thể tích bao.
    */
-  public calculateBoundingVolumeUpdate(entity?: any, options?: any): any {
-    const frame = this.lodFrame(entity, (options as any)?.camera);
+  public calculateBoundingVolumeUpdate(entity?: unknown, options?: unknown) {
+    const frame = this.lodFrame(entity, asRecord(options).camera);
     const level = lodLevelForScreenSize(frame.screenSize);
     return lodUpdateFrequency(level, opt(options, ['baseFrequency'], 30));
   }
@@ -1843,7 +1844,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1677] calculateSpatialPartitionIndex
    * Chỉ số phân hoạch không gian (Morton code).
    */
-  public calculateSpatialPartitionIndex(a?: any, b?: any, options?: any): any {
+  public calculateSpatialPartitionIndex(a?: unknown, b?: unknown, options?: unknown) {
     const cellSize = this.cellSize(options);
     const index = gridCellIndex(this.worldOf(a), cellSize);
     const interleave = (x: number, y: number, z: number): number => {
@@ -1864,7 +1865,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1678] calculateOctreeNode
    * Node của octree tại một điểm.
    */
-  public calculateOctreeNode(a?: any, b?: any, options?: any): any {
+  public calculateOctreeNode(a?: unknown, b?: unknown, options?: unknown) {
     const cellSize = this.cellSize(options);
     const depth = Math.max(0, Math.floor(opt(options, ['depth'], 0)));
     const point = this.worldOf(a);
@@ -1891,7 +1892,7 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1679] calculateQuadtreeNode
    * Node của quadtree tại một điểm.
    */
-  public calculateQuadtreeNode(a?: any, b?: any, options?: any): any {
+  public calculateQuadtreeNode(a?: unknown, b?: unknown, options?: unknown) {
     const cellSize = this.cellSize(options);
     const depth = Math.max(0, Math.floor(opt(options, ['depth'], 0)));
     const point = this.worldOf(a);
@@ -1916,8 +1917,8 @@ export class CurvesMatricesEnvironmentSubsystem {
    * [1680] calculateBVHTraversalCost
    * Chi phí duyệt BVH.
    */
-  public calculateBVHTraversalCost(entity?: any, options?: any): any {
-    const frame = this.lodFrame(entity, (options as any)?.camera);
+  public calculateBVHTraversalCost(entity?: unknown, options?: unknown) {
+    const frame = this.lodFrame(entity, asRecord(options).camera);
     const nodeCount = opt(options, ['nodeCount'], 64);
     const depth = Math.log2(Math.max(2, nodeCount));
     const cost = Math.max(1, Math.ceil(depth * (1 + frame.screenSize)));

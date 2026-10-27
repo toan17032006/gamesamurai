@@ -8,14 +8,14 @@ import { Transform3D } from './entities.js';
 
 export type SyncStrategy = 'reliable' | 'unreliable' | 'delta_compressed';
 
-export interface ReplicationPayload<TPayload = any> {
+export interface ReplicationPayload<TPayload = unknown> {
   packetId: number;
   timestamp: number;
   entityId: string;
   payload: TPayload;
 }
 
-export interface SnapshotEntry<TState = any> {
+export interface SnapshotEntry<TState = unknown> {
   timestamp: number;
   state: TState;
   position: [number, number, number];
@@ -24,7 +24,7 @@ export interface SnapshotEntry<TState = any> {
 /**
  * Generic Network-replicated entity with state serialization and interpolation.
  */
-export class NetworkEntity<TSync extends Record<string, any> = Record<string, any>> {
+export class NetworkEntity<TSync extends Record<string, unknown> = Record<string, unknown>> {
   public readonly networkId: string;
   public ownerConnectionId?: string;
   public isLocalAuthority = false;
@@ -81,7 +81,7 @@ export class NetworkEntity<TSync extends Record<string, any> = Record<string, an
 /**
  * Snapshot Buffer for network jitter smoothing and lag compensation.
  */
-export class SnapshotBuffer<TState = any> {
+export class SnapshotBuffer<TState = unknown> {
   private _buffer: SnapshotEntry<TState>[] = [];
   public maxBufferSize: number;
 

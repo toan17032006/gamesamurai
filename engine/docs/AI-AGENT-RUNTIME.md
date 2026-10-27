@@ -169,6 +169,89 @@ clears only the Q-table and restores the starting epsilon.
 skill check (when defined), applies need effects, performs a Q-update, records an
 episodic memory and optionally ingests the next observation.
 
+## Negative reinforcement, preferences and aversions
+
+Positive rewards teach what to do; negative samples teach what **not** to do.
+`learnNegative` applies a penalty with a faster asymmetric learning rate and is
+monotonic: a penalty may lower an action's Q-value but never raise it.
+
+```ts
+const result = brain.learnNegative({
+  stateKey: 'village',
+  actionId: 'attack_ally',
+  penalty: 8,                 // positive magnitude, clamped to [0, 1000]
+  weight: 1,                  // optional multiplier in [0.01, 10]
+  stimulusId: 'friendly_npc', // optional source of an aversion
+  reason: 'friendly fire',
+});
+
+result.newQ;          // <= result.oldQ
+result.aversionStrength;
+brain.getNegativeHistory(20);
+```
+
+Semantics:
+
+- `target = -penalty + gamma * minNextQ`, so a supplied `nextStateKey` also
+  bootstraps punishment of future states.
+- The negative learning rate is `alpha * 1.5` (clamped to `[0.05, 0.95]`).
+- Q-values are clamped to `[-1000, 1000]`; the update stores
+  `min(oldQ, newQ)`.
+- Each sample increments training/reward counters, subtracts from
+  `stats.totalReward`, and raises stress, fear and negative valence.
+- History is bounded by the memory capacity and is persisted in snapshots.
+
+Batch training returns aggregate diagnostics:
+
+```ts
+const report = brain.trainNegativeBatch([
+  { stateKey: 'fire', actionId: 'walk_in', penalty: 10, stimulusId: 'fire' },
+  { stateKey: 'fire', actionId: 'idle', penalty: 1 },
+]);
+// { samples, totalPenalty, meanPenalty, updatedActions, aversionCount, qTableSize }
+```
+
+Preference learning pushes a preferred action above a dispreferred one:
+
+```ts
+const preference = brain.learnPreference({
+  stateKey: 'duel',
+  preferredActionId: 'retreat',
+  dispreferredActionId: 'charge',
+  strength: 2, // desired positive Q margin
+});
+```
+
+Identical action ids throw `RangeError`. `trainPreferenceBatch(pairs)` applies
+pairs in order.
+
+Aversions are persistent, saturating stimulus memories:
+
+```ts
+brain.recordAversion('spikes', 0.6, 'trap injury'); // strength -> 1 - (1-s)(1-x)
+brain.getAvoidanceScore('spikes');                  // 0..1, 0 for unknown
+brain.listAversions();                              // strongest first
+brain.decayAversions(0.05);                         // forgetting; removes <= 1e-4
+brain.clearAversion('spikes');
+brain.getNegativeStats(); // { samples, totalPenalty, preferencePairs, aversionCount }
+```
+
+Supplying `stimulusId` to `learnNegative` creates or reinforces an aversion with
+initial strength `penalty / 25`.
+
+`AgentManager` mirrors the API:
+
+```ts
+manager.trainNegative('guard', samples);
+manager.learnNegative('guard', sample);
+manager.trainNegativeAll({ guard: samples, scout: otherSamples });
+manager.trainPreference('guard', pair);
+manager.trainPreferences({ guard: [pair], scout: [pair] });
+```
+
+`getStats()` aggregates `negativeSamples`, `totalPenalty`, `totalAversions` and
+`preferencePairs` across registered agents.
+
 ## Episodic and semantic memory
 
 Every brain owns a private `NPCMemoryLearningSystem`:
@@ -294,12 +377,53 @@ npc.peekBrain();          // null until the brain is created
 `Monster` extends `Bot`, defaults to the `monster` archetype and a larger health
 pool, and keeps the legacy `aiState` machine available.
 
+Every entity wrapper also exposes the negative-learning surface:
+`learnFromNegative`, `trainNegativeBatch`, `learnPreference`, `recordAversion`
+and `getAversions`.
+
+## Player agents
+
+`Player` can be driven by a human while an optional brain observes, learns and
+supports auto-play, companions, replays or spectator simulation. The brain is
+created lazily on first use, so manually controlled players pay no AI cost.
+
+```ts
+import { Player } from '@aetheria/engine';
+
+const player = new Player('player_alpha', 'Hero');
+player.peekBrain();                    // null
+
+const decision = player.think();       // perception from live health/stamina/combat
+player.learnFromReward(2);             // positive reinforcement
+player.learnFromNegative({
+  actionId: 'charge',
+  penalty: 4,
+  stimulusId: 'spikes',
+  reason: 'spikes hurt',
+});
+player.learnPreference({
+  preferredActionId: 'retreat',
+  dispreferredActionId: 'charge',
+});
+
+player.update(0.016);                  // ticks attributes + brain when created
+player.peekLastBrainUpdate();
+```
+
+`buildAgentObservation()` derives health, stamina, threat level, inventory and
+combat environment from the player's live pools and state. Brain persistence is
+available through `serializeAgentBrain()` and `restoreAgentBrain(snapshot)`; the
+latter returns `false` for checksum or schema failures instead of throwing.
+`getBrainSummary()` reports archetype `player`.
+
 ## Persistence
 
 `serialize()` returns a checksummed `AgentSnapshot` containing identity,
 personality, needs, emotions, skills, relationships, Q-table, episodes, beliefs,
 goals, action definitions, learning config, stats, private NPC records, tick,
-epsilon, PRNG state and counters.
+epsilon, PRNG state and counters. Optional v1 fields add `aversions`,
+`negativeHistory` and `negativeStats`; snapshots created before negative learning
+still restore correctly because these fields default to empty/zero.
 
 ```ts
 const snapshot = brain.serialize();
@@ -367,3 +491,6 @@ The AI runtime is covered by `tests/ai-agent-runtime.test.ts`, including barrel
 exports, deterministic personality separation, memory isolation, Q-learning,
 skill growth, relationships, snapshot round-trips with checksum rejection,
 manager lifecycle, `Bot`/`NPC` integration and per-agent steering state.
+`tests/ai-negative-learning.test.ts` covers monotonic punishment, preference
+margins, saturating/decaying aversions, negative snapshot persistence, legacy
+snapshot fallback, manager-wide training and lazy player brains.

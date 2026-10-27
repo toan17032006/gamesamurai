@@ -852,7 +852,12 @@ export function projectileImpactPoint(origin: Vec3D, direction: Vec3D, speed: nu
   };
 }
 
-/** Lệch độ do gió tác động lên đạn. */
+/** Lệch độ do gió tác động lên đạn.
+ *
+ * Chỉ thành phần gió VUÔNG GÓC phương bay mới tạo lệch ngang (drift);
+ * thành phần dọc phương bay (xuôi/ngược gió) đổi tầm bay, không phải lệch.
+ * Quy ước độ lớn giữ nguyên: `0.5·w_perp·t²`.
+ */
 export function projectileWindDrift(
   origin: Vec3D,
   direction: Vec3D,
@@ -860,8 +865,15 @@ export function projectileWindDrift(
   wind: Vec3D,
   flightTime: number,
 ): Vec3D {
+  const flightDir = magnitude(direction) > 1e-9 ? normalize(direction) : { ...FORWARD3 };
   const horizontalWind = { x: wind.x, y: 0, z: wind.z };
-  return scale(horizontalWind, flightTime * flightTime * 0.5);
+  const along = horizontalWind.x * flightDir.x + horizontalWind.z * flightDir.z;
+  const perpendicular = {
+    x: horizontalWind.x - flightDir.x * along,
+    y: 0,
+    z: horizontalWind.z - flightDir.z * along,
+  };
+  return scale(perpendicular, flightTime * flightTime * 0.5);
 }
 
 /** Góc sai lệch do tán sai. */

@@ -7,7 +7,70 @@
 
 import { ParticleEffectSystem, ToolImpact, FractureGraph } from '../types.js';
 import type { Vec3 } from '../../types/index.js';
-import { forceMagnitude } from './vegetation-subsystem.js';
+import { forceMagnitude, windSpeedOf } from './vegetation-subsystem.js';
+
+/** Đọc một giá trị bất kỳ dưới dạng bản ghi khoá–giá trị. */
+function asRecord(value: unknown): Record<string, unknown> | null {
+  return typeof value === 'object' && value !== null ? (value as Record<string, unknown>) : null;
+}
+
+/** Một hệ sinh thái khu vực. */
+export interface Ecosystem {
+  id: string;
+  region: unknown;
+  balance: number;
+  vegetationDensity: number;
+}
+
+/** Vòng đời của một vật thể trong thế giới. */
+export interface ObjectLifecycle {
+  id: string;
+  age: number;
+  health: number;
+  isDecayed: boolean;
+}
+
+/** Hạt môi trường (phấn hoa, lá rơi, cánh hoa, tro…). */
+export interface EnvironmentalParticle {
+  id: string;
+  position: Vec3;
+  velocity: Vec3;
+  mass?: number;
+  source?: string;
+  [key: string]: unknown;
+}
+
+/** Một mảnh vỡ sinh ra từ vật thể. */
+export interface DebrisFragment {
+  id: string;
+  position: Vec3;
+  velocity: Vec3;
+  mass: number;
+  size: number;
+  source: string;
+  [key: string]: unknown;
+}
+
+/** Một nửa / một đoạn của vật thể sau khi cắt. */
+export interface MeshPart {
+  id: string;
+  position: Vec3;
+  size: number;
+  source: string;
+  side?: string;
+  segment?: number;
+  [key: string]: unknown;
+}
+
+/** Mẫu vết nứt Voronoi sinh từ va chạm. */
+export interface FracturePattern {
+  pattern: 'voronoi';
+  cells: Vec3[];
+  cellCount: number;
+  energy: number;
+  radius: number;
+  center: Vec3;
+}
 
 // ---------------------------------------------------------------------------
 // Hằng số kỹ thuật — chuẩn suy ra khi công cụ / vật thể không có dữ liệu
@@ -64,8 +127,8 @@ import { recordSubsystemAction } from '../../core/subsystem-activity.js';
 
 export class EnvironmentalDynamicsSubsystem {
   public particleSystems: Map<string, ParticleEffectSystem> = new Map();
-  public ecosystems: Map<string, any> = new Map();
-  public objectLifecycles: Map<string, any> = new Map();
+  public ecosystems: Map<string, Ecosystem> = new Map();
+  public objectLifecycles: Map<string, ObjectLifecycle> = new Map();
   public toolImpacts: ToolImpact[] = [];
   public destructionGraphs: Map<string, FractureGraph> = new Map();
   public animationMixerTime = 0;
@@ -81,34 +144,40 @@ export class EnvironmentalDynamicsSubsystem {
     return ps;
   }
 
-  public spawnParticles(system: any, count: number): void {
-    const ps = typeof system === 'string' ? this.particleSystems.get(system) : system;
+  public spawnParticles(system: unknown, count: number): void {
+    const ps =
+      typeof system === 'string'
+        ? this.particleSystems.get(system)
+        : asRecord(system)
+          ? (system as ParticleEffectSystem)
+          : undefined;
     if (ps) ps.activeCount = Math.min(ps.maxCount, ps.activeCount + count);
   }
 
-  public updateParticleMotion(particle: any, deltaTime: number): void { recordSubsystemAction(this, 'updateParticleMotion', 'EnvironmentalDynamicsSubsystem'); }
-  public applyParticleGravity(particle: any): void { recordSubsystemAction(this, 'applyParticleGravity', 'EnvironmentalDynamicsSubsystem'); }
-  public applyParticleWind(particle: any, wind: any): void { recordSubsystemAction(this, 'applyParticleWind', 'EnvironmentalDynamicsSubsystem'); }
+  public updateParticleMotion(particle: unknown, deltaTime: number): void { recordSubsystemAction(this, 'updateParticleMotion', 'EnvironmentalDynamicsSubsystem'); }
+  public applyParticleGravity(particle: unknown): void { recordSubsystemAction(this, 'applyParticleGravity', 'EnvironmentalDynamicsSubsystem'); }
+  public applyParticleWind(particle: unknown, wind: unknown): void { recordSubsystemAction(this, 'applyParticleWind', 'EnvironmentalDynamicsSubsystem'); }
   /**
    * Hệ số kéo của một hạt.
    *
    * Trước đây luôn `0.2`. Nay suy từ kích thước hạt và mật độ môi trường
    * (hạt nhỏ + môi trường loãng ⇒ kéo lớn hơn).
    */
-  public calculateParticleDrag(particle: any): number {
+  public calculateParticleDrag(particle: unknown): number {
     const size = this.extentOf(particle, 0.1);
-    const density = Number(particle?.density ?? particle?.mediumDensity ?? 1.2);
+    const record = asRecord(particle);
+    const density = Number(record?.density ?? record?.mediumDensity ?? 1.2);
     const d = Number.isFinite(density) && density > 0 ? density : 1.2;
     const coefficient = 0.47 * (0.1 / Math.max(0.01, size)) * (1.2 / d);
     return Math.min(2, Math.max(0.01, coefficient));
   }
 
-  public simulateDustCloud(position: Vec3, force: any): any { return { position, radius: 5.0 }; }
-  public spreadDustCloud(cloud: any, wind: any): void { recordSubsystemAction(this, 'spreadDustCloud', 'EnvironmentalDynamicsSubsystem'); }
-  public dissipateDustCloud(cloud: any, rate: number): void { recordSubsystemAction(this, 'dissipateDustCloud', 'EnvironmentalDynamicsSubsystem'); }
-  public createSandBurst(position: Vec3, force: any): any { return { position }; }
-  public simulateBlowingSand(sand: any, wind: any): void { recordSubsystemAction(this, 'simulateBlowingSand', 'EnvironmentalDynamicsSubsystem'); }
-  public simulateDustDevilParticles(particles: any): void { recordSubsystemAction(this, 'simulateDustDevilParticles', 'EnvironmentalDynamicsSubsystem'); }
+  public simulateDustCloud(position: Vec3, force: unknown) { return { position, radius: 5.0 }; }
+  public spreadDustCloud(cloud: unknown, wind: unknown): void { recordSubsystemAction(this, 'spreadDustCloud', 'EnvironmentalDynamicsSubsystem'); }
+  public dissipateDustCloud(cloud: unknown, rate: number): void { recordSubsystemAction(this, 'dissipateDustCloud', 'EnvironmentalDynamicsSubsystem'); }
+  public createSandBurst(position: Vec3, force: unknown) { return { position }; }
+  public simulateBlowingSand(sand: unknown, wind: unknown): void { recordSubsystemAction(this, 'simulateBlowingSand', 'EnvironmentalDynamicsSubsystem'); }
+  public simulateDustDevilParticles(particles: unknown): void { recordSubsystemAction(this, 'simulateDustDevilParticles', 'EnvironmentalDynamicsSubsystem'); }
   /**
    * Hạt phấn hoa bắt từ cây.
    *
@@ -116,11 +185,12 @@ export class EnvironmentalDynamicsSubsystem {
    * suy ra từ sản lượng phấn hoa / kích thước tán cây, và mỗi hạt có vị trí,
    * vận tốc và thời gian sống tính từ dữ liệu cây.
    */
-  public spawnPollenParticles(plant: any): any[] {
+  public spawnPollenParticles(plant: unknown): EnvironmentalParticle[] {
     const count = this.particleCountFor(plant, ['pollenCount', 'pollenOutput', 'pollen'], 12);
     const origin = this.positionOf(plant);
     const spread = this.extentOf(plant, 0.5);
-    const particles: any[] = [];
+    const plantRecord = asRecord(plant);
+    const particles: EnvironmentalParticle[] = [];
     for (let i = 0; i < count; i++) {
       const offset = this.scatter(i, spread);
       particles.push({
@@ -129,25 +199,26 @@ export class EnvironmentalDynamicsSubsystem {
         velocity: { x: offset.x * 0.25, y: 0.05 + (i % 3) * 0.02, z: offset.z * 0.25 },
         drift: 0.3 + (i % 5) * 0.1,
         lifetime: 10 + (i % 7),
-        source: plant?.id ?? 'plant',
+        source: typeof plantRecord?.id === 'string' ? plantRecord.id : 'plant',
       });
     }
     return particles;
   }
-  public dispersePollen(pollen: any, wind: any): void { recordSubsystemAction(this, 'dispersePollen', 'EnvironmentalDynamicsSubsystem'); }
+  public dispersePollen(pollen: unknown, wind: unknown): void { recordSubsystemAction(this, 'dispersePollen', 'EnvironmentalDynamicsSubsystem'); }
   /**
    * Lá rơi từ tán cây.
    *
    * Số lá suy ra từ `leafCount` / kích thước tán; tốc độ rơi và lắc lư theo
    * khối lượng lá và sức gió.
    */
-  public spawnFallingLeaves(tree: any): any[] {
+  public spawnFallingLeaves(tree: unknown): EnvironmentalParticle[] {
     const count = this.particleCountFor(tree, ['leafCount', 'leaves', 'canopySize'], 10);
     const origin = this.positionOf(tree);
     const spread = this.extentOf(tree, 1);
-    const gust = forceMagnitude(tree?.wind ?? tree?.gust ?? 0);
-    const mass = Number(tree?.leafMass ?? 0.02);
-    const leaves: any[] = [];
+    const treeRecord = asRecord(tree);
+    const gust = windSpeedOf(treeRecord?.wind ?? treeRecord?.gust ?? 0);
+    const mass = Number(treeRecord?.leafMass ?? 0.02);
+    const leaves: EnvironmentalParticle[] = [];
     for (let i = 0; i < count; i++) {
       const offset = this.scatter(i, spread);
       leaves.push({
@@ -157,18 +228,19 @@ export class EnvironmentalDynamicsSubsystem {
         sway: 0.2 + (i % 4) * 0.15,
         area: 0.01 + (i % 3) * 0.004,
         mass,
-        source: tree?.id ?? 'tree',
+        source: typeof treeRecord?.id === 'string' ? treeRecord.id : 'tree',
       });
     }
     return leaves;
   }
-  public simulateFallingLeafParticles(leaves: any): void { recordSubsystemAction(this, 'simulateFallingLeafParticles', 'EnvironmentalDynamicsSubsystem'); }
+  public simulateFallingLeafParticles(leaves: unknown): void { recordSubsystemAction(this, 'simulateFallingLeafParticles', 'EnvironmentalDynamicsSubsystem'); }
   /** Cánh hoa rơi — số cánh theo kích thước bông hoa, rơi chậm hơn lá. */
-  public spawnFallingPetals(flower: any): any[] {
+  public spawnFallingPetals(flower: unknown): EnvironmentalParticle[] {
     const count = this.particleCountFor(flower, ['petalCount', 'petals', 'bloomSize'], 6);
     const origin = this.positionOf(flower);
     const spread = this.extentOf(flower, 0.3);
-    const petals: any[] = [];
+    const flowerRecord = asRecord(flower);
+    const petals: EnvironmentalParticle[] = [];
     for (let i = 0; i < count; i++) {
       const offset = this.scatter(i, spread);
       petals.push({
@@ -177,7 +249,7 @@ export class EnvironmentalDynamicsSubsystem {
         velocity: { x: offset.x * 0.1, y: -0.08, z: offset.z * 0.1 },
         sway: 0.1 + (i % 3) * 0.05,
         mass: 0.002,
-        source: flower?.id ?? 'flower',
+        source: typeof flowerRecord?.id === 'string' ? flowerRecord.id : 'flower',
       });
     }
     return petals;
@@ -187,13 +259,14 @@ export class EnvironmentalDynamicsSubsystem {
    *
    * Số hạt và tốc độ bay theo nhiệt độ / cường độ lửa và lưu lượng khói.
    */
-  public spawnAshParticles(fire: any): any[] {
+  public spawnAshParticles(fire: unknown): EnvironmentalParticle[] {
     const count = this.particleCountFor(fire, ['ashOutput', 'ashCount', 'smokeOutput'], 8);
     const origin = this.positionOf(fire);
-    const heat = Number(fire?.heat ?? fire?.intensity ?? fire?.temperature ?? 0);
+    const fireRecord = asRecord(fire);
+    const heat = Number(fireRecord?.heat ?? fireRecord?.intensity ?? fireRecord?.temperature ?? 0);
     const rise = 0.5 + Math.min(3, Math.max(0, heat) / 200);
     const spread = this.extentOf(fire, 0.8);
-    const ashes: any[] = [];
+    const ashes: EnvironmentalParticle[] = [];
     for (let i = 0; i < count; i++) {
       const offset = this.scatter(i, spread);
       ashes.push({
@@ -202,13 +275,13 @@ export class EnvironmentalDynamicsSubsystem {
         velocity: { x: offset.x * 0.2, y: rise * (0.6 + (i % 4) * 0.15), z: offset.z * 0.2 },
         temperature: heat,
         mass: 0.0005,
-        source: fire?.id ?? 'fire',
+        source: typeof fireRecord?.id === 'string' ? fireRecord.id : 'fire',
       });
     }
     return ashes;
   }
-  public simulateAshDeposition(surface: any, ash: any): void { recordSubsystemAction(this, 'simulateAshDeposition', 'EnvironmentalDynamicsSubsystem'); }
-  public recycleExpiredParticles(system: any): void { recordSubsystemAction(this, 'recycleExpiredParticles', 'EnvironmentalDynamicsSubsystem'); }
+  public simulateAshDeposition(surface: unknown, ash: unknown): void { recordSubsystemAction(this, 'simulateAshDeposition', 'EnvironmentalDynamicsSubsystem'); }
+  public recycleExpiredParticles(system: unknown): void { recordSubsystemAction(this, 'recycleExpiredParticles', 'EnvironmentalDynamicsSubsystem'); }
 
   // 681–700. Ăn mòn, phong hóa và sự lụi tàn của vật thể
   /**
@@ -217,87 +290,92 @@ export class EnvironmentalDynamicsSubsystem {
    * Trước đây luôn `0.05` bất kể vật liệu và môi trường. Nay suy từ vật liệu
    * và điều kiện môi trường (độ ẩm, nhiệt độ, mức phơi nắng).
    */
-  public calculateWeatheringRate(object: any): number {
-    const material = String(object?.material ?? object?.type ?? 'stone');
+  public calculateWeatheringRate(object: unknown): number {
+    const record = asRecord(object);
+    const material = String(record?.material ?? record?.type ?? 'stone');
     const base = MATERIAL_WEATHERING[material] ?? 0.05;
-    const moisture = Number(object?.moisture ?? object?.humidity ?? 0.4);
-    const temperature = Number(object?.temperature ?? 20);
-    const exposure = Number(object?.exposure ?? object?.sunlight ?? 0.5);
+    const moisture = Number(record?.moisture ?? record?.humidity ?? 0.4);
+    const temperature = Number(record?.temperature ?? 20);
+    const exposure = Number(record?.exposure ?? record?.sunlight ?? 0.5);
     const m = Number.isFinite(moisture) ? Math.max(0, Math.min(1, moisture)) : 0.4;
     const t = Number.isFinite(temperature) ? Math.max(0, Math.min(1, temperature / 60)) : 0.33;
     const e = Number.isFinite(exposure) ? Math.max(0, Math.min(1, exposure)) : 0.5;
     return base * (0.4 + m * 0.8 + t * 0.5 + e * 0.3);
   }
 
-  public applyMechanicalWeathering(object: any, force: any): void { recordSubsystemAction(this, 'applyMechanicalWeathering', 'EnvironmentalDynamicsSubsystem'); }
-  public applyChemicalWeathering(object: any, fluid: any): void { recordSubsystemAction(this, 'applyChemicalWeathering', 'EnvironmentalDynamicsSubsystem'); }
-  public applyFreezeThawWeathering(object: any, temperature: number): void { recordSubsystemAction(this, 'applyFreezeThawWeathering', 'EnvironmentalDynamicsSubsystem'); }
-  public erodeObjectSurface(object: any, rate: number): void { recordSubsystemAction(this, 'erodeObjectSurface', 'EnvironmentalDynamicsSubsystem'); }
-  public erodeBuildingFacade(building: any, rate: number): void { recordSubsystemAction(this, 'erodeBuildingFacade', 'EnvironmentalDynamicsSubsystem'); }
-  public erodeRockFormation(rock: any, water: any): void { recordSubsystemAction(this, 'erodeRockFormation', 'EnvironmentalDynamicsSubsystem'); }
-  public erodeSoilLayer(soil: any, water: any): void { recordSubsystemAction(this, 'erodeSoilLayer', 'EnvironmentalDynamicsSubsystem'); }
-  public weatherWoodSurface(wood: any, weather: any): void { recordSubsystemAction(this, 'weatherWoodSurface', 'EnvironmentalDynamicsSubsystem'); }
-  public fadePaintSurface(object: any, sunlight: any): void { recordSubsystemAction(this, 'fadePaintSurface', 'EnvironmentalDynamicsSubsystem'); }
-  public peelPaintSurface(object: any, rate: number): void { recordSubsystemAction(this, 'peelPaintSurface', 'EnvironmentalDynamicsSubsystem'); }
-  public corrodeConcreteSurface(object: any, rate: number): void { recordSubsystemAction(this, 'corrodeConcreteSurface', 'EnvironmentalDynamicsSubsystem'); }
-  public growMoldOnSurface(object: any, humidity: number): void { recordSubsystemAction(this, 'growMoldOnSurface', 'EnvironmentalDynamicsSubsystem'); }
-  public spreadSurfaceMoss(object: any, moisture: number): void { recordSubsystemAction(this, 'spreadSurfaceMoss', 'EnvironmentalDynamicsSubsystem'); }
-  public accumulateDirtOnSurface(object: any, amount: number): void { recordSubsystemAction(this, 'accumulateDirtOnSurface', 'EnvironmentalDynamicsSubsystem'); }
-  public accumulateDustOnSurface(object: any, amount: number): void { recordSubsystemAction(this, 'accumulateDustOnSurface', 'EnvironmentalDynamicsSubsystem'); }
-  public washDirtFromSurface(object: any, water: any): void { recordSubsystemAction(this, 'washDirtFromSurface', 'EnvironmentalDynamicsSubsystem'); }
-  public degradeMaterialProperties(object: any, rate: number): void { recordSubsystemAction(this, 'degradeMaterialProperties', 'EnvironmentalDynamicsSubsystem'); }
+  public applyMechanicalWeathering(object: unknown, force: unknown): void { recordSubsystemAction(this, 'applyMechanicalWeathering', 'EnvironmentalDynamicsSubsystem'); }
+  public applyChemicalWeathering(object: unknown, fluid: unknown): void { recordSubsystemAction(this, 'applyChemicalWeathering', 'EnvironmentalDynamicsSubsystem'); }
+  public applyFreezeThawWeathering(object: unknown, temperature: number): void { recordSubsystemAction(this, 'applyFreezeThawWeathering', 'EnvironmentalDynamicsSubsystem'); }
+  public erodeObjectSurface(object: unknown, rate: number): void { recordSubsystemAction(this, 'erodeObjectSurface', 'EnvironmentalDynamicsSubsystem'); }
+  public erodeBuildingFacade(building: unknown, rate: number): void { recordSubsystemAction(this, 'erodeBuildingFacade', 'EnvironmentalDynamicsSubsystem'); }
+  public erodeRockFormation(rock: unknown, water: unknown): void { recordSubsystemAction(this, 'erodeRockFormation', 'EnvironmentalDynamicsSubsystem'); }
+  public erodeSoilLayer(soil: unknown, water: unknown): void { recordSubsystemAction(this, 'erodeSoilLayer', 'EnvironmentalDynamicsSubsystem'); }
+  public weatherWoodSurface(wood: unknown, weather: unknown): void { recordSubsystemAction(this, 'weatherWoodSurface', 'EnvironmentalDynamicsSubsystem'); }
+  public fadePaintSurface(object: unknown, sunlight: unknown): void { recordSubsystemAction(this, 'fadePaintSurface', 'EnvironmentalDynamicsSubsystem'); }
+  public peelPaintSurface(object: unknown, rate: number): void { recordSubsystemAction(this, 'peelPaintSurface', 'EnvironmentalDynamicsSubsystem'); }
+  public corrodeConcreteSurface(object: unknown, rate: number): void { recordSubsystemAction(this, 'corrodeConcreteSurface', 'EnvironmentalDynamicsSubsystem'); }
+  public growMoldOnSurface(object: unknown, humidity: number): void { recordSubsystemAction(this, 'growMoldOnSurface', 'EnvironmentalDynamicsSubsystem'); }
+  public spreadSurfaceMoss(object: unknown, moisture: number): void { recordSubsystemAction(this, 'spreadSurfaceMoss', 'EnvironmentalDynamicsSubsystem'); }
+  public accumulateDirtOnSurface(object: unknown, amount: number): void { recordSubsystemAction(this, 'accumulateDirtOnSurface', 'EnvironmentalDynamicsSubsystem'); }
+  public accumulateDustOnSurface(object: unknown, amount: number): void { recordSubsystemAction(this, 'accumulateDustOnSurface', 'EnvironmentalDynamicsSubsystem'); }
+  public washDirtFromSurface(object: unknown, water: unknown): void { recordSubsystemAction(this, 'washDirtFromSurface', 'EnvironmentalDynamicsSubsystem'); }
+  public degradeMaterialProperties(object: unknown, rate: number): void { recordSubsystemAction(this, 'degradeMaterialProperties', 'EnvironmentalDynamicsSubsystem'); }
   /**
    * Tuổi thọ danh nghĩa của vật thể (giây).
    *
    * Trước đây luôn `5000`. Nay suy từ vật liệu và điều kiện môi trường —
    * môi trường khắc nghiệt rút ngắn tuổi thọ.
    */
-  public calculateMaterialLifetime(object: any): number {
-    const material = String(object?.material ?? object?.type ?? 'stone');
+  public calculateMaterialLifetime(object: unknown): number {
+    const record = asRecord(object);
+    const material = String(record?.material ?? record?.type ?? 'stone');
     const base = MATERIAL_LIFETIME[material] ?? 5000;
-    const moisture = Number(object?.moisture ?? object?.humidity ?? 0.4);
-    const temperature = Number(object?.temperature ?? 20);
+    const moisture = Number(record?.moisture ?? record?.humidity ?? 0.4);
+    const temperature = Number(record?.temperature ?? 20);
     const m = Number.isFinite(moisture) ? Math.max(0, Math.min(1, moisture)) : 0.4;
     const t = Number.isFinite(temperature) ? Math.max(0, Math.min(1, temperature / 60)) : 0.33;
-    const wear = Number(object?.wear ?? object?.damage ?? 0);
+    const wear = Number(record?.wear ?? record?.damage ?? 0);
     const w = Number.isFinite(wear) ? Math.max(0, Math.min(0.9, wear)) : 0;
     const condition = 1 + m * 0.5 + t * 0.3 + w;
     return Math.max(1, base / condition);
   }
 
-  public transitionObjectToRuins(object: any): void {
-    if (object) object.isRuins = true;
+  public transitionObjectToRuins(object: unknown): void {
+    const record = asRecord(object);
+    if (record) record.isRuins = true;
   }
 
   // 701–720. Hệ sinh thái và tương tác môi trường
-  public initializeEcosystem(region: any): any {
+  public initializeEcosystem(region: unknown): Ecosystem {
     const id = `eco_${Date.now()}`;
-    const eco = { id, region, balance: 1.0, vegetationDensity: 0.7 };
+    const eco: Ecosystem = { id, region, balance: 1.0, vegetationDensity: 0.7 };
     this.ecosystems.set(id, eco);
     return eco;
   }
 
-  public updateEcosystem(region: any, deltaTime: number): void { recordSubsystemAction(this, 'updateEcosystem', 'EnvironmentalDynamicsSubsystem'); }
+  public updateEcosystem(region: unknown, deltaTime: number): void { recordSubsystemAction(this, 'updateEcosystem', 'EnvironmentalDynamicsSubsystem'); }
   /**
    * Mật độ thảm thực vật của khu vực (0..1).
    *
    * Trước đây luôn `0.75`. Nay ưu tiên dữ liệu khai báo, nếu không thì suy từ
    * độ ẩm đất và lượng mưa của khu vực.
    */
-  public calculateVegetationDensity(region: any): number {
-    const declared = Number(region?.vegetationDensity);
+  public calculateVegetationDensity(region: unknown): number {
+    const record = asRecord(region);
+    const declared = Number(record?.vegetationDensity);
     if (Number.isFinite(declared)) return Math.max(0, Math.min(1, declared));
 
-    const plants = Array.isArray(region?.plants)
-      ? region.plants.length
+    const plants = Array.isArray(record?.plants)
+      ? (record.plants as unknown[]).length
       : this.countOf(region, ['plantCount', 'treeCount'], -1);
-    const area = Number(region?.area ?? region?.surfaceArea);
+    const area = Number(record?.area ?? record?.surfaceArea);
     if (plants >= 0 && Number.isFinite(area) && area > 0) {
       return Math.max(0, Math.min(1, plants / area));
     }
 
-    const moisture = Number(region?.soil?.moisture ?? region?.moisture ?? region?.humidity);
-    const rainfall = Number(region?.rainfall ?? region?.precipitation);
+    const soil = asRecord(record?.soil);
+    const moisture = Number(soil?.moisture ?? record?.moisture ?? record?.humidity);
+    const rainfall = Number(record?.rainfall ?? record?.precipitation);
     const m = Number.isFinite(moisture) ? Math.max(0, Math.min(1, moisture)) : 0.4;
     const r = Number.isFinite(rainfall) ? Math.max(0, Math.min(1, rainfall / 200)) : 0.3;
     return Math.max(0, Math.min(1, 0.2 + m * 0.45 + r * 0.35));
@@ -308,13 +386,15 @@ export class EnvironmentalDynamicsSubsystem {
    *
    * Trước đây luôn `45`. Nay suy từ lượng mưa, mực nước và khả năng thoát nước.
    */
-  public calculateSoilMoisture(region: any): number {
-    const declared = Number(region?.moisture ?? region?.soilMoisture);
+  public calculateSoilMoisture(region: unknown): number {
+    const record = asRecord(region);
+    const declared = Number(record?.moisture ?? record?.soilMoisture);
     if (Number.isFinite(declared)) return Math.max(0, Math.min(100, declared * (declared <= 1 ? 100 : 1)));
 
-    const rainfall = Number(region?.rainfall ?? region?.precipitation ?? 0);
-    const waterLevel = Number(region?.water?.level ?? region?.waterLevel ?? 0);
-    const drainage = Number(region?.drainage ?? 0.5);
+    const rainfall = Number(record?.rainfall ?? record?.precipitation ?? 0);
+    const water = asRecord(record?.water);
+    const waterLevel = Number(water?.level ?? record?.waterLevel ?? 0);
+    const drainage = Number(record?.drainage ?? 0.5);
     const r = Number.isFinite(rainfall) ? rainfall : 0;
     const w = Number.isFinite(waterLevel) ? Math.max(0, Math.min(1, waterLevel)) : 0;
     const d = Number.isFinite(drainage) ? Math.max(0, Math.min(1, drainage)) : 0.5;
@@ -327,13 +407,15 @@ export class EnvironmentalDynamicsSubsystem {
    * Trước đây luôn `80`. Nay suy từ độ phì của đất, hoạt động phân hủy và
    * số lượng chất dinh dưỡng khai báo.
    */
-  public calculateNutrientAvailability(region: any): number {
-    const declared = Number(region?.nutrientAvailability);
+  public calculateNutrientAvailability(region: unknown): number {
+    const record = asRecord(region);
+    const declared = Number(record?.nutrientAvailability);
     if (Number.isFinite(declared)) return Math.max(0, Math.min(100, declared));
 
-    const fertility = Number(region?.soil?.fertility ?? region?.fertility);
-    const decomposition = Number(region?.decomposition ?? region?.humus);
-    const nutrients = Array.isArray(region?.nutrients) ? region.nutrients.length : -1;
+    const soil = asRecord(record?.soil);
+    const fertility = Number(soil?.fertility ?? record?.fertility);
+    const decomposition = Number(record?.decomposition ?? record?.humus);
+    const nutrients = Array.isArray(record?.nutrients) ? (record.nutrients as unknown[]).length : -1;
     const f = Number.isFinite(fertility) ? Math.max(0, Math.min(1, fertility)) : 0.5;
     const d = Number.isFinite(decomposition) ? Math.max(0, Math.min(1, decomposition)) : 0.3;
     const n = nutrients >= 0 ? Math.min(0.2, nutrients * 0.02) : 0;
@@ -345,7 +427,7 @@ export class EnvironmentalDynamicsSubsystem {
    *
    * Trước đây luôn `0.85`. Nay tính từ số cây lân cận và độ rộng tán cây.
    */
-  public calculateLightCompetition(plant: any, neighbors: any[]): number {
+  public calculateLightCompetition(plant: unknown, neighbors: unknown[]): number {
     const neighborCount = Array.isArray(neighbors)
       ? neighbors.length
       : this.countOf(plant, ['neighborCount', 'competitorCount'], 0);
@@ -353,68 +435,63 @@ export class EnvironmentalDynamicsSubsystem {
     const shade = Math.min(0.9, neighborCount * 0.12 + canopy * 0.05);
     return Math.max(0.1, 1 - shade);
   }
-  public simulatePlantCompetition(plantA: any, plantB: any): void { recordSubsystemAction(this, 'simulatePlantCompetition', 'EnvironmentalDynamicsSubsystem'); }
-  public simulateCanopyCompetition(treeA: any, treeB: any): void { recordSubsystemAction(this, 'simulateCanopyCompetition', 'EnvironmentalDynamicsSubsystem'); }
-  public simulateRootCompetition(plantA: any, plantB: any): void { recordSubsystemAction(this, 'simulateRootCompetition', 'EnvironmentalDynamicsSubsystem'); }
-  public spreadSeedsAcrossRegion(region: any, wind: any): void { recordSubsystemAction(this, 'spreadSeedsAcrossRegion', 'EnvironmentalDynamicsSubsystem'); }
-  public disperseSeedsByWater(region: any, water: any): void { recordSubsystemAction(this, 'disperseSeedsByWater', 'EnvironmentalDynamicsSubsystem'); }
-  public spreadWildfireAcrossRegion(region: any): void { recordSubsystemAction(this, 'spreadWildfireAcrossRegion', 'EnvironmentalDynamicsSubsystem'); }
-  public simulateHabitatRecovery(region: any): void { recordSubsystemAction(this, 'simulateHabitatRecovery', 'EnvironmentalDynamicsSubsystem'); }
-  public regenerateVegetation(region: any): void { recordSubsystemAction(this, 'regenerateVegetation', 'EnvironmentalDynamicsSubsystem'); }
-  public restoreDamagedSoil(region: any): void { recordSubsystemAction(this, 'restoreDamagedSoil', 'EnvironmentalDynamicsSubsystem'); }
-  public simulateWetlandExpansion(region: any): void { recordSubsystemAction(this, 'simulateWetlandExpansion', 'EnvironmentalDynamicsSubsystem'); }
-  public simulateDesertification(region: any): void { recordSubsystemAction(this, 'simulateDesertification', 'EnvironmentalDynamicsSubsystem'); }
-  public simulateCoastalErosion(region: any): void { recordSubsystemAction(this, 'simulateCoastalErosion', 'EnvironmentalDynamicsSubsystem'); }
-  public simulateRiverDeltaGrowth(region: any): void { recordSubsystemAction(this, 'simulateRiverDeltaGrowth', 'EnvironmentalDynamicsSubsystem'); }
-  public updateEcosystemBalance(region: any): void { recordSubsystemAction(this, 'updateEcosystemBalance', 'EnvironmentalDynamicsSubsystem'); }
+  public simulatePlantCompetition(plantA: unknown, plantB: unknown): void { recordSubsystemAction(this, 'simulatePlantCompetition', 'EnvironmentalDynamicsSubsystem'); }
+  public simulateCanopyCompetition(treeA: unknown, treeB: unknown): void { recordSubsystemAction(this, 'simulateCanopyCompetition', 'EnvironmentalDynamicsSubsystem'); }
+  public simulateRootCompetition(plantA: unknown, plantB: unknown): void { recordSubsystemAction(this, 'simulateRootCompetition', 'EnvironmentalDynamicsSubsystem'); }
+  public spreadSeedsAcrossRegion(region: unknown, wind: unknown): void { recordSubsystemAction(this, 'spreadSeedsAcrossRegion', 'EnvironmentalDynamicsSubsystem'); }
+  public disperseSeedsByWater(region: unknown, water: unknown): void { recordSubsystemAction(this, 'disperseSeedsByWater', 'EnvironmentalDynamicsSubsystem'); }
+  public spreadWildfireAcrossRegion(region: unknown): void { recordSubsystemAction(this, 'spreadWildfireAcrossRegion', 'EnvironmentalDynamicsSubsystem'); }
+  public simulateHabitatRecovery(region: unknown): void { recordSubsystemAction(this, 'simulateHabitatRecovery', 'EnvironmentalDynamicsSubsystem'); }
+  public regenerateVegetation(region: unknown): void { recordSubsystemAction(this, 'regenerateVegetation', 'EnvironmentalDynamicsSubsystem'); }
+  public restoreDamagedSoil(region: unknown): void { recordSubsystemAction(this, 'restoreDamagedSoil', 'EnvironmentalDynamicsSubsystem'); }
+  public simulateWetlandExpansion(region: unknown): void { recordSubsystemAction(this, 'simulateWetlandExpansion', 'EnvironmentalDynamicsSubsystem'); }
+  public simulateDesertification(region: unknown): void { recordSubsystemAction(this, 'simulateDesertification', 'EnvironmentalDynamicsSubsystem'); }
+  public simulateCoastalErosion(region: unknown): void { recordSubsystemAction(this, 'simulateCoastalErosion', 'EnvironmentalDynamicsSubsystem'); }
+  public simulateRiverDeltaGrowth(region: unknown): void { recordSubsystemAction(this, 'simulateRiverDeltaGrowth', 'EnvironmentalDynamicsSubsystem'); }
+  public updateEcosystemBalance(region: unknown): void { recordSubsystemAction(this, 'updateEcosystemBalance', 'EnvironmentalDynamicsSubsystem'); }
 
   // 721–740. Hệ thống thời gian và biến đổi trạng thái
-  public initializeObjectLifecycle(object: any): any {
-    const id = typeof object === 'string' ? object : (object?.id ?? 'obj');
-    const lc = { id, age: 0, health: 100, isDecayed: false };
+  public initializeObjectLifecycle(object: unknown): ObjectLifecycle {
+    const id = this.idOf(object);
+    const lc: ObjectLifecycle = { id, age: 0, health: 100, isDecayed: false };
     this.objectLifecycles.set(id, lc);
     return lc;
   }
 
-  public updateObjectLifecycle(object: any, deltaTime: number): void {
-    const id = typeof object === 'string' ? object : object?.id;
-    const lc = this.objectLifecycles.get(id);
+  public updateObjectLifecycle(object: unknown, deltaTime: number): void {
+    const lc = this.objectLifecycles.get(this.idOf(object));
     if (lc) lc.age += deltaTime;
   }
 
-  public setObjectAge(object: any, age: number): void {
-    const id = typeof object === 'string' ? object : object?.id;
-    const lc = this.objectLifecycles.get(id);
+  public setObjectAge(object: unknown, age: number): void {
+    const lc = this.objectLifecycles.get(this.idOf(object));
     if (lc) lc.age = age;
   }
 
-  public calculateObjectAge(object: any): number {
-    const id = typeof object === 'string' ? object : object?.id;
-    return this.objectLifecycles.get(id)?.age ?? 0;
+  public calculateObjectAge(object: unknown): number {
+    return this.objectLifecycles.get(this.idOf(object))?.age ?? 0;
   }
 
-  public growObjectOverTime(object: any, duration: number): void { recordSubsystemAction(this, 'growObjectOverTime', 'EnvironmentalDynamicsSubsystem'); }
-  public shrinkObjectOverTime(object: any, duration: number): void { recordSubsystemAction(this, 'shrinkObjectOverTime', 'EnvironmentalDynamicsSubsystem'); }
-  public matureObject(object: any): void { recordSubsystemAction(this, 'matureObject', 'EnvironmentalDynamicsSubsystem'); }
-  public weakenObjectOverTime(object: any, rate: number): void { recordSubsystemAction(this, 'weakenObjectOverTime', 'EnvironmentalDynamicsSubsystem'); }
-  public fatigueObjectOverTime(object: any, load: any): void { recordSubsystemAction(this, 'fatigueObjectOverTime', 'EnvironmentalDynamicsSubsystem'); }
-  public accumulateObjectDamage(object: any, damage: number): void {
-    const id = typeof object === 'string' ? object : object?.id;
-    const lc = this.objectLifecycles.get(id);
+  public growObjectOverTime(object: unknown, duration: number): void { recordSubsystemAction(this, 'growObjectOverTime', 'EnvironmentalDynamicsSubsystem'); }
+  public shrinkObjectOverTime(object: unknown, duration: number): void { recordSubsystemAction(this, 'shrinkObjectOverTime', 'EnvironmentalDynamicsSubsystem'); }
+  public matureObject(object: unknown): void { recordSubsystemAction(this, 'matureObject', 'EnvironmentalDynamicsSubsystem'); }
+  public weakenObjectOverTime(object: unknown, rate: number): void { recordSubsystemAction(this, 'weakenObjectOverTime', 'EnvironmentalDynamicsSubsystem'); }
+  public fatigueObjectOverTime(object: unknown, load: unknown): void { recordSubsystemAction(this, 'fatigueObjectOverTime', 'EnvironmentalDynamicsSubsystem'); }
+  public accumulateObjectDamage(object: unknown, damage: number): void {
+    const lc = this.objectLifecycles.get(this.idOf(object));
     if (lc) lc.health = Math.max(0, lc.health - damage);
   }
 
-  public recoverObjectCondition(object: any, rate: number): void {
-    const id = typeof object === 'string' ? object : object?.id;
-    const lc = this.objectLifecycles.get(id);
+  public recoverObjectCondition(object: unknown, rate: number): void {
+    const lc = this.objectLifecycles.get(this.idOf(object));
     if (lc) lc.health = Math.min(100, lc.health + rate);
   }
 
-  public decayObjectOverTime(object: any, rate: number): void { recordSubsystemAction(this, 'decayObjectOverTime', 'EnvironmentalDynamicsSubsystem'); }
-  public decomposeObjectOverTime(object: any, rate: number): void { recordSubsystemAction(this, 'decomposeObjectOverTime', 'EnvironmentalDynamicsSubsystem'); }
-  public fadeObjectOverTime(object: any, rate: number): void { recordSubsystemAction(this, 'fadeObjectOverTime', 'EnvironmentalDynamicsSubsystem'); }
-  public disintegrateObjectOverTime(object: any, rate: number): void { recordSubsystemAction(this, 'disintegrateObjectOverTime', 'EnvironmentalDynamicsSubsystem'); }
-  public triggerObjectFailure(object: any): void { recordSubsystemAction(this, 'triggerObjectFailure', 'EnvironmentalDynamicsSubsystem'); }
+  public decayObjectOverTime(object: unknown, rate: number): void { recordSubsystemAction(this, 'decayObjectOverTime', 'EnvironmentalDynamicsSubsystem'); }
+  public decomposeObjectOverTime(object: unknown, rate: number): void { recordSubsystemAction(this, 'decomposeObjectOverTime', 'EnvironmentalDynamicsSubsystem'); }
+  public fadeObjectOverTime(object: unknown, rate: number): void { recordSubsystemAction(this, 'fadeObjectOverTime', 'EnvironmentalDynamicsSubsystem'); }
+  public disintegrateObjectOverTime(object: unknown, rate: number): void { recordSubsystemAction(this, 'disintegrateObjectOverTime', 'EnvironmentalDynamicsSubsystem'); }
+  public triggerObjectFailure(object: unknown): void { recordSubsystemAction(this, 'triggerObjectFailure', 'EnvironmentalDynamicsSubsystem'); }
   /**
    * Thay vật thể bằng các mảnh vụn.
    *
@@ -422,13 +499,14 @@ export class EnvironmentalDynamicsSubsystem {
    * thể tích / kích thước vật thể, mỗi mảnh có vị trí, khối lượng và tốc độ
    * nảy tính từ dữ liệu vật thể.
    */
-  public replaceObjectWithDebris(object: any): any[] {
+  public replaceObjectWithDebris(object: unknown): DebrisFragment[] {
     const count = this.particleCountFor(object, ['fragmentCount', 'debrisCount', 'pieces'], 6);
     const origin = this.positionOf(object);
     const spread = this.extentOf(object, 0.5);
-    const totalMass = Number(object?.mass ?? object?.weight ?? 1);
+    const record = asRecord(object);
+    const totalMass = Number(record?.mass ?? record?.weight ?? 1);
     const perPiece = totalMass > 0 ? totalMass / count : 0;
-    const debris: any[] = [];
+    const debris: DebrisFragment[] = [];
     for (let i = 0; i < count; i++) {
       const offset = this.scatter(i, spread);
       debris.push({
@@ -437,14 +515,14 @@ export class EnvironmentalDynamicsSubsystem {
         velocity: { x: offset.x * 1.2, y: 0.8 + (i % 3) * 0.3, z: offset.z * 1.2 },
         mass: perPiece,
         size: spread / Math.max(1, Math.sqrt(count)),
-        source: object?.id ?? 'object',
+        source: typeof record?.id === 'string' ? record.id : 'object',
       });
     }
     return debris;
   }
-  public regenerateObjectFromState(object: any, state: any): void { recordSubsystemAction(this, 'regenerateObjectFromState', 'EnvironmentalDynamicsSubsystem'); }
-  public advanceSeasonalChanges(region: any, season: string): void { recordSubsystemAction(this, 'advanceSeasonalChanges', 'EnvironmentalDynamicsSubsystem'); }
-  public updateWorldAging(region: any, deltaTime: number): void { recordSubsystemAction(this, 'updateWorldAging', 'EnvironmentalDynamicsSubsystem'); }
+  public regenerateObjectFromState(object: unknown, state: unknown): void { recordSubsystemAction(this, 'regenerateObjectFromState', 'EnvironmentalDynamicsSubsystem'); }
+  public advanceSeasonalChanges(region: unknown, season: string): void { recordSubsystemAction(this, 'advanceSeasonalChanges', 'EnvironmentalDynamicsSubsystem'); }
+  public updateWorldAging(region: unknown, deltaTime: number): void { recordSubsystemAction(this, 'updateWorldAging', 'EnvironmentalDynamicsSubsystem'); }
 
   // 741–760. Tương tác giữa công cụ và môi trường
   /**
@@ -454,7 +532,7 @@ export class EnvironmentalDynamicsSubsystem {
    * thật giữa vùng của công cụ và vật thể (AABB nếu có `bounds`, nếu không
    * thì so bán kính quanh tâm).
    */
-  public detectToolContact(tool: any, object: any): boolean {
+  public detectToolContact(tool: unknown, object: unknown): boolean {
     const toolBounds = this.boundsOf(tool);
     const objectBounds = this.boundsOf(object);
     if (toolBounds && objectBounds) return boundsOverlap(toolBounds, objectBounds);
@@ -479,15 +557,16 @@ export class EnvironmentalDynamicsSubsystem {
    *  - độ sắc hiệu dụng suy ra từ độ cứng thật của vật bị đánh;
    *  - điểm tiếp xúc lấy theo vị trí / điểm va chạm thật của vật.
    */
-  public calculateToolImpact(tool: any, object: any): ToolImpact {
-    const mass = Number(tool?.mass ?? tool?.weight ?? DEFAULT_TOOL_MASS);
+  public calculateToolImpact(tool: unknown, object: unknown): ToolImpact {
+    const toolRecord = asRecord(tool);
+    const mass = Number(toolRecord?.mass ?? toolRecord?.weight ?? DEFAULT_TOOL_MASS);
     const speed = this.swingSpeedOf(tool);
     const kineticEnergy =
       0.5 * (Number.isFinite(mass) && mass > 0 ? mass : DEFAULT_TOOL_MASS) * speed * speed;
     const hardness = this.hardnessOf(object);
     const sharpness = this.sharpnessOf(tool, hardness);
     const impact: ToolImpact = {
-      toolType: tool?.type ?? 'axe',
+      toolType: typeof toolRecord?.type === 'string' ? toolRecord.type : 'axe',
       kineticEnergy,
       sharpness,
       contactPoint: this.contactPointOf(object),
@@ -497,34 +576,39 @@ export class EnvironmentalDynamicsSubsystem {
   }
 
   /** Tốc độ đung đưa của công cụ (m/s) — số, vector vận tốc hoặc mặc định. */
-  private swingSpeedOf(tool: any): number {
-    const candidate = tool?.swingSpeed ?? tool?.speed ?? tool?.swooshSpeed ?? tool?.velocity;
+  private swingSpeedOf(tool: unknown): number {
+    const record = asRecord(tool);
+    const candidate = record?.swingSpeed ?? record?.speed ?? record?.swooshSpeed ?? record?.velocity;
     if (candidate === undefined || candidate === null) return DEFAULT_SWING_SPEED;
     const magnitude = forceMagnitude(candidate);
     return magnitude > 0 ? magnitude : DEFAULT_SWING_SPEED;
   }
 
   /** Độ cứng của vật bị đánh — suy từ vật liệu hoặc kích thước nếu có. */
-  private hardnessOf(object: any): number {
-    const declared = Number(object?.hardness ?? object?.material?.hardness ?? NaN);
+  private hardnessOf(object: unknown): number {
+    const record = asRecord(object);
+    const material = asRecord(record?.material);
+    const declared = Number(record?.hardness ?? material?.hardness ?? NaN);
     if (Number.isFinite(declared) && declared > 0) return declared;
-    const thickness = Number(object?.thickness ?? NaN);
+    const thickness = Number(record?.thickness ?? NaN);
     if (Number.isFinite(thickness) && thickness > 0) return thickness * 5;
     return DEFAULT_TARGET_HARDNESS;
   }
 
   /** Độ sắc hiệu dụng của công cụ trên vật bị đánh. */
-  private sharpnessOf(tool: any, hardness: number): number {
-    const declared = Number(tool?.sharpness ?? tool?.sharp ?? NaN);
+  private sharpnessOf(tool: unknown, hardness: number): number {
+    const record = asRecord(tool);
+    const declared = Number(record?.sharpness ?? record?.sharp ?? NaN);
     if (Number.isFinite(declared) && declared > 0) return Math.min(1, declared);
     // Vật cứng hơn thì lưỡi cùng độ sắc bị "mất" hiệu quả hơn.
     return Math.max(0.1, Math.min(1, 1 - Math.min(0.8, hardness / 10)));
   }
 
   /** Điểm tiếp xúc của cú đánh — theo vị trí hoặc điểm va chạm của vật. */
-  private contactPointOf(object: any): Vec3 {
-    const source = object?.contactPoint ?? object?.impactPoint ?? object?.position;
-    if (source && typeof source === 'object') {
+  private contactPointOf(object: unknown): Vec3 {
+    const record = asRecord(object);
+    const source = asRecord(record?.contactPoint ?? record?.impactPoint ?? record?.position);
+    if (source) {
       const x = Number(source.x ?? 0);
       const y = Number(source.y ?? 0);
       const z = Number(source.z ?? 0);
@@ -537,11 +621,19 @@ export class EnvironmentalDynamicsSubsystem {
   // Helper đọc dữ liệu thật — thay cho giá trị đóng cứng
   // -------------------------------------------------------------------------
 
+  /** Định danh của đối tượng (chuỗi hoặc bản ghi có `id`). */
+  private idOf(object: unknown, fallback = 'obj'): string {
+    if (typeof object === 'string') return object;
+    const id = asRecord(object)?.id;
+    return typeof id === 'string' ? id : fallback;
+  }
+
   /** Số lượng từ nhiều khoá khả năng (fallback khi dữ liệu không có). */
-  private countOf(source: any, keys: string[], fallback: number): number {
-    if (source && typeof source === 'object') {
+  private countOf(source: unknown, keys: string[], fallback: number): number {
+    const record = asRecord(source);
+    if (record) {
       for (const key of keys) {
-        const value = (source as Record<string, unknown>)[key];
+        const value = record[key];
         if (typeof value === 'number' && Number.isFinite(value) && value >= 0) {
           return Math.floor(value);
         }
@@ -551,10 +643,21 @@ export class EnvironmentalDynamicsSubsystem {
     return fallback;
   }
 
-  /** Vị trí thế giới của đối tượng. */
-  private positionOf(source: any): Vec3 {
-    const p = source?.position ?? source?.origin ?? source?.center ?? source?.location;
-    if (p && typeof p === 'object') {
+  /** Vị trí thế giới của đối tượng — chấp nhận cả vector trực tiếp lẫn `position` lồng nhau. */
+  private positionOf(source: unknown): Vec3 {
+    const record = asRecord(source);
+    if (!record) return { x: 0, y: 0, z: 0 };
+
+    // Vector trực tiếp `{ x, y, z }` (ví dụ vị trí camera).
+    const directX = Number(record.x ?? NaN);
+    const directY = Number(record.y ?? NaN);
+    const directZ = Number(record.z ?? NaN);
+    if (Number.isFinite(directX) && Number.isFinite(directY) && Number.isFinite(directZ)) {
+      return { x: directX, y: directY, z: directZ };
+    }
+
+    const p = asRecord(record.position ?? record.origin ?? record.center ?? record.location);
+    if (p) {
       const x = Number(p.x ?? 0);
       const y = Number(p.y ?? 0);
       const z = Number(p.z ?? 0);
@@ -564,11 +667,20 @@ export class EnvironmentalDynamicsSubsystem {
   }
 
   /** Kích thước đặc trưng (bán kính / cạnh lớn nhất) của đối tượng. */
-  private extentOf(source: any, fallback = 1): number {
-    const size = source?.size ?? source?.radius ?? source?.scale ?? source?.bounds;
+  private extentOf(source: unknown, fallback = 1): number {
+    const record = asRecord(source);
+    const size = record?.size ?? record?.radius ?? record?.scale ?? record?.bounds;
     if (typeof size === 'number' && Number.isFinite(size) && size > 0) return size;
-    if (size && typeof size === 'object') {
-      const values = [size.x, size.y, size.z, size.max, size.width, size.height].map((v) => Number(v));
+    const sizeRecord = asRecord(size);
+    if (sizeRecord) {
+      const values = [
+        sizeRecord.x,
+        sizeRecord.y,
+        sizeRecord.z,
+        sizeRecord.max,
+        sizeRecord.width,
+        sizeRecord.height,
+      ].map((v) => Number(v));
       const max = values.filter((v) => Number.isFinite(v) && v > 0).sort((a, b) => b - a)[0];
       if (max) return max;
     }
@@ -592,20 +704,20 @@ export class EnvironmentalDynamicsSubsystem {
   }
 
   /** Số lượng hạt chia cho một đối tượng, có tỉ lệ theo kích thước. */
-  private particleCountFor(source: any, keys: string[], base: number): number {
+  private particleCountFor(source: unknown, keys: string[], base: number): number {
     const declared = this.countOf(source, keys, -1);
     if (declared >= 0) return declared;
     return Math.max(1, Math.round(base * Math.max(0.25, this.extentOf(source, 1))));
   }
 
   /** Hộp giới hạn AABB khai báo của đối tượng (nếu có). */
-  private boundsOf(source: any): Aabb | null {
-    const bounds = source?.bounds;
-    if (!bounds || typeof bounds !== 'object') return null;
-    const min = bounds.min;
-    const max = bounds.max;
+  private boundsOf(source: unknown): Aabb | null {
+    const bounds = asRecord(asRecord(source)?.bounds);
+    if (!bounds) return null;
+    const min = asRecord(bounds.min);
+    const max = asRecord(bounds.max);
     if (!min || !max) return null;
-    const read = (v: any, axis: 'x' | 'y' | 'z') => Number(v?.[axis] ?? NaN);
+    const read = (v: Record<string, unknown> | null, axis: 'x' | 'y' | 'z') => Number(v?.[axis] ?? NaN);
     const minX = read(min, 'x');
     const minY = read(min, 'y');
     const minZ = read(min, 'z');
@@ -625,11 +737,12 @@ export class EnvironmentalDynamicsSubsystem {
    * Dùng cho lực, pháp tuyến mặt phẳng… Trả hướng mặc định khi dữ liệu không
    * dùng được.
    */
-  private directionOf(vector: any): Vec3 {
-    if (vector && typeof vector === 'object') {
-      const x = Number(vector.x ?? NaN);
-      const y = Number(vector.y ?? NaN);
-      const z = Number(vector.z ?? NaN);
+  private directionOf(vector: unknown): Vec3 {
+    const record = asRecord(vector);
+    if (record) {
+      const x = Number(record.x ?? NaN);
+      const y = Number(record.y ?? NaN);
+      const z = Number(record.z ?? NaN);
       if (Number.isFinite(x) && Number.isFinite(y) && Number.isFinite(z)) {
         const length = Math.hypot(x, y, z);
         if (length > 0) return { x: x / length, y: y / length, z: z / length };
@@ -638,31 +751,31 @@ export class EnvironmentalDynamicsSubsystem {
     return { x: 0, y: 1, z: 0 };
   }
 
-  public applyHammerImpact(object: any, impact: any): void { recordSubsystemAction(this, 'applyHammerImpact', 'EnvironmentalDynamicsSubsystem'); }
-  public strikeObjectWithTool(object: any, tool: any): void {
+  public applyHammerImpact(object: unknown, impact: unknown): void { recordSubsystemAction(this, 'applyHammerImpact', 'EnvironmentalDynamicsSubsystem'); }
+  public strikeObjectWithTool(object: unknown, tool: unknown): void {
     this.calculateToolImpact(tool, object);
   }
 
-  public cutVegetationWithTool(plant: any, tool: any): void { recordSubsystemAction(this, 'cutVegetationWithTool', 'EnvironmentalDynamicsSubsystem'); }
-  public sawWoodObject(wood: any, tool: any): void { recordSubsystemAction(this, 'sawWoodObject', 'EnvironmentalDynamicsSubsystem'); }
-  public digTerrainWithTool(terrain: any, tool: any): void { recordSubsystemAction(this, 'digTerrainWithTool', 'EnvironmentalDynamicsSubsystem'); }
-  public excavateRockWithTool(rock: any, tool: any): void { recordSubsystemAction(this, 'excavateRockWithTool', 'EnvironmentalDynamicsSubsystem'); }
-  public chipStoneWithTool(rock: any, tool: any): void { recordSubsystemAction(this, 'chipStoneWithTool', 'EnvironmentalDynamicsSubsystem'); }
-  public breakIceWithTool(ice: any, tool: any): void { recordSubsystemAction(this, 'breakIceWithTool', 'EnvironmentalDynamicsSubsystem'); }
-  public pryOpenObject(object: any, tool: any): void { recordSubsystemAction(this, 'pryOpenObject', 'EnvironmentalDynamicsSubsystem'); }
-  public leverObjectWithTool(object: any, tool: any): void { recordSubsystemAction(this, 'leverObjectWithTool', 'EnvironmentalDynamicsSubsystem'); }
-  public drillIntoMaterial(object: any, tool: any): void { recordSubsystemAction(this, 'drillIntoMaterial', 'EnvironmentalDynamicsSubsystem'); }
-  public grindMaterialSurface(object: any, tool: any): void { recordSubsystemAction(this, 'grindMaterialSurface', 'EnvironmentalDynamicsSubsystem'); }
-  public polishMaterialSurface(object: any, tool: any): void { recordSubsystemAction(this, 'polishMaterialSurface', 'EnvironmentalDynamicsSubsystem'); }
-  public weldMetalParts(partA: any, partB: any): void { recordSubsystemAction(this, 'weldMetalParts', 'EnvironmentalDynamicsSubsystem'); }
-  public fastenStructuralParts(partA: any, partB: any): void { recordSubsystemAction(this, 'fastenStructuralParts', 'EnvironmentalDynamicsSubsystem'); }
-  public detachFastenedPart(object: any, part: any): void { recordSubsystemAction(this, 'detachFastenedPart', 'EnvironmentalDynamicsSubsystem'); }
-  public repairObjectWithMaterial(object: any, material: any): void { recordSubsystemAction(this, 'repairObjectWithMaterial', 'EnvironmentalDynamicsSubsystem'); }
-  public updateToolDamage(tool: any, impact: any): void { recordSubsystemAction(this, 'updateToolDamage', 'EnvironmentalDynamicsSubsystem'); }
+  public cutVegetationWithTool(plant: unknown, tool: unknown): void { recordSubsystemAction(this, 'cutVegetationWithTool', 'EnvironmentalDynamicsSubsystem'); }
+  public sawWoodObject(wood: unknown, tool: unknown): void { recordSubsystemAction(this, 'sawWoodObject', 'EnvironmentalDynamicsSubsystem'); }
+  public digTerrainWithTool(terrain: unknown, tool: unknown): void { recordSubsystemAction(this, 'digTerrainWithTool', 'EnvironmentalDynamicsSubsystem'); }
+  public excavateRockWithTool(rock: unknown, tool: unknown): void { recordSubsystemAction(this, 'excavateRockWithTool', 'EnvironmentalDynamicsSubsystem'); }
+  public chipStoneWithTool(rock: unknown, tool: unknown): void { recordSubsystemAction(this, 'chipStoneWithTool', 'EnvironmentalDynamicsSubsystem'); }
+  public breakIceWithTool(ice: unknown, tool: unknown): void { recordSubsystemAction(this, 'breakIceWithTool', 'EnvironmentalDynamicsSubsystem'); }
+  public pryOpenObject(object: unknown, tool: unknown): void { recordSubsystemAction(this, 'pryOpenObject', 'EnvironmentalDynamicsSubsystem'); }
+  public leverObjectWithTool(object: unknown, tool: unknown): void { recordSubsystemAction(this, 'leverObjectWithTool', 'EnvironmentalDynamicsSubsystem'); }
+  public drillIntoMaterial(object: unknown, tool: unknown): void { recordSubsystemAction(this, 'drillIntoMaterial', 'EnvironmentalDynamicsSubsystem'); }
+  public grindMaterialSurface(object: unknown, tool: unknown): void { recordSubsystemAction(this, 'grindMaterialSurface', 'EnvironmentalDynamicsSubsystem'); }
+  public polishMaterialSurface(object: unknown, tool: unknown): void { recordSubsystemAction(this, 'polishMaterialSurface', 'EnvironmentalDynamicsSubsystem'); }
+  public weldMetalParts(partA: unknown, partB: unknown): void { recordSubsystemAction(this, 'weldMetalParts', 'EnvironmentalDynamicsSubsystem'); }
+  public fastenStructuralParts(partA: unknown, partB: unknown): void { recordSubsystemAction(this, 'fastenStructuralParts', 'EnvironmentalDynamicsSubsystem'); }
+  public detachFastenedPart(object: unknown, part: unknown): void { recordSubsystemAction(this, 'detachFastenedPart', 'EnvironmentalDynamicsSubsystem'); }
+  public repairObjectWithMaterial(object: unknown, material: unknown): void { recordSubsystemAction(this, 'repairObjectWithMaterial', 'EnvironmentalDynamicsSubsystem'); }
+  public updateToolDamage(tool: unknown, impact: unknown): void { recordSubsystemAction(this, 'updateToolDamage', 'EnvironmentalDynamicsSubsystem'); }
 
   // 761–780. Mô phỏng phá hủy nâng cao
-  public initializeDestructionGraph(object: any): FractureGraph {
-    const id = typeof object === 'string' ? object : (object?.id ?? 'destr');
+  public initializeDestructionGraph(object: unknown): FractureGraph {
+    const id = this.idOf(object, 'destr');
     const g: FractureGraph = {
       nodes: [{ x: 0, y: 0, z: 0 }, { x: 1, y: 0, z: 0 }],
       edges: [[0, 1]],
@@ -678,11 +791,12 @@ export class EnvironmentalDynamicsSubsystem {
    * Trước đây luôn trả `{ pattern: 'voronoi' }`. Nay số ô nứt suy ra từ năng
    * lượng va chạm, mỗi ô có tâm tính từ vị trí va chạm và kích thước vật thể.
    */
-  public generateFracturePattern(object: any, impact: any): any {
-    const energy = Number(impact?.energy ?? impact?.kineticEnergy ?? impact?.force ?? 100);
+  public generateFracturePattern(object: unknown, impact: unknown): FracturePattern {
+    const impactRecord = asRecord(impact);
+    const energy = Number(impactRecord?.energy ?? impactRecord?.kineticEnergy ?? impactRecord?.force ?? 100);
     const safeEnergy = Number.isFinite(energy) && energy > 0 ? energy : 100;
     const cells = Math.max(2, Math.min(24, Math.round(safeEnergy / 25)));
-    const origin = this.positionOf(impact?.position ? impact : object);
+    const origin = this.positionOf(impactRecord?.position ? impact : object);
     const spread = this.extentOf(object, 1);
     const cellSeeds: Vec3[] = [];
     for (let i = 0; i < cells; i++) {
@@ -703,15 +817,17 @@ export class EnvironmentalDynamicsSubsystem {
     };
   }
 
-  public propagateStructuralCrack(object: any, crack: any): void { recordSubsystemAction(this, 'propagateStructuralCrack', 'EnvironmentalDynamicsSubsystem'); }
+  public propagateStructuralCrack(object: unknown, crack: unknown): void { recordSubsystemAction(this, 'propagateStructuralCrack', 'EnvironmentalDynamicsSubsystem'); }
   /**
    * Tốc độ lan truyền vết nứt (m/giây).
    *
    * Trước đây luôn `1.5`. Nay suy từ độ bền vật liệu và chiều dài vết nứt.
    */
-  public calculateFracturePropagation(object: any): number {
-    const toughness = Number(object?.toughness ?? object?.hardness ?? 1);
-    const crackLength = Number(object?.crackLength ?? object?.size?.x ?? object?.width ?? 1);
+  public calculateFracturePropagation(object: unknown): number {
+    const record = asRecord(object);
+    const size = asRecord(record?.size);
+    const toughness = Number(record?.toughness ?? record?.hardness ?? 1);
+    const crackLength = Number(record?.crackLength ?? size?.x ?? record?.width ?? 1);
     const t = Number.isFinite(toughness) && toughness > 0 ? toughness : 1;
     const length = Number.isFinite(crackLength) && crackLength > 0 ? crackLength : 1;
     return Math.max(0.05, (1 + length) / t);
@@ -723,7 +839,7 @@ export class EnvironmentalDynamicsSubsystem {
    * Trước đây luôn `{ x: 0, y: 1.5, z: 0 }`. Nay điểm gãy nằm trên vật thể,
    * lệch theo hướng lực và theo kích thước vật thể.
    */
-  public calculateBreakPoint(object: any, force: any): Vec3 {
+  public calculateBreakPoint(object: unknown, force: unknown): Vec3 {
     const center = this.positionOf(object);
     const size = this.extentOf(object, 1);
     const direction = this.directionOf(force);
@@ -741,10 +857,13 @@ export class EnvironmentalDynamicsSubsystem {
    * Trước đây luôn `250`. Nay tính từ độ cứng, diện tích chịu lực và lực tác
    * dụng thật.
    */
-  public calculateFractureEnergy(object: any, force: any): number {
-    const hardness = Number(object?.hardness ?? object?.material?.hardness ?? 1);
+  public calculateFractureEnergy(object: unknown, force: unknown): number {
+    const record = asRecord(object);
+    const material = asRecord(record?.material);
+    const size = asRecord(record?.size);
+    const hardness = Number(record?.hardness ?? material?.hardness ?? 1);
     const h = Number.isFinite(hardness) && hardness > 0 ? hardness : 1;
-    const area = Number(object?.area ?? object?.size?.x ?? object?.width ?? 1);
+    const area = Number(record?.area ?? size?.x ?? record?.width ?? 1);
     const a = Number.isFinite(area) && area > 0 ? area : 1;
     const applied = forceMagnitude(force);
     return Math.max(0, h * a * applied);
@@ -753,13 +872,16 @@ export class EnvironmentalDynamicsSubsystem {
   /**
    * Cắt vật thể bằng mặt phẳng — hai nửa đối xứng qua mặt phẳng.
    */
-  public splitMeshAlongPlane(object: any, plane: any): any[] {
+  public splitMeshAlongPlane(object: unknown, plane: unknown): MeshPart[] {
     const center = this.positionOf(object);
     const size = this.extentOf(object, 1);
-    const normal = this.directionOf(plane?.normal ?? plane);
-    const offset = Number(plane?.constant ?? plane?.distance ?? 0);
+    const planeRecord = asRecord(plane);
+    const normal = this.directionOf(planeRecord?.normal ?? plane);
+    const offset = Number(planeRecord?.constant ?? planeRecord?.distance ?? 0);
     const half = Number.isFinite(offset) ? offset : 0;
-    const parts: any[] = [];
+    const objectRecord = asRecord(object);
+    const source = typeof objectRecord?.id === 'string' ? objectRecord.id : 'object';
+    const parts: MeshPart[] = [];
     for (const sign of [-1, 1]) {
       parts.push({
         id: `part_${sign < 0 ? 'A' : 'B'}`,
@@ -770,7 +892,7 @@ export class EnvironmentalDynamicsSubsystem {
         },
         size: size / 2,
         side: sign < 0 ? 'negative' : 'positive',
-        source: object?.id ?? 'object',
+        source,
       });
     }
     return parts;
@@ -781,19 +903,28 @@ export class EnvironmentalDynamicsSubsystem {
    * Trước đây luôn trả một mảnh `part_C`. Nay số mảnh bằng số điểm của đường
    * cong, mỗi mảnh nằm tại điểm tương ứng trên đường cong.
    */
-  public splitMeshAlongCurve(object: any, curve: any): any[] {
-    const points = Array.isArray(curve)
+  public splitMeshAlongCurve(object: unknown, curve: unknown): MeshPart[] {
+    const curveRecord = asRecord(curve);
+    const points: unknown[] = Array.isArray(curve)
       ? curve
-      : (curve?.points ?? curve?.controlPoints ?? curve?.path ?? []);
+      : Array.isArray(curveRecord?.points)
+        ? (curveRecord.points as unknown[])
+        : Array.isArray(curveRecord?.controlPoints)
+          ? (curveRecord.controlPoints as unknown[])
+          : Array.isArray(curveRecord?.path)
+            ? (curveRecord.path as unknown[])
+            : [];
     const segments = Math.max(1, points.length);
     const origin = this.positionOf(object);
     const spread = this.extentOf(object, 1);
-    const parts: any[] = [];
+    const objectRecord = asRecord(object);
+    const source = typeof objectRecord?.id === 'string' ? objectRecord.id : 'object';
+    const parts: MeshPart[] = [];
     for (let i = 0; i < segments; i++) {
-      const point = points[i] ?? {};
-      const x = Number(point.x ?? 0);
-      const y = Number(point.y ?? 0);
-      const z = Number(point.z ?? 0);
+      const point = asRecord(points[i]);
+      const x = Number(point?.x ?? 0);
+      const y = Number(point?.y ?? 0);
+      const z = Number(point?.z ?? 0);
       parts.push({
         id: `part_${i}`,
         position: {
@@ -803,13 +934,13 @@ export class EnvironmentalDynamicsSubsystem {
         },
         size: spread / segments,
         segment: i,
-        source: object?.id ?? 'object',
+        source,
       });
     }
     return parts;
   }
 
-  public createFractureCapSurface(object: any, fracture: any): void { recordSubsystemAction(this, 'createFractureCapSurface', 'EnvironmentalDynamicsSubsystem'); }
+  public createFractureCapSurface(object: unknown, fracture: unknown): void { recordSubsystemAction(this, 'createFractureCapSurface', 'EnvironmentalDynamicsSubsystem'); }
   /**
    * Mảnh vụn từ mẫu vết nứt.
    *
@@ -817,58 +948,61 @@ export class EnvironmentalDynamicsSubsystem {
    * nứt (hoặc suy ra từ vật thể), mỗi mảnh có vị trí tại tâm ô và khối lượng
    * tính từ khối lượng vật thể chia đều.
    */
-  public generateFractureDebris(object: any, fracture: any): any[] {
-    const seeds = Array.isArray(fracture?.cells)
-      ? fracture.cells
-      : Array.isArray(fracture?.seeds)
-        ? fracture.seeds
+  public generateFractureDebris(object: unknown, fracture: unknown): DebrisFragment[] {
+    const fractureRecord = asRecord(fracture);
+    const seeds: unknown[] = Array.isArray(fractureRecord?.cells)
+      ? (fractureRecord.cells as unknown[])
+      : Array.isArray(fractureRecord?.seeds)
+        ? (fractureRecord.seeds as unknown[])
         : [];
     const count = seeds.length || this.particleCountFor(object, ['fragmentCount', 'debrisCount'], 5);
     const origin = this.positionOf(object);
     const spread = this.extentOf(object, 0.5);
-    const totalMass = Number(object?.mass ?? object?.weight ?? 1);
+    const objectRecord = asRecord(object);
+    const totalMass = Number(objectRecord?.mass ?? objectRecord?.weight ?? 1);
     const perPiece = totalMass > 0 ? totalMass / count : 0;
-    const debris: any[] = [];
+    const source = typeof objectRecord?.id === 'string' ? objectRecord.id : 'object';
+    const debris: DebrisFragment[] = [];
     for (let i = 0; i < count; i++) {
-      const seed = seeds[i];
-      const base =
-        seed && typeof seed === 'object'
-          ? {
-              x: Number(seed.x ?? 0),
-              y: Number(seed.y ?? 0),
-              z: Number(seed.z ?? 0),
-            }
-          : this.scatter(i, spread);
+      const seed = asRecord(seeds[i]);
+      const base = seed
+        ? {
+            x: Number(seed.x ?? 0),
+            y: Number(seed.y ?? 0),
+            z: Number(seed.z ?? 0),
+          }
+        : this.scatter(i, spread);
       debris.push({
         id: `debris_frag_${i}`,
         position: { x: origin.x + base.x, y: origin.y + base.y, z: origin.z + base.z },
         velocity: { x: base.x * 1.5, y: 0.6 + (i % 3) * 0.25, z: base.z * 1.5 },
         mass: perPiece,
         size: spread / Math.max(1, Math.sqrt(count)),
-        source: object?.id ?? 'object',
+        source,
       });
     }
     return debris;
   }
 
-  public assignDebrisMass(fragments: any[]): void { recordSubsystemAction(this, 'assignDebrisMass', 'EnvironmentalDynamicsSubsystem'); }
-  public assignDebrisCollision(fragments: any[]): void { recordSubsystemAction(this, 'assignDebrisCollision', 'EnvironmentalDynamicsSubsystem'); }
+  public assignDebrisMass(fragments: unknown[]): void { recordSubsystemAction(this, 'assignDebrisMass', 'EnvironmentalDynamicsSubsystem'); }
+  public assignDebrisCollision(fragments: unknown[]): void { recordSubsystemAction(this, 'assignDebrisCollision', 'EnvironmentalDynamicsSubsystem'); }
   /**
    * Quỹ đạo nảy của mảnh vụn — ném xiên theo trọng trường.
    *
    * Trước đây luôn trả đúng một điểm `{ x: 0, y: 2, z: 0 }`. Nay quỹ đạo được
    * tích phân từ vị trí, vận tốc và gia tốc trọng trường của mảnh vụn.
    */
-  public calculateDebrisTrajectory(fragment: any): Vec3[] {
+  public calculateDebrisTrajectory(fragment: unknown): Vec3[] {
     const start = this.positionOf(fragment);
-    const velocity = fragment?.velocity ?? { x: 0, y: 0, z: 0 };
+    const fragmentRecord = asRecord(fragment);
+    const velocity = asRecord(fragmentRecord?.velocity) ?? { x: 0, y: 0, z: 0 };
     let vx = Number(velocity.x ?? 0);
     let vy = Number(velocity.y ?? 0);
     let vz = Number(velocity.z ?? 0);
     if (!Number.isFinite(vx)) vx = 0;
     if (!Number.isFinite(vy)) vy = 0;
     if (!Number.isFinite(vz)) vz = 0;
-    const gravity = Number(fragment?.gravity ?? 9.81);
+    const gravity = Number(fragmentRecord?.gravity ?? 9.81);
     const g = Number.isFinite(gravity) ? gravity : 9.81;
     const steps = Math.max(2, Math.min(64, this.countOf(fragment, ['steps', 'sampleCount'], 16)));
     const dt = 1 / 60;
@@ -886,7 +1020,7 @@ export class EnvironmentalDynamicsSubsystem {
     return path;
   }
 
-  public simulateDebrisPileCollapse(pile: any): void { recordSubsystemAction(this, 'simulateDebrisPileCollapse', 'EnvironmentalDynamicsSubsystem'); }
+  public simulateDebrisPileCollapse(pile: unknown): void { recordSubsystemAction(this, 'simulateDebrisPileCollapse', 'EnvironmentalDynamicsSubsystem'); }
   /**
    * Mảnh vụn có va chạm thứ cấp không.
    *
@@ -894,33 +1028,34 @@ export class EnvironmentalDynamicsSubsystem {
    * đất (độ cao ≤ mặt đất) HOẶC rơi đủ nhanh để vượt ngưỡng va chạm khi còn
    * ở gần mặt đất.
    */
-  public detectSecondaryImpact(debris: any): boolean {
-    const speed = forceMagnitude(debris?.velocity ?? 0);
-    const threshold = Number(debris?.threshold ?? debris?.impactThreshold ?? 2);
+  public detectSecondaryImpact(debris: unknown): boolean {
+    const record = asRecord(debris);
+    const speed = forceMagnitude(record?.velocity ?? 0);
+    const threshold = Number(record?.threshold ?? record?.impactThreshold ?? 2);
     const limit = Number.isFinite(threshold) && threshold > 0 ? threshold : 2;
-    const groundY = Number(debris?.groundY ?? 0);
+    const groundY = Number(record?.groundY ?? 0);
     const base = Number.isFinite(groundY) ? groundY : 0;
     const position = this.positionOf(debris);
     if (position.y <= base + 0.05) return true;
     return speed > 0 && speed >= limit && position.y < base + limit;
   }
 
-  public triggerSecondaryFracture(object: any, impact: any): void { recordSubsystemAction(this, 'triggerSecondaryFracture', 'EnvironmentalDynamicsSubsystem'); }
-  public simulateProgressiveObjectFailure(object: any): void { recordSubsystemAction(this, 'simulateProgressiveObjectFailure', 'EnvironmentalDynamicsSubsystem'); }
-  public stabilizeRemainingStructure(object: any): void { recordSubsystemAction(this, 'stabilizeRemainingStructure', 'EnvironmentalDynamicsSubsystem'); }
-  public rebuildDestructibleMesh(object: any): void { recordSubsystemAction(this, 'rebuildDestructibleMesh', 'EnvironmentalDynamicsSubsystem'); }
-  public finalizeDestructionState(object: any): void { recordSubsystemAction(this, 'finalizeDestructionState', 'EnvironmentalDynamicsSubsystem'); }
+  public triggerSecondaryFracture(object: unknown, impact: unknown): void { recordSubsystemAction(this, 'triggerSecondaryFracture', 'EnvironmentalDynamicsSubsystem'); }
+  public simulateProgressiveObjectFailure(object: unknown): void { recordSubsystemAction(this, 'simulateProgressiveObjectFailure', 'EnvironmentalDynamicsSubsystem'); }
+  public stabilizeRemainingStructure(object: unknown): void { recordSubsystemAction(this, 'stabilizeRemainingStructure', 'EnvironmentalDynamicsSubsystem'); }
+  public rebuildDestructibleMesh(object: unknown): void { recordSubsystemAction(this, 'rebuildDestructibleMesh', 'EnvironmentalDynamicsSubsystem'); }
+  public finalizeDestructionState(object: unknown): void { recordSubsystemAction(this, 'finalizeDestructionState', 'EnvironmentalDynamicsSubsystem'); }
 
   // 781–800. Animation, vật lý, đồng bộ và tối ưu hóa
   public initializeWorldAnimation(): void { recordSubsystemAction(this, 'initializeWorldAnimation', 'EnvironmentalDynamicsSubsystem'); }
   public loadWorldAnimationClips(): string[] { return ['sway', 'flutter', 'wave']; }
-  public playWorldAnimation(object: any, animation: string): void { recordSubsystemAction(this, 'playWorldAnimation', 'EnvironmentalDynamicsSubsystem'); }
-  public blendWorldAnimations(object: any, animations: string[]): void { recordSubsystemAction(this, 'blendWorldAnimations', 'EnvironmentalDynamicsSubsystem'); }
-  public crossFadeWorldAnimation(object: any, from: string, to: string): void { recordSubsystemAction(this, 'crossFadeWorldAnimation', 'EnvironmentalDynamicsSubsystem'); }
+  public playWorldAnimation(object: unknown, animation: string): void { recordSubsystemAction(this, 'playWorldAnimation', 'EnvironmentalDynamicsSubsystem'); }
+  public blendWorldAnimations(object: unknown, animations: string[]): void { recordSubsystemAction(this, 'blendWorldAnimations', 'EnvironmentalDynamicsSubsystem'); }
+  public crossFadeWorldAnimation(object: unknown, from: string, to: string): void { recordSubsystemAction(this, 'crossFadeWorldAnimation', 'EnvironmentalDynamicsSubsystem'); }
   public updateWorldAnimationMixer(deltaTime: number): void { this.animationMixerTime += deltaTime; }
-  public applyRootMotionToObject(object: any, motion: Vec3): void { recordSubsystemAction(this, 'applyRootMotionToObject', 'EnvironmentalDynamicsSubsystem'); }
-  public interpolateObjectPosition(object: any, deltaTime: number): void { recordSubsystemAction(this, 'interpolateObjectPosition', 'EnvironmentalDynamicsSubsystem'); }
-  public interpolateObjectRotation(object: any, deltaTime: number): void { recordSubsystemAction(this, 'interpolateObjectRotation', 'EnvironmentalDynamicsSubsystem'); }
+  public applyRootMotionToObject(object: unknown, motion: Vec3): void { recordSubsystemAction(this, 'applyRootMotionToObject', 'EnvironmentalDynamicsSubsystem'); }
+  public interpolateObjectPosition(object: unknown, deltaTime: number): void { recordSubsystemAction(this, 'interpolateObjectPosition', 'EnvironmentalDynamicsSubsystem'); }
+  public interpolateObjectRotation(object: unknown, deltaTime: number): void { recordSubsystemAction(this, 'interpolateObjectRotation', 'EnvironmentalDynamicsSubsystem'); }
   /**
    * Cập nhật LOD của vật thể theo khoảng cách tới camera.
    *
@@ -928,26 +1063,25 @@ export class EnvironmentalDynamicsSubsystem {
    * tính từ khoảng cách thật giữa vật thể và camera (mức 0 gần nhất), rồi
    * lưu lại để các lần sau đọc được.
    */
-  public updateObjectLOD(object: any): number {
-    const id = typeof object === 'string' ? object : (object?.id ?? 'obj');
+  public updateObjectLOD(object: unknown): number {
+    const id = this.idOf(object);
+    const record = asRecord(object);
     const origin = this.positionOf(object);
-    const camera = this.positionOf(
-      object?.camera ?? object?.cameraPosition ?? object?.viewer ?? { x: 0, y: 0, z: 0 },
-    );
+    const camera = this.positionOf(record?.camera ?? record?.cameraPosition ?? record?.viewer ?? { x: 0, y: 0, z: 0 });
     const distance = Math.hypot(
       origin.x - camera.x,
       origin.y - camera.y,
       origin.z - camera.z,
     );
-    const far = Number(object?.farDistance ?? object?.lodFar ?? 100);
+    const far = Number(record?.farDistance ?? record?.lodFar ?? 100);
     const range = Number.isFinite(far) && far > 0 ? far : 100;
     const lod = Math.max(0, Math.min(3, Math.floor((distance / range) * 3)));
     this.objectLODs.set(id, lod);
     return lod;
   }
 
-  public updateVegetationLOD(region: any): void { recordSubsystemAction(this, 'updateVegetationLOD', 'EnvironmentalDynamicsSubsystem'); }
-  public updateDestructionLOD(object: any): void { recordSubsystemAction(this, 'updateDestructionLOD', 'EnvironmentalDynamicsSubsystem'); }
+  public updateVegetationLOD(region: unknown): void { recordSubsystemAction(this, 'updateVegetationLOD', 'EnvironmentalDynamicsSubsystem'); }
+  public updateDestructionLOD(object: unknown): void { recordSubsystemAction(this, 'updateDestructionLOD', 'EnvironmentalDynamicsSubsystem'); }
   /**
    * Loại bỏ các vật thể đã ra khỏi tầm nhìn.
    *
@@ -980,10 +1114,10 @@ export class EnvironmentalDynamicsSubsystem {
     }
     return slept;
   }
-  public wakeRigidBody(object: any): void { recordSubsystemAction(this, 'wakeRigidBody', 'EnvironmentalDynamicsSubsystem'); }
-  public synchronizePhysicsAndAnimation(object: any): void { recordSubsystemAction(this, 'synchronizePhysicsAndAnimation', 'EnvironmentalDynamicsSubsystem'); }
-  public rebuildWorldCollision(region: any): void { recordSubsystemAction(this, 'rebuildWorldCollision', 'EnvironmentalDynamicsSubsystem'); }
-  public updateWorldNavigation(region: any): void { recordSubsystemAction(this, 'updateWorldNavigation', 'EnvironmentalDynamicsSubsystem'); }
+  public wakeRigidBody(object: unknown): void { recordSubsystemAction(this, 'wakeRigidBody', 'EnvironmentalDynamicsSubsystem'); }
+  public synchronizePhysicsAndAnimation(object: unknown): void { recordSubsystemAction(this, 'synchronizePhysicsAndAnimation', 'EnvironmentalDynamicsSubsystem'); }
+  public rebuildWorldCollision(region: unknown): void { recordSubsystemAction(this, 'rebuildWorldCollision', 'EnvironmentalDynamicsSubsystem'); }
+  public updateWorldNavigation(region: unknown): void { recordSubsystemAction(this, 'updateWorldNavigation', 'EnvironmentalDynamicsSubsystem'); }
   /**
    * Kiểm tra tính hợp lệ của mô phỏng thế giới.
    *
@@ -991,8 +1125,8 @@ export class EnvironmentalDynamicsSubsystem {
    * thái, mật độ thảm thực vật, nhiệt độ, sức khoẻ vật thể và trạng thái
    * hệ hạt — trả `false` nếu bất kỳ giá trị nào nằm ngoài miền hợp lệ.
    */
-  public validateWorldSimulation(region: any): boolean {
-    const data = region ?? {};
+  public validateWorldSimulation(region: unknown): boolean {
+    const data = asRecord(region) ?? {};
 
     const balance = Number(data.balance ?? data.ecosystemBalance);
     if (Number.isFinite(balance) && (balance < 0 || balance > 1)) return false;
@@ -1006,8 +1140,9 @@ export class EnvironmentalDynamicsSubsystem {
     const humidity = Number(data.humidity);
     if (Number.isFinite(humidity) && (humidity < 0 || humidity > 1)) return false;
 
-    const objects = Array.isArray(data.objects) ? data.objects : [];
-    for (const object of objects) {
+    const objects: unknown[] = Array.isArray(data.objects) ? (data.objects as unknown[]) : [];
+    for (const raw of objects) {
+      const object = asRecord(raw);
       const health = Number(object?.health);
       if (Number.isFinite(health) && (health < 0 || health > 100)) return false;
       const age = Number(object?.age);
@@ -1018,7 +1153,7 @@ export class EnvironmentalDynamicsSubsystem {
       if (system.activeCount < 0 || system.activeCount > system.maxCount) return false;
     }
     for (const eco of this.ecosystems.values()) {
-      const value = Number(eco?.balance);
+      const value = Number(eco.balance);
       if (Number.isFinite(value) && (value < 0 || value > 1)) return false;
     }
     for (const lod of this.objectLODs.values()) {

@@ -54,7 +54,7 @@ export class HeadSensesSubsystem {
   // -------------------------------------------------------------------------
 
   /** Đọc số từ nhiều khoá, có giá trị thay thế khi dữ liệu thiếu. */
-  private numOf(source: any, keys: string[], fallback: number): number {
+  private numOf(source: unknown, keys: string[], fallback: number): number {
     if (source && typeof source === 'object') {
       for (const key of keys) {
         const value = (source as Record<string, unknown>)[key];
@@ -65,25 +65,28 @@ export class HeadSensesSubsystem {
   }
 
   /** Vị trí của nguồn kích thích. */
-  private positionOf(source: any): Vec3 {
-    const p = source?.position ?? source?.origin ?? source?.center;
-    if (p && typeof p === 'object') {
+  private positionOf(source: unknown): Vec3 {
+    const record =
+      source !== null && typeof source === 'object' ? (source as Record<string, unknown>) : {};
+    const raw = record.position ?? record.origin ?? record.center;
+    if (raw && typeof raw === 'object') {
+      const p = raw as Record<string, unknown>;
       const x = Number(p.x ?? 0);
       const y = Number(p.y ?? 0);
       const z = Number(p.z ?? 0);
       if (Number.isFinite(x) && Number.isFinite(y) && Number.isFinite(z)) return { x, y, z };
     }
     if (source && typeof source === 'object') {
-      const x = Number(source.x ?? NaN);
-      const y = Number(source.y ?? NaN);
-      const z = Number(source.z ?? NaN);
+      const x = Number(record.x ?? NaN);
+      const y = Number(record.y ?? NaN);
+      const z = Number(record.z ?? NaN);
       if (Number.isFinite(x) && Number.isFinite(y) && Number.isFinite(z)) return { x, y, z };
     }
     return { x: 0, y: 0, z: 0 };
   }
 
   /** Khoảng cách từ nguồn kích thích tới đầu con vật (gốc toạ độ). */
-  private distanceOf(source: any): number {
+  private distanceOf(source: unknown): number {
     const declared = this.numOf(source, ['distance'], NaN);
     if (Number.isFinite(declared)) return declared;
     const p = this.positionOf(source);
@@ -91,12 +94,12 @@ export class HeadSensesSubsystem {
   }
 
   /** Tần số của nguồn âm thanh (Hz). */
-  private frequencyOf(source: any): number {
+  private frequencyOf(source: unknown): number {
     return this.numOf(source, ['frequency', 'hz'], 1000);
   }
 
   /** Cường độ của nguồn kích thích. */
-  private strengthOf(source: any): number {
+  private strengthOf(source: unknown): number {
     return this.numOf(source, ['intensity', 'strength', 'concentration'], 0.5);
   }
 
@@ -171,12 +174,12 @@ export class HeadSensesSubsystem {
   public updateAnimalNose(): void { recordSubsystemAction(this, 'updateAnimalNose', 'HeadSensesSubsystem'); }
   public sniffAir(): void { recordSubsystemAction(this, 'sniffAir', 'HeadSensesSubsystem'); }
   public sniffGround(): void { recordSubsystemAction(this, 'sniffGround', 'HeadSensesSubsystem'); }
-  public sniffObject(object: any): void { recordSubsystemAction(this, 'sniffObject', 'HeadSensesSubsystem'); }
-  public detectScent(scent: any): boolean { return true; }
+  public sniffObject(object: unknown): void { recordSubsystemAction(this, 'sniffObject', 'HeadSensesSubsystem'); }
+  public detectScent(scent: unknown): boolean { return true; }
   public analyzeScentComposition(): string { return 'prey_trail'; }
-  public trackScentTrail(trail: any): void { recordSubsystemAction(this, 'trackScentTrail', 'HeadSensesSubsystem'); }
-  public followScentSource(source: any): void { recordSubsystemAction(this, 'followScentSource', 'HeadSensesSubsystem'); }
-  public distinguishFamiliarScent(scent: any): boolean { return true; }
+  public trackScentTrail(trail: unknown): void { recordSubsystemAction(this, 'trackScentTrail', 'HeadSensesSubsystem'); }
+  public followScentSource(source: unknown): void { recordSubsystemAction(this, 'followScentSource', 'HeadSensesSubsystem'); }
+  public distinguishFamiliarScent(scent: unknown): boolean { return true; }
   public detectFoodOdor(): boolean { return true; }
   public detectPredatorOdor(): boolean { return false; }
   public detectMateOdor(): boolean { return false; }
@@ -200,8 +203,8 @@ export class HeadSensesSubsystem {
   public lickWaterSurface(): void { this.extendTongue(); }
   public exposeTeeth(): void { recordSubsystemAction(this, 'exposeTeeth', 'HeadSensesSubsystem'); }
   public updateToothDisplay(): void { recordSubsystemAction(this, 'updateToothDisplay', 'HeadSensesSubsystem'); }
-  public biteFood(food: any): void { this.updateJawOpening(0.7); this.updateJawClosing(); }
-  public gripFoodWithMouth(food: any): void { this.updateJawClosing(); }
+  public biteFood(food: unknown): void { this.updateJawOpening(0.7); this.updateJawClosing(); }
+  public gripFoodWithMouth(food: unknown): void { this.updateJawClosing(); }
   public chewFood(): void { this.updateJawOpening(0.3); this.updateJawClosing(); }
   public swallowFood(): void { this.updateJawClosing(); }
   public regurgitateFood(): void { recordSubsystemAction(this, 'regurgitateFood', 'HeadSensesSubsystem'); }

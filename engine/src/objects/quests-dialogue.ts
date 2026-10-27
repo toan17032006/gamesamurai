@@ -25,7 +25,7 @@ export type FactionStanding =
   | 'revered'
   | 'exalted';
 
-export interface QuestObjective<TTarget = any> {
+export interface QuestObjective<TTarget = unknown> {
   id: string;
   description: string;
   type: ObjectiveType;
@@ -34,7 +34,7 @@ export interface QuestObjective<TTarget = any> {
   requiredAmount: number;
 }
 
-export interface QuestReward<TReward = any> {
+export interface QuestReward<TReward = unknown> {
   exp?: number;
   gold?: number;
   items?: TReward[];
@@ -42,11 +42,11 @@ export interface QuestReward<TReward = any> {
   reputationPoints?: number;
 }
 
-export interface DialogueChoice<TAction = any> {
+export interface DialogueChoice<TAction = unknown> {
   text: string;
   nextNodeId?: string;
   action?: TAction;
-  requiredCondition?: (player: any) => boolean;
+  requiredCondition?: (player: unknown) => boolean;
 }
 
 export interface DialogueNode<TChoice = DialogueChoice> {
@@ -177,7 +177,7 @@ export class DialogueTree<TChoice extends DialogueChoice = DialogueChoice> {
     return null;
   }
 
-  public chooseOption(choiceIndex: number, player?: any): DialogueNode<TChoice> | null {
+  public chooseOption(choiceIndex: number, player?: unknown): DialogueNode<TChoice> | null {
     if (!this._currentNode) return null;
 
     const choices = this._currentNode.choices;

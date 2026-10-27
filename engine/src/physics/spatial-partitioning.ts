@@ -180,7 +180,7 @@ export class EngineOctree<T = unknown> {
           return;
         }
       }
-      // If doesn't fit completely in any child, store at current node
+      // If it doesn't fit completely in a child, store at current node
       node.elements.push(item);
       return;
     }

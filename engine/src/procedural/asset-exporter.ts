@@ -41,6 +41,64 @@ export interface GltfExportOptions {
   includeSkins?: boolean;
 }
 
+/** Cấu trúc JSON glTF 2.0 tối thiểu mà exporter tạo ra. */
+export interface GltfScene {
+  nodes: number[];
+}
+
+export interface GltfNode {
+  name?: string;
+  matrix?: number[];
+  translation?: number[];
+  rotation?: number[];
+  scale?: number[];
+  mesh?: number;
+  skin?: number;
+  children?: number[];
+}
+
+export interface GltfAccessor {
+  bufferView: number;
+  byteOffset: number;
+  componentType: number;
+  count: number;
+  type: string;
+  min?: number[];
+  max?: number[];
+}
+
+export interface GltfBufferView {
+  buffer: number;
+  byteOffset: number;
+  byteLength: number;
+}
+
+export interface GltfMesh {
+  name: string;
+  primitives: Array<Record<string, unknown>>;
+}
+
+export interface GltfImage {
+  uri: string;
+  name?: string;
+}
+
+export interface GltfSampler {
+  wrapS: number;
+  wrapT: number;
+}
+
+export interface GltfTexture {
+  source: number;
+  sampler: number;
+}
+
+export interface GltfSkin {
+  joints: number[];
+  inverseBindMatrices: number;
+  name?: string;
+}
+
 export interface StlExportOptions {
   /** 'binary' (mặc định) hoặc 'ascii'. */
   encoding?: 'binary' | 'ascii';
@@ -163,20 +221,26 @@ export class AssetExporter {
       mtlOutput += `newmtl ${matName}\n`;
       mtlOutput += 'Ns 250.0\nKa 1.000 1.000 1.000\n';
 
-      const color = (mat as any).color ? (mat as any).color : new THREE.Color(0.8, 0.8, 0.8);
+      const material = mat as THREE.Material & {
+        color?: THREE.Color;
+        map?: THREE.Texture;
+        normalMap?: THREE.Texture;
+        alphaMap?: THREE.Texture;
+      };
+      const color = material.color ? material.color : new THREE.Color(0.8, 0.8, 0.8);
       mtlOutput += `Kd ${color.r.toFixed(4)} ${color.g.toFixed(4)} ${color.b.toFixed(4)}\n`;
       mtlOutput += 'Ks 0.200 0.200 0.200\nNi 1.450\n';
 
       const opacity = mat.opacity ?? 1.0;
       mtlOutput += `d ${opacity.toFixed(4)}\nillum 2\n`;
 
-      const mapUri = this.textureUriOf((mat as any).map);
+      const mapUri = this.textureUriOf(material.map);
       if (mapUri) mtlOutput += `map_Kd ${mapUri}\n`;
 
-      const bumpUri = this.textureUriOf((mat as any).normalMap);
+      const bumpUri = this.textureUriOf(material.normalMap);
       if (bumpUri) mtlOutput += `map_Bump ${bumpUri}\n`;
 
-      const alphaUri = this.textureUriOf((mat as any).alphaMap);
+      const alphaUri = this.textureUriOf(material.alphaMap);
       if (alphaUri) mtlOutput += `map_d ${alphaUri}\n`;
 
       mtlOutput += '\n';
@@ -352,17 +416,17 @@ export class AssetExporter {
   private static buildGltfDocument(
     root: THREE.Object3D,
     options: GltfExportOptions,
-  ): { doc: Record<string, any>; bin: Uint8Array } {
-    const scenes: any[] = [{ nodes: [] }];
-    const nodes: any[] = [];
-    const meshes: any[] = [];
-    const accessors: any[] = [];
-    const bufferViews: any[] = [];
-    const materials: any[] = [];
-    const skins: any[] = [];
-    const textures: any[] = [];
-    const images: any[] = [];
-    const samplers: any[] = [];
+  ): { doc: Record<string, unknown>; bin: Uint8Array } {
+    const scenes: GltfScene[] = [{ nodes: [] }];
+    const nodes: GltfNode[] = [];
+    const meshes: GltfMesh[] = [];
+    const accessors: GltfAccessor[] = [];
+    const bufferViews: GltfBufferView[] = [];
+    const materials: Array<Record<string, unknown>> = [];
+    const skins: GltfSkin[] = [];
+    const textures: GltfTexture[] = [];
+    const images: GltfImage[] = [];
+    const samplers: GltfSampler[] = [];
 
     const binaryChunks: Uint8Array[] = [];
     let currentByteOffset = 0;
@@ -395,7 +459,7 @@ export class AssetExporter {
       max?: number[],
     ): number => {
       const bufferView = appendBufferData(bytes);
-      const accessor: Record<string, unknown> = {
+      const accessor: GltfAccessor = {
         bufferView,
         byteOffset: 0,
         componentType,
@@ -765,7 +829,7 @@ export class AssetExporter {
       offset += chunk.byteLength;
     }
 
-    const doc: Record<string, any> = {
+    const doc: Record<string, unknown> = {
       asset: {
         version: '2.0',
         generator: 'AETHERIA 3D Engine Exporter v2.0',
@@ -794,7 +858,7 @@ export class AssetExporter {
    * Buffer được nhúng thành data URI nên tệp tự chứa — mở được bằng mọi
    * trình đọc glTF mà không cần tệp `.bin` đi kèm.
    */
-  public static exportToGltf(root: THREE.Object3D, options: GltfExportOptions = {}): Record<string, any> {
+  public static exportToGltf(root: THREE.Object3D, options: GltfExportOptions = {}): Record<string, unknown> {
     const { doc, bin } = this.buildGltfDocument(root, options);
 
     if (bin.byteLength > 0 && (options.embedBuffers ?? true)) {

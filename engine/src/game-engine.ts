@@ -36,6 +36,17 @@ import { ObjectPool } from './memory/object-pool.js';
 import { MemoryDisposer } from './memory/memory-disposer.js';
 import { InputMap } from './input/input-map.js';
 import { AudioBus } from './audio/audio-bus.js';
+import { NavGrid, type NavGridConfig, type NavPath, type NavPathOptions } from './navigation/index.js';
+import {
+  PopulationManager,
+  WorldStreamer,
+  type PopulationAgent,
+  type PopulationEntry,
+  type PopulationStats,
+  type StreamerStats,
+  type StreamRegion,
+  type StreamRegionView,
+} from './open-world/index.js';
 
 export class GameEngine implements Engine {
   public canvas: HTMLCanvasElement | null = null;
@@ -55,6 +66,12 @@ export class GameEngine implements Engine {
   public objectPool: ObjectPool;
   public input: InputMap;
   public audio: AudioBus;
+  /** Open-world navigation grid (optional until a level provides one). */
+  public navGrid: NavGrid | null = null;
+  /** Population LOD scheduler for NPCs, animals, vehicles and props. */
+  public population: PopulationManager;
+  /** Region/chunk streamer driven by the active camera. */
+  public streamer: WorldStreamer;
 
   private graphicsMode: GraphicsMode = 'balanced';
   private manifests = new Map<string, AssetManifestEntry>();
@@ -76,6 +93,8 @@ export class GameEngine implements Engine {
     this.objectPool = new ObjectPool();
     this.input = new InputMap();
     this.audio = new AudioBus();
+    this.population = new PopulationManager();
+    this.streamer = new WorldStreamer();
 
     this.scene.add(this.particles.group);
     this.scene.add(this.decals.group);
@@ -85,6 +104,8 @@ export class GameEngine implements Engine {
         this.stepPhysics(dt);
         this.particles.update(dt);
         this.decals.update(dt);
+        this.population.update(this.camera.position, dt);
+        this.streamer.update(this.camera.position, dt);
       },
       render: () => {
         this.render();
@@ -133,6 +154,9 @@ export class GameEngine implements Engine {
     this.assetCache.clear();
     this.objectPool.clear();
     this.audio.clear();
+    this.population.clear();
+    this.streamer.clear();
+    this.navGrid = null;
 
     if (this.postFx) {
       this.postFx.dispose();
@@ -252,6 +276,66 @@ export class GameEngine implements Engine {
     this.physics.step(dt);
   }
 
+  // --- Navigation ---
+  /** Install a prepared navigation grid (or `null` to disable navigation). */
+  public setNavGrid(grid: NavGrid | null): void {
+    this.navGrid = grid;
+  }
+
+  /** Build a grid and make it the active one. */
+  public createNavGrid(config: NavGridConfig): NavGrid {
+    const grid = new NavGrid(config);
+    this.navGrid = grid;
+    return grid;
+  }
+
+  /** Find a path with the active grid; `null` when no grid is installed. */
+  public findNavPath(
+    start: { x: number; y: number; z: number },
+    goal: { x: number; y: number; z: number },
+    options?: NavPathOptions,
+  ): NavPath | null {
+    return this.navGrid ? this.navGrid.findPath(start, goal, options) : null;
+  }
+
+  public isNavigable(point: { x: number; y: number; z: number }): boolean {
+    return this.navGrid?.isWalkable(point) ?? false;
+  }
+
+  // --- Population LOD ---
+  public registerAgent(entry: PopulationEntry): PopulationAgent {
+    return this.population.add(entry);
+  }
+
+  public unregisterAgent(id: string): boolean {
+    return this.population.remove(id);
+  }
+
+  public updatePopulation(viewer: THREE.Vector3, dt: number): PopulationStats {
+    return this.population.update(viewer, dt);
+  }
+
+  public getPopulationStats(): PopulationStats {
+    return this.population.getStats();
+  }
+
+  // --- Region streaming ---
+  public addRegion(region: StreamRegion): StreamRegionView {
+    return this.streamer.add(region);
+  }
+
+  public removeRegion(id: string): boolean {
+    return this.streamer.remove(id);
+  }
+
+  public updateStreaming(viewer: THREE.Vector3, dt: number): StreamerStats {
+    return this.streamer.update(viewer, dt);
+  }
+
+  public waitForStreaming(): Promise<void> {
+    return this.streamer.waitForIdle();
+  }
+
   // --- Effects / Renderer ---
   public spawnEmitter(cfg: EmitterConfig, at: THREE.Vector3): string {
     const emitter = this.particles.createEmitter(cfg);
@@ -305,6 +389,8 @@ export class GameEngine implements Engine {
       triangles,
       physicsBodiesCount: this.physics.getAllBodies().length,
       activeParticlesCount: this.particles.getActiveParticleCount(),
+      populationAgents: this.population.size,
+      streamedRegions: this.streamer.getStats().loaded,
     };
   }
 

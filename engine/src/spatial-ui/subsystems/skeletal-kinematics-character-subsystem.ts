@@ -145,13 +145,13 @@ export class SkeletalKinematicsCharacterSubsystem {
   // -------------------------------------------------------------------------
 
   /** Hệ số nhân từ `options.scale` (mặc định 1). */
-  private scaleOf(options?: any): number {
+  private scaleOf(options?: unknown): number {
     const raw = readNum(options, ['scale'], Number.NaN);
     return Number.isFinite(raw) ? raw : 1;
   }
 
   /** Đơn vị trả về do `options.unit` chỉ định (null nếu không chỉ định). */
-  private unitOf(options?: any): string | null {
+  private unitOf(options?: unknown): string | null {
     const raw = options && typeof options === 'object'
       ? (options as Record<string, unknown>).unit
       : undefined;
@@ -159,12 +159,12 @@ export class SkeletalKinematicsCharacterSubsystem {
   }
 
   /** Đơn vị trả về: `options.unit` ghi đè đơn vị mặc định. */
-  private unitWithFallback(options: any, fallback: string): string {
+  private unitWithFallback(options: unknown, fallback: string): string {
     return this.unitOf(options) ?? fallback;
   }
 
   /** Có đảo dấu kết quả số theo `options.invert` không. */
-  private invertOf(options?: any): boolean {
+  private invertOf(options?: unknown): boolean {
     return Boolean(
       options
       && typeof options === 'object'
@@ -173,7 +173,7 @@ export class SkeletalKinematicsCharacterSubsystem {
   }
 
   /** Khung tham chiếu: 'world' (mặc định) hoặc 'local'. */
-  private referenceOf(options?: any): 'world' | 'local' {
+  private referenceOf(options?: unknown): 'world' | 'local' {
     const raw = options && typeof options === 'object'
       ? (options as Record<string, unknown>).reference
       : undefined;
@@ -181,7 +181,7 @@ export class SkeletalKinematicsCharacterSubsystem {
   }
 
   /** Bên trái/phải theo `options.side` (null nếu không chỉ định). */
-  private sideOf(options?: any): 'left' | 'right' | null {
+  private sideOf(options?: unknown): 'left' | 'right' | null {
     const raw = options && typeof options === 'object'
       ? (options as Record<string, unknown>).side
       : undefined;
@@ -190,18 +190,18 @@ export class SkeletalKinematicsCharacterSubsystem {
   }
 
   /** Số kết quả: nhân `options.scale` rồi đảo dấu nếu `options.invert`. */
-  private transformedNumber(value: number, options?: any): number {
+  private transformedNumber(value: number, options?: unknown): number {
     const sign = this.invertOf(options) ? -1 : 1;
     return value * this.scaleOf(options) * sign;
   }
 
   /** Số kết quả chỉ đảo dấu nếu `options.invert` (không nhân hệ số). */
-  private invertedNumber(value: number, options?: any): number {
+  private invertedNumber(value: number, options?: unknown): number {
     return this.invertOf(options) ? -value : value;
   }
 
   /** Vector kết quả: nhân `options.scale` rồi đảo dấu nếu `options.invert`. */
-  private transformedVector(value: Vec3D, options?: any): Vec3D {
+  private transformedVector(value: Vec3D, options?: unknown): Vec3D {
     const factor = this.scaleOf(options);
     const sign = this.invertOf(options) ? -1 : 1;
     return {
@@ -212,14 +212,14 @@ export class SkeletalKinematicsCharacterSubsystem {
   }
 
   /** Quaternion nghịch đảo (xoay ngược) khi `options.invert`. */
-  private transformedQuaternion(value: QuatD, options?: any): QuatD {
+  private transformedQuaternion(value: QuatD, options?: unknown): QuatD {
     return this.invertOf(options)
       ? { x: -value.x, y: -value.y, z: -value.z, w: value.w }
       : value;
   }
 
   /** Entity thay thế để tính: `options.entity` ghi đè entity đầu vào. */
-  private entityOf(entity: any, options?: any): any {
+  private entityOf(entity: unknown, options?: unknown) {
     const raw = options && typeof options === 'object'
       ? (options as Record<string, unknown>).entity
       : undefined;
@@ -227,7 +227,7 @@ export class SkeletalKinematicsCharacterSubsystem {
   }
 
   /** Điểm kết quả theo khung tham chiếu: 'local' → tương đối `origin`. */
-  private referencePoint(result: Vec3D, origin: Vec3D, options?: any): Vec3D {
+  private referencePoint(result: Vec3D, origin: Vec3D, options?: unknown): Vec3D {
     return this.referenceOf(options) === 'local' ? subtract(result, origin) : result;
   }
 
@@ -237,7 +237,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * CHỈ đọc từ `options` — không suy ra từ entity, để hành vi mặc định (khi
    * không truyền `options`) giữ nguyên như trước.
    */
-  private optionBoneName(options: any): string | undefined {
+  private optionBoneName(options: unknown): string | undefined {
     const explicit = this.firstText([options], ['bone', 'boneName']);
     const side = this.sideOf(options);
     return explicit && side ? this.sidedBoneName(explicit, side) : explicit ?? undefined;
@@ -261,7 +261,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * Nguồn xương chính: `options.entity` ghi đè, không thì `a` (khi có cây
    * xương), rồi `b` (nguồn dữ liệu thứ hai).
    */
-  private boneSource(a: any, b: any, options?: any): any {
+  private boneSource(a: unknown, b: unknown, options?: unknown) {
     const override = this.entityOf(a, options);
     if (override !== a) return override;
     if (this.skeletonOf(a)) return a;
@@ -273,7 +273,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * Hướng nhìn của nhân vật: `a` trước, `b` là nguồn thứ hai khi `a` không
    * có hướng tường minh.
    */
-  private characterForwardOf(a: any, b: any): Vec3D {
+  private characterForwardOf(a: unknown, b: unknown): Vec3D {
     const explicit = readVec(a, ['forward', 'direction']);
     if (magnitude(explicit) > 0) return explicit;
     const fromB = readVec(b, ['forward', 'direction']);
@@ -643,7 +643,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [0951] getBonePosition
    * Vị trí của xương (neo: `entity.position` + offset).
    */
-  public getBonePosition(entity?: any, offset?: Vec3D): any {
+  public getBonePosition(entity?: unknown, offset?: Vec3D) {
     const base = entityPosition(entity);
     return {
       x: base.x + (offset?.x ?? 0),
@@ -655,7 +655,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [0952] getBoneStartPosition
    * Đầu gần của xương.
    */
-  public getBoneStartPosition(entity?: any, offset?: Vec3D): any {
+  public getBoneStartPosition(entity?: unknown, offset?: Vec3D) {
     const bone = this.boneOf(entity);
     const base = bone ? boneEndpoints(bone).start : entityPosition(entity);
     return {
@@ -668,7 +668,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [0953] getBoneEndPosition
    * Đầu xa của xương.
    */
-  public getBoneEndPosition(entity?: any, offset?: Vec3D): any {
+  public getBoneEndPosition(entity?: unknown, offset?: Vec3D) {
     const bone = this.boneOf(entity);
     const base = bone ? boneEndpoints(bone).end : entityPosition(entity);
     return {
@@ -681,7 +681,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [0954] getBoneCenter
    * Tâm xương.
    */
-  public getBoneCenter(entity?: any, offset?: Vec3D): any {
+  public getBoneCenter(entity?: unknown, offset?: Vec3D) {
     const bone = this.boneOf(entity);
     const base = bone
       ? (() => {
@@ -699,7 +699,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [0955] getBoneDirection
    * Hướng của xương.
    */
-  public getBoneDirection(a?: any, b?: any): any {
+  public getBoneDirection(a?: unknown, b?: unknown) {
     const bone = this.boneOf(a);
     if (bone) return directionRecord('getBoneDirection', boneDirection(bone));
     const from = worldPoint(a);
@@ -711,7 +711,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [0956] getBoneOrientation
    * Góc quay của xương.
    */
-  public getBoneOrientation(entityOrAngle?: any, options?: any): any {
+  public getBoneOrientation(entityOrAngle?: unknown, options?: unknown) {
     const source = this.entityOf(entityOrAngle, options);
     const name = this.optionBoneName(options);
     const bone = name ? this.boneOf(source, [name]) : this.boneOf(source);
@@ -724,7 +724,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [0957] getBoneLength
    * Chiều dài xương.
    */
-  public getBoneLength(entity?: any, options?: any): any {
+  public getBoneLength(entity?: unknown, options?: unknown) {
     const source = this.entityOf(entity, options);
     const name = this.optionBoneName(options);
     const length = name ? this.lengthOf(source, [name], 1) : this.lengthOf(source, [], 1);
@@ -734,7 +734,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [0958] getBoneScale
    * Tỉ lệ của xương.
    */
-  public getBoneScale(entity?: any, options?: any): any {
+  public getBoneScale(entity?: unknown, options?: unknown) {
     const source = this.entityOf(entity, options);
     const name = this.optionBoneName(options);
     const bone = name ? this.boneOf(source, [name]) : this.boneOf(source);
@@ -751,7 +751,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * entity) rồi trả về cha THẬT trong cây xương; chỉ khi không tìm thấy
    * xương nào thì mới trả `null`.
    */
-  public getBoneParent(a?: any, b?: any, options?: any): any {
+  public getBoneParent(a?: unknown, b?: unknown, options?: unknown) {
     const sources = [a, b, options];
     const name = this.requestedBoneName(sources);
     const bone = this.resolveBone(sources, name ? [name] : []);
@@ -766,7 +766,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [0960] getBoneChildren
    * Các xương con.
    */
-  public getBoneChildren(a?: any, b?: any, options?: any): any {
+  public getBoneChildren(a?: unknown, b?: unknown, options?: unknown) {
     // `b` là nguồn xương thứ hai khi `a` không có cây xương.
     const source = this.boneSource(a, b, options);
     const name = this.optionBoneName(options);
@@ -778,14 +778,14 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [0961] calculateBoneDistance
    * Khoảng cách giữa hai xương.
    */
-  public calculateBoneDistance(a?: any, b?: any): any {
+  public calculateBoneDistance(a?: unknown, b?: unknown) {
     return distance3D(this.boneWorld(a, []), this.boneWorld(b, []));
   }
   /**
    * [0962] calculateBoneAngle
    * Góc giữa hai xương.
    */
-  public calculateBoneAngle(a?: any, b?: any): any {
+  public calculateBoneAngle(a?: unknown, b?: unknown) {
     const boneA = this.boneOf(a);
     const boneB = this.boneOf(b);
     const dirA = boneA ? boneDirection(boneA) : normalize(subtract(worldPoint(b), worldPoint(a)));
@@ -796,7 +796,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [0963] calculateBoneAlignment
    * Mức độ thẳng hàng của hai xương.
    */
-  public calculateBoneAlignment(a?: any, b?: any, options?: any): any {
+  public calculateBoneAlignment(a?: unknown, b?: unknown, options?: unknown) {
     const boneA = this.boneOf(a);
     const boneB = this.boneOf(b);
     const dirA = boneA ? boneDirection(boneA) : FORWARD3;
@@ -811,13 +811,14 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [0964] calculateBoneChainLength
    * Tổng chiều dài chuỗi xương.
    */
-  public calculateBoneChainLength(entity?: any, options?: any): any {
+  public calculateBoneChainLength(entity?: unknown, options?: unknown) {
     const source = this.entityOf(entity, options);
     const bone = this.boneOf(source);
     // `options.bone` ghi đè xương mặc định (xương của entity, nếu không thì xương gốc).
     const requested = this.optionBoneName(options);
+    const sourceBone = source == null ? undefined : (source as { bone?: unknown }).bone;
     const name = requested
-      ?? (typeof (source as any)?.bone === 'string' ? (source as any).bone : (bone?.name ?? ''));
+      ?? (typeof sourceBone === 'string' ? sourceBone : (bone?.name ?? ''));
     const length = name ? chainLength(this.skeletonOf(source), name) : this.lengthOf(source, [], 0);
     return this.transformedNumber(length, options);
   }
@@ -825,7 +826,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [0965] calculateBoneHierarchyDepth
    * Độ sâu của cây xương.
    */
-  public calculateBoneHierarchyDepth(entity?: any, options?: any): any {
+  public calculateBoneHierarchyDepth(entity?: unknown, options?: unknown) {
     const source = this.entityOf(entity, options);
     const requested = this.optionBoneName(options);
     // `options.bone` → đo độ sâu của nhánh xương đó, không phải của cả cây.
@@ -837,7 +838,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [0966] calculateBoneWorldTransform
    * Ma trận biến đổi thế giới của xương.
    */
-  public calculateBoneWorldTransform(target?: any, options?: any): any {
+  public calculateBoneWorldTransform(target?: unknown, options?: unknown) {
     const source = this.entityOf(target, options);
     const requested = this.optionBoneName(options);
     const bone = requested ? this.boneOf(source, [requested]) : this.boneOf(source);
@@ -851,7 +852,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [0967] calculateBoneLocalTransform
    * Ma trận biến đổi cục bộ của xương.
    */
-  public calculateBoneLocalTransform(target?: any, options?: any): any {
+  public calculateBoneLocalTransform(target?: unknown, options?: unknown) {
     const source = this.entityOf(target, options);
     const requested = this.optionBoneName(options);
     const bone = requested ? this.boneOf(source, [requested]) : this.boneOf(source);
@@ -864,7 +865,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [0968] calculateBoneInverseTransform
    * Ma trận biến đổi nghịch của xương.
    */
-  public calculateBoneInverseTransform(target?: any, options?: any): any {
+  public calculateBoneInverseTransform(target?: unknown, options?: unknown) {
     const world = this.calculateBoneWorldTransform(target, options);
     // Nghịch đảo affine nhanh: nghịch đảo phần 3x3 + phép tịnh tiến nghịch.
     const inverse = [
@@ -893,7 +894,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [0969] calculateBoneBindPose
    * Tư thế bind của xương.
    */
-  public calculateBoneBindPose(a?: any, b?: any, options?: any): any {
+  public calculateBoneBindPose(a?: unknown, b?: unknown, options?: unknown) {
     // `b` là nguồn xương thứ hai khi `a` không có cây xương.
     const source = this.boneSource(a, b, options);
     const name = this.optionBoneName(options);
@@ -913,7 +914,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [0970] calculateBonePoseDelta
    * Chênh lệch tư thế của xương.
    */
-  public calculateBonePoseDelta(a?: any, b?: any, options?: any): any {
+  public calculateBonePoseDelta(a?: unknown, b?: unknown, options?: unknown) {
     const boneA = this.boneOf(a);
     const boneB = this.boneOf(b);
     const pa = boneA ? { position: boneA.position, quaternion: boneA.quaternion } : { position: worldPoint(a), quaternion: entityQuaternion(a) };
@@ -932,7 +933,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [0971] calculateBoneVelocity
    * Vận tốc của xương.
    */
-  public calculateBoneVelocity(entity?: any, dt = 0.016): any {
+  public calculateBoneVelocity(entity?: unknown, dt = 0.016) {
     const velocity = readVec(entity, ['velocity']);
     return directionRecord('calculateBoneVelocity', magnitude(velocity) > 0 ? velocity : { x: 0, y: 0, z: 0 }, { dt });
   }
@@ -940,7 +941,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [0972] calculateBoneAcceleration
    * Gia tốc của xương.
    */
-  public calculateBoneAcceleration(entity?: any, dt = 0.016): any {
+  public calculateBoneAcceleration(entity?: unknown, dt = 0.016) {
     const acceleration = readVec(entity, ['acceleration']);
     return directionRecord('calculateBoneAcceleration', magnitude(acceleration) > 0 ? acceleration : { x: 0, y: 0, z: 0 }, { dt });
   }
@@ -948,7 +949,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [0973] calculateBoneAngularVelocity
    * Vận tốc góc của xương.
    */
-  public calculateBoneAngularVelocity(entity?: any, dt = 0.016): any {
+  public calculateBoneAngularVelocity(entity?: unknown, dt = 0.016) {
     const angular = readVec(entity, ['angularVelocity']);
     return directionRecord('calculateBoneAngularVelocity', magnitude(angular) > 0 ? angular : { x: 0, y: 0, z: 0 }, { dt });
   }
@@ -956,7 +957,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [0974] calculateBoneAngularAcceleration
    * Gia tốc góc của xương.
    */
-  public calculateBoneAngularAcceleration(entity?: any, dt = 0.016): any {
+  public calculateBoneAngularAcceleration(entity?: unknown, dt = 0.016) {
     const angular = readVec(entity, ['angularAcceleration']);
     return directionRecord('calculateBoneAngularAcceleration', magnitude(angular) > 0 ? angular : { x: 0, y: 0, z: 0 }, { dt });
   }
@@ -964,7 +965,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [0975] calculateBoneBoundingBox
    * Hộp bao của xương.
    */
-  public calculateBoneBoundingBox(entity?: any, size?: Vec3D): any {
+  public calculateBoneBoundingBox(entity?: unknown, size?: Vec3D) {
     const bone = this.boneOf(entity);
     const center = bone
       ? lerpVec3(boneEndpoints(bone).start, boneEndpoints(bone).end, 0.5)
@@ -976,7 +977,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [0976] calculateBoneBoundingSphere
    * Hình cầu bao của xương.
    */
-  public calculateBoneBoundingSphere(entity?: any, radius = 1.0): any {
+  public calculateBoneBoundingSphere(entity?: unknown, radius = 1.0) {
     const bone = this.boneOf(entity);
     const center = bone
       ? lerpVec3(boneEndpoints(bone).start, boneEndpoints(bone).end, 0.5)
@@ -993,7 +994,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [0977] calculateBoneCapsule
    * Capsule bao của xương.
    */
-  public calculateBoneCapsule(a?: any, b?: any, options?: any): any {
+  public calculateBoneCapsule(a?: unknown, b?: unknown, options?: unknown) {
     const bone = this.boneOf(a);
     const endpoints = bone ? boneEndpoints(bone) : { start: worldPoint(a), end: worldPoint(b) };
     const radius = readNum(options, ['radius'], 0.05);
@@ -1008,7 +1009,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [0978] calculateBoneCollision
    * Va chạm giữa hai xương.
    */
-  public calculateBoneCollision(a?: any, b?: any): any {
+  public calculateBoneCollision(a?: unknown, b?: unknown) {
     const capsuleA = this.calculateBoneCapsule(a, b).result as { start: Vec3D; end: Vec3D; radius: number };
     const boxA = boundingBox(capsuleA.start, {
       x: capsuleA.radius * 2,
@@ -1032,7 +1033,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [0979] calculateBoneIntersection
    * Giao điểm hai đoạn xương.
    */
-  public calculateBoneIntersection(a?: any, b?: any): any {
+  public calculateBoneIntersection(a?: unknown, b?: unknown) {
     const boneA = this.boneOf(a);
     const boneB = this.boneOf(b);
     const a1 = boneA ? boneEndpoints(boneA).start : worldPoint(a);
@@ -1046,7 +1047,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [0980] calculateBoneClosestPoint
    * Điểm gần nhất trên xương.
    */
-  public calculateBoneClosestPoint(a?: any, b?: any, options?: any): any {
+  public calculateBoneClosestPoint(a?: unknown, b?: unknown, options?: unknown) {
     const bone = this.boneOf(a);
     const endpoints = bone ? boneEndpoints(bone) : { start: worldPoint(a), end: worldPoint(a) };
     const point = worldPoint(b);
@@ -1072,7 +1073,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [0981] getJointPosition
    * Vị trí khớp.
    */
-  public getJointPosition(entity?: any, offset?: Vec3D): any {
+  public getJointPosition(entity?: unknown, offset?: Vec3D) {
     const base = entityPosition(entity);
     return {
       x: base.x + (offset?.x ?? 0),
@@ -1084,7 +1085,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [0982] getJointCenter
    * Tâm khớp.
    */
-  public getJointCenter(entity?: any, offset?: Vec3D): any {
+  public getJointCenter(entity?: unknown, offset?: Vec3D) {
     const base = entityPosition(entity);
     return {
       x: base.x + (offset?.x ?? 0),
@@ -1096,7 +1097,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [0983] getJointAxis
    * Trục bản lề của khớp.
    */
-  public getJointAxis(a?: any, b?: any, options?: any): any {
+  public getJointAxis(a?: unknown, b?: unknown, options?: unknown) {
     const boneA = this.boneOf(a);
     const boneB = this.boneOf(b);
     const axisA = boneA ? boneDirection(boneA) : FORWARD3;
@@ -1109,7 +1110,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [0984] getJointNormal
    * Pháp tuyến khớp.
    */
-  public getJointNormal(a?: any, b?: any): any {
+  public getJointNormal(a?: unknown, b?: unknown) {
     const boneA = this.boneOf(a);
     const boneB = this.boneOf(b);
     const axisA = boneA ? boneDirection(boneA) : FORWARD3;
@@ -1123,7 +1124,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    *
    * Tìm khớp theo tên rồi trả về xương cha THẬT trong cây xương.
    */
-  public getJointParentBone(a?: any, b?: any, options?: any): any {
+  public getJointParentBone(a?: unknown, b?: unknown, options?: unknown) {
     const sources = [a, b, options];
     const name = this.requestedBoneName(sources);
     const bone = this.resolveBone(sources, name ? [name] : []);
@@ -1138,7 +1139,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [0986] getJointChildBone
    * Xương con của khớp.
    */
-  public getJointChildBone(a?: any, b?: any, options?: any): any {
+  public getJointChildBone(a?: unknown, b?: unknown, options?: unknown) {
     // `b` là nguồn xương thứ hai khi `a` không có cây xương.
     const source = this.boneSource(a, b, options);
     const name = this.optionBoneName(options);
@@ -1153,7 +1154,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [0987] calculateJointAngle
    * Góc của khớp.
    */
-  public calculateJointAngle(a?: any, b?: any): any {
+  public calculateJointAngle(a?: unknown, b?: unknown) {
     const boneA = this.boneOf(a);
     const boneB = this.boneOf(b);
     const dirA = boneA ? boneDirection(boneA) : normalize(subtract(worldPoint(b), worldPoint(a)));
@@ -1164,7 +1165,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [0988] calculateJointLimit
    * Giới hạn góc của khớp.
    */
-  public calculateJointLimit(a?: any, b?: any, options?: any): any {
+  public calculateJointLimit(a?: unknown, b?: unknown, options?: unknown) {
     // `a` / `b` là nguồn giới hạn thứ hai/thứ ba khi `options` không chỉ định.
     const min = readNum(options, ['min', 'minAngle'], readNum(a, ['minAngle'], readNum(b, ['minAngle'], 0)));
     const max = readNum(options, ['max', 'maxAngle'], readNum(a, ['maxAngle'], readNum(b, ['maxAngle'], Math.PI)));
@@ -1174,9 +1175,9 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [0989] calculateJointConstraint
    * Ràng buộc của khớp.
    */
-  public calculateJointConstraint(a?: any, b?: any, options?: any): any {
+  public calculateJointConstraint(a?: unknown, b?: unknown, options?: unknown) {
     const limit = this.calculateJointLimit(a, b, options).result as { min: number; max: number };
-    const angle = this.calculateJointAngle(a, b).value as number;
+    const angle = this.calculateJointAngle(a, b);
     const violated = angle < limit.min || angle > limit.max;
     return named('calculateJointConstraint', {
       angle,
@@ -1190,7 +1191,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [0990] calculateJointVelocity
    * Vận tốc khớp.
    */
-  public calculateJointVelocity(entity?: any, dt = 0.016): any {
+  public calculateJointVelocity(entity?: unknown, dt = 0.016) {
     const velocity = readVec(entity, ['velocity']);
     return directionRecord('calculateJointVelocity', magnitude(velocity) > 0 ? velocity : { x: 0, y: 0, z: 0 }, { dt });
   }
@@ -1198,7 +1199,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [0991] calculateJointAcceleration
    * Gia tốc khớp.
    */
-  public calculateJointAcceleration(entity?: any, dt = 0.016): any {
+  public calculateJointAcceleration(entity?: unknown, dt = 0.016) {
     const acceleration = readVec(entity, ['acceleration']);
     return directionRecord('calculateJointAcceleration', magnitude(acceleration) > 0 ? acceleration : { x: 0, y: 0, z: 0 }, { dt });
   }
@@ -1206,7 +1207,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [0992] calculateJointTorque
    * Mô-men xoắn tại khớp.
    */
-  public calculateJointTorque(entity?: any, dt = 0.016): any {
+  public calculateJointTorque(entity?: unknown, dt = 0.016) {
     const force = readVec(entity, ['force']);
     const lever = readVec(entity, ['leverArm']);
     const torque = cross(lever, force);
@@ -1216,7 +1217,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [0993] calculateJointForce
    * Lực tại khớp.
    */
-  public calculateJointForce(entity?: any, dt = 0.016): any {
+  public calculateJointForce(entity?: unknown, dt = 0.016) {
     const force = readVec(entity, ['force']);
     const resolved = magnitude(force) > 0 ? force : { x: 0, y: 0, z: 0 };
     return directionRecord('calculateJointForce', resolved, { dt, magnitude: magnitude(resolved) });
@@ -1229,7 +1230,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * F = m·a của chính khớp. Độ dời lấy từ `displacement` tường minh, nếu
    * không có thì đo từ cây xương thật (độ lệch của khớp so với tư thế nghỉ).
    */
-  public calculateJointStiffness(a?: any, b?: any, options?: any): any {
+  public calculateJointStiffness(a?: unknown, b?: unknown, options?: unknown) {
     const sources = [a, b, options];
     const explicitForce = this.firstVector(sources, ['force', 'jointForce', 'tension']);
     const explicitDisplacement = this.firstVector(sources, ['displacement', 'offset', 'delta']);
@@ -1270,7 +1271,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [0995] calculateJointDamping
    * Hệ số giảm chấn (c = F/v).
    */
-  public calculateJointDamping(a?: any, b?: any, options?: any): any {
+  public calculateJointDamping(a?: unknown, b?: unknown, options?: unknown) {
     const force = readVec(a, ['force']);
     const velocity = readVec(b, ['velocity']);
     const magnitudeForce = magnitude(force);
@@ -1282,7 +1283,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [0996] calculateJointFriction
    * Ma sát của khớp.
    */
-  public calculateJointFriction(a?: any, b?: any, options?: any): any {
+  public calculateJointFriction(a?: unknown, b?: unknown, options?: unknown) {
     // `b` là nguồn pháp tuyến / hệ số ma sát thứ hai khi `a` thiếu.
     const fromA = readVec(a, ['normal']);
     const normal = magnitude(fromA) > 0 ? fromA : readVec(b, ['normal']);
@@ -1298,7 +1299,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [0997] calculateJointCollision
    * Va chạm tại khớp.
    */
-  public calculateJointCollision(a?: any, b?: any): any {
+  public calculateJointCollision(a?: unknown, b?: unknown) {
     const pointA = worldPoint(a);
     const pointB = worldPoint(b);
     const radiusA = readNum(a, ['radius'], 0.1);
@@ -1319,7 +1320,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [0998] calculateJointChain
    * Chuỗi khớp từ xương lên tới gốc.
    */
-  public calculateJointChain(a?: any, b?: any, options?: any): any {
+  public calculateJointChain(a?: unknown, b?: unknown, options?: unknown) {
     // `b` là nguồn xương thứ hai khi `a` không có cây xương.
     const source = this.boneSource(a, b, options);
     const name = this.optionBoneName(options);
@@ -1340,7 +1341,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * với tư thế tham chiếu: tư thế của nguồn thứ hai nếu có, nếu không thì tư
    * thế nghỉ (bind pose) của chính cây xương đó.
    */
-  public calculateJointPoseError(a?: any, b?: any, options?: any): any {
+  public calculateJointPoseError(a?: unknown, b?: unknown, options?: unknown) {
     const sources = [a, b, options];
     const pose = this.poseSource(sources);
     const current = pose?.pose ?? {};
@@ -1355,7 +1356,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1000] calculateJointInverseKinematics
    * IK của một khớp đơn.
    */
-  public calculateJointInverseKinematics(a?: any, b?: any, options?: any): any {
+  public calculateJointInverseKinematics(a?: unknown, b?: unknown, options?: unknown) {
     const root = worldPoint(a);
     const target = worldPoint(b);
     // `options.scale` co giãn chiều dài chi (và do đó đổi cả tầm với của).
@@ -1380,7 +1381,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1001] calculateForwardKinematics
    * Động học tiền — vị trí thế giới của mọi xương.
    */
-  public calculateForwardKinematics(a?: any, b?: any, options?: any): any {
+  public calculateForwardKinematics(a?: unknown, b?: unknown, options?: unknown) {
     // `b` là nguồn xương thứ hai khi `a` không có cây xương.
     const source = this.boneSource(a, b, options);
     const raw = this.worldPositions(source);
@@ -1399,7 +1400,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1002] calculateInverseKinematics
    * Động học ngược tổng quát.
    */
-  public calculateInverseKinematics(a?: any, b?: any, options?: any): any {
+  public calculateInverseKinematics(a?: unknown, b?: unknown, options?: unknown) {
     const root = worldPoint(a);
     const target = worldPoint(b);
     // `options.scale` co giãn chiều dài chi (và do đó đổi tầm với của).
@@ -1418,7 +1419,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1003] solveTwoBoneIK
    * Giải IK hai xương.
    */
-  public solveTwoBoneIK(a?: any, b?: any, options?: any): any {
+  public solveTwoBoneIK(a?: unknown, b?: unknown, options?: unknown) {
     const root = worldPoint(a);
     const target = worldPoint(b);
     const length1 = this.lengthOf(a, ['upperArm', 'upper'], readNum(options, ['length1', 'upperLength'], 0.3));
@@ -1431,7 +1432,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1004] solveThreeBoneIK
    * Giải IK ba xương.
    */
-  public solveThreeBoneIK(a?: any, b?: any, options?: any): any {
+  public solveThreeBoneIK(a?: unknown, b?: unknown, options?: unknown) {
     const root = worldPoint(a);
     const target = worldPoint(b);
     const length1 = readNum(options, ['length1'], 0.3);
@@ -1445,7 +1446,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1005] solveFullBodyIK
    * IK toàn thân — phân bổ trọng số cho các khớp.
    */
-  public solveFullBodyIK(a?: any, b?: any, options?: any): any {
+  public solveFullBodyIK(a?: unknown, b?: unknown, options?: unknown) {
     const positions = this.worldPositions(a);
     // `options.scale` co giãn bộ khớp so với đích → đổi cách phân bổ trọng số.
     const joints = Object.entries(positions).map(([name, position]) => ({
@@ -1464,7 +1465,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1006] calculateIKTargetError
    * Sai lệch giữa đích IK và vị trí đạt được.
    */
-  public calculateIKTargetError(a?: any, b?: any, options?: any): any {
+  public calculateIKTargetError(a?: unknown, b?: unknown, options?: unknown) {
     const target = worldPoint(b);
     // `a` là nguồn thứ hai cho vị trí đạt được khi `options` không chỉ định.
     const fromOptions = readVec(options, ['reached', 'end']);
@@ -1482,7 +1483,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1007] calculateIKJointWeights
    * Trọng số của các khớp trong chuỗi IK.
    */
-  public calculateIKJointWeights(a?: any, b?: any, options?: any): any {
+  public calculateIKJointWeights(a?: unknown, b?: unknown, options?: unknown) {
     // `a` là danh sách khớp (mảng) và `b` là nguồn độ suy giảm khi
     // `options` không chỉ định.
     const countFromA = Array.isArray(a) ? a.length : Number.NaN;
@@ -1497,7 +1498,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1008] calculateIKReachability
    * Đích IK có nằm trong tầm với không.
    */
-  public calculateIKReachability(a?: any, b?: any, options?: any): any {
+  public calculateIKReachability(a?: unknown, b?: unknown, options?: unknown) {
     const root = worldPoint(a);
     const target = worldPoint(b);
     const reach = readNum(options, ['reach', 'maxReach'], this.lengthOf(a, [], 1));
@@ -1511,7 +1512,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1009] calculateIKPoleVector
    * Vector định hướng khuỷu cho IK.
    */
-  public calculateIKPoleVector(a?: any, b?: any): any {
+  public calculateIKPoleVector(a?: unknown, b?: unknown) {
     const root = worldPoint(a);
     const target = worldPoint(b);
     const direction = normalize(subtract(target, root));
@@ -1523,7 +1524,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1010] calculateIKChainStretch
    * Độ giãn của chuỗi IK.
    */
-  public calculateIKChainStretch(a?: any, b?: any, options?: any): any {
+  public calculateIKChainStretch(a?: unknown, b?: unknown, options?: unknown) {
     const root = worldPoint(a);
     const target = worldPoint(b);
     const natural = this.lengthOf(a, [], 1);
@@ -1541,7 +1542,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1011] calculateSkeletonRootPosition
    * Vị trí gốc của skeleton.
    */
-  public calculateSkeletonRootPosition(a?: any, b?: any, options?: any): any {
+  public calculateSkeletonRootPosition(a?: unknown, b?: unknown, options?: unknown) {
     // `b` là nguồn skeleton thứ hai khi `a` không có cây xương.
     const source = this.boneSource(a, b, options);
     const bones = this.bonesOf(source);
@@ -1555,7 +1556,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1012] calculateSkeletonOrientation
    * Góc quay của skeleton.
    */
-  public calculateSkeletonOrientation(entityOrAngle?: any, options?: any): any {
+  public calculateSkeletonOrientation(entityOrAngle?: unknown, options?: unknown) {
     const source = this.entityOf(entityOrAngle, options);
     const name = this.optionBoneName(options);
     const bones = this.bonesOf(source);
@@ -1567,7 +1568,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1013] calculateSkeletonBounds
    * Hộp bao toàn bộ skeleton.
    */
-  public calculateSkeletonBounds(entity?: any, size?: Vec3D): any {
+  public calculateSkeletonBounds(entity?: unknown, size?: Vec3D) {
     const positions = Object.values(this.worldPositions(entity));
     if (positions.length === 0) {
       return bounds('calculateSkeletonBounds', boundingBox(entityPosition(entity), size ?? { x: 1, y: 1, z: 1 }));
@@ -1588,7 +1589,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1014] calculateSkeletonCenterOfMass
    * Tâm khối lượng của skeleton.
    */
-  public calculateSkeletonCenterOfMass(entity?: any, options?: any): any {
+  public calculateSkeletonCenterOfMass(entity?: unknown, options?: unknown) {
     const source = this.entityOf(entity, options);
     const positions = Object.values(this.worldPositions(source));
     if (positions.length === 0) {
@@ -1608,7 +1609,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1015] calculateSkeletonPose
    * Tư thế hiện tại của skeleton.
    */
-  public calculateSkeletonPose(a?: any, b?: any, options?: any): any {
+  public calculateSkeletonPose(a?: unknown, b?: unknown, options?: unknown) {
     // `b` là nguồn tư thế thứ hai khi `a` không có cây xương.
     const source = this.boneSource(a, b, options);
     const raw = readPose(source, this.skeletonOf(source));
@@ -1625,7 +1626,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1016] calculateSkeletonPoseDifference
    * Chênh lệch giữa hai tư thế skeleton.
    */
-  public calculateSkeletonPoseDifference(a?: any, b?: any, options?: any): any {
+  public calculateSkeletonPoseDifference(a?: unknown, b?: unknown, options?: unknown) {
     const poseA = readPose(a, this.skeletonOf(a));
     const poseB = readPose(b, this.skeletonOf(b));
     const difference = poseDifference(poseA, poseB);
@@ -1638,7 +1639,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1017] calculateSkeletonPoseSimilarity
    * Mức độ tương đồng của hai tư thế skeleton.
    */
-  public calculateSkeletonPoseSimilarity(a?: any, b?: any, options?: any): any {
+  public calculateSkeletonPoseSimilarity(a?: unknown, b?: unknown, options?: unknown) {
     const poseA = readPose(a, this.skeletonOf(a));
     const poseB = readPose(b, this.skeletonOf(b));
     return scalar(
@@ -1651,7 +1652,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1018] calculateSkeletonRetargeting
    * Retarget tư thế giữa hai skeleton khác kích thước.
    */
-  public calculateSkeletonRetargeting(a?: any, b?: any, options?: any): any {
+  public calculateSkeletonRetargeting(a?: unknown, b?: unknown, options?: unknown) {
     const source = readPose(a, this.skeletonOf(a));
     const target = readPose(b, this.skeletonOf(b));
     const scale = readNum(options, ['scale'], 1);
@@ -1669,7 +1670,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1019] calculateBoneRetargeting
    * Retarget một xương.
    */
-  public calculateBoneRetargeting(a?: any, b?: any, options?: any): any {
+  public calculateBoneRetargeting(a?: unknown, b?: unknown, options?: unknown) {
     const bone = this.boneOf(a);
     const scale = readNum(options, ['scale'], 1);
     const source = bone ? bone.position : worldPoint(a);
@@ -1693,7 +1694,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * animation nguồn (`blendFrom`) nhường bao nhiêu trọng số cho animation đích
    * (`blendTo`).
    */
-  public calculateAnimationBlendWeight(a?: any, b?: any, options?: any): any {
+  public calculateAnimationBlendWeight(a?: unknown, b?: unknown, options?: unknown) {
     const sources = [a, b, options];
     const explicitA = this.firstNumber(sources, ['weight', 'weightA']);
     const blendWeight = this.firstNumber(sources, ['blendWeight']);
@@ -1730,7 +1731,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1021] calculateAnimationBlendFactor
    * Hệ số trộn animation theo thời gian.
    */
-  public calculateAnimationBlendFactor(a?: any, b?: any, options?: any): any {
+  public calculateAnimationBlendFactor(a?: unknown, b?: unknown, options?: unknown) {
     // `a` / `b` là nguồn thứ hai/thứ ba (khoá riêng `blendDuration` /
     // `blendElapsed`) khi `options` không chỉ định.
     const duration = readNum(
@@ -1755,7 +1756,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1022] calculateAnimationTime
    * Thời gian của animation.
    */
-  public calculateAnimationTime(a?: any, b?: any, options?: any): any {
+  public calculateAnimationTime(a?: unknown, b?: unknown, options?: unknown) {
     // `b` là nguồn thứ hai cho thời gian / thời lượng (khoá `animationTime`).
     const time = readNum(
       a,
@@ -1777,7 +1778,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1023] calculateAnimationPhase
    * Pha của animation (0..1).
    */
-  public calculateAnimationPhase(entity?: any, options?: any): any {
+  public calculateAnimationPhase(entity?: unknown, options?: unknown) {
     const source = this.entityOf(entity, options);
     const time = readNum(source, ['time', 'currentTime'], 0);
     const duration = readNum(source, ['duration'], 1);
@@ -1788,7 +1789,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1024] calculateAnimationPlaybackSpeed
    * Tốc độ phát animation.
    */
-  public calculateAnimationPlaybackSpeed(entity?: any, options?: any): any {
+  public calculateAnimationPlaybackSpeed(entity?: unknown, options?: unknown) {
     const source = this.entityOf(entity, options);
     const speed = readNum(source, ['playbackSpeed', 'speed', 'timeScale'], 1);
     return this.transformedNumber(speed, options);
@@ -1797,7 +1798,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1025] calculateAnimationRootMotion
    * Chuyển động gốc của animation.
    */
-  public calculateAnimationRootMotion(a?: any, b?: any, options?: any): any {
+  public calculateAnimationRootMotion(a?: unknown, b?: unknown, options?: unknown) {
     const start = worldPoint(a);
     const end = worldPoint(b);
     const motion = this.transformedVector(subtract(end, start), options);
@@ -1810,7 +1811,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1026] calculateAnimationRootVelocity
    * Vận tốc gốc của animation.
    */
-  public calculateAnimationRootVelocity(entity?: any, dt = 0.016): any {
+  public calculateAnimationRootVelocity(entity?: unknown, dt = 0.016) {
     const velocity = readVec(entity, ['rootVelocity', 'velocity']);
     return directionRecord('calculateAnimationRootVelocity', magnitude(velocity) > 0 ? velocity : { x: 0, y: 0, z: 0 }, { dt });
   }
@@ -1818,7 +1819,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1027] calculateAnimationRootAcceleration
    * Gia tốc gốc của animation.
    */
-  public calculateAnimationRootAcceleration(entity?: any, dt = 0.016): any {
+  public calculateAnimationRootAcceleration(entity?: unknown, dt = 0.016) {
     const acceleration = readVec(entity, ['rootAcceleration', 'acceleration']);
     return directionRecord('calculateAnimationRootAcceleration', magnitude(acceleration) > 0 ? acceleration : { x: 0, y: 0, z: 0 }, { dt });
   }
@@ -1826,7 +1827,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1028] calculateAnimationPoseAtTime
    * Tư thế animation tại thời điểm t.
    */
-  public calculateAnimationPoseAtTime(a?: any, b?: any, options?: any): any {
+  public calculateAnimationPoseAtTime(a?: unknown, b?: unknown, options?: unknown) {
     // `b` là nguồn tư thế / đường cong thứ hai khi `a` không có.
     const source = this.boneSource(a, b, options);
     const pose = readPose(source, this.skeletonOf(source));
@@ -1850,7 +1851,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1029] calculateAnimationInterpolation
    * Nội suy giữa hai animation.
    */
-  public calculateAnimationInterpolation(a?: any, b?: any, options?: any): any {
+  public calculateAnimationInterpolation(a?: unknown, b?: unknown, options?: unknown) {
     const poseA = readPose(a, this.skeletonOf(a));
     const poseB = readPose(b, this.skeletonOf(b));
     const t = readNum(options, ['t', 'time', 'progress'], 0.5);
@@ -1860,7 +1861,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1030] calculateAnimationCurveValue
    * Giá trị đường cong animation tại t.
    */
-  public calculateAnimationCurveValue(a?: any, b?: any, options?: any): any {
+  public calculateAnimationCurveValue(a?: unknown, b?: unknown, options?: unknown) {
     // `b` là nguồn đường cong thứ hai khi `a` không có.
     const keys = readCurveKeys(a).length > 0 ? readCurveKeys(a) : readCurveKeys(b);
     const t = readNum(options, ['time', 't'], 0);
@@ -1875,7 +1876,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1031] calculateAnimationCurveDerivative
    * Đạo hàm đường cong animation.
    */
-  public calculateAnimationCurveDerivative(a?: any, b?: any, options?: any): any {
+  public calculateAnimationCurveDerivative(a?: unknown, b?: unknown, options?: unknown) {
     // `b` là nguồn đường cong thứ hai khi `a` không có.
     const keys = readCurveKeys(a).length > 0 ? readCurveKeys(a) : readCurveKeys(b);
     const t = readNum(options, ['time', 't'], 0);
@@ -1890,7 +1891,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1032] calculateAnimationCurveIntegral
    * Tích phân đường cong animation.
    */
-  public calculateAnimationCurveIntegral(a?: any, b?: any, options?: any): any {
+  public calculateAnimationCurveIntegral(a?: unknown, b?: unknown, options?: unknown) {
     // `b` là nguồn đường cong thứ hai khi `a` không có.
     const keys = readCurveKeys(a).length > 0 ? readCurveKeys(a) : readCurveKeys(b);
     const t = readNum(options, ['time', 't'], 1);
@@ -1905,7 +1906,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1033] calculateAnimationVelocity
    * Vận tốc animation.
    */
-  public calculateAnimationVelocity(entity?: any, dt = 0.016): any {
+  public calculateAnimationVelocity(entity?: unknown, dt = 0.016) {
     const velocity = readVec(entity, ['velocity']);
     return directionRecord('calculateAnimationVelocity', magnitude(velocity) > 0 ? velocity : { x: 0, y: 0, z: 0 }, { dt });
   }
@@ -1913,7 +1914,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1034] calculateAnimationAcceleration
    * Gia tốc animation.
    */
-  public calculateAnimationAcceleration(entity?: any, dt = 0.016): any {
+  public calculateAnimationAcceleration(entity?: unknown, dt = 0.016) {
     const acceleration = readVec(entity, ['acceleration']);
     return directionRecord('calculateAnimationAcceleration', magnitude(acceleration) > 0 ? acceleration : { x: 0, y: 0, z: 0 }, { dt });
   }
@@ -1926,7 +1927,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1035] calculatePoseTransition
    * Chuyển tiếp giữa hai tư thế.
    */
-  public calculatePoseTransition(a?: any, b?: any, options?: any): any {
+  public calculatePoseTransition(a?: unknown, b?: unknown, options?: unknown) {
     const poseA = readPose(a, this.skeletonOf(a));
     const poseB = readPose(b, this.skeletonOf(b));
     const t = readNum(options, ['t', 'progress'], 0.5);
@@ -1945,7 +1946,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * Khoảng cách tư thế được đo từ cây xương thật (so với tư thế tham chiếu),
    * chia cho tốc độ chuyển tiếp để ra thời lượng.
    */
-  public calculatePoseTransitionDuration(a?: any, b?: any, options?: any): any {
+  public calculatePoseTransitionDuration(a?: unknown, b?: unknown, options?: unknown) {
     const sources = [a, b, options];
     const pose = this.poseSource(sources);
     const current = pose?.pose ?? {};
@@ -1964,7 +1965,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1037] calculatePoseBlend
    * Trộn hai tư thế.
    */
-  public calculatePoseBlend(a?: any, b?: any, options?: any): any {
+  public calculatePoseBlend(a?: unknown, b?: unknown, options?: unknown) {
     const poseA = readPose(a, this.skeletonOf(a));
     const poseB = readPose(b, this.skeletonOf(b));
     const t = readNum(options, ['t', 'weight', 'progress'], 0.5);
@@ -1974,7 +1975,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1038] calculatePoseStability
    * Độ ổn định của tư thế.
    */
-  public calculatePoseStability(a?: any, b?: any, options?: any): any {
+  public calculatePoseStability(a?: unknown, b?: unknown, options?: unknown) {
     // `b` là nguồn gia tốc thứ hai khi `a` không có.
     const fromA = readVec(a, ['acceleration']);
     const acceleration = magnitude(fromA) > 0 ? fromA : readVec(b, ['acceleration']);
@@ -1986,7 +1987,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1039] calculatePoseReachability
    * Tư thế có với tới được đích không.
    */
-  public calculatePoseReachability(a?: any, b?: any, options?: any): any {
+  public calculatePoseReachability(a?: unknown, b?: unknown, options?: unknown) {
     const target = worldPoint(b);
     const reach = readNum(options, ['reach'], this.lengthOf(a, [], 1));
     const distance = distance3D(worldPoint(a), target);
@@ -1999,7 +2000,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * Đo trên tư thế thật của cây xương: sai lệch vị trí và sai lệch xoay so
    * với tư thế tham chiếu (tư thế đích nếu có, nếu không thì tư thế nghỉ).
    */
-  public calculatePoseConstraintError(a?: any, b?: any, options?: any): any {
+  public calculatePoseConstraintError(a?: unknown, b?: unknown, options?: unknown) {
     const sources = [a, b, options];
     const pose = this.poseSource(sources);
     const current = pose?.pose ?? {};
@@ -2014,7 +2015,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1041] calculateFootLockPosition
    * Vị trí khóa bàn chân (IK chân).
    */
-  public calculateFootLockPosition(a?: any, b?: any, options?: any): any {
+  public calculateFootLockPosition(a?: unknown, b?: unknown, options?: unknown) {
     const target = worldPoint(b);
     const ground = readNum(options, ['groundY'], 0);
     const locked = readNum(options, ['lock'], 1);
@@ -2025,7 +2026,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1042] calculateFootLockWeight
    * Trọng số khóa bàn chân.
    */
-  public calculateFootLockWeight(a?: any, b?: any, options?: any): any {
+  public calculateFootLockWeight(a?: unknown, b?: unknown, options?: unknown) {
     const distance = distance3D(worldPoint(a), worldPoint(b));
     const radius = readNum(options, ['radius'], 0.3);
     const weight = clamp01(1 - distance / Math.max(1e-6, radius));
@@ -2035,7 +2036,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1043] calculateHandIKTarget
    * Đích IK cho bàn tay.
    */
-  public calculateHandIKTarget(a?: any, b?: any, options?: any): any {
+  public calculateHandIKTarget(a?: unknown, b?: unknown, options?: unknown) {
     const target = worldPoint(b);
     // `a` là nguồn độ lệch thứ hai khi `options` không chỉ định.
     const fromOptions = readVec(options, ['offset']);
@@ -2050,7 +2051,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1044] calculateLookAtTarget
    * Đích nhìn của nhân vật.
    */
-  public calculateLookAtTarget(a?: any, b?: any, options?: any): any {
+  public calculateLookAtTarget(a?: unknown, b?: unknown, options?: unknown) {
     const target = worldPoint(b);
     const origin = worldPoint(a);
     const direction = normalize(subtract(target, origin));
@@ -2068,7 +2069,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1045] calculateHeadLookAt
    * Góc quay đầu để nhìn mục tiêu.
    */
-  public calculateHeadLookAt(a?: any, b?: any, options?: any): any {
+  public calculateHeadLookAt(a?: unknown, b?: unknown, options?: unknown) {
     const origin = worldPoint(a);
     const target = worldPoint(b);
     const quaternion = this.transformedQuaternion(aimQuaternion(origin, target), options);
@@ -2084,7 +2085,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1046] calculateEyeLookAt
    * Góc quay mắt để nhìn mục tiêu.
    */
-  public calculateEyeLookAt(a?: any, b?: any, options?: any): any {
+  public calculateEyeLookAt(a?: unknown, b?: unknown, options?: unknown) {
     const origin = worldPoint(a);
     const target = worldPoint(b);
     const direction = normalize(subtract(target, origin));
@@ -2101,7 +2102,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1047] calculateAimOffset
    * Lệch giữa hướng ngắm và hướng nhìn.
    */
-  public calculateAimOffset(a?: any, b?: any, options?: any): any {
+  public calculateAimOffset(a?: unknown, b?: unknown, options?: unknown) {
     const origin = worldPoint(a);
     const target = worldPoint(b);
     const forward = entityForward(a);
@@ -2117,7 +2118,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1048] calculateAimPose
    * Tư thế ngắm.
    */
-  public calculateAimPose(a?: any, b?: any, options?: any): any {
+  public calculateAimPose(a?: unknown, b?: unknown, options?: unknown) {
     const origin = worldPoint(a);
     const target = worldPoint(b);
     const quaternion = this.transformedQuaternion(aimQuaternion(origin, target), options);
@@ -2131,7 +2132,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1049] calculateReachPose
    * Tư thế với tới.
    */
-  public calculateReachPose(a?: any, b?: any, options?: any): any {
+  public calculateReachPose(a?: unknown, b?: unknown, options?: unknown) {
     const origin = worldPoint(a);
     const target = worldPoint(b);
     const reach = readNum(options, ['reach'], this.lengthOf(a, [], 1));
@@ -2150,7 +2151,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1050] calculateCharacterPoseError
    * Sai lệch tư thế của nhân vật.
    */
-  public calculateCharacterPoseError(a?: any, b?: any, options?: any): any {
+  public calculateCharacterPoseError(a?: unknown, b?: unknown, options?: unknown) {
     const poseA = readPose(a, this.skeletonOf(a));
     const poseB = readPose(b, this.skeletonOf(b));
     const diff = poseDifference(poseA, poseB);
@@ -2168,7 +2169,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1051] getCharacterPosition
    * Vị trí nhân vật.
    */
-  public getCharacterPosition(entity?: any, offset?: Vec3D): any {
+  public getCharacterPosition(entity?: unknown, offset?: Vec3D) {
     const base = entityPosition(entity);
     return {
       x: base.x + (offset?.x ?? 0),
@@ -2180,7 +2181,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1052] getCharacterRotation
    * Góc quay của nhân vật.
    */
-  public getCharacterRotation(entityOrAngle?: any, options?: any): any {
+  public getCharacterRotation(entityOrAngle?: unknown, options?: unknown) {
     const source = this.entityOf(entityOrAngle, options);
     if (!source) return orientation('getCharacterRotation', { x: 0, y: 0, z: 0, w: 1 });
     const explicit = readQuat(source, ['quaternion', 'rotation']);
@@ -2191,7 +2192,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1053] getCharacterScale
    * Tỉ lệ nhân vật.
    */
-  public getCharacterScale(entity?: any, options?: any): any {
+  public getCharacterScale(entity?: unknown, options?: unknown) {
     const source = this.entityOf(entity, options);
     const raw = readVec(source, ['scale']);
     const base = magnitude(raw) > 0 ? raw : { x: 1, y: 1, z: 1 };
@@ -2202,21 +2203,21 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1054] getCharacterVelocity
    * Vận tốc nhân vật.
    */
-  public getCharacterVelocity(entity?: any, dt = 0.016): any {
+  public getCharacterVelocity(entity?: unknown, dt = 0.016) {
     return directionRecord('getCharacterVelocity', characterVelocity(entity, dt), { dt });
   }
   /**
    * [1055] getCharacterAcceleration
    * Gia tốc nhân vật.
    */
-  public getCharacterAcceleration(entity?: any, dt = 0.016): any {
+  public getCharacterAcceleration(entity?: unknown, dt = 0.016) {
     return directionRecord('getCharacterAcceleration', characterAcceleration(entity, dt), { dt });
   }
   /**
    * [1056] getCharacterForwardVector
    * Hướng nhìn của nhân vật.
    */
-  public getCharacterForwardVector(a?: any, b?: any): any {
+  public getCharacterForwardVector(a?: unknown, b?: unknown) {
     const forward = this.characterForwardOf(a, b);
     return directionRecord('getCharacterForwardVector', magnitude(forward) > 0 ? forward : FORWARD3);
   }
@@ -2224,7 +2225,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1057] getCharacterRightVector
    * Hướng bên phải của nhân vật.
    */
-  public getCharacterRightVector(a?: any, b?: any): any {
+  public getCharacterRightVector(a?: unknown, b?: unknown) {
     const forward = this.characterForwardOf(a, b);
     const right = normalize(cross(UP3, forward));
     return directionRecord('getCharacterRightVector', magnitude(right) > 0 ? right : RIGHT3);
@@ -2233,7 +2234,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1058] getCharacterUpVector
    * Hướng trên của nhân vật.
    */
-  public getCharacterUpVector(a?: any, b?: any): any {
+  public getCharacterUpVector(a?: unknown, b?: unknown) {
     const forward = this.characterForwardOf(a, b);
     const right = normalize(cross(UP3, forward));
     const up = normalize(cross(forward, right));
@@ -2243,7 +2244,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1059] calculateCharacterHeight
    * Chiều cao nhân vật.
    */
-  public calculateCharacterHeight(entity?: any, options?: any): any {
+  public calculateCharacterHeight(entity?: unknown, options?: unknown) {
     const source = this.entityOf(entity, options);
     const explicit = readNum(source, ['height'], Number.NaN);
     const value = Number.isFinite(explicit) ? explicit : CHARACTER_DIMENSIONS.height;
@@ -2253,7 +2254,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1060] calculateCharacterWidth
    * Bề ngang nhân vật.
    */
-  public calculateCharacterWidth(entity?: any, options?: any): any {
+  public calculateCharacterWidth(entity?: unknown, options?: unknown) {
     const source = this.entityOf(entity, options);
     const explicit = readNum(source, ['width'], Number.NaN);
     const value = Number.isFinite(explicit) ? explicit : CHARACTER_DIMENSIONS.width;
@@ -2263,7 +2264,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1061] calculateCharacterDepth
    * Bề sâu nhân vật.
    */
-  public calculateCharacterDepth(entity?: any, options?: any): any {
+  public calculateCharacterDepth(entity?: unknown, options?: unknown) {
     const source = this.entityOf(entity, options);
     const explicit = readNum(source, ['depth'], Number.NaN);
     const value = Number.isFinite(explicit) ? explicit : CHARACTER_DIMENSIONS.depth;
@@ -2273,7 +2274,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1062] calculateCharacterRadius
    * Bán kính bao của nhân vật.
    */
-  public calculateCharacterRadius(entity?: any, options?: any): any {
+  public calculateCharacterRadius(entity?: unknown, options?: unknown) {
     const source = this.entityOf(entity, options);
     const explicit = readNum(source, ['radius'], Number.NaN);
     const value = Number.isFinite(explicit) ? explicit : CHARACTER_DIMENSIONS.radius;
@@ -2283,7 +2284,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1063] calculateCharacterBounds
    * Hộp bao của nhân vật.
    */
-  public calculateCharacterBounds(entity?: any, size?: Vec3D): any {
+  public calculateCharacterBounds(entity?: unknown, size?: Vec3D) {
     const center = entityPosition(entity);
     const extent = size ?? {
       x: CHARACTER_DIMENSIONS.width,
@@ -2296,7 +2297,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1064] calculateCharacterBoundingBox
    * Hộp bao xương của nhân vật.
    */
-  public calculateCharacterBoundingBox(entity?: any, size?: Vec3D): any {
+  public calculateCharacterBoundingBox(entity?: unknown, size?: Vec3D) {
     const positions = Object.values(this.worldPositions(entity));
     if (positions.length === 0) return this.calculateCharacterBounds(entity, size);
     const min = { x: Infinity, y: Infinity, z: Infinity };
@@ -2315,7 +2316,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1065] calculateCharacterBoundingSphere
    * Hình cầu bao của nhân vật.
    */
-  public calculateCharacterBoundingSphere(entity?: any, radius = 1.0): any {
+  public calculateCharacterBoundingSphere(entity?: unknown, radius = 1.0) {
     return {
       name: 'calculateCharacterBoundingSphere',
       valid: true,
@@ -2328,7 +2329,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1066] calculateCharacterBoundingCapsule
    * Capsule bao của nhân vật.
    */
-  public calculateCharacterBoundingCapsule(entity?: any, height = 2.0, radius = 0.5): any {
+  public calculateCharacterBoundingCapsule(entity?: unknown, height = 2.0, radius = 0.5) {
     const center = entityPosition(entity);
     return named('calculateCharacterBoundingCapsule', {
       start: { x: center.x, y: center.y - height / 2, z: center.z },
@@ -2341,7 +2342,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1067] calculateCharacterCenterOfMass
    * Tâm khối lượng của nhân vật.
    */
-  public calculateCharacterCenterOfMass(entity?: any, options?: any): any {
+  public calculateCharacterCenterOfMass(entity?: unknown, options?: unknown) {
     const source = this.entityOf(entity, options);
     const positions = Object.values(this.worldPositions(source));
     if (positions.length === 0) {
@@ -2362,7 +2363,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1068] calculateCharacterGroundDistance
    * Khoảng cách tới mặt đất.
    */
-  public calculateCharacterGroundDistance(a?: any, b?: any): any {
+  public calculateCharacterGroundDistance(a?: unknown, b?: unknown) {
     const position = worldPoint(a);
     const ground = readNum(b, ['groundY', 'ground'], 0);
     return Math.abs(position.y - ground);
@@ -2371,7 +2372,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1069] calculateCharacterGroundContact
    * Nhân vật có chạm đất không.
    */
-  public calculateCharacterGroundContact(a?: any, b?: any, options?: any): any {
+  public calculateCharacterGroundContact(a?: unknown, b?: unknown, options?: unknown) {
     const position = worldPoint(a);
     const ground = readNum(options, ['groundY', 'ground'], readNum(b, ['groundY'], 0));
     const distance = position.y - ground;
@@ -2385,7 +2386,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * Dùng pháp tuyến tường minh nếu có; nếu không thì suy ra từ hướng di
    * chuyển (mặt đất phải vuông góc với đường đi của nhân vật).
    */
-  public calculateCharacterGroundNormal(a?: any, b?: any): any {
+  public calculateCharacterGroundNormal(a?: unknown, b?: unknown) {
     const explicit = this.firstVector([b, a], ['normal', 'groundNormal', 'planeNormal']);
     if (magnitude(explicit) > 0) {
       return directionRecord('calculateCharacterGroundNormal', normalize(explicit));
@@ -2400,7 +2401,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * không thì góc dốc suy ra từ hướng di chuyển (đi lên dốc → vận tốc có
    * thành phần `y` dương).
    */
-  public calculateCharacterSlopeAngle(a?: any, b?: any): any {
+  public calculateCharacterSlopeAngle(a?: unknown, b?: unknown) {
     const explicit = this.firstVector([b, a], ['normal', 'groundNormal', 'planeNormal']);
     if (magnitude(explicit) > 0) {
       const resolved = normalize(explicit);
@@ -2412,7 +2413,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1072] calculateCharacterMovementDirection
    * Hướng di chuyển.
    */
-  public calculateCharacterMovementDirection(a?: any, b?: any): any {
+  public calculateCharacterMovementDirection(a?: unknown, b?: unknown) {
     const velocity = readVec(a, ['velocity']);
     if (magnitude(velocity) > 0) return directionRecord('calculateCharacterMovementDirection', normalize(velocity));
     const from = worldPoint(a);
@@ -2424,21 +2425,21 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1073] calculateCharacterMovementSpeed
    * Tốc độ di chuyển.
    */
-  public calculateCharacterMovementSpeed(entity?: any, options?: any): any {
+  public calculateCharacterMovementSpeed(entity?: unknown, options?: unknown) {
     return this.transformedNumber(characterSpeed(this.entityOf(entity, options)), options);
   }
   /**
    * [1074] calculateCharacterMovementDistance
    * Quãng đường đã đi.
    */
-  public calculateCharacterMovementDistance(a?: any, b?: any): any {
+  public calculateCharacterMovementDistance(a?: unknown, b?: unknown) {
     return distance3D(worldPoint(a), worldPoint(b));
   }
   /**
    * [1075] calculateCharacterTurningRate
    * Tốc độ quay của nhân vật.
    */
-  public calculateCharacterTurningRate(entity?: any, options?: any): any {
+  public calculateCharacterTurningRate(entity?: unknown, options?: unknown) {
     const source = this.entityOf(entity, options);
     const angular = readVec(source, ['angularVelocity']);
     const rate = magnitude(angular) > 0 ? magnitude(angular) : readNum(source, ['turnRate'], CHARACTER_DIMENSIONS.turnRate);
@@ -2448,7 +2449,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1076] calculateCharacterTurningAngle
    * Góc quay giữa hai hướng.
    */
-  public calculateCharacterTurningAngle(a?: any, b?: any): any {
+  public calculateCharacterTurningAngle(a?: unknown, b?: unknown) {
     const from = readVec(a, ['forward']);
     const to = readVec(b, ['forward']);
     const dirA = magnitude(from) > 0 ? normalize(from) : entityForward(a);
@@ -2459,7 +2460,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1077] calculateCharacterStoppingDistance
    * Quãng đường dừng.
    */
-  public calculateCharacterStoppingDistance(a?: any, b?: any): any {
+  public calculateCharacterStoppingDistance(a?: unknown, b?: unknown) {
     const speed = characterSpeed(a);
     const deceleration = readNum(a, ['deceleration', 'braking'], readNum(b, ['deceleration'], 5));
     return stoppingDistance(speed, deceleration);
@@ -2468,7 +2469,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1078] calculateCharacterBrakingAcceleration
    * Gia tốc phanh.
    */
-  public calculateCharacterBrakingAcceleration(entity?: any, dt = 0.016): any {
+  public calculateCharacterBrakingAcceleration(entity?: unknown, dt = 0.016) {
     const deceleration = readNum(entity, ['deceleration', 'braking'], 5);
     const speed = characterSpeed(entity);
     const acceleration = deceleration > 0 ? -(speed * speed) / (2 * Math.max(1e-6, speed)) : 0;
@@ -2478,7 +2479,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1079] calculateCharacterJumpVelocity
    * Vận tốc nhảy.
    */
-  public calculateCharacterJumpVelocity(entity?: any, dt = 0.016): any {
+  public calculateCharacterJumpVelocity(entity?: unknown, dt = 0.016) {
     const height = readNum(entity, ['jumpHeight'], readNum(entity, ['height'], 1));
     const gravity = readNum(entity, ['gravity'], CHARACTER_DIMENSIONS.gravity);
     const velocity = jumpVelocityForHeight(height, gravity);
@@ -2488,7 +2489,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1080] calculateCharacterJumpHeight
    * Chiều cao nhảy.
    */
-  public calculateCharacterJumpHeight(entity?: any, options?: any): any {
+  public calculateCharacterJumpHeight(entity?: unknown, options?: unknown) {
     const source = this.entityOf(entity, options);
     const velocity = readNum(source, ['jumpVelocity'], CHARACTER_DIMENSIONS.jumpVelocity);
     const gravity = readNum(source, ['gravity'], CHARACTER_DIMENSIONS.gravity);
@@ -2499,7 +2500,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1081] calculateCharacterFallVelocity
    * Vận tốc rơi.
    */
-  public calculateCharacterFallVelocity(entity?: any, dt = 0.016): any {
+  public calculateCharacterFallVelocity(entity?: unknown, dt = 0.016) {
     const gravity = readNum(entity, ['gravity'], CHARACTER_DIMENSIONS.gravity);
     const velocity = readVec(entity, ['fallVelocity']);
     const resolved = magnitude(velocity) > 0 ? velocity : { x: 0, y: -gravity * dt, z: 0 };
@@ -2509,7 +2510,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1082] calculateCharacterFallDistance
    * Quãng đường rơi.
    */
-  public calculateCharacterFallDistance(a?: any, b?: any): any {
+  public calculateCharacterFallDistance(a?: unknown, b?: unknown) {
     const height = Math.abs(worldPoint(a).y - readNum(b, ['groundY', 'ground'], 0));
     const gravity = readNum(a, ['gravity'], CHARACTER_DIMENSIONS.gravity);
     const fall = fallKinematics(height, gravity);
@@ -2519,7 +2520,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1083] calculateCharacterLandingPosition
    * Vị trí hạ cánh.
    */
-  public calculateCharacterLandingPosition(a?: any, b?: any, options?: any): any {
+  public calculateCharacterLandingPosition(a?: unknown, b?: unknown, options?: unknown) {
     const position = worldPoint(a);
     const target = worldPoint(b);
     const ground = readNum(options, ['groundY'], 0);
@@ -2534,7 +2535,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1084] calculateCharacterLandingVelocity
    * Vận tốc khi chạm đất.
    */
-  public calculateCharacterLandingVelocity(entity?: any, dt = 0.016): any {
+  public calculateCharacterLandingVelocity(entity?: unknown, dt = 0.016) {
     const gravity = readNum(entity, ['gravity'], CHARACTER_DIMENSIONS.gravity);
     const velocity = readVec(entity, ['fallVelocity', 'velocity']);
     const resolved = magnitude(velocity) > 0 ? velocity : { x: 0, y: -gravity * dt, z: 0 };
@@ -2544,7 +2545,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1085] calculateCharacterCollision
    * Va chạm của nhân vật.
    */
-  public calculateCharacterCollision(a?: any, b?: any): any {
+  public calculateCharacterCollision(a?: unknown, b?: unknown) {
     const boxA = boundingBox(worldPoint(a), {
       x: CHARACTER_DIMENSIONS.width,
       y: CHARACTER_DIMENSIONS.height,
@@ -2571,7 +2572,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1086] calculateCharacterCollisionResponse
    * Phản ứng va chạm của nhân vật.
    */
-  public calculateCharacterCollisionResponse(a?: any, b?: any): any {
+  public calculateCharacterCollisionResponse(a?: unknown, b?: unknown) {
     const normal = normalize(subtract(worldPoint(b), worldPoint(a)));
     const resolved = magnitude(normal) > 0 ? normal : UP3;
     const restitution = readNum(a, ['restitution'], 0.2);
@@ -2588,7 +2589,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1087] calculateCharacterPenetrationDepth
    * Độ sâu xâm nhập của nhân vật.
    */
-  public calculateCharacterPenetrationDepth(entity?: any, options?: any): any {
+  public calculateCharacterPenetrationDepth(entity?: unknown, options?: unknown) {
     const radius = readNum(entity, ['radius'], CHARACTER_DIMENSIONS.radius);
     const other = readVec(options, ['other', 'position']);
     const distance = magnitude(other) > 0 ? distance3D(worldPoint(entity), other) : 0;
@@ -2599,7 +2600,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1088] calculateCharacterSeparationVector
    * Vector tách nhân vật khỏi nhau.
    */
-  public calculateCharacterSeparationVector(a?: any, b?: any): any {
+  public calculateCharacterSeparationVector(a?: unknown, b?: unknown) {
     const dir = normalize(subtract(worldPoint(a), worldPoint(b)));
     return directionRecord('calculateCharacterSeparationVector', magnitude(dir) > 0 ? dir : FORWARD3, {
       distance: distance3D(worldPoint(a), worldPoint(b)),
@@ -2609,7 +2610,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1089] calculateCharacterAvoidanceDirection
    * Hướng tránh vật cản.
    */
-  public calculateCharacterAvoidanceDirection(a?: any, b?: any): any {
+  public calculateCharacterAvoidanceDirection(a?: unknown, b?: unknown) {
     const from = worldPoint(a);
     const obstacle = worldPoint(b);
     const away = normalize(subtract(from, obstacle));
@@ -2623,14 +2624,14 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1090] calculateCharacterPathDistance
    * Quãng đường trên đường đi.
    */
-  public calculateCharacterPathDistance(a?: any, b?: any): any {
+  public calculateCharacterPathDistance(a?: unknown, b?: unknown) {
     return distance3D(worldPoint(a), worldPoint(b));
   }
   /**
    * [1091] calculateCharacterPathDeviation
    * Độ lệch khỏi đường đi.
    */
-  public calculateCharacterPathDeviation(a?: any, b?: any, options?: any): any {
+  public calculateCharacterPathDeviation(a?: unknown, b?: unknown, options?: unknown) {
     // `b` là nguồn hướng đường đi thứ hai khi `options` không chỉ định.
     const fromOptions = readVec(options, ['pathDirection', 'path']);
     const path = magnitude(fromOptions) > 0 ? fromOptions : readVec(b, ['pathDirection', 'path']);
@@ -2653,7 +2654,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * Ưu tiên công thức lái xe κ = yawRate / speed (tốc độ lái và tốc độ thật);
    * khi không có tốc độ lái thì đo độ cong hình học của đường đi.
    */
-  public calculateCharacterPathCurvature(entity?: any, options?: any): any {
+  public calculateCharacterPathCurvature(entity?: unknown, options?: unknown) {
     const sources = [entity, options];
     const yawRate = Math.abs(this.yawRateOf(sources));
     const speed = this.speedOf(sources);
@@ -2666,7 +2667,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1093] calculateCharacterPathTangent
    * Tiếp tuyến đường đi.
    */
-  public calculateCharacterPathTangent(a?: any, b?: any): any {
+  public calculateCharacterPathTangent(a?: unknown, b?: unknown) {
     // `b` là nguồn hướng đường đi thứ hai khi `a` không chỉ định.
     const fromA = readVec(a, ['pathDirection', 'path']);
     const path = magnitude(fromA) > 0 ? fromA : readVec(b, ['pathDirection', 'path']);
@@ -2677,7 +2678,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1094] calculateCharacterPathNormal
    * Pháp tuyến đường đi.
    */
-  public calculateCharacterPathNormal(a?: any, b?: any): any {
+  public calculateCharacterPathNormal(a?: unknown, b?: unknown) {
     const tangent = this.calculateCharacterPathTangent(a, b).direction as Vec3D;
     const normal = normalize(cross(tangent, UP3));
     return directionRecord('calculateCharacterPathNormal', magnitude(normal) > 0 ? normal : RIGHT3);
@@ -2686,7 +2687,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1095] calculateCharacterNavigationCost
    * Chi phí điều hướng của nhân vật.
    */
-  public calculateCharacterNavigationCost(entity?: any, options?: any): any {
+  public calculateCharacterNavigationCost(entity?: unknown, options?: unknown) {
     const distance = distance3D(worldPoint(entity), readVec(options, ['target']));
     const speed = Math.max(0.1, characterSpeed(entity));
     const cost = distance / speed;
@@ -2696,14 +2697,14 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1096] calculateCharacterReachDistance
    * Quãng đường với tới.
    */
-  public calculateCharacterReachDistance(a?: any, b?: any): any {
+  public calculateCharacterReachDistance(a?: unknown, b?: unknown) {
     return distance3D(worldPoint(a), worldPoint(b));
   }
   /**
    * [1097] calculateCharacterInteractionRange
    * Tầm tương tác.
    */
-  public calculateCharacterInteractionRange(a?: any, b?: any, options?: any): any {
+  public calculateCharacterInteractionRange(a?: unknown, b?: unknown, options?: unknown) {
     const explicit = readNum(options, ['range', 'interactionRange'], Number.NaN);
     const value = Number.isFinite(explicit) ? explicit : CHARACTER_DIMENSIONS.interactionRange;
     const distance = distance3D(worldPoint(a), worldPoint(b));
@@ -2716,7 +2717,7 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1098] calculateCharacterVisibilityRange
    * Tầm nhìn của nhân vật.
    */
-  public calculateCharacterVisibilityRange(entity?: any, camera?: any): any {
+  public calculateCharacterVisibilityRange(entity?: unknown, camera?: unknown) {
     const explicit = readNum(entity, ['visibilityRange', 'viewDistance'], Number.NaN);
     const value = Number.isFinite(explicit) ? explicit : 50;
     const distance = distance3D(worldPoint(entity), worldPoint(camera));
@@ -2729,14 +2730,14 @@ export class SkeletalKinematicsCharacterSubsystem {
    * [1099] calculateCharacterTargetDistance
    * Khoảng cách tới mục tiêu.
    */
-  public calculateCharacterTargetDistance(a?: any, b?: any): any {
+  public calculateCharacterTargetDistance(a?: unknown, b?: unknown) {
     return distance3D(worldPoint(a), worldPoint(b));
   }
   /**
    * [1100] calculateCharacterTargetAngle
    * Góc tới mục tiêu.
    */
-  public calculateCharacterTargetAngle(a?: any, b?: any): any {
+  public calculateCharacterTargetAngle(a?: unknown, b?: unknown) {
     const from = worldPoint(a);
     const to = worldPoint(b);
     const forward = entityForward(a);

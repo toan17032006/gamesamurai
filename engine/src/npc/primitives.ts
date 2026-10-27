@@ -280,7 +280,7 @@ export function compareData<T = unknown>(a: T, b: T, options?: ComparisonOptions
  * Generic In-Memory Repository for NPC Knowledge & Memory Records
  */
 export class NPCMemoryRepository {
-  private records = new Map<string, NPCRecord<any>[]>();
+  private records = new Map<string, NPCRecord<unknown>[]>();
   private config: NPCSystemConfig;
 
   constructor(config: NPCSystemConfig = {}) {
@@ -338,12 +338,15 @@ export class NPCMemoryRepository {
     }
 
     const latest = list[list.length - 1];
-    latest.data = { ...latest.data, ...updateData };
+    latest.data = {
+      ...(latest.data as Record<string, unknown>),
+      ...(updateData as Record<string, unknown>),
+    } as T;
     latest.timestamp = Date.now();
     if (context) {
       latest.metadata = { ...latest.metadata, ...context };
     }
-    return latest;
+    return latest as NPCRecord<T>;
   }
 
   public query<T = Record<string, unknown>>(
@@ -375,8 +378,8 @@ export class NPCMemoryRepository {
       const field = query.sortBy;
       const asc = query.sortOrder === 'asc';
       result.sort((a, b) => {
-        const valA = (a as any)[field] ?? 0;
-        const valB = (b as any)[field] ?? 0;
+        const valA = (a as unknown as Record<string, number | undefined>)[field] ?? 0;
+        const valB = (b as unknown as Record<string, number | undefined>)[field] ?? 0;
         return asc ? valA - valB : valB - valA;
       });
     }
@@ -402,7 +405,7 @@ export class NPCMemoryRepository {
     const now = Date.now();
 
     const prunedIds: string[] = [];
-    const retained: NPCRecord<any>[] = [];
+    const retained: NPCRecord<unknown>[] = [];
 
     for (const rec of list) {
       let keep = true;

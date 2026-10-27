@@ -16,7 +16,7 @@ export type ItemCategory =
   | 'currency'
   | 'misc';
 
-export interface Item<TMetadata = Record<string, any>> {
+export interface Item<TMetadata = Record<string, unknown>> {
   id: string;
   name: string;
   category: ItemCategory;
@@ -36,7 +36,7 @@ export interface EquipmentItem<TSlot extends string = string, TStats = Record<st
   maxDurability?: number;
 }
 
-export interface ConsumableItem<TEffect = Record<string, any>> extends Item {
+export interface ConsumableItem<TEffect = Record<string, unknown>> extends Item {
   effect: TEffect;
   cooldownSeconds?: number;
   consumeOnUse?: boolean;

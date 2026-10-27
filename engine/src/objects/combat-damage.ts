@@ -70,10 +70,25 @@ export class DamageInstance {
   }
 }
 
+/** Minimal structural view of combat stats used by damage calculation. */
+interface CombatStats {
+  strength?: number;
+  intelligence?: number;
+  critChance?: number;
+  defense?: number;
+  magicResist?: number;
+}
+
+/** Entity shape exposing combat stats directly or through an attribute system. */
+interface CombatStatProvider {
+  stats?: CombatStats;
+  attributeSystem?: { toJSON?: () => CombatStats };
+}
+
 /**
  * Generic Damage Calculator factoring in attack power, armor formulas, and critical hits.
  */
-export class DamageCalculator<TAttacker = any, TTarget = any> {
+export class DamageCalculator<TAttacker = unknown, TTarget = unknown> {
   public armorConstant: number;
   public baseCritMultiplier: number;
 
@@ -92,7 +107,8 @@ export class DamageCalculator<TAttacker = any, TTarget = any> {
 
     // 1. Attacker power bonus
     let damage = basePower;
-    const atkStats = (attacker as any)?.stats ?? (attacker as any)?.attributeSystem?.toJSON?.();
+    const attackerProvider = attacker as CombatStatProvider | null;
+    const atkStats = attackerProvider?.stats ?? attackerProvider?.attributeSystem?.toJSON?.();
     if (atkStats) {
       const statBonus = type === 'magical' ? (atkStats.intelligence ?? 0) : (atkStats.strength ?? 0);
       damage += statBonus * 0.5;
@@ -107,7 +123,8 @@ export class DamageCalculator<TAttacker = any, TTarget = any> {
 
     // 3. Target armor / resistance mitigation
     if (type !== 'pure') {
-      const defStats = (target as any)?.stats ?? (target as any)?.attributeSystem?.toJSON?.();
+      const targetProvider = target as CombatStatProvider | null;
+      const defStats = targetProvider?.stats ?? targetProvider?.attributeSystem?.toJSON?.();
       const defense = type === 'magical' ? (defStats?.magicResist ?? 0) : (defStats?.defense ?? 0);
       const mitigationRatio = defense / (defense + this.armorConstant);
       damage *= 1.0 - mitigationRatio;
@@ -157,7 +174,7 @@ export class Hitbox<TShape extends HitboxShape = HitboxShape> {
 /**
  * Threat / Aggro Table managing target priority for AI bots and bosses.
  */
-export class ThreatTable<TTarget = any> {
+export class ThreatTable<TTarget = unknown> {
   private _threat: Map<TTarget, number> = new Map();
 
   public addThreat(target: TTarget, amount: number): void {

@@ -41,796 +41,796 @@ export function createWorld(config?: Partial<WorldConfig>): World {
   setActiveWorld(w);
   return w;
 }
-export function initializeWorld(inst?: World): any { return resolveWorld(inst).initializeWorld(); }
-export function destroyWorld(inst?: World): any { return resolveWorld(inst).destroyWorld(); }
-export function resetWorld(inst?: World): any { return resolveWorld(inst).resetWorld(); }
-export function updateWorld(deltaTime?: any, inst?: World): any { return resolveWorld(inst).updateWorld(deltaTime); }
-export function fixedUpdateWorld(fixedDeltaTime?: any, inst?: World): any { return resolveWorld(inst).fixedUpdateWorld(fixedDeltaTime); }
-export function setWorldConfig(config?: any, inst?: World): any { return resolveWorld(inst).setWorldConfig(config); }
-export function getWorldState(inst?: World): any { return resolveWorld(inst).getWorldState(); }
-export function saveWorldState(inst?: World): any { return resolveWorld(inst).saveWorldState(); }
-export function restoreWorldState(state?: any, inst?: World): any { return resolveWorld(inst).restoreWorldState(state); }
-export function pauseWorldSimulation(inst?: World): any { return resolveWorld(inst).pauseWorldSimulation(); }
-export function resumeWorldSimulation(inst?: World): any { return resolveWorld(inst).resumeWorldSimulation(); }
-export function setWorldSimulationSpeed(speed?: any, inst?: World): any { return resolveWorld(inst).setWorldSimulationSpeed(speed); }
-export function setWorldTime(time?: any, inst?: World): any { return resolveWorld(inst).setWorldTime(time); }
-export function advanceWorldTime(deltaTime?: any, inst?: World): any { return resolveWorld(inst).advanceWorldTime(deltaTime); }
-export function setWorldBounds(bounds?: any, inst?: World): any { return resolveWorld(inst).setWorldBounds(bounds); }
-export function loadWorldRegion(region?: any, inst?: World): any { return resolveWorld(inst).loadWorldRegion(region); }
-export function unloadWorldRegion(region?: any, inst?: World): any { return resolveWorld(inst).unloadWorldRegion(region); }
-export function validateWorldState(inst?: World): any { return resolveWorld(inst).validateWorldState(); }
-export function optimizeWorldSimulation(inst?: World): any { return resolveWorld(inst).optimizeWorldSimulation(); }
-export function createWorldObject(type?: any, inst?: World): any { return resolveWorld(inst).createWorldObject(type); }
-export function destroyWorldObject(object?: any, inst?: World): any { return resolveWorld(inst).destroyWorldObject(object); }
-export function cloneWorldObject(object?: any, inst?: World): any { return resolveWorld(inst).cloneWorldObject(object); }
-export function duplicateWorldObject(object?: any, inst?: World): any { return resolveWorld(inst).duplicateWorldObject(object); }
-export function setObjectPosition(object?: any, position?: any, inst?: World): any { return resolveWorld(inst).setObjectPosition(object, position); }
-export function setObjectRotation(object?: any, rotation?: any, inst?: World): any { return resolveWorld(inst).setObjectRotation(object, rotation); }
-export function setObjectScale(object?: any, scale?: any, inst?: World): any { return resolveWorld(inst).setObjectScale(object, scale); }
-export function setObjectTransform(object?: any, transform?: any, inst?: World): any { return resolveWorld(inst).setObjectTransform(object, transform); }
-export function getObjectTransform(object?: any, inst?: World): any { return resolveWorld(inst).getObjectTransform(object); }
-export function updateObjectTransform(object?: any, inst?: World): any { return resolveWorld(inst).updateObjectTransform(object); }
-export function setObjectVisibility(object?: any, visible?: any, inst?: World): any { return resolveWorld(inst).setObjectVisibility(object, visible); }
-export function setObjectMaterial(object?: any, material?: any, inst?: World): any { return resolveWorld(inst).setObjectMaterial(object, material); }
-export function setObjectTexture(object?: any, texture?: any, inst?: World): any { return resolveWorld(inst).setObjectTexture(object, texture); }
-export function setObjectTags(object?: any, tags?: any, inst?: World): any { return resolveWorld(inst).setObjectTags(object, tags); }
-export function getObjectTags(object?: any, inst?: World): any { return resolveWorld(inst).getObjectTags(object); }
-export function attachObjectToParent(object?: any, parent?: any, inst?: World): any { return resolveWorld(inst).attachObjectToParent(object, parent); }
-export function detachObjectFromParent(object?: any, inst?: World): any { return resolveWorld(inst).detachObjectFromParent(object); }
-export function transferObjectToRegion(object?: any, region?: any, inst?: World): any { return resolveWorld(inst).transferObjectToRegion(object, region); }
-export function serializeWorldObject(object?: any, inst?: World): any { return resolveWorld(inst).serializeWorldObject(object); }
-export function deserializeWorldObject(data?: any, inst?: World): any { return resolveWorld(inst).deserializeWorldObject(data); }
-export function createTree(species?: any, inst?: World): any { return resolveWorld(inst).createTree(species); }
-export function initializeTree(tree?: any, inst?: World): any { return resolveWorld(inst).initializeTree(tree); }
-export function updateTree(tree?: any, deltaTime?: any, inst?: World): any { return resolveWorld(inst).updateTree(tree, deltaTime); }
-export function growTree(tree?: any, amount?: any, inst?: World): any { return resolveWorld(inst).growTree(tree, amount); }
-export function setTreeAge(tree?: any, age?: any, inst?: World): any { return resolveWorld(inst).setTreeAge(tree, age); }
-export function updateTreeHeight(tree?: any, inst?: World): any { return resolveWorld(inst).updateTreeHeight(tree); }
-export function updateTreeThickness(tree?: any, inst?: World): any { return resolveWorld(inst).updateTreeThickness(tree); }
-export function updateTreeCanopy(tree?: any, inst?: World): any { return resolveWorld(inst).updateTreeCanopy(tree); }
-export function updateTreeRootSystem(tree?: any, inst?: World): any { return resolveWorld(inst).updateTreeRootSystem(tree); }
-export function updateTreeTrunk(tree?: any, inst?: World): any { return resolveWorld(inst).updateTreeTrunk(tree); }
-export function updateTreeBark(tree?: any, inst?: World): any { return resolveWorld(inst).updateTreeBark(tree); }
-export function updateTreeBranchStructure(tree?: any, inst?: World): any { return resolveWorld(inst).updateTreeBranchStructure(tree); }
-export function generateTreeBranches(tree?: any, inst?: World): any { return resolveWorld(inst).generateTreeBranches(tree); }
-export function extendTreeBranch(branch?: any, inst?: World): any { return resolveWorld(inst).extendTreeBranch(branch); }
-export function shortenTreeBranch(branch?: any, inst?: World): any { return resolveWorld(inst).shortenTreeBranch(branch); }
-export function bendTreeBranch(branch?: any, force?: any, inst?: World): any { return resolveWorld(inst).bendTreeBranch(branch, force); }
-export function twistTreeBranch(branch?: any, torque?: any, inst?: World): any { return resolveWorld(inst).twistTreeBranch(branch, torque); }
-export function repairTreeDamage(tree?: any, inst?: World): any { return resolveWorld(inst).repairTreeDamage(tree); }
-export function removeTree(tree?: any, inst?: World): any { return resolveWorld(inst).removeTree(tree); }
-export function regenerateTreeGeometry(tree?: any, inst?: World): any { return resolveWorld(inst).regenerateTreeGeometry(tree); }
-export function createBranch(tree?: any, parentBranch?: any, inst?: World): any { return resolveWorld(inst).createBranch(tree, parentBranch); }
-export function splitBranch(branch?: any, inst?: World): any { return resolveWorld(inst).splitBranch(branch); }
-export function growBranch(branch?: any, amount?: any, inst?: World): any { return resolveWorld(inst).growBranch(branch, amount); }
-export function thickenBranch(branch?: any, amount?: any, inst?: World): any { return resolveWorld(inst).thickenBranch(branch, amount); }
-export function bendBranch(branch?: any, force?: any, inst?: World): any { return resolveWorld(inst).bendBranch(branch, force); }
-export function straightenBranch(branch?: any, inst?: World): any { return resolveWorld(inst).straightenBranch(branch); }
-export function rotateBranch(branch?: any, angle?: any, inst?: World): any { return resolveWorld(inst).rotateBranch(branch, angle); }
-export function twistBranch(branch?: any, angle?: any, inst?: World): any { return resolveWorld(inst).twistBranch(branch, angle); }
-export function shakeBranch(branch?: any, intensity?: any, inst?: World): any { return resolveWorld(inst).shakeBranch(branch, intensity); }
-export function applyBranchLoad(branch?: any, force?: any, inst?: World): any { return resolveWorld(inst).applyBranchLoad(branch, force); }
-export function detectBranchStress(branch?: any, inst?: World): any { return resolveWorld(inst).detectBranchStress(branch); }
-export function detectBranchFracture(branch?: any, inst?: World): any { return resolveWorld(inst).detectBranchFracture(branch); }
-export function breakBranch(branch?: any, force?: any, inst?: World): any { return resolveWorld(inst).breakBranch(branch, force); }
-export function snapBranchAtJoint(branch?: any, joint?: any, inst?: World): any { return resolveWorld(inst).snapBranchAtJoint(branch, joint); }
-export function detachBranch(branch?: any, inst?: World): any { return resolveWorld(inst).detachBranch(branch); }
-export function fallBranch(branch?: any, gravity?: any, inst?: World): any { return resolveWorld(inst).fallBranch(branch, gravity); }
-export function splitWoodGrain(branch?: any, inst?: World): any { return resolveWorld(inst).splitWoodGrain(branch); }
-export function crackWoodSurface(branch?: any, inst?: World): any { return resolveWorld(inst).crackWoodSurface(branch); }
-export function decayWood(branch?: any, rate?: any, inst?: World): any { return resolveWorld(inst).decayWood(branch, rate); }
-export function regenerateBranchMesh(branch?: any, inst?: World): any { return resolveWorld(inst).regenerateBranchMesh(branch); }
-export function createLeaf(plant?: any, inst?: World): any { return resolveWorld(inst).createLeaf(plant); }
-export function initializeLeaf(leaf?: any, inst?: World): any { return resolveWorld(inst).initializeLeaf(leaf); }
-export function updateLeaf(leaf?: any, deltaTime?: any, inst?: World): any { return resolveWorld(inst).updateLeaf(leaf, deltaTime); }
-export function growLeaf(leaf?: any, amount?: any, inst?: World): any { return resolveWorld(inst).growLeaf(leaf, amount); }
-export function shrinkLeaf(leaf?: any, amount?: any, inst?: World): any { return resolveWorld(inst).shrinkLeaf(leaf, amount); }
-export function unfoldLeaf(leaf?: any, inst?: World): any { return resolveWorld(inst).unfoldLeaf(leaf); }
-export function foldLeaf(leaf?: any, inst?: World): any { return resolveWorld(inst).foldLeaf(leaf); }
-export function curlLeaf(leaf?: any, amount?: any, inst?: World): any { return resolveWorld(inst).curlLeaf(leaf, amount); }
-export function uncurlLeaf(leaf?: any, inst?: World): any { return resolveWorld(inst).uncurlLeaf(leaf); }
-export function bendLeaf(leaf?: any, force?: any, inst?: World): any { return resolveWorld(inst).bendLeaf(leaf, force); }
-export function twistLeaf(leaf?: any, angle?: any, inst?: World): any { return resolveWorld(inst).twistLeaf(leaf, angle); }
-export function flutterLeaf(leaf?: any, wind?: any, inst?: World): any { return resolveWorld(inst).flutterLeaf(leaf, wind); }
-export function shakeLeaf(leaf?: any, intensity?: any, inst?: World): any { return resolveWorld(inst).shakeLeaf(leaf, intensity); }
-export function droopLeaf(leaf?: any, amount?: any, inst?: World): any { return resolveWorld(inst).droopLeaf(leaf, amount); }
-export function restoreLeafPose(leaf?: any, inst?: World): any { return resolveWorld(inst).restoreLeafPose(leaf); }
-export function changeLeafColor(leaf?: any, color?: any, inst?: World): any { return resolveWorld(inst).changeLeafColor(leaf, color); }
-export function dryLeaf(leaf?: any, rate?: any, inst?: World): any { return resolveWorld(inst).dryLeaf(leaf, rate); }
-export function detachLeaf(leaf?: any, inst?: World): any { return resolveWorld(inst).detachLeaf(leaf); }
-export function fallLeaf(leaf?: any, gravity?: any, inst?: World): any { return resolveWorld(inst).fallLeaf(leaf, gravity); }
-export function landLeaf(leaf?: any, surface?: any, inst?: World): any { return resolveWorld(inst).landLeaf(leaf, surface); }
-export function applyWindToTree(tree?: any, wind?: any, inst?: World): any { return resolveWorld(inst).applyWindToTree(tree, wind); }
-export function applyWindToBranch(branch?: any, wind?: any, inst?: World): any { return resolveWorld(inst).applyWindToBranch(branch, wind); }
-export function applyWindToLeaf(leaf?: any, wind?: any, inst?: World): any { return resolveWorld(inst).applyWindToLeaf(leaf, wind); }
-export function calculateWindPressure(object?: any, wind?: any, inst?: World): any { return resolveWorld(inst).calculateWindPressure(object, wind); }
-export function calculateWindDrag(object?: any, wind?: any, inst?: World): any { return resolveWorld(inst).calculateWindDrag(object, wind); }
-export function calculateWindTorque(object?: any, wind?: any, inst?: World): any { return resolveWorld(inst).calculateWindTorque(object, wind); }
-export function swayTreeTrunk(tree?: any, wind?: any, inst?: World): any { return resolveWorld(inst).swayTreeTrunk(tree, wind); }
-export function swayTreeCanopy(tree?: any, wind?: any, inst?: World): any { return resolveWorld(inst).swayTreeCanopy(tree, wind); }
-export function oscillateBranch(branch?: any, wind?: any, inst?: World): any { return resolveWorld(inst).oscillateBranch(branch, wind); }
-export function flutterLeaves(leafGroup?: any, wind?: any, inst?: World): any { return resolveWorld(inst).flutterLeaves(leafGroup, wind); }
-export function simulateWindGust(gust?: any, inst?: World): any { return resolveWorld(inst).simulateWindGust(gust); }
-export function simulateTurbulentWind(wind?: any, inst?: World): any { return resolveWorld(inst).simulateTurbulentWind(wind); }
-export function simulateWindShear(wind?: any, inst?: World): any { return resolveWorld(inst).simulateWindShear(wind); }
-export function updateWindDirection(direction?: any, inst?: World): any { return resolveWorld(inst).updateWindDirection(direction); }
-export function updateWindStrength(strength?: any, inst?: World): any { return resolveWorld(inst).updateWindStrength(strength); }
-export function updateWindFrequency(frequency?: any, inst?: World): any { return resolveWorld(inst).updateWindFrequency(frequency); }
-export function detectWindDamage(object?: any, inst?: World): any { return resolveWorld(inst).detectWindDamage(object); }
-export function breakWindDamagedBranch(branch?: any, inst?: World): any { return resolveWorld(inst).breakWindDamagedBranch(branch); }
-export function shedLeavesInWind(tree?: any, wind?: any, inst?: World): any { return resolveWorld(inst).shedLeavesInWind(tree, wind); }
-export function stabilizeVegetationAfterWind(tree?: any, inst?: World): any { return resolveWorld(inst).stabilizeVegetationAfterWind(tree); }
-export function createRootSystem(tree?: any, inst?: World): any { return resolveWorld(inst).createRootSystem(tree); }
-export function growRoot(root?: any, amount?: any, inst?: World): any { return resolveWorld(inst).growRoot(root, amount); }
-export function extendRootIntoSoil(root?: any, direction?: any, inst?: World): any { return resolveWorld(inst).extendRootIntoSoil(root, direction); }
-export function thickenRoot(root?: any, amount?: any, inst?: World): any { return resolveWorld(inst).thickenRoot(root, amount); }
-export function branchRootSystem(root?: any, inst?: World): any { return resolveWorld(inst).branchRootSystem(root); }
-export function detectRootObstacles(root?: any, inst?: World): any { return resolveWorld(inst).detectRootObstacles(root); }
-export function wrapRootAroundObstacle(root?: any, obstacle?: any, inst?: World): any { return resolveWorld(inst).wrapRootAroundObstacle(root, obstacle); }
-export function penetrateSoil(root?: any, soil?: any, inst?: World): any { return resolveWorld(inst).penetrateSoil(root, soil); }
-export function absorbWaterThroughRoots(root?: any, inst?: World): any { return resolveWorld(inst).absorbWaterThroughRoots(root); }
-export function absorbNutrientsThroughRoots(root?: any, inst?: World): any { return resolveWorld(inst).absorbNutrientsThroughRoots(root); }
-export function detectRootDamage(root?: any, inst?: World): any { return resolveWorld(inst).detectRootDamage(root); }
-export function breakRoot(root?: any, force?: any, inst?: World): any { return resolveWorld(inst).breakRoot(root, force); }
-export function decayRoot(root?: any, rate?: any, inst?: World): any { return resolveWorld(inst).decayRoot(root, rate); }
-export function anchorTreeWithRoots(tree?: any, inst?: World): any { return resolveWorld(inst).anchorTreeWithRoots(tree); }
-export function loosenRootAnchorage(tree?: any, inst?: World): any { return resolveWorld(inst).loosenRootAnchorage(tree); }
-export function calculateRootStability(tree?: any, inst?: World): any { return resolveWorld(inst).calculateRootStability(tree); }
-export function simulateRootCompetition(root?: any, neighbor?: any, inst?: World): any { return resolveWorld(inst).simulateRootCompetition(root, neighbor); }
-export function updateRootGrowthDirection(root?: any, inst?: World): any { return resolveWorld(inst).updateRootGrowthDirection(root); }
-export function regenerateRootMesh(tree?: any, inst?: World): any { return resolveWorld(inst).regenerateRootMesh(tree); }
-export function updateRootSoilInteraction(tree?: any, inst?: World): any { return resolveWorld(inst).updateRootSoilInteraction(tree); }
-export function createFlower(plant?: any, inst?: World): any { return resolveWorld(inst).createFlower(plant); }
-export function initializeFlower(flower?: any, inst?: World): any { return resolveWorld(inst).initializeFlower(flower); }
-export function growFlower(flower?: any, amount?: any, inst?: World): any { return resolveWorld(inst).growFlower(flower, amount); }
-export function developFlowerBud(flower?: any, inst?: World): any { return resolveWorld(inst).developFlowerBud(flower); }
-export function swellFlowerBud(flower?: any, inst?: World): any { return resolveWorld(inst).swellFlowerBud(flower); }
-export function openFlowerBud(flower?: any, inst?: World): any { return resolveWorld(inst).openFlowerBud(flower); }
-export function bloomFlower(flower?: any, inst?: World): any { return resolveWorld(inst).bloomFlower(flower); }
-export function unfoldPetals(flower?: any, inst?: World): any { return resolveWorld(inst).unfoldPetals(flower); }
-export function foldPetals(flower?: any, inst?: World): any { return resolveWorld(inst).foldPetals(flower); }
-export function rotateFlower(flower?: any, angle?: any, inst?: World): any { return resolveWorld(inst).rotateFlower(flower, angle); }
-export function swayFlower(flower?: any, wind?: any, inst?: World): any { return resolveWorld(inst).swayFlower(flower, wind); }
-export function flutterPetals(flower?: any, wind?: any, inst?: World): any { return resolveWorld(inst).flutterPetals(flower, wind); }
-export function changePetalColor(flower?: any, color?: any, inst?: World): any { return resolveWorld(inst).changePetalColor(flower, color); }
-export function closeFlowerAtNight(flower?: any, inst?: World): any { return resolveWorld(inst).closeFlowerAtNight(flower); }
-export function reopenFlowerAtDay(flower?: any, inst?: World): any { return resolveWorld(inst).reopenFlowerAtDay(flower); }
-export function wiltFlower(flower?: any, rate?: any, inst?: World): any { return resolveWorld(inst).wiltFlower(flower, rate); }
-export function dryPetals(flower?: any, rate?: any, inst?: World): any { return resolveWorld(inst).dryPetals(flower, rate); }
-export function detachPetal(petal?: any, inst?: World): any { return resolveWorld(inst).detachPetal(petal); }
-export function scatterPetals(flower?: any, force?: any, inst?: World): any { return resolveWorld(inst).scatterPetals(flower, force); }
-export function dropWitheredFlower(flower?: any, inst?: World): any { return resolveWorld(inst).dropWitheredFlower(flower); }
-export function createFruit(plant?: any, inst?: World): any { return resolveWorld(inst).createFruit(plant); }
-export function developFruit(fruit?: any, inst?: World): any { return resolveWorld(inst).developFruit(fruit); }
-export function growFruit(fruit?: any, amount?: any, inst?: World): any { return resolveWorld(inst).growFruit(fruit, amount); }
-export function ripenFruit(fruit?: any, rate?: any, inst?: World): any { return resolveWorld(inst).ripenFruit(fruit, rate); }
-export function changeFruitColor(fruit?: any, color?: any, inst?: World): any { return resolveWorld(inst).changeFruitColor(fruit, color); }
-export function softenFruit(fruit?: any, amount?: any, inst?: World): any { return resolveWorld(inst).softenFruit(fruit, amount); }
-export function rotFruit(fruit?: any, rate?: any, inst?: World): any { return resolveWorld(inst).rotFruit(fruit, rate); }
-export function detachFruit(fruit?: any, inst?: World): any { return resolveWorld(inst).detachFruit(fruit); }
-export function fallFruit(fruit?: any, gravity?: any, inst?: World): any { return resolveWorld(inst).fallFruit(fruit, gravity); }
-export function bounceFruit(fruit?: any, surface?: any, inst?: World): any { return resolveWorld(inst).bounceFruit(fruit, surface); }
-export function splitFruit(fruit?: any, force?: any, inst?: World): any { return resolveWorld(inst).splitFruit(fruit, force); }
-export function exposeSeeds(fruit?: any, inst?: World): any { return resolveWorld(inst).exposeSeeds(fruit); }
-export function createSeed(plant?: any, inst?: World): any { return resolveWorld(inst).createSeed(plant); }
-export function disperseSeed(seed?: any, force?: any, inst?: World): any { return resolveWorld(inst).disperseSeed(seed, force); }
-export function burySeed(seed?: any, soil?: any, inst?: World): any { return resolveWorld(inst).burySeed(seed, soil); }
-export function germinateSeed(seed?: any, inst?: World): any { return resolveWorld(inst).germinateSeed(seed); }
-export function sproutSeed(seed?: any, inst?: World): any { return resolveWorld(inst).sproutSeed(seed); }
-export function developSeedling(seedling?: any, inst?: World): any { return resolveWorld(inst).developSeedling(seedling); }
-export function maturePlant(plant?: any, inst?: World): any { return resolveWorld(inst).maturePlant(plant); }
-export function restartPlantGrowthCycle(plant?: any, inst?: World): any { return resolveWorld(inst).restartPlantGrowthCycle(plant); }
-export function calculatePlantHealth(plant?: any, inst?: World): any { return resolveWorld(inst).calculatePlantHealth(plant); }
-export function calculatePlantStress(plant?: any, inst?: World): any { return resolveWorld(inst).calculatePlantStress(plant); }
-export function detectPlantDrought(plant?: any, inst?: World): any { return resolveWorld(inst).detectPlantDrought(plant); }
-export function detectPlantDisease(plant?: any, inst?: World): any { return resolveWorld(inst).detectPlantDisease(plant); }
-export function detectPlantDamage(plant?: any, inst?: World): any { return resolveWorld(inst).detectPlantDamage(plant); }
-export function reducePlantVitality(plant?: any, amount?: any, inst?: World): any { return resolveWorld(inst).reducePlantVitality(plant, amount); }
-export function wiltPlant(plant?: any, rate?: any, inst?: World): any { return resolveWorld(inst).wiltPlant(plant, rate); }
-export function dryPlantLeaves(plant?: any, rate?: any, inst?: World): any { return resolveWorld(inst).dryPlantLeaves(plant, rate); }
-export function discolorPlantLeaves(plant?: any, color?: any, inst?: World): any { return resolveWorld(inst).discolorPlantLeaves(plant, color); }
-export function shedDeadLeaves(plant?: any, inst?: World): any { return resolveWorld(inst).shedDeadLeaves(plant); }
-export function killPlant(plant?: any, inst?: World): any { return resolveWorld(inst).killPlant(plant); }
-export function enterDormancy(plant?: any, inst?: World): any { return resolveWorld(inst).enterDormancy(plant); }
-export function resumePlantGrowth(plant?: any, inst?: World): any { return resolveWorld(inst).resumePlantGrowth(plant); }
-export function decayPlantTissue(plant?: any, rate?: any, inst?: World): any { return resolveWorld(inst).decayPlantTissue(plant, rate); }
-export function decomposeDeadPlant(plant?: any, inst?: World): any { return resolveWorld(inst).decomposeDeadPlant(plant); }
-export function detachDeadBranch(branch?: any, inst?: World): any { return resolveWorld(inst).detachDeadBranch(branch); }
-export function collapseDeadTree(tree?: any, inst?: World): any { return resolveWorld(inst).collapseDeadTree(tree); }
-export function spreadPlantDisease(plant?: any, neighbor?: any, inst?: World): any { return resolveWorld(inst).spreadPlantDisease(plant, neighbor); }
-export function regenerateDamagedPlant(plant?: any, inst?: World): any { return resolveWorld(inst).regenerateDamagedPlant(plant); }
-export function recyclePlantNutrients(plant?: any, soil?: any, inst?: World): any { return resolveWorld(inst).recyclePlantNutrients(plant, soil); }
-export function createGrassPatch(area?: any, inst?: World): any { return resolveWorld(inst).createGrassPatch(area); }
-export function growGrassBlade(blade?: any, inst?: World): any { return resolveWorld(inst).growGrassBlade(blade); }
-export function bendGrassBlade(blade?: any, wind?: any, inst?: World): any { return resolveWorld(inst).bendGrassBlade(blade, wind); }
-export function swayGrassPatch(patch?: any, wind?: any, inst?: World): any { return resolveWorld(inst).swayGrassPatch(patch, wind); }
-export function flattenGrassPatch(patch?: any, force?: any, inst?: World): any { return resolveWorld(inst).flattenGrassPatch(patch, force); }
-export function restoreGrassPatch(patch?: any, inst?: World): any { return resolveWorld(inst).restoreGrassPatch(patch); }
-export function trampleGrassPatch(patch?: any, inst?: World): any { return resolveWorld(inst).trampleGrassPatch(patch); }
-export function regrowTrampledGrass(patch?: any, inst?: World): any { return resolveWorld(inst).regrowTrampledGrass(patch); }
-export function dryGrassPatch(patch?: any, rate?: any, inst?: World): any { return resolveWorld(inst).dryGrassPatch(patch, rate); }
-export function igniteDryGrass(patch?: any, inst?: World): any { return resolveWorld(inst).igniteDryGrass(patch); }
-export function createShrub(species?: any, inst?: World): any { return resolveWorld(inst).createShrub(species); }
-export function growShrub(shrub?: any, amount?: any, inst?: World): any { return resolveWorld(inst).growShrub(shrub, amount); }
-export function trimShrub(shrub?: any, amount?: any, inst?: World): any { return resolveWorld(inst).trimShrub(shrub, amount); }
-export function crushShrub(shrub?: any, force?: any, inst?: World): any { return resolveWorld(inst).crushShrub(shrub, force); }
-export function createVine(plant?: any, inst?: World): any { return resolveWorld(inst).createVine(plant); }
-export function extendVine(vine?: any, amount?: any, inst?: World): any { return resolveWorld(inst).extendVine(vine, amount); }
-export function wrapVineAroundObject(vine?: any, object?: any, inst?: World): any { return resolveWorld(inst).wrapVineAroundObject(vine, object); }
-export function detachVine(vine?: any, inst?: World): any { return resolveWorld(inst).detachVine(vine); }
-export function growMoss(surface?: any, inst?: World): any { return resolveWorld(inst).growMoss(surface); }
-export function dryMoss(surface?: any, rate?: any, inst?: World): any { return resolveWorld(inst).dryMoss(surface, rate); }
-export function createRock(type?: any, inst?: World): any { return resolveWorld(inst).createRock(type); }
-export function generateRockGeometry(rock?: any, inst?: World): any { return resolveWorld(inst).generateRockGeometry(rock); }
-export function setRockHardness(rock?: any, hardness?: any, inst?: World): any { return resolveWorld(inst).setRockHardness(rock, hardness); }
-export function applyRockStress(rock?: any, force?: any, inst?: World): any { return resolveWorld(inst).applyRockStress(rock, force); }
-export function detectRockCracks(rock?: any, inst?: World): any { return resolveWorld(inst).detectRockCracks(rock); }
-export function initiateRockFracture(rock?: any, inst?: World): any { return resolveWorld(inst).initiateRockFracture(rock); }
-export function fractureRock(rock?: any, force?: any, inst?: World): any { return resolveWorld(inst).fractureRock(rock, force); }
-export function splitRockIntoFragments(rock?: any, inst?: World): any { return resolveWorld(inst).splitRockIntoFragments(rock); }
-export function chipRockSurface(rock?: any, impact?: any, inst?: World): any { return resolveWorld(inst).chipRockSurface(rock, impact); }
-export function erodeRockSurface(rock?: any, rate?: any, inst?: World): any { return resolveWorld(inst).erodeRockSurface(rock, rate); }
-export function weatherRock(rock?: any, weather?: any, inst?: World): any { return resolveWorld(inst).weatherRock(rock, weather); }
-export function dissolveRock(rock?: any, fluid?: any, inst?: World): any { return resolveWorld(inst).dissolveRock(rock, fluid); }
-export function polishRockSurface(rock?: any, amount?: any, inst?: World): any { return resolveWorld(inst).polishRockSurface(rock, amount); }
-export function dislodgeRock(rock?: any, force?: any, inst?: World): any { return resolveWorld(inst).dislodgeRock(rock, force); }
-export function rollRock(rock?: any, direction?: any, inst?: World): any { return resolveWorld(inst).rollRock(rock, direction); }
-export function slideRock(rock?: any, surface?: any, inst?: World): any { return resolveWorld(inst).slideRock(rock, surface); }
-export function toppleRock(rock?: any, force?: any, inst?: World): any { return resolveWorld(inst).toppleRock(rock, force); }
-export function buryRock(rock?: any, sediment?: any, inst?: World): any { return resolveWorld(inst).buryRock(rock, sediment); }
-export function exposeRock(rock?: any, erosion?: any, inst?: World): any { return resolveWorld(inst).exposeRock(rock, erosion); }
-export function regenerateRockCollision(rock?: any, inst?: World): any { return resolveWorld(inst).regenerateRockCollision(rock); }
-export function createMountain(region?: any, inst?: World): any { return resolveWorld(inst).createMountain(region); }
-export function generateMountainTerrain(region?: any, inst?: World): any { return resolveWorld(inst).generateMountainTerrain(region); }
-export function updateMountainHeight(region?: any, amount?: any, inst?: World): any { return resolveWorld(inst).updateMountainHeight(region, amount); }
-export function deformMountainSurface(region?: any, force?: any, inst?: World): any { return resolveWorld(inst).deformMountainSurface(region, force); }
-export function formRockyRidge(region?: any, inst?: World): any { return resolveWorld(inst).formRockyRidge(region); }
-export function formMountainValley(region?: any, inst?: World): any { return resolveWorld(inst).formMountainValley(region); }
-export function generateCliffFace(region?: any, inst?: World): any { return resolveWorld(inst).generateCliffFace(region); }
-export function erodeMountain(region?: any, rate?: any, inst?: World): any { return resolveWorld(inst).erodeMountain(region, rate); }
-export function weatherMountainSurface(region?: any, weather?: any, inst?: World): any { return resolveWorld(inst).weatherMountainSurface(region, weather); }
-export function fractureMountainRock(region?: any, force?: any, inst?: World): any { return resolveWorld(inst).fractureMountainRock(region, force); }
-export function triggerRockfall(region?: any, inst?: World): any { return resolveWorld(inst).triggerRockfall(region); }
-export function triggerLandslide(region?: any, inst?: World): any { return resolveWorld(inst).triggerLandslide(region); }
-export function collapseCliffSection(region?: any, section?: any, inst?: World): any { return resolveWorld(inst).collapseCliffSection(region, section); }
-export function generateTalusSlope(region?: any, inst?: World): any { return resolveWorld(inst).generateTalusSlope(region); }
-export function depositMountainSediment(region?: any, sediment?: any, inst?: World): any { return resolveWorld(inst).depositMountainSediment(region, sediment); }
-export function carveRiverValley(region?: any, river?: any, inst?: World): any { return resolveWorld(inst).carveRiverValley(region, river); }
-export function accumulateSnowOnMountain(region?: any, snow?: any, inst?: World): any { return resolveWorld(inst).accumulateSnowOnMountain(region, snow); }
-export function meltMountainSnow(region?: any, temperature?: any, inst?: World): any { return resolveWorld(inst).meltMountainSnow(region, temperature); }
-export function calculateSlopeStability(region?: any, inst?: World): any { return resolveWorld(inst).calculateSlopeStability(region); }
-export function updateMountainCollision(region?: any, inst?: World): any { return resolveWorld(inst).updateMountainCollision(region); }
-export function createSoilPatch(area?: any, inst?: World): any { return resolveWorld(inst).createSoilPatch(area); }
-export function initializeSoilProperties(soil?: any, inst?: World): any { return resolveWorld(inst).initializeSoilProperties(soil); }
-export function compactSoil(soil?: any, force?: any, inst?: World): any { return resolveWorld(inst).compactSoil(soil, force); }
-export function loosenSoil(soil?: any, amount?: any, inst?: World): any { return resolveWorld(inst).loosenSoil(soil, amount); }
-export function deformSoilSurface(soil?: any, force?: any, inst?: World): any { return resolveWorld(inst).deformSoilSurface(soil, force); }
-export function createFootprint(soil?: any, foot?: any, inst?: World): any { return resolveWorld(inst).createFootprint(soil, foot); }
-export function eraseFootprint(soil?: any, rate?: any, inst?: World): any { return resolveWorld(inst).eraseFootprint(soil, rate); }
-export function displaceSoil(soil?: any, direction?: any, inst?: World): any { return resolveWorld(inst).displaceSoil(soil, direction); }
-export function excavateSoil(soil?: any, amount?: any, inst?: World): any { return resolveWorld(inst).excavateSoil(soil, amount); }
-export function fillExcavation(soil?: any, material?: any, inst?: World): any { return resolveWorld(inst).fillExcavation(soil, material); }
-export function erodeSoil(soil?: any, water?: any, inst?: World): any { return resolveWorld(inst).erodeSoil(soil, water); }
-export function depositSediment(soil?: any, sediment?: any, inst?: World): any { return resolveWorld(inst).depositSediment(soil, sediment); }
-export function liquefySoil(soil?: any, saturation?: any, inst?: World): any { return resolveWorld(inst).liquefySoil(soil, saturation); }
-export function dryMud(mud?: any, rate?: any, inst?: World): any { return resolveWorld(inst).dryMud(mud, rate); }
-export function crackDryMud(mud?: any, inst?: World): any { return resolveWorld(inst).crackDryMud(mud); }
-export function splashMud(mud?: any, impact?: any, inst?: World): any { return resolveWorld(inst).splashMud(mud, impact); }
-export function simulateSandSliding(sand?: any, slope?: any, inst?: World): any { return resolveWorld(inst).simulateSandSliding(sand, slope); }
-export function formSandDune(sand?: any, wind?: any, inst?: World): any { return resolveWorld(inst).formSandDune(sand, wind); }
-export function reshapeSandDune(dune?: any, wind?: any, inst?: World): any { return resolveWorld(inst).reshapeSandDune(dune, wind); }
-export function updateTerrainSurface(terrain?: any, inst?: World): any { return resolveWorld(inst).updateTerrainSurface(terrain); }
-export function createWaterBody(type?: any, inst?: World): any { return resolveWorld(inst).createWaterBody(type); }
-export function initializeWaterSimulation(water?: any, inst?: World): any { return resolveWorld(inst).initializeWaterSimulation(water); }
-export function updateWaterSimulation(water?: any, deltaTime?: any, inst?: World): any { return resolveWorld(inst).updateWaterSimulation(water, deltaTime); }
-export function calculateWaterFlow(water?: any, inst?: World): any { return resolveWorld(inst).calculateWaterFlow(water); }
-export function updateWaterLevel(water?: any, level?: any, inst?: World): any { return resolveWorld(inst).updateWaterLevel(water, level); }
-export function simulateWaterCurrent(water?: any, force?: any, inst?: World): any { return resolveWorld(inst).simulateWaterCurrent(water, force); }
-export function generateWaterWaves(water?: any, wind?: any, inst?: World): any { return resolveWorld(inst).generateWaterWaves(water, wind); }
-export function propagateWaterWave(wave?: any, inst?: World): any { return resolveWorld(inst).propagateWaterWave(wave); }
-export function reflectWaterWave(wave?: any, surface?: any, inst?: World): any { return resolveWorld(inst).reflectWaterWave(wave, surface); }
-export function createWaterRipple(position?: any, inst?: World): any { return resolveWorld(inst).createWaterRipple(position); }
-export function createSplash(position?: any, force?: any, inst?: World): any { return resolveWorld(inst).createSplash(position, force); }
-export function simulateWaterDroplets(splash?: any, inst?: World): any { return resolveWorld(inst).simulateWaterDroplets(splash); }
-export function simulateWaterfall(waterfall?: any, inst?: World): any { return resolveWorld(inst).simulateWaterfall(waterfall); }
-export function simulateRiverFlow(river?: any, inst?: World): any { return resolveWorld(inst).simulateRiverFlow(river); }
-export function simulateStreamFlow(stream?: any, inst?: World): any { return resolveWorld(inst).simulateStreamFlow(stream); }
-export function simulateFlooding(area?: any, water?: any, inst?: World): any { return resolveWorld(inst).simulateFlooding(area, water); }
-export function erodeRiverbank(riverbank?: any, water?: any, inst?: World): any { return resolveWorld(inst).erodeRiverbank(riverbank, water); }
-export function depositRiverSediment(river?: any, sediment?: any, inst?: World): any { return resolveWorld(inst).depositRiverSediment(river, sediment); }
-export function freezeWaterSurface(water?: any, temperature?: any, inst?: World): any { return resolveWorld(inst).freezeWaterSurface(water, temperature); }
-export function meltWaterSurface(water?: any, temperature?: any, inst?: World): any { return resolveWorld(inst).meltWaterSurface(water, temperature); }
-export function createRainSystem(inst?: World): any { return resolveWorld(inst).createRainSystem(); }
-export function spawnRaindrops(area?: any, inst?: World): any { return resolveWorld(inst).spawnRaindrops(area); }
-export function updateRaindropMotion(drop?: any, deltaTime?: any, inst?: World): any { return resolveWorld(inst).updateRaindropMotion(drop, deltaTime); }
-export function applyWindToRaindrops(drops?: any, wind?: any, inst?: World): any { return resolveWorld(inst).applyWindToRaindrops(drops, wind); }
-export function createRainSplash(position?: any, inst?: World): any { return resolveWorld(inst).createRainSplash(position); }
-export function accumulateRainwater(surface?: any, amount?: any, inst?: World): any { return resolveWorld(inst).accumulateRainwater(surface, amount); }
-export function createSnowfallSystem(inst?: World): any { return resolveWorld(inst).createSnowfallSystem(); }
-export function spawnSnowflakes(area?: any, inst?: World): any { return resolveWorld(inst).spawnSnowflakes(area); }
-export function updateSnowflakeMotion(flake?: any, deltaTime?: any, inst?: World): any { return resolveWorld(inst).updateSnowflakeMotion(flake, deltaTime); }
-export function accumulateSnow(surface?: any, amount?: any, inst?: World): any { return resolveWorld(inst).accumulateSnow(surface, amount); }
-export function compactSnow(snow?: any, force?: any, inst?: World): any { return resolveWorld(inst).compactSnow(snow, force); }
-export function meltSnow(snow?: any, temperature?: any, inst?: World): any { return resolveWorld(inst).meltSnow(snow, temperature); }
-export function createIcicle(surface?: any, inst?: World): any { return resolveWorld(inst).createIcicle(surface); }
-export function growIcicle(icicle?: any, temperature?: any, inst?: World): any { return resolveWorld(inst).growIcicle(icicle, temperature); }
-export function breakIcicle(icicle?: any, force?: any, inst?: World): any { return resolveWorld(inst).breakIcicle(icicle, force); }
-export function freezeWetSurface(surface?: any, temperature?: any, inst?: World): any { return resolveWorld(inst).freezeWetSurface(surface, temperature); }
-export function thawFrozenSurface(surface?: any, temperature?: any, inst?: World): any { return resolveWorld(inst).thawFrozenSurface(surface, temperature); }
-export function createHailstone(size?: any, inst?: World): any { return resolveWorld(inst).createHailstone(size); }
-export function spawnHailstorm(area?: any, inst?: World): any { return resolveWorld(inst).spawnHailstorm(area); }
-export function simulateHailImpact(hailstone?: any, surface?: any, inst?: World): any { return resolveWorld(inst).simulateHailImpact(hailstone, surface); }
-export function createWindField(inst?: World): any { return resolveWorld(inst).createWindField(); }
-export function updateWindField(field?: any, deltaTime?: any, inst?: World): any { return resolveWorld(inst).updateWindField(field, deltaTime); }
-export function setWindDirection(direction?: any, inst?: World): any { return resolveWorld(inst).setWindDirection(direction); }
-export function setWindSpeed(speed?: any, inst?: World): any { return resolveWorld(inst).setWindSpeed(speed); }
-export function simulateWindTurbulence(field?: any, inst?: World): any { return resolveWorld(inst).simulateWindTurbulence(field); }
-export function simulateThermalUpdraft(field?: any, inst?: World): any { return resolveWorld(inst).simulateThermalUpdraft(field); }
-export function simulateDowndraft(field?: any, inst?: World): any { return resolveWorld(inst).simulateDowndraft(field); }
-export function simulateDustDevil(position?: any, inst?: World): any { return resolveWorld(inst).simulateDustDevil(position); }
-export function simulateTornado(tornado?: any, inst?: World): any { return resolveWorld(inst).simulateTornado(tornado); }
-export function applyWindToParticles(particles?: any, wind?: any, inst?: World): any { return resolveWorld(inst).applyWindToParticles(particles, wind); }
-export function applyWindToCloth(cloth?: any, wind?: any, inst?: World): any { return resolveWorld(inst).applyWindToCloth(cloth, wind); }
-export function applyWindToFlags(flags?: any, wind?: any, inst?: World): any { return resolveWorld(inst).applyWindToFlags(flags, wind); }
-export function applyWindToStructures(structures?: any, wind?: any, inst?: World): any { return resolveWorld(inst).applyWindToStructures(structures, wind); }
-export function calculateWindLoad(structure?: any, wind?: any, inst?: World): any { return resolveWorld(inst).calculateWindLoad(structure, wind); }
-export function updateAtmosphericPressure(field?: any, inst?: World): any { return resolveWorld(inst).updateAtmosphericPressure(field); }
-export function createCloud(cloudType?: any, inst?: World): any { return resolveWorld(inst).createCloud(cloudType); }
-export function generateCloudVolume(cloud?: any, inst?: World): any { return resolveWorld(inst).generateCloudVolume(cloud); }
-export function updateCloudShape(cloud?: any, deltaTime?: any, inst?: World): any { return resolveWorld(inst).updateCloudShape(cloud, deltaTime); }
-export function moveCloudWithWind(cloud?: any, wind?: any, inst?: World): any { return resolveWorld(inst).moveCloudWithWind(cloud, wind); }
-export function mergeClouds(cloudA?: any, cloudB?: any, inst?: World): any { return resolveWorld(inst).mergeClouds(cloudA, cloudB); }
-export function separateClouds(cloudA?: any, cloudB?: any, inst?: World): any { return resolveWorld(inst).separateClouds(cloudA, cloudB); }
-export function dissipateCloud(cloud?: any, rate?: any, inst?: World): any { return resolveWorld(inst).dissipateCloud(cloud, rate); }
-export function condenseCloudVapor(cloud?: any, inst?: World): any { return resolveWorld(inst).condenseCloudVapor(cloud); }
-export function simulateCumulusGrowth(cloud?: any, inst?: World): any { return resolveWorld(inst).simulateCumulusGrowth(cloud); }
-export function simulateStormCloudGrowth(cloud?: any, inst?: World): any { return resolveWorld(inst).simulateStormCloudGrowth(cloud); }
-export function createFogVolume(area?: any, inst?: World): any { return resolveWorld(inst).createFogVolume(area); }
-export function spreadFog(fog?: any, wind?: any, inst?: World): any { return resolveWorld(inst).spreadFog(fog, wind); }
-export function dissipateFog(fog?: any, temperature?: any, inst?: World): any { return resolveWorld(inst).dissipateFog(fog, temperature); }
-export function simulateGroundFog(area?: any, inst?: World): any { return resolveWorld(inst).simulateGroundFog(area); }
-export function simulateMistOverWater(water?: any, inst?: World): any { return resolveWorld(inst).simulateMistOverWater(water); }
-export function simulateAtmosphericHaze(atmosphere?: any, inst?: World): any { return resolveWorld(inst).simulateAtmosphericHaze(atmosphere); }
-export function createRainbow(atmosphere?: any, inst?: World): any { return resolveWorld(inst).createRainbow(atmosphere); }
-export function updateRainbowVisibility(rainbow?: any, inst?: World): any { return resolveWorld(inst).updateRainbowVisibility(rainbow); }
-export function simulateHeatShimmer(area?: any, inst?: World): any { return resolveWorld(inst).simulateHeatShimmer(area); }
-export function updateSkyAtmosphere(atmosphere?: any, inst?: World): any { return resolveWorld(inst).updateSkyAtmosphere(atmosphere); }
-export function createThunderstorm(area?: any, inst?: World): any { return resolveWorld(inst).createThunderstorm(area); }
-export function accumulateStormEnergy(storm?: any, inst?: World): any { return resolveWorld(inst).accumulateStormEnergy(storm); }
-export function generateLightningBolt(storm?: any, inst?: World): any { return resolveWorld(inst).generateLightningBolt(storm); }
-export function branchLightningBolt(bolt?: any, inst?: World): any { return resolveWorld(inst).branchLightningBolt(bolt); }
-export function illuminateSceneWithLightning(bolt?: any, inst?: World): any { return resolveWorld(inst).illuminateSceneWithLightning(bolt); }
-export function createLightningFlash(position?: any, inst?: World): any { return resolveWorld(inst).createLightningFlash(position); }
-export function calculateLightningStrikeTarget(storm?: any, inst?: World): any { return resolveWorld(inst).calculateLightningStrikeTarget(storm); }
-export function strikeLightningTarget(target?: any, inst?: World): any { return resolveWorld(inst).strikeLightningTarget(target); }
-export function applyLightningDamage(target?: any, inst?: World): any { return resolveWorld(inst).applyLightningDamage(target); }
-export function createThunderSound(bolt?: any, inst?: World): any { return resolveWorld(inst).createThunderSound(bolt); }
-export function propagateThunderWave(position?: any, inst?: World): any { return resolveWorld(inst).propagateThunderWave(position); }
-export function createStormWind(storm?: any, inst?: World): any { return resolveWorld(inst).createStormWind(storm); }
-export function generateStormRain(storm?: any, inst?: World): any { return resolveWorld(inst).generateStormRain(storm); }
-export function spawnStormDebris(storm?: any, inst?: World): any { return resolveWorld(inst).spawnStormDebris(storm); }
-export function simulateStormSurge(coast?: any, inst?: World): any { return resolveWorld(inst).simulateStormSurge(coast); }
-export function calculateStormDamage(structures?: any, inst?: World): any { return resolveWorld(inst).calculateStormDamage(structures); }
-export function dissipateThunderstorm(storm?: any, inst?: World): any { return resolveWorld(inst).dissipateThunderstorm(storm); }
-export function simulateHurricane(hurricane?: any, inst?: World): any { return resolveWorld(inst).simulateHurricane(hurricane); }
-export function simulateCyclone(cyclone?: any, inst?: World): any { return resolveWorld(inst).simulateCyclone(cyclone); }
-export function updateStormRecovery(area?: any, inst?: World): any { return resolveWorld(inst).updateStormRecovery(area); }
-export function createFire(source?: any, inst?: World): any { return resolveWorld(inst).createFire(source); }
-export function igniteObject(object?: any, ignitionSource?: any, inst?: World): any { return resolveWorld(inst).igniteObject(object, ignitionSource); }
-export function extinguishFire(fire?: any, inst?: World): any { return resolveWorld(inst).extinguishFire(fire); }
-export function spreadFire(fire?: any, target?: any, inst?: World): any { return resolveWorld(inst).spreadFire(fire, target); }
-export function calculateCombustionRate(object?: any, inst?: World): any { return resolveWorld(inst).calculateCombustionRate(object); }
-export function calculateFireTemperature(fire?: any, inst?: World): any { return resolveWorld(inst).calculateFireTemperature(fire); }
-export function updateFlameShape(fire?: any, inst?: World): any { return resolveWorld(inst).updateFlameShape(fire); }
-export function spawnFireParticles(fire?: any, inst?: World): any { return resolveWorld(inst).spawnFireParticles(fire); }
-export function generateSmoke(fire?: any, inst?: World): any { return resolveWorld(inst).generateSmoke(fire); }
-export function spreadSmoke(smoke?: any, wind?: any, inst?: World): any { return resolveWorld(inst).spreadSmoke(smoke, wind); }
-export function dissipateSmoke(smoke?: any, rate?: any, inst?: World): any { return resolveWorld(inst).dissipateSmoke(smoke, rate); }
-export function createEmber(emberSource?: any, inst?: World): any { return resolveWorld(inst).createEmber(emberSource); }
-export function scatterEmbers(embers?: any, wind?: any, inst?: World): any { return resolveWorld(inst).scatterEmbers(embers, wind); }
-export function igniteDryVegetation(plant?: any, inst?: World): any { return resolveWorld(inst).igniteDryVegetation(plant); }
-export function charObjectSurface(object?: any, heat?: any, inst?: World): any { return resolveWorld(inst).charObjectSurface(object, heat); }
-export function burnObjectMaterial(object?: any, rate?: any, inst?: World): any { return resolveWorld(inst).burnObjectMaterial(object, rate); }
-export function deformObjectByHeat(object?: any, heat?: any, inst?: World): any { return resolveWorld(inst).deformObjectByHeat(object, heat); }
-export function meltObjectMaterial(object?: any, temperature?: any, inst?: World): any { return resolveWorld(inst).meltObjectMaterial(object, temperature); }
-export function coolBurningObject(object?: any, rate?: any, inst?: World): any { return resolveWorld(inst).coolBurningObject(object, rate); }
-export function calculateFireDamage(object?: any, inst?: World): any { return resolveWorld(inst).calculateFireDamage(object); }
-export function createRockfall(region?: any, inst?: World): any { return resolveWorld(inst).createRockfall(region); }
-export function releaseRockFromSlope(rock?: any, slope?: any, inst?: World): any { return resolveWorld(inst).releaseRockFromSlope(rock, slope); }
-export function calculateRockfallTrajectory(rock?: any, inst?: World): any { return resolveWorld(inst).calculateRockfallTrajectory(rock); }
-export function simulateRockBouncing(rock?: any, surface?: any, inst?: World): any { return resolveWorld(inst).simulateRockBouncing(rock, surface); }
-export function simulateRockRolling(rock?: any, slope?: any, inst?: World): any { return resolveWorld(inst).simulateRockRolling(rock, slope); }
-export function simulateRockFragmentation(rock?: any, inst?: World): any { return resolveWorld(inst).simulateRockFragmentation(rock); }
-export function createLandslide(region?: any, inst?: World): any { return resolveWorld(inst).createLandslide(region); }
-export function calculateSlopeFailure(region?: any, inst?: World): any { return resolveWorld(inst).calculateSlopeFailure(region); }
-export function displaceLandslideSoil(landslide?: any, inst?: World): any { return resolveWorld(inst).displaceLandslideSoil(landslide); }
-export function simulateDebrisFlow(flow?: any, inst?: World): any { return resolveWorld(inst).simulateDebrisFlow(flow); }
-export function depositLandslideDebris(landslide?: any, inst?: World): any { return resolveWorld(inst).depositLandslideDebris(landslide); }
-export function createAvalanche(region?: any, inst?: World): any { return resolveWorld(inst).createAvalanche(region); }
-export function triggerSnowSlabFailure(snowpack?: any, inst?: World): any { return resolveWorld(inst).triggerSnowSlabFailure(snowpack); }
-export function simulateAvalancheMotion(avalanche?: any, inst?: World): any { return resolveWorld(inst).simulateAvalancheMotion(avalanche); }
-export function simulateAvalancheDebris(avalanche?: any, inst?: World): any { return resolveWorld(inst).simulateAvalancheDebris(avalanche); }
-export function buryObjectsInDebris(objects?: any, debris?: any, inst?: World): any { return resolveWorld(inst).buryObjectsInDebris(objects, debris); }
-export function calculateBurialDepth(object?: any, debris?: any, inst?: World): any { return resolveWorld(inst).calculateBurialDepth(object, debris); }
-export function stabilizeDamagedSlope(region?: any, inst?: World): any { return resolveWorld(inst).stabilizeDamagedSlope(region); }
-export function erodeUnstableSlope(region?: any, inst?: World): any { return resolveWorld(inst).erodeUnstableSlope(region); }
-export function updateSlopeAfterFailure(region?: any, inst?: World): any { return resolveWorld(inst).updateSlopeAfterFailure(region); }
-export function createBuilding(type?: any, inst?: World): any { return resolveWorld(inst).createBuilding(type); }
-export function initializeBuilding(building?: any, inst?: World): any { return resolveWorld(inst).initializeBuilding(building); }
-export function generateBuildingGeometry(building?: any, inst?: World): any { return resolveWorld(inst).generateBuildingGeometry(building); }
-export function generateBuildingFoundation(building?: any, inst?: World): any { return resolveWorld(inst).generateBuildingFoundation(building); }
-export function generateBuildingWalls(building?: any, inst?: World): any { return resolveWorld(inst).generateBuildingWalls(building); }
-export function generateBuildingRoof(building?: any, inst?: World): any { return resolveWorld(inst).generateBuildingRoof(building); }
-export function generateBuildingFloors(building?: any, inst?: World): any { return resolveWorld(inst).generateBuildingFloors(building); }
-export function generateBuildingColumns(building?: any, inst?: World): any { return resolveWorld(inst).generateBuildingColumns(building); }
-export function generateBuildingBeams(building?: any, inst?: World): any { return resolveWorld(inst).generateBuildingBeams(building); }
-export function connectStructuralElements(building?: any, inst?: World): any { return resolveWorld(inst).connectStructuralElements(building); }
-export function calculateBuildingMass(building?: any, inst?: World): any { return resolveWorld(inst).calculateBuildingMass(building); }
-export function calculateBuildingCenterOfMass(building?: any, inst?: World): any { return resolveWorld(inst).calculateBuildingCenterOfMass(building); }
-export function calculateStructuralStress(building?: any, inst?: World): any { return resolveWorld(inst).calculateStructuralStress(building); }
-export function calculateStructuralLoad(building?: any, inst?: World): any { return resolveWorld(inst).calculateStructuralLoad(building); }
-export function detectStructuralWeakness(building?: any, inst?: World): any { return resolveWorld(inst).detectStructuralWeakness(building); }
-export function updateBuildingCondition(building?: any, inst?: World): any { return resolveWorld(inst).updateBuildingCondition(building); }
-export function repairBuildingDamage(building?: any, inst?: World): any { return resolveWorld(inst).repairBuildingDamage(building); }
-export function renovateBuilding(building?: any, inst?: World): any { return resolveWorld(inst).renovateBuilding(building); }
-export function demolishBuilding(building?: any, inst?: World): any { return resolveWorld(inst).demolishBuilding(building); }
-export function regenerateBuildingCollision(building?: any, inst?: World): any { return resolveWorld(inst).regenerateBuildingCollision(building); }
-export function createWall(building?: any, inst?: World): any { return resolveWorld(inst).createWall(building); }
-export function crackWall(wall?: any, force?: any, inst?: World): any { return resolveWorld(inst).crackWall(wall, force); }
-export function chipWallSurface(wall?: any, impact?: any, inst?: World): any { return resolveWorld(inst).chipWallSurface(wall, impact); }
-export function breakWall(wall?: any, force?: any, inst?: World): any { return resolveWorld(inst).breakWall(wall, force); }
-export function collapseWallSection(wall?: any, section?: any, inst?: World): any { return resolveWorld(inst).collapseWallSection(wall, section); }
-export function createRoof(building?: any, inst?: World): any { return resolveWorld(inst).createRoof(building); }
-export function bendRoof(roof?: any, load?: any, inst?: World): any { return resolveWorld(inst).bendRoof(roof, load); }
-export function crackRoof(roof?: any, force?: any, inst?: World): any { return resolveWorld(inst).crackRoof(roof, force); }
-export function detachRoofPanel(roof?: any, panel?: any, inst?: World): any { return resolveWorld(inst).detachRoofPanel(roof, panel); }
-export function collapseRoof(roof?: any, load?: any, inst?: World): any { return resolveWorld(inst).collapseRoof(roof, load); }
-export function createDoor(building?: any, inst?: World): any { return resolveWorld(inst).createDoor(building); }
-export function openDoor(door?: any, inst?: World): any { return resolveWorld(inst).openDoor(door); }
-export function closeDoor(door?: any, inst?: World): any { return resolveWorld(inst).closeDoor(door); }
-export function breakDoor(door?: any, force?: any, inst?: World): any { return resolveWorld(inst).breakDoor(door, force); }
-export function detachDoorFromFrame(door?: any, inst?: World): any { return resolveWorld(inst).detachDoorFromFrame(door); }
-export function createWindow(building?: any, inst?: World): any { return resolveWorld(inst).createWindow(building); }
-export function crackWindowGlass(window?: any, impact?: any, inst?: World): any { return resolveWorld(inst).crackWindowGlass(window, impact); }
-export function shatterWindowGlass(window?: any, force?: any, inst?: World): any { return resolveWorld(inst).shatterWindowGlass(window, force); }
-export function scatterGlassFragments(window?: any, inst?: World): any { return resolveWorld(inst).scatterGlassFragments(window); }
-export function repairWindow(window?: any, inst?: World): any { return resolveWorld(inst).repairWindow(window); }
-export function initiateStructuralCollapse(building?: any, inst?: World): any { return resolveWorld(inst).initiateStructuralCollapse(building); }
-export function calculateCollapseSequence(building?: any, inst?: World): any { return resolveWorld(inst).calculateCollapseSequence(building); }
-export function weakenStructuralSupport(support?: any, inst?: World): any { return resolveWorld(inst).weakenStructuralSupport(support); }
-export function removeStructuralSupport(support?: any, inst?: World): any { return resolveWorld(inst).removeStructuralSupport(support); }
-export function fractureStructuralJoint(joint?: any, inst?: World): any { return resolveWorld(inst).fractureStructuralJoint(joint); }
-export function breakStructuralBeam(beam?: any, force?: any, inst?: World): any { return resolveWorld(inst).breakStructuralBeam(beam, force); }
-export function buckleStructuralColumn(column?: any, load?: any, inst?: World): any { return resolveWorld(inst).buckleStructuralColumn(column, load); }
-export function triggerProgressiveCollapse(building?: any, inst?: World): any { return resolveWorld(inst).triggerProgressiveCollapse(building); }
-export function simulateFloorCollapse(floor?: any, inst?: World): any { return resolveWorld(inst).simulateFloorCollapse(floor); }
-export function simulateRoofCollapse(roof?: any, inst?: World): any { return resolveWorld(inst).simulateRoofCollapse(roof); }
-export function detachStructuralDebris(building?: any, inst?: World): any { return resolveWorld(inst).detachStructuralDebris(building); }
-export function spawnBuildingFragments(building?: any, inst?: World): any { return resolveWorld(inst).spawnBuildingFragments(building); }
-export function applyImpulseToDebris(debris?: any, impulse?: any, inst?: World): any { return resolveWorld(inst).applyImpulseToDebris(debris, impulse); }
-export function simulateDebrisCollision(debris?: any, inst?: World): any { return resolveWorld(inst).simulateDebrisCollision(debris); }
-export function simulateDebrisPile(debris?: any, inst?: World): any { return resolveWorld(inst).simulateDebrisPile(debris); }
-export function settleDebrisPile(debris?: any, inst?: World): any { return resolveWorld(inst).settleDebrisPile(debris); }
-export function generateDustCloud(debris?: any, inst?: World): any { return resolveWorld(inst).generateDustCloud(debris); }
-export function dissipateCollapseDust(dust?: any, inst?: World): any { return resolveWorld(inst).dissipateCollapseDust(dust); }
-export function updateCollapsedBuilding(building?: any, inst?: World): any { return resolveWorld(inst).updateCollapsedBuilding(building); }
-export function clearBuildingDebris(building?: any, inst?: World): any { return resolveWorld(inst).clearBuildingDebris(building); }
-export function createFurniture(type?: any, inst?: World): any { return resolveWorld(inst).createFurniture(type); }
-export function moveFurniture(furniture?: any, position?: any, inst?: World): any { return resolveWorld(inst).moveFurniture(furniture, position); }
-export function rotateFurniture(furniture?: any, angle?: any, inst?: World): any { return resolveWorld(inst).rotateFurniture(furniture, angle); }
-export function slideFurniture(furniture?: any, surface?: any, inst?: World): any { return resolveWorld(inst).slideFurniture(furniture, surface); }
-export function toppleChair(chair?: any, force?: any, inst?: World): any { return resolveWorld(inst).toppleChair(chair, force); }
-export function pullChair(chair?: any, direction?: any, inst?: World): any { return resolveWorld(inst).pullChair(chair, direction); }
-export function pushTable(table?: any, force?: any, inst?: World): any { return resolveWorld(inst).pushTable(table, force); }
-export function overturnTable(table?: any, force?: any, inst?: World): any { return resolveWorld(inst).overturnTable(table, force); }
-export function openDrawer(drawer?: any, inst?: World): any { return resolveWorld(inst).openDrawer(drawer); }
-export function closeDrawer(drawer?: any, inst?: World): any { return resolveWorld(inst).closeDrawer(drawer); }
-export function openCabinet(cabinet?: any, inst?: World): any { return resolveWorld(inst).openCabinet(cabinet); }
-export function closeCabinet(cabinet?: any, inst?: World): any { return resolveWorld(inst).closeCabinet(cabinet); }
-export function breakFurnitureJoint(furniture?: any, joint?: any, inst?: World): any { return resolveWorld(inst).breakFurnitureJoint(furniture, joint); }
-export function splitWoodenFurniture(furniture?: any, inst?: World): any { return resolveWorld(inst).splitWoodenFurniture(furniture); }
-export function shatterCeramicObject(object?: any, impact?: any, inst?: World): any { return resolveWorld(inst).shatterCeramicObject(object, impact); }
-export function breakGlassObject(object?: any, impact?: any, inst?: World): any { return resolveWorld(inst).breakGlassObject(object, impact); }
-export function deformMetalObject(object?: any, force?: any, inst?: World): any { return resolveWorld(inst).deformMetalObject(object, force); }
-export function tearFabricObject(object?: any, force?: any, inst?: World): any { return resolveWorld(inst).tearFabricObject(object, force); }
-export function scatterHouseholdObjects(objects?: any, impulse?: any, inst?: World): any { return resolveWorld(inst).scatterHouseholdObjects(objects, impulse); }
-export function restoreFurnitureState(furniture?: any, inst?: World): any { return resolveWorld(inst).restoreFurnitureState(furniture); }
-export function initializeRigidBody(object?: any, inst?: World): any { return resolveWorld(inst).initializeRigidBody(object); }
-export function setObjectMass(object?: any, mass?: any, inst?: World): any { return resolveWorld(inst).setObjectMass(object, mass); }
-export function setObjectDensity(object?: any, density?: any, inst?: World): any { return resolveWorld(inst).setObjectDensity(object, density); }
-export function setObjectFriction(object?: any, friction?: any, inst?: World): any { return resolveWorld(inst).setObjectFriction(object, friction); }
-export function setObjectRestitution(object?: any, restitution?: any, inst?: World): any { return resolveWorld(inst).setObjectRestitution(object, restitution); }
-export function applyForceToObject(object?: any, force?: any, inst?: World): any { return resolveWorld(inst).applyForceToObject(object, force); }
-export function applyImpulseToObject(object?: any, impulse?: any, inst?: World): any { return resolveWorld(inst).applyImpulseToObject(object, impulse); }
-export function applyTorqueToObject(object?: any, torque?: any, inst?: World): any { return resolveWorld(inst).applyTorqueToObject(object, torque); }
-export function calculateObjectVelocity(object?: any, inst?: World): any { return resolveWorld(inst).calculateObjectVelocity(object); }
-export function calculateObjectAcceleration(object?: any, inst?: World): any { return resolveWorld(inst).calculateObjectAcceleration(object); }
-export function calculateAngularVelocity(object?: any, inst?: World): any { return resolveWorld(inst).calculateAngularVelocity(object); }
-export function simulateObjectGravity(object?: any, inst?: World): any { return resolveWorld(inst).simulateObjectGravity(object); }
-export function simulateObjectAirResistance(object?: any, inst?: World): any { return resolveWorld(inst).simulateObjectAirResistance(object); }
-export function detectObjectCollision(objectA?: any, objectB?: any, inst?: World): any { return resolveWorld(inst).detectObjectCollision(objectA, objectB); }
-export function resolveObjectCollision(objectA?: any, objectB?: any, inst?: World): any { return resolveWorld(inst).resolveObjectCollision(objectA, objectB); }
-export function calculateImpactEnergy(objectA?: any, objectB?: any, inst?: World): any { return resolveWorld(inst).calculateImpactEnergy(objectA, objectB); }
-export function calculateImpactDamage(object?: any, impact?: any, inst?: World): any { return resolveWorld(inst).calculateImpactDamage(object, impact); }
-export function simulateObjectPenetration(object?: any, surface?: any, inst?: World): any { return resolveWorld(inst).simulateObjectPenetration(object, surface); }
-export function simulateObjectBounce(object?: any, surface?: any, inst?: World): any { return resolveWorld(inst).simulateObjectBounce(object, surface); }
-export function settleRigidBody(object?: any, inst?: World): any { return resolveWorld(inst).settleRigidBody(object); }
-export function initializeDestructionSystem(object?: any, inst?: World): any { return resolveWorld(inst).initializeDestructionSystem(object); }
-export function defineFractureRegions(object?: any, inst?: World): any { return resolveWorld(inst).defineFractureRegions(object); }
-export function calculateFractureThreshold(object?: any, inst?: World): any { return resolveWorld(inst).calculateFractureThreshold(object); }
-export function detectCuttingContact(object?: any, tool?: any, inst?: World): any { return resolveWorld(inst).detectCuttingContact(object, tool); }
-export function applyCuttingForce(object?: any, tool?: any, inst?: World): any { return resolveWorld(inst).applyCuttingForce(object, tool); }
-export function sliceObject(object?: any, plane?: any, inst?: World): any { return resolveWorld(inst).sliceObject(object, plane); }
-export function cutObjectIntoPieces(object?: any, cutPath?: any, inst?: World): any { return resolveWorld(inst).cutObjectIntoPieces(object, cutPath); }
-export function severBranchWithBlade(branch?: any, blade?: any, inst?: World): any { return resolveWorld(inst).severBranchWithBlade(branch, blade); }
-export function chopTreeTrunk(tree?: any, blade?: any, inst?: World): any { return resolveWorld(inst).chopTreeTrunk(tree, blade); }
-export function splitWoodLog(log?: any, tool?: any, inst?: World): any { return resolveWorld(inst).splitWoodLog(log, tool); }
-export function breakObjectAtJoint(object?: any, joint?: any, inst?: World): any { return resolveWorld(inst).breakObjectAtJoint(object, joint); }
-export function snapObjectInHalf(object?: any, force?: any, inst?: World): any { return resolveWorld(inst).snapObjectInHalf(object, force); }
-export function fractureObjectSurface(object?: any, impact?: any, inst?: World): any { return resolveWorld(inst).fractureObjectSurface(object, impact); }
-export function shatterObject(object?: any, impulse?: any, inst?: World): any { return resolveWorld(inst).shatterObject(object, impulse); }
-export function splitRockWithImpact(rock?: any, impact?: any, inst?: World): any { return resolveWorld(inst).splitRockWithImpact(rock, impact); }
-export function detachObjectPart(object?: any, part?: any, inst?: World): any { return resolveWorld(inst).detachObjectPart(object, part); }
-export function calculateDetachedPartVelocity(part?: any, inst?: World): any { return resolveWorld(inst).calculateDetachedPartVelocity(part); }
-export function spawnDetachedFragments(object?: any, inst?: World): any { return resolveWorld(inst).spawnDetachedFragments(object); }
-export function applyDebrisPhysics(fragments?: any, inst?: World): any { return resolveWorld(inst).applyDebrisPhysics(fragments); }
-export function finalizeObjectDestruction(object?: any, inst?: World): any { return resolveWorld(inst).finalizeObjectDestruction(object); }
-export function createSoftBody(object?: any, inst?: World): any { return resolveWorld(inst).createSoftBody(object); }
-export function initializeSoftBodyPhysics(object?: any, inst?: World): any { return resolveWorld(inst).initializeSoftBodyPhysics(object); }
-export function deformSoftBody(object?: any, force?: any, inst?: World): any { return resolveWorld(inst).deformSoftBody(object, force); }
-export function stretchSoftBody(object?: any, amount?: any, inst?: World): any { return resolveWorld(inst).stretchSoftBody(object, amount); }
-export function compressSoftBody(object?: any, amount?: any, inst?: World): any { return resolveWorld(inst).compressSoftBody(object, amount); }
-export function bendSoftBody(object?: any, force?: any, inst?: World): any { return resolveWorld(inst).bendSoftBody(object, force); }
-export function twistSoftBody(object?: any, torque?: any, inst?: World): any { return resolveWorld(inst).twistSoftBody(object, torque); }
-export function restoreSoftBodyShape(object?: any, inst?: World): any { return resolveWorld(inst).restoreSoftBodyShape(object); }
-export function simulateClothMotion(cloth?: any, inst?: World): any { return resolveWorld(inst).simulateClothMotion(cloth); }
-export function simulateClothWind(cloth?: any, wind?: any, inst?: World): any { return resolveWorld(inst).simulateClothWind(cloth, wind); }
-export function foldCloth(cloth?: any, inst?: World): any { return resolveWorld(inst).foldCloth(cloth); }
-export function unfoldCloth(cloth?: any, inst?: World): any { return resolveWorld(inst).unfoldCloth(cloth); }
-export function tearCloth(cloth?: any, force?: any, inst?: World): any { return resolveWorld(inst).tearCloth(cloth, force); }
-export function simulatePaperBending(paper?: any, force?: any, inst?: World): any { return resolveWorld(inst).simulatePaperBending(paper, force); }
-export function crumplePaper(paper?: any, inst?: World): any { return resolveWorld(inst).crumplePaper(paper); }
-export function tearPaper(paper?: any, force?: any, inst?: World): any { return resolveWorld(inst).tearPaper(paper, force); }
-export function burnPaper(paper?: any, rate?: any, inst?: World): any { return resolveWorld(inst).burnPaper(paper, rate); }
-export function simulateRopeMotion(rope?: any, inst?: World): any { return resolveWorld(inst).simulateRopeMotion(rope); }
-export function stretchRope(rope?: any, force?: any, inst?: World): any { return resolveWorld(inst).stretchRope(rope, force); }
-export function snapRope(rope?: any, force?: any, inst?: World): any { return resolveWorld(inst).snapRope(rope, force); }
-export function createMechanicalObject(type?: any, inst?: World): any { return resolveWorld(inst).createMechanicalObject(type); }
-export function initializeMechanicalJoints(object?: any, inst?: World): any { return resolveWorld(inst).initializeMechanicalJoints(object); }
-export function rotateMechanicalJoint(joint?: any, angle?: any, inst?: World): any { return resolveWorld(inst).rotateMechanicalJoint(joint, angle); }
-export function slideMechanicalJoint(joint?: any, distance?: any, inst?: World): any { return resolveWorld(inst).slideMechanicalJoint(joint, distance); }
-export function lockMechanicalJoint(joint?: any, inst?: World): any { return resolveWorld(inst).lockMechanicalJoint(joint); }
-export function unlockMechanicalJoint(joint?: any, inst?: World): any { return resolveWorld(inst).unlockMechanicalJoint(joint); }
-export function applyMechanicalTorque(object?: any, torque?: any, inst?: World): any { return resolveWorld(inst).applyMechanicalTorque(object, torque); }
-export function bendMetalSheet(sheet?: any, force?: any, inst?: World): any { return resolveWorld(inst).bendMetalSheet(sheet, force); }
-export function dentMetalSurface(object?: any, impact?: any, inst?: World): any { return resolveWorld(inst).dentMetalSurface(object, impact); }
-export function deformMetalStructure(object?: any, load?: any, inst?: World): any { return resolveWorld(inst).deformMetalStructure(object, load); }
-export function fractureMetalPart(object?: any, force?: any, inst?: World): any { return resolveWorld(inst).fractureMetalPart(object, force); }
-export function fatigueMetalMaterial(object?: any, cycles?: any, inst?: World): any { return resolveWorld(inst).fatigueMetalMaterial(object, cycles); }
-export function corrodeMetalSurface(object?: any, rate?: any, inst?: World): any { return resolveWorld(inst).corrodeMetalSurface(object, rate); }
-export function rustMetalObject(object?: any, moisture?: any, inst?: World): any { return resolveWorld(inst).rustMetalObject(object, moisture); }
-export function heatMetalObject(object?: any, temperature?: any, inst?: World): any { return resolveWorld(inst).heatMetalObject(object, temperature); }
-export function coolMetalObject(object?: any, rate?: any, inst?: World): any { return resolveWorld(inst).coolMetalObject(object, rate); }
-export function expandMetalObject(object?: any, temperature?: any, inst?: World): any { return resolveWorld(inst).expandMetalObject(object, temperature); }
-export function contractMetalObject(object?: any, temperature?: any, inst?: World): any { return resolveWorld(inst).contractMetalObject(object, temperature); }
-export function jamMechanicalJoint(joint?: any, inst?: World): any { return resolveWorld(inst).jamMechanicalJoint(joint); }
-export function repairMechanicalObject(object?: any, inst?: World): any { return resolveWorld(inst).repairMechanicalObject(object); }
-export function createSettlement(region?: any, inst?: World): any { return resolveWorld(inst).createSettlement(region); }
-export function generateBuildingPlot(region?: any, inst?: World): any { return resolveWorld(inst).generateBuildingPlot(region); }
-export function placeBuildingOnTerrain(building?: any, terrain?: any, inst?: World): any { return resolveWorld(inst).placeBuildingOnTerrain(building, terrain); }
-export function constructFoundation(building?: any, terrain?: any, inst?: World): any { return resolveWorld(inst).constructFoundation(building, terrain); }
-export function constructWallSection(building?: any, section?: any, inst?: World): any { return resolveWorld(inst).constructWallSection(building, section); }
-export function installRoofSection(building?: any, section?: any, inst?: World): any { return resolveWorld(inst).installRoofSection(building, section); }
-export function installWindow(building?: any, window?: any, inst?: World): any { return resolveWorld(inst).installWindow(building, window); }
-export function installDoor(building?: any, door?: any, inst?: World): any { return resolveWorld(inst).installDoor(building, door); }
-export function constructBridge(region?: any, inst?: World): any { return resolveWorld(inst).constructBridge(region); }
-export function constructRoad(region?: any, inst?: World): any { return resolveWorld(inst).constructRoad(region); }
-export function paveRoadSurface(road?: any, inst?: World): any { return resolveWorld(inst).paveRoadSurface(road); }
-export function crackRoadSurface(road?: any, load?: any, inst?: World): any { return resolveWorld(inst).crackRoadSurface(road, load); }
-export function erodeRoadSurface(road?: any, weather?: any, inst?: World): any { return resolveWorld(inst).erodeRoadSurface(road, weather); }
-export function generatePothole(road?: any, position?: any, inst?: World): any { return resolveWorld(inst).generatePothole(road, position); }
-export function repairRoadSurface(road?: any, inst?: World): any { return resolveWorld(inst).repairRoadSurface(road); }
-export function constructFence(region?: any, inst?: World): any { return resolveWorld(inst).constructFence(region); }
-export function breakFenceSection(fence?: any, section?: any, inst?: World): any { return resolveWorld(inst).breakFenceSection(fence, section); }
-export function constructDam(region?: any, inst?: World): any { return resolveWorld(inst).constructDam(region); }
-export function breachDam(dam?: any, force?: any, inst?: World): any { return resolveWorld(inst).breachDam(dam, force); }
-export function updateBuiltEnvironment(region?: any, inst?: World): any { return resolveWorld(inst).updateBuiltEnvironment(region); }
-export function createEarthquake(region?: any, inst?: World): any { return resolveWorld(inst).createEarthquake(region); }
-export function calculateSeismicWave(earthquake?: any, inst?: World): any { return resolveWorld(inst).calculateSeismicWave(earthquake); }
-export function propagateSeismicWave(wave?: any, inst?: World): any { return resolveWorld(inst).propagateSeismicWave(wave); }
-export function shakeTerrain(terrain?: any, wave?: any, inst?: World): any { return resolveWorld(inst).shakeTerrain(terrain, wave); }
-export function shakeBuilding(building?: any, wave?: any, inst?: World): any { return resolveWorld(inst).shakeBuilding(building, wave); }
-export function triggerGroundRupture(region?: any, inst?: World): any { return resolveWorld(inst).triggerGroundRupture(region); }
-export function generateGroundCracks(region?: any, inst?: World): any { return resolveWorld(inst).generateGroundCracks(region); }
-export function widenGroundCracks(region?: any, inst?: World): any { return resolveWorld(inst).widenGroundCracks(region); }
-export function triggerLiquefaction(region?: any, inst?: World): any { return resolveWorld(inst).triggerLiquefaction(region); }
-export function calculateSeismicDamage(region?: any, inst?: World): any { return resolveWorld(inst).calculateSeismicDamage(region); }
-export function createVolcano(region?: any, inst?: World): any { return resolveWorld(inst).createVolcano(region); }
-export function accumulateMagmaPressure(volcano?: any, inst?: World): any { return resolveWorld(inst).accumulateMagmaPressure(volcano); }
-export function simulateMagmaMovement(volcano?: any, inst?: World): any { return resolveWorld(inst).simulateMagmaMovement(volcano); }
-export function triggerVolcanicEruption(volcano?: any, inst?: World): any { return resolveWorld(inst).triggerVolcanicEruption(volcano); }
-export function spawnVolcanicProjectiles(volcano?: any, inst?: World): any { return resolveWorld(inst).spawnVolcanicProjectiles(volcano); }
-export function simulateLavaFlow(volcano?: any, inst?: World): any { return resolveWorld(inst).simulateLavaFlow(volcano); }
-export function coolLavaFlow(lava?: any, inst?: World): any { return resolveWorld(inst).coolLavaFlow(lava); }
-export function solidifyLava(lava?: any, inst?: World): any { return resolveWorld(inst).solidifyLava(lava); }
-export function generateVolcanicAsh(volcano?: any, inst?: World): any { return resolveWorld(inst).generateVolcanicAsh(volcano); }
-export function updateGeologicalRecovery(region?: any, inst?: World): any { return resolveWorld(inst).updateGeologicalRecovery(region); }
-export function createGlacier(region?: any, inst?: World): any { return resolveWorld(inst).createGlacier(region); }
-export function accumulateGlacierSnow(glacier?: any, inst?: World): any { return resolveWorld(inst).accumulateGlacierSnow(glacier); }
-export function compactGlacierSnow(glacier?: any, inst?: World): any { return resolveWorld(inst).compactGlacierSnow(glacier); }
-export function simulateGlacierFlow(glacier?: any, inst?: World): any { return resolveWorld(inst).simulateGlacierFlow(glacier); }
-export function deformGlacierSurface(glacier?: any, inst?: World): any { return resolveWorld(inst).deformGlacierSurface(glacier); }
-export function generateGlacierCrevasse(glacier?: any, inst?: World): any { return resolveWorld(inst).generateGlacierCrevasse(glacier); }
-export function widenGlacierCrevasse(glacier?: any, inst?: World): any { return resolveWorld(inst).widenGlacierCrevasse(glacier); }
-export function fractureGlacierIce(glacier?: any, inst?: World): any { return resolveWorld(inst).fractureGlacierIce(glacier); }
-export function calveGlacierIceberg(glacier?: any, inst?: World): any { return resolveWorld(inst).calveGlacierIceberg(glacier); }
-export function createIceberg(region?: any, inst?: World): any { return resolveWorld(inst).createIceberg(region); }
-export function driftIceberg(iceberg?: any, current?: any, inst?: World): any { return resolveWorld(inst).driftIceberg(iceberg, current); }
-export function rotateIceberg(iceberg?: any, torque?: any, inst?: World): any { return resolveWorld(inst).rotateIceberg(iceberg, torque); }
-export function meltIceberg(iceberg?: any, temperature?: any, inst?: World): any { return resolveWorld(inst).meltIceberg(iceberg, temperature); }
-export function simulateSeaIceFormation(water?: any, inst?: World): any { return resolveWorld(inst).simulateSeaIceFormation(water); }
-export function simulateSeaIceBreakup(ice?: any, inst?: World): any { return resolveWorld(inst).simulateSeaIceBreakup(ice); }
-export function driftSeaIce(ice?: any, current?: any, inst?: World): any { return resolveWorld(inst).driftSeaIce(ice, current); }
-export function collideIceFloes(iceA?: any, iceB?: any, inst?: World): any { return resolveWorld(inst).collideIceFloes(iceA, iceB); }
-export function freezeGroundWater(ground?: any, inst?: World): any { return resolveWorld(inst).freezeGroundWater(ground); }
-export function thawPermafrost(ground?: any, temperature?: any, inst?: World): any { return resolveWorld(inst).thawPermafrost(ground, temperature); }
-export function updateCryosphereState(region?: any, inst?: World): any { return resolveWorld(inst).updateCryosphereState(region); }
-export function createSunLight(inst?: World): any { return resolveWorld(inst).createSunLight(); }
-export function updateSunPosition(time?: any, inst?: World): any { return resolveWorld(inst).updateSunPosition(time); }
-export function updateSunIntensity(intensity?: any, inst?: World): any { return resolveWorld(inst).updateSunIntensity(intensity); }
-export function calculateSunlightDirection(inst?: World): any { return resolveWorld(inst).calculateSunlightDirection(); }
-export function updateShadowDirection(inst?: World): any { return resolveWorld(inst).updateShadowDirection(); }
-export function updateShadowLength(inst?: World): any { return resolveWorld(inst).updateShadowLength(); }
-export function calculateSurfaceSolarHeating(surface?: any, inst?: World): any { return resolveWorld(inst).calculateSurfaceSolarHeating(surface); }
-export function heatObjectSurface(object?: any, energy?: any, inst?: World): any { return resolveWorld(inst).heatObjectSurface(object, energy); }
-export function coolObjectSurface(object?: any, rate?: any, inst?: World): any { return resolveWorld(inst).coolObjectSurface(object, rate); }
-export function simulateThermalExpansion(object?: any, temperature?: any, inst?: World): any { return resolveWorld(inst).simulateThermalExpansion(object, temperature); }
-export function simulateThermalContraction(object?: any, temperature?: any, inst?: World): any { return resolveWorld(inst).simulateThermalContraction(object, temperature); }
-export function fadeSunlightAtDusk(inst?: World): any { return resolveWorld(inst).fadeSunlightAtDusk(); }
-export function restoreSunlightAtDawn(inst?: World): any { return resolveWorld(inst).restoreSunlightAtDawn(); }
-export function updateNightLighting(inst?: World): any { return resolveWorld(inst).updateNightLighting(); }
-export function simulateMoonlight(inst?: World): any { return resolveWorld(inst).simulateMoonlight(); }
-export function updateCloudShadowMovement(cloud?: any, inst?: World): any { return resolveWorld(inst).updateCloudShadowMovement(cloud); }
-export function updateVegetationLightExposure(plant?: any, inst?: World): any { return resolveWorld(inst).updateVegetationLightExposure(plant); }
-export function calculateSurfaceReflectance(surface?: any, inst?: World): any { return resolveWorld(inst).calculateSurfaceReflectance(surface); }
-export function simulateHeatTransfer(objectA?: any, objectB?: any, inst?: World): any { return resolveWorld(inst).simulateHeatTransfer(objectA, objectB); }
-export function updateEnvironmentalTemperature(region?: any, inst?: World): any { return resolveWorld(inst).updateEnvironmentalTemperature(region); }
-export function createParticleSystem(type?: any, inst?: World): any { return resolveWorld(inst).createParticleSystem(type); }
-export function spawnParticles(system?: any, count?: any, inst?: World): any { return resolveWorld(inst).spawnParticles(system, count); }
-export function updateParticleMotion(particle?: any, deltaTime?: any, inst?: World): any { return resolveWorld(inst).updateParticleMotion(particle, deltaTime); }
-export function applyParticleGravity(particle?: any, inst?: World): any { return resolveWorld(inst).applyParticleGravity(particle); }
-export function applyParticleWind(particle?: any, wind?: any, inst?: World): any { return resolveWorld(inst).applyParticleWind(particle, wind); }
-export function calculateParticleDrag(particle?: any, inst?: World): any { return resolveWorld(inst).calculateParticleDrag(particle); }
-export function simulateDustCloud(position?: any, force?: any, inst?: World): any { return resolveWorld(inst).simulateDustCloud(position, force); }
-export function spreadDustCloud(cloud?: any, wind?: any, inst?: World): any { return resolveWorld(inst).spreadDustCloud(cloud, wind); }
-export function dissipateDustCloud(cloud?: any, rate?: any, inst?: World): any { return resolveWorld(inst).dissipateDustCloud(cloud, rate); }
-export function createSandBurst(position?: any, force?: any, inst?: World): any { return resolveWorld(inst).createSandBurst(position, force); }
-export function simulateBlowingSand(sand?: any, wind?: any, inst?: World): any { return resolveWorld(inst).simulateBlowingSand(sand, wind); }
-export function simulateDustDevilParticles(particles?: any, inst?: World): any { return resolveWorld(inst).simulateDustDevilParticles(particles); }
-export function spawnPollenParticles(plant?: any, inst?: World): any { return resolveWorld(inst).spawnPollenParticles(plant); }
-export function dispersePollen(pollen?: any, wind?: any, inst?: World): any { return resolveWorld(inst).dispersePollen(pollen, wind); }
-export function spawnFallingLeaves(tree?: any, inst?: World): any { return resolveWorld(inst).spawnFallingLeaves(tree); }
-export function simulateFallingLeafParticles(leaves?: any, inst?: World): any { return resolveWorld(inst).simulateFallingLeafParticles(leaves); }
-export function spawnFallingPetals(flower?: any, inst?: World): any { return resolveWorld(inst).spawnFallingPetals(flower); }
-export function spawnAshParticles(fire?: any, inst?: World): any { return resolveWorld(inst).spawnAshParticles(fire); }
-export function simulateAshDeposition(surface?: any, ash?: any, inst?: World): any { return resolveWorld(inst).simulateAshDeposition(surface, ash); }
-export function recycleExpiredParticles(system?: any, inst?: World): any { return resolveWorld(inst).recycleExpiredParticles(system); }
-export function calculateWeatheringRate(object?: any, inst?: World): any { return resolveWorld(inst).calculateWeatheringRate(object); }
-export function applyMechanicalWeathering(object?: any, force?: any, inst?: World): any { return resolveWorld(inst).applyMechanicalWeathering(object, force); }
-export function applyChemicalWeathering(object?: any, fluid?: any, inst?: World): any { return resolveWorld(inst).applyChemicalWeathering(object, fluid); }
-export function applyFreezeThawWeathering(object?: any, temperature?: any, inst?: World): any { return resolveWorld(inst).applyFreezeThawWeathering(object, temperature); }
-export function erodeObjectSurface(object?: any, rate?: any, inst?: World): any { return resolveWorld(inst).erodeObjectSurface(object, rate); }
-export function erodeBuildingFacade(building?: any, rate?: any, inst?: World): any { return resolveWorld(inst).erodeBuildingFacade(building, rate); }
-export function erodeRockFormation(rock?: any, water?: any, inst?: World): any { return resolveWorld(inst).erodeRockFormation(rock, water); }
-export function erodeSoilLayer(soil?: any, water?: any, inst?: World): any { return resolveWorld(inst).erodeSoilLayer(soil, water); }
-export function weatherWoodSurface(wood?: any, weather?: any, inst?: World): any { return resolveWorld(inst).weatherWoodSurface(wood, weather); }
-export function fadePaintSurface(object?: any, sunlight?: any, inst?: World): any { return resolveWorld(inst).fadePaintSurface(object, sunlight); }
-export function peelPaintSurface(object?: any, rate?: any, inst?: World): any { return resolveWorld(inst).peelPaintSurface(object, rate); }
-export function corrodeConcreteSurface(object?: any, rate?: any, inst?: World): any { return resolveWorld(inst).corrodeConcreteSurface(object, rate); }
-export function growMoldOnSurface(object?: any, humidity?: any, inst?: World): any { return resolveWorld(inst).growMoldOnSurface(object, humidity); }
-export function spreadSurfaceMoss(object?: any, moisture?: any, inst?: World): any { return resolveWorld(inst).spreadSurfaceMoss(object, moisture); }
-export function accumulateDirtOnSurface(object?: any, amount?: any, inst?: World): any { return resolveWorld(inst).accumulateDirtOnSurface(object, amount); }
-export function accumulateDustOnSurface(object?: any, amount?: any, inst?: World): any { return resolveWorld(inst).accumulateDustOnSurface(object, amount); }
-export function washDirtFromSurface(object?: any, water?: any, inst?: World): any { return resolveWorld(inst).washDirtFromSurface(object, water); }
-export function degradeMaterialProperties(object?: any, rate?: any, inst?: World): any { return resolveWorld(inst).degradeMaterialProperties(object, rate); }
-export function calculateMaterialLifetime(object?: any, inst?: World): any { return resolveWorld(inst).calculateMaterialLifetime(object); }
-export function transitionObjectToRuins(object?: any, inst?: World): any { return resolveWorld(inst).transitionObjectToRuins(object); }
-export function initializeEcosystem(region?: any, inst?: World): any { return resolveWorld(inst).initializeEcosystem(region); }
-export function updateEcosystem(region?: any, deltaTime?: any, inst?: World): any { return resolveWorld(inst).updateEcosystem(region, deltaTime); }
-export function calculateVegetationDensity(region?: any, inst?: World): any { return resolveWorld(inst).calculateVegetationDensity(region); }
-export function calculateSoilMoisture(region?: any, inst?: World): any { return resolveWorld(inst).calculateSoilMoisture(region); }
-export function calculateNutrientAvailability(region?: any, inst?: World): any { return resolveWorld(inst).calculateNutrientAvailability(region); }
-export function simulatePlantCompetition(plantA?: any, plantB?: any, inst?: World): any { return resolveWorld(inst).simulatePlantCompetition(plantA, plantB); }
-export function simulateCanopyCompetition(treeA?: any, treeB?: any, inst?: World): any { return resolveWorld(inst).simulateCanopyCompetition(treeA, treeB); }
-export function calculateLightCompetition(plant?: any, neighbors?: any, inst?: World): any { return resolveWorld(inst).calculateLightCompetition(plant, neighbors); }
-export function spreadSeedsAcrossRegion(region?: any, wind?: any, inst?: World): any { return resolveWorld(inst).spreadSeedsAcrossRegion(region, wind); }
-export function disperseSeedsByWater(region?: any, water?: any, inst?: World): any { return resolveWorld(inst).disperseSeedsByWater(region, water); }
-export function spreadWildfireAcrossRegion(region?: any, inst?: World): any { return resolveWorld(inst).spreadWildfireAcrossRegion(region); }
-export function simulateHabitatRecovery(region?: any, inst?: World): any { return resolveWorld(inst).simulateHabitatRecovery(region); }
-export function regenerateVegetation(region?: any, inst?: World): any { return resolveWorld(inst).regenerateVegetation(region); }
-export function restoreDamagedSoil(region?: any, inst?: World): any { return resolveWorld(inst).restoreDamagedSoil(region); }
-export function simulateWetlandExpansion(region?: any, inst?: World): any { return resolveWorld(inst).simulateWetlandExpansion(region); }
-export function simulateDesertification(region?: any, inst?: World): any { return resolveWorld(inst).simulateDesertification(region); }
-export function simulateCoastalErosion(region?: any, inst?: World): any { return resolveWorld(inst).simulateCoastalErosion(region); }
-export function simulateRiverDeltaGrowth(region?: any, inst?: World): any { return resolveWorld(inst).simulateRiverDeltaGrowth(region); }
-export function updateEcosystemBalance(region?: any, inst?: World): any { return resolveWorld(inst).updateEcosystemBalance(region); }
-export function initializeObjectLifecycle(object?: any, inst?: World): any { return resolveWorld(inst).initializeObjectLifecycle(object); }
-export function updateObjectLifecycle(object?: any, deltaTime?: any, inst?: World): any { return resolveWorld(inst).updateObjectLifecycle(object, deltaTime); }
-export function setObjectAge(object?: any, age?: any, inst?: World): any { return resolveWorld(inst).setObjectAge(object, age); }
-export function calculateObjectAge(object?: any, inst?: World): any { return resolveWorld(inst).calculateObjectAge(object); }
-export function growObjectOverTime(object?: any, duration?: any, inst?: World): any { return resolveWorld(inst).growObjectOverTime(object, duration); }
-export function shrinkObjectOverTime(object?: any, duration?: any, inst?: World): any { return resolveWorld(inst).shrinkObjectOverTime(object, duration); }
-export function matureObject(object?: any, inst?: World): any { return resolveWorld(inst).matureObject(object); }
-export function weakenObjectOverTime(object?: any, rate?: any, inst?: World): any { return resolveWorld(inst).weakenObjectOverTime(object, rate); }
-export function fatigueObjectOverTime(object?: any, load?: any, inst?: World): any { return resolveWorld(inst).fatigueObjectOverTime(object, load); }
-export function accumulateObjectDamage(object?: any, damage?: any, inst?: World): any { return resolveWorld(inst).accumulateObjectDamage(object, damage); }
-export function recoverObjectCondition(object?: any, rate?: any, inst?: World): any { return resolveWorld(inst).recoverObjectCondition(object, rate); }
-export function decayObjectOverTime(object?: any, rate?: any, inst?: World): any { return resolveWorld(inst).decayObjectOverTime(object, rate); }
-export function decomposeObjectOverTime(object?: any, rate?: any, inst?: World): any { return resolveWorld(inst).decomposeObjectOverTime(object, rate); }
-export function fadeObjectOverTime(object?: any, rate?: any, inst?: World): any { return resolveWorld(inst).fadeObjectOverTime(object, rate); }
-export function disintegrateObjectOverTime(object?: any, rate?: any, inst?: World): any { return resolveWorld(inst).disintegrateObjectOverTime(object, rate); }
-export function triggerObjectFailure(object?: any, inst?: World): any { return resolveWorld(inst).triggerObjectFailure(object); }
-export function replaceObjectWithDebris(object?: any, inst?: World): any { return resolveWorld(inst).replaceObjectWithDebris(object); }
-export function regenerateObjectFromState(object?: any, state?: any, inst?: World): any { return resolveWorld(inst).regenerateObjectFromState(object, state); }
-export function advanceSeasonalChanges(region?: any, season?: any, inst?: World): any { return resolveWorld(inst).advanceSeasonalChanges(region, season); }
-export function updateWorldAging(region?: any, deltaTime?: any, inst?: World): any { return resolveWorld(inst).updateWorldAging(region, deltaTime); }
-export function detectToolContact(tool?: any, object?: any, inst?: World): any { return resolveWorld(inst).detectToolContact(tool, object); }
-export function calculateToolImpact(tool?: any, object?: any, inst?: World): any { return resolveWorld(inst).calculateToolImpact(tool, object); }
-export function applyHammerImpact(object?: any, impact?: any, inst?: World): any { return resolveWorld(inst).applyHammerImpact(object, impact); }
-export function strikeObjectWithTool(object?: any, tool?: any, inst?: World): any { return resolveWorld(inst).strikeObjectWithTool(object, tool); }
-export function cutVegetationWithTool(plant?: any, tool?: any, inst?: World): any { return resolveWorld(inst).cutVegetationWithTool(plant, tool); }
-export function sawWoodObject(wood?: any, tool?: any, inst?: World): any { return resolveWorld(inst).sawWoodObject(wood, tool); }
-export function digTerrainWithTool(terrain?: any, tool?: any, inst?: World): any { return resolveWorld(inst).digTerrainWithTool(terrain, tool); }
-export function excavateRockWithTool(rock?: any, tool?: any, inst?: World): any { return resolveWorld(inst).excavateRockWithTool(rock, tool); }
-export function chipStoneWithTool(rock?: any, tool?: any, inst?: World): any { return resolveWorld(inst).chipStoneWithTool(rock, tool); }
-export function breakIceWithTool(ice?: any, tool?: any, inst?: World): any { return resolveWorld(inst).breakIceWithTool(ice, tool); }
-export function pryOpenObject(object?: any, tool?: any, inst?: World): any { return resolveWorld(inst).pryOpenObject(object, tool); }
-export function leverObjectWithTool(object?: any, tool?: any, inst?: World): any { return resolveWorld(inst).leverObjectWithTool(object, tool); }
-export function drillIntoMaterial(object?: any, tool?: any, inst?: World): any { return resolveWorld(inst).drillIntoMaterial(object, tool); }
-export function grindMaterialSurface(object?: any, tool?: any, inst?: World): any { return resolveWorld(inst).grindMaterialSurface(object, tool); }
-export function polishMaterialSurface(object?: any, tool?: any, inst?: World): any { return resolveWorld(inst).polishMaterialSurface(object, tool); }
-export function weldMetalParts(partA?: any, partB?: any, inst?: World): any { return resolveWorld(inst).weldMetalParts(partA, partB); }
-export function fastenStructuralParts(partA?: any, partB?: any, inst?: World): any { return resolveWorld(inst).fastenStructuralParts(partA, partB); }
-export function detachFastenedPart(object?: any, part?: any, inst?: World): any { return resolveWorld(inst).detachFastenedPart(object, part); }
-export function repairObjectWithMaterial(object?: any, material?: any, inst?: World): any { return resolveWorld(inst).repairObjectWithMaterial(object, material); }
-export function updateToolDamage(tool?: any, impact?: any, inst?: World): any { return resolveWorld(inst).updateToolDamage(tool, impact); }
-export function initializeDestructionGraph(object?: any, inst?: World): any { return resolveWorld(inst).initializeDestructionGraph(object); }
-export function generateFracturePattern(object?: any, impact?: any, inst?: World): any { return resolveWorld(inst).generateFracturePattern(object, impact); }
-export function calculateFracturePropagation(object?: any, inst?: World): any { return resolveWorld(inst).calculateFracturePropagation(object); }
-export function propagateStructuralCrack(object?: any, crack?: any, inst?: World): any { return resolveWorld(inst).propagateStructuralCrack(object, crack); }
-export function calculateBreakPoint(object?: any, force?: any, inst?: World): any { return resolveWorld(inst).calculateBreakPoint(object, force); }
-export function calculateFractureEnergy(object?: any, force?: any, inst?: World): any { return resolveWorld(inst).calculateFractureEnergy(object, force); }
-export function splitMeshAlongPlane(object?: any, plane?: any, inst?: World): any { return resolveWorld(inst).splitMeshAlongPlane(object, plane); }
-export function splitMeshAlongCurve(object?: any, curve?: any, inst?: World): any { return resolveWorld(inst).splitMeshAlongCurve(object, curve); }
-export function createFractureCapSurface(object?: any, fracture?: any, inst?: World): any { return resolveWorld(inst).createFractureCapSurface(object, fracture); }
-export function generateFractureDebris(object?: any, fracture?: any, inst?: World): any { return resolveWorld(inst).generateFractureDebris(object, fracture); }
-export function assignDebrisMass(fragments?: any, inst?: World): any { return resolveWorld(inst).assignDebrisMass(fragments); }
-export function assignDebrisCollision(fragments?: any, inst?: World): any { return resolveWorld(inst).assignDebrisCollision(fragments); }
-export function calculateDebrisTrajectory(fragment?: any, inst?: World): any { return resolveWorld(inst).calculateDebrisTrajectory(fragment); }
-export function simulateDebrisPileCollapse(pile?: any, inst?: World): any { return resolveWorld(inst).simulateDebrisPileCollapse(pile); }
-export function detectSecondaryImpact(debris?: any, inst?: World): any { return resolveWorld(inst).detectSecondaryImpact(debris); }
-export function triggerSecondaryFracture(object?: any, impact?: any, inst?: World): any { return resolveWorld(inst).triggerSecondaryFracture(object, impact); }
-export function simulateProgressiveObjectFailure(object?: any, inst?: World): any { return resolveWorld(inst).simulateProgressiveObjectFailure(object); }
-export function stabilizeRemainingStructure(object?: any, inst?: World): any { return resolveWorld(inst).stabilizeRemainingStructure(object); }
-export function rebuildDestructibleMesh(object?: any, inst?: World): any { return resolveWorld(inst).rebuildDestructibleMesh(object); }
-export function finalizeDestructionState(object?: any, inst?: World): any { return resolveWorld(inst).finalizeDestructionState(object); }
-export function initializeWorldAnimation(inst?: World): any { return resolveWorld(inst).initializeWorldAnimation(); }
-export function loadWorldAnimationClips(inst?: World): any { return resolveWorld(inst).loadWorldAnimationClips(); }
-export function playWorldAnimation(object?: any, animation?: any, inst?: World): any { return resolveWorld(inst).playWorldAnimation(object, animation); }
-export function blendWorldAnimations(object?: any, animations?: any, inst?: World): any { return resolveWorld(inst).blendWorldAnimations(object, animations); }
-export function crossFadeWorldAnimation(object?: any, from?: any, to?: any, inst?: World): any { return resolveWorld(inst).crossFadeWorldAnimation(object, from, to); }
-export function updateWorldAnimationMixer(deltaTime?: any, inst?: World): any { return resolveWorld(inst).updateWorldAnimationMixer(deltaTime); }
-export function applyRootMotionToObject(object?: any, motion?: any, inst?: World): any { return resolveWorld(inst).applyRootMotionToObject(object, motion); }
-export function interpolateObjectPosition(object?: any, deltaTime?: any, inst?: World): any { return resolveWorld(inst).interpolateObjectPosition(object, deltaTime); }
-export function interpolateObjectRotation(object?: any, deltaTime?: any, inst?: World): any { return resolveWorld(inst).interpolateObjectRotation(object, deltaTime); }
-export function updateObjectLOD(object?: any, inst?: World): any { return resolveWorld(inst).updateObjectLOD(object); }
-export function updateVegetationLOD(region?: any, inst?: World): any { return resolveWorld(inst).updateVegetationLOD(region); }
-export function updateDestructionLOD(object?: any, inst?: World): any { return resolveWorld(inst).updateDestructionLOD(object); }
-export function cullInvisibleWorldObjects(inst?: World): any { return resolveWorld(inst).cullInvisibleWorldObjects(); }
-export function sleepInactiveRigidBodies(inst?: World): any { return resolveWorld(inst).sleepInactiveRigidBodies(); }
-export function wakeRigidBody(object?: any, inst?: World): any { return resolveWorld(inst).wakeRigidBody(object); }
-export function synchronizePhysicsAndAnimation(object?: any, inst?: World): any { return resolveWorld(inst).synchronizePhysicsAndAnimation(object); }
-export function rebuildWorldCollision(region?: any, inst?: World): any { return resolveWorld(inst).rebuildWorldCollision(region); }
-export function updateWorldNavigation(region?: any, inst?: World): any { return resolveWorld(inst).updateWorldNavigation(region); }
-export function validateWorldSimulation(region?: any, inst?: World): any { return resolveWorld(inst).validateWorldSimulation(region); }
-export function optimizeWorldSimulationPerformance(inst?: World): any { return resolveWorld(inst).optimizeWorldSimulationPerformance(); }
+export function initializeWorld(inst?: World): ReturnType<World['initializeWorld']> { return resolveWorld(inst).initializeWorld(); }
+export function destroyWorld(inst?: World): ReturnType<World['destroyWorld']> { return resolveWorld(inst).destroyWorld(); }
+export function resetWorld(inst?: World): ReturnType<World['resetWorld']> { return resolveWorld(inst).resetWorld(); }
+export function updateWorld(deltaTime?: Parameters<World['updateWorld']>[0], inst?: World): ReturnType<World['updateWorld']> { return resolveWorld(inst).updateWorld(deltaTime!); }
+export function fixedUpdateWorld(fixedDeltaTime?: Parameters<World['fixedUpdateWorld']>[0], inst?: World): ReturnType<World['fixedUpdateWorld']> { return resolveWorld(inst).fixedUpdateWorld(fixedDeltaTime!); }
+export function setWorldConfig(config?: Parameters<World['setWorldConfig']>[0], inst?: World): ReturnType<World['setWorldConfig']> { return resolveWorld(inst).setWorldConfig(config!); }
+export function getWorldState(inst?: World): ReturnType<World['getWorldState']> { return resolveWorld(inst).getWorldState(); }
+export function saveWorldState(inst?: World): ReturnType<World['saveWorldState']> { return resolveWorld(inst).saveWorldState(); }
+export function restoreWorldState(state?: Parameters<World['restoreWorldState']>[0], inst?: World): ReturnType<World['restoreWorldState']> { return resolveWorld(inst).restoreWorldState(state!); }
+export function pauseWorldSimulation(inst?: World): ReturnType<World['pauseWorldSimulation']> { return resolveWorld(inst).pauseWorldSimulation(); }
+export function resumeWorldSimulation(inst?: World): ReturnType<World['resumeWorldSimulation']> { return resolveWorld(inst).resumeWorldSimulation(); }
+export function setWorldSimulationSpeed(speed?: Parameters<World['setWorldSimulationSpeed']>[0], inst?: World): ReturnType<World['setWorldSimulationSpeed']> { return resolveWorld(inst).setWorldSimulationSpeed(speed!); }
+export function setWorldTime(time?: Parameters<World['setWorldTime']>[0], inst?: World): ReturnType<World['setWorldTime']> { return resolveWorld(inst).setWorldTime(time!); }
+export function advanceWorldTime(deltaTime?: Parameters<World['advanceWorldTime']>[0], inst?: World): ReturnType<World['advanceWorldTime']> { return resolveWorld(inst).advanceWorldTime(deltaTime!); }
+export function setWorldBounds(bounds?: Parameters<World['setWorldBounds']>[0], inst?: World): ReturnType<World['setWorldBounds']> { return resolveWorld(inst).setWorldBounds(bounds!); }
+export function loadWorldRegion(region?: Parameters<World['loadWorldRegion']>[0], inst?: World): ReturnType<World['loadWorldRegion']> { return resolveWorld(inst).loadWorldRegion(region!); }
+export function unloadWorldRegion(region?: Parameters<World['unloadWorldRegion']>[0], inst?: World): ReturnType<World['unloadWorldRegion']> { return resolveWorld(inst).unloadWorldRegion(region!); }
+export function validateWorldState(inst?: World): ReturnType<World['validateWorldState']> { return resolveWorld(inst).validateWorldState(); }
+export function optimizeWorldSimulation(inst?: World): ReturnType<World['optimizeWorldSimulation']> { return resolveWorld(inst).optimizeWorldSimulation(); }
+export function createWorldObject(type?: Parameters<World['createWorldObject']>[0], inst?: World): ReturnType<World['createWorldObject']> { return resolveWorld(inst).createWorldObject(type!); }
+export function destroyWorldObject(object?: Parameters<World['destroyWorldObject']>[0], inst?: World): ReturnType<World['destroyWorldObject']> { return resolveWorld(inst).destroyWorldObject(object!); }
+export function cloneWorldObject(object?: Parameters<World['cloneWorldObject']>[0], inst?: World): ReturnType<World['cloneWorldObject']> { return resolveWorld(inst).cloneWorldObject(object!); }
+export function duplicateWorldObject(object?: Parameters<World['duplicateWorldObject']>[0], inst?: World): ReturnType<World['duplicateWorldObject']> { return resolveWorld(inst).duplicateWorldObject(object!); }
+export function setObjectPosition(object?: Parameters<World['setObjectPosition']>[0], position?: Parameters<World['setObjectPosition']>[1], inst?: World): ReturnType<World['setObjectPosition']> { return resolveWorld(inst).setObjectPosition(object!, position!); }
+export function setObjectRotation(object?: Parameters<World['setObjectRotation']>[0], rotation?: Parameters<World['setObjectRotation']>[1], inst?: World): ReturnType<World['setObjectRotation']> { return resolveWorld(inst).setObjectRotation(object!, rotation!); }
+export function setObjectScale(object?: Parameters<World['setObjectScale']>[0], scale?: Parameters<World['setObjectScale']>[1], inst?: World): ReturnType<World['setObjectScale']> { return resolveWorld(inst).setObjectScale(object!, scale!); }
+export function setObjectTransform(object?: Parameters<World['setObjectTransform']>[0], transform?: Parameters<World['setObjectTransform']>[1], inst?: World): ReturnType<World['setObjectTransform']> { return resolveWorld(inst).setObjectTransform(object!, transform!); }
+export function getObjectTransform(object?: Parameters<World['getObjectTransform']>[0], inst?: World): ReturnType<World['getObjectTransform']> { return resolveWorld(inst).getObjectTransform(object!); }
+export function updateObjectTransform(object?: Parameters<World['updateObjectTransform']>[0], inst?: World): ReturnType<World['updateObjectTransform']> { return resolveWorld(inst).updateObjectTransform(object!); }
+export function setObjectVisibility(object?: Parameters<World['setObjectVisibility']>[0], visible?: Parameters<World['setObjectVisibility']>[1], inst?: World): ReturnType<World['setObjectVisibility']> { return resolveWorld(inst).setObjectVisibility(object!, visible!); }
+export function setObjectMaterial(object?: Parameters<World['setObjectMaterial']>[0], material?: Parameters<World['setObjectMaterial']>[1], inst?: World): ReturnType<World['setObjectMaterial']> { return resolveWorld(inst).setObjectMaterial(object!, material!); }
+export function setObjectTexture(object?: Parameters<World['setObjectTexture']>[0], texture?: Parameters<World['setObjectTexture']>[1], inst?: World): ReturnType<World['setObjectTexture']> { return resolveWorld(inst).setObjectTexture(object!, texture!); }
+export function setObjectTags(object?: Parameters<World['setObjectTags']>[0], tags?: Parameters<World['setObjectTags']>[1], inst?: World): ReturnType<World['setObjectTags']> { return resolveWorld(inst).setObjectTags(object!, tags!); }
+export function getObjectTags(object?: Parameters<World['getObjectTags']>[0], inst?: World): ReturnType<World['getObjectTags']> { return resolveWorld(inst).getObjectTags(object!); }
+export function attachObjectToParent(object?: Parameters<World['attachObjectToParent']>[0], parent?: Parameters<World['attachObjectToParent']>[1], inst?: World): ReturnType<World['attachObjectToParent']> { return resolveWorld(inst).attachObjectToParent(object!, parent!); }
+export function detachObjectFromParent(object?: Parameters<World['detachObjectFromParent']>[0], inst?: World): ReturnType<World['detachObjectFromParent']> { return resolveWorld(inst).detachObjectFromParent(object!); }
+export function transferObjectToRegion(object?: Parameters<World['transferObjectToRegion']>[0], region?: Parameters<World['transferObjectToRegion']>[1], inst?: World): ReturnType<World['transferObjectToRegion']> { return resolveWorld(inst).transferObjectToRegion(object!, region!); }
+export function serializeWorldObject(object?: Parameters<World['serializeWorldObject']>[0], inst?: World): ReturnType<World['serializeWorldObject']> { return resolveWorld(inst).serializeWorldObject(object!); }
+export function deserializeWorldObject(data?: Parameters<World['deserializeWorldObject']>[0], inst?: World): ReturnType<World['deserializeWorldObject']> { return resolveWorld(inst).deserializeWorldObject(data!); }
+export function createTree(species?: Parameters<World['createTree']>[0], inst?: World): ReturnType<World['createTree']> { return resolveWorld(inst).createTree(species!); }
+export function initializeTree(tree?: Parameters<World['initializeTree']>[0], inst?: World): ReturnType<World['initializeTree']> { return resolveWorld(inst).initializeTree(tree!); }
+export function updateTree(tree?: Parameters<World['updateTree']>[0], deltaTime?: Parameters<World['updateTree']>[1], inst?: World): ReturnType<World['updateTree']> { return resolveWorld(inst).updateTree(tree!, deltaTime!); }
+export function growTree(tree?: Parameters<World['growTree']>[0], amount?: Parameters<World['growTree']>[1], inst?: World): ReturnType<World['growTree']> { return resolveWorld(inst).growTree(tree!, amount!); }
+export function setTreeAge(tree?: Parameters<World['setTreeAge']>[0], age?: Parameters<World['setTreeAge']>[1], inst?: World): ReturnType<World['setTreeAge']> { return resolveWorld(inst).setTreeAge(tree!, age!); }
+export function updateTreeHeight(tree?: Parameters<World['updateTreeHeight']>[0], inst?: World): ReturnType<World['updateTreeHeight']> { return resolveWorld(inst).updateTreeHeight(tree!); }
+export function updateTreeThickness(tree?: Parameters<World['updateTreeThickness']>[0], inst?: World): ReturnType<World['updateTreeThickness']> { return resolveWorld(inst).updateTreeThickness(tree!); }
+export function updateTreeCanopy(tree?: Parameters<World['updateTreeCanopy']>[0], inst?: World): ReturnType<World['updateTreeCanopy']> { return resolveWorld(inst).updateTreeCanopy(tree!); }
+export function updateTreeRootSystem(tree?: Parameters<World['updateTreeRootSystem']>[0], inst?: World): ReturnType<World['updateTreeRootSystem']> { return resolveWorld(inst).updateTreeRootSystem(tree!); }
+export function updateTreeTrunk(tree?: Parameters<World['updateTreeTrunk']>[0], inst?: World): ReturnType<World['updateTreeTrunk']> { return resolveWorld(inst).updateTreeTrunk(tree!); }
+export function updateTreeBark(tree?: Parameters<World['updateTreeBark']>[0], inst?: World): ReturnType<World['updateTreeBark']> { return resolveWorld(inst).updateTreeBark(tree!); }
+export function updateTreeBranchStructure(tree?: Parameters<World['updateTreeBranchStructure']>[0], inst?: World): ReturnType<World['updateTreeBranchStructure']> { return resolveWorld(inst).updateTreeBranchStructure(tree!); }
+export function generateTreeBranches(tree?: Parameters<World['generateTreeBranches']>[0], inst?: World): ReturnType<World['generateTreeBranches']> { return resolveWorld(inst).generateTreeBranches(tree!); }
+export function extendTreeBranch(branch?: Parameters<World['extendTreeBranch']>[0], inst?: World): ReturnType<World['extendTreeBranch']> { return resolveWorld(inst).extendTreeBranch(branch!); }
+export function shortenTreeBranch(branch?: Parameters<World['shortenTreeBranch']>[0], inst?: World): ReturnType<World['shortenTreeBranch']> { return resolveWorld(inst).shortenTreeBranch(branch!); }
+export function bendTreeBranch(branch?: Parameters<World['bendTreeBranch']>[0], force?: Parameters<World['bendTreeBranch']>[1], inst?: World): ReturnType<World['bendTreeBranch']> { return resolveWorld(inst).bendTreeBranch(branch!, force!); }
+export function twistTreeBranch(branch?: Parameters<World['twistTreeBranch']>[0], torque?: Parameters<World['twistTreeBranch']>[1], inst?: World): ReturnType<World['twistTreeBranch']> { return resolveWorld(inst).twistTreeBranch(branch!, torque!); }
+export function repairTreeDamage(tree?: Parameters<World['repairTreeDamage']>[0], inst?: World): ReturnType<World['repairTreeDamage']> { return resolveWorld(inst).repairTreeDamage(tree!); }
+export function removeTree(tree?: Parameters<World['removeTree']>[0], inst?: World): ReturnType<World['removeTree']> { return resolveWorld(inst).removeTree(tree!); }
+export function regenerateTreeGeometry(tree?: Parameters<World['regenerateTreeGeometry']>[0], inst?: World): ReturnType<World['regenerateTreeGeometry']> { return resolveWorld(inst).regenerateTreeGeometry(tree!); }
+export function createBranch(tree?: Parameters<World['createBranch']>[0], parentBranch?: Parameters<World['createBranch']>[1], inst?: World): ReturnType<World['createBranch']> { return resolveWorld(inst).createBranch(tree!, parentBranch!); }
+export function splitBranch(branch?: Parameters<World['splitBranch']>[0], inst?: World): ReturnType<World['splitBranch']> { return resolveWorld(inst).splitBranch(branch!); }
+export function growBranch(branch?: Parameters<World['growBranch']>[0], amount?: Parameters<World['growBranch']>[1], inst?: World): ReturnType<World['growBranch']> { return resolveWorld(inst).growBranch(branch!, amount!); }
+export function thickenBranch(branch?: Parameters<World['thickenBranch']>[0], amount?: Parameters<World['thickenBranch']>[1], inst?: World): ReturnType<World['thickenBranch']> { return resolveWorld(inst).thickenBranch(branch!, amount!); }
+export function bendBranch(branch?: Parameters<World['bendBranch']>[0], force?: Parameters<World['bendBranch']>[1], inst?: World): ReturnType<World['bendBranch']> { return resolveWorld(inst).bendBranch(branch!, force!); }
+export function straightenBranch(branch?: Parameters<World['straightenBranch']>[0], inst?: World): ReturnType<World['straightenBranch']> { return resolveWorld(inst).straightenBranch(branch!); }
+export function rotateBranch(branch?: Parameters<World['rotateBranch']>[0], angle?: Parameters<World['rotateBranch']>[1], inst?: World): ReturnType<World['rotateBranch']> { return resolveWorld(inst).rotateBranch(branch!, angle!); }
+export function twistBranch(branch?: Parameters<World['twistBranch']>[0], angle?: Parameters<World['twistBranch']>[1], inst?: World): ReturnType<World['twistBranch']> { return resolveWorld(inst).twistBranch(branch!, angle!); }
+export function shakeBranch(branch?: Parameters<World['shakeBranch']>[0], intensity?: Parameters<World['shakeBranch']>[1], inst?: World): ReturnType<World['shakeBranch']> { return resolveWorld(inst).shakeBranch(branch!, intensity!); }
+export function applyBranchLoad(branch?: Parameters<World['applyBranchLoad']>[0], force?: Parameters<World['applyBranchLoad']>[1], inst?: World): ReturnType<World['applyBranchLoad']> { return resolveWorld(inst).applyBranchLoad(branch!, force!); }
+export function detectBranchStress(branch?: Parameters<World['detectBranchStress']>[0], inst?: World): ReturnType<World['detectBranchStress']> { return resolveWorld(inst).detectBranchStress(branch!); }
+export function detectBranchFracture(branch?: Parameters<World['detectBranchFracture']>[0], inst?: World): ReturnType<World['detectBranchFracture']> { return resolveWorld(inst).detectBranchFracture(branch!); }
+export function breakBranch(branch?: Parameters<World['breakBranch']>[0], force?: Parameters<World['breakBranch']>[1], inst?: World): ReturnType<World['breakBranch']> { return resolveWorld(inst).breakBranch(branch!, force!); }
+export function snapBranchAtJoint(branch?: Parameters<World['snapBranchAtJoint']>[0], joint?: Parameters<World['snapBranchAtJoint']>[1], inst?: World): ReturnType<World['snapBranchAtJoint']> { return resolveWorld(inst).snapBranchAtJoint(branch!, joint!); }
+export function detachBranch(branch?: Parameters<World['detachBranch']>[0], inst?: World): ReturnType<World['detachBranch']> { return resolveWorld(inst).detachBranch(branch!); }
+export function fallBranch(branch?: Parameters<World['fallBranch']>[0], gravity?: Parameters<World['fallBranch']>[1], inst?: World): ReturnType<World['fallBranch']> { return resolveWorld(inst).fallBranch(branch!, gravity!); }
+export function splitWoodGrain(branch?: Parameters<World['splitWoodGrain']>[0], inst?: World): ReturnType<World['splitWoodGrain']> { return resolveWorld(inst).splitWoodGrain(branch!); }
+export function crackWoodSurface(branch?: Parameters<World['crackWoodSurface']>[0], inst?: World): ReturnType<World['crackWoodSurface']> { return resolveWorld(inst).crackWoodSurface(branch!); }
+export function decayWood(branch?: Parameters<World['decayWood']>[0], rate?: Parameters<World['decayWood']>[1], inst?: World): ReturnType<World['decayWood']> { return resolveWorld(inst).decayWood(branch!, rate!); }
+export function regenerateBranchMesh(branch?: Parameters<World['regenerateBranchMesh']>[0], inst?: World): ReturnType<World['regenerateBranchMesh']> { return resolveWorld(inst).regenerateBranchMesh(branch!); }
+export function createLeaf(plant?: Parameters<World['createLeaf']>[0], inst?: World): ReturnType<World['createLeaf']> { return resolveWorld(inst).createLeaf(plant!); }
+export function initializeLeaf(leaf?: Parameters<World['initializeLeaf']>[0], inst?: World): ReturnType<World['initializeLeaf']> { return resolveWorld(inst).initializeLeaf(leaf!); }
+export function updateLeaf(leaf?: Parameters<World['updateLeaf']>[0], deltaTime?: Parameters<World['updateLeaf']>[1], inst?: World): ReturnType<World['updateLeaf']> { return resolveWorld(inst).updateLeaf(leaf!, deltaTime!); }
+export function growLeaf(leaf?: Parameters<World['growLeaf']>[0], amount?: Parameters<World['growLeaf']>[1], inst?: World): ReturnType<World['growLeaf']> { return resolveWorld(inst).growLeaf(leaf!, amount!); }
+export function shrinkLeaf(leaf?: Parameters<World['shrinkLeaf']>[0], amount?: Parameters<World['shrinkLeaf']>[1], inst?: World): ReturnType<World['shrinkLeaf']> { return resolveWorld(inst).shrinkLeaf(leaf!, amount!); }
+export function unfoldLeaf(leaf?: Parameters<World['unfoldLeaf']>[0], inst?: World): ReturnType<World['unfoldLeaf']> { return resolveWorld(inst).unfoldLeaf(leaf!); }
+export function foldLeaf(leaf?: Parameters<World['foldLeaf']>[0], inst?: World): ReturnType<World['foldLeaf']> { return resolveWorld(inst).foldLeaf(leaf!); }
+export function curlLeaf(leaf?: Parameters<World['curlLeaf']>[0], amount?: Parameters<World['curlLeaf']>[1], inst?: World): ReturnType<World['curlLeaf']> { return resolveWorld(inst).curlLeaf(leaf!, amount!); }
+export function uncurlLeaf(leaf?: Parameters<World['uncurlLeaf']>[0], inst?: World): ReturnType<World['uncurlLeaf']> { return resolveWorld(inst).uncurlLeaf(leaf!); }
+export function bendLeaf(leaf?: Parameters<World['bendLeaf']>[0], force?: Parameters<World['bendLeaf']>[1], inst?: World): ReturnType<World['bendLeaf']> { return resolveWorld(inst).bendLeaf(leaf!, force!); }
+export function twistLeaf(leaf?: Parameters<World['twistLeaf']>[0], angle?: Parameters<World['twistLeaf']>[1], inst?: World): ReturnType<World['twistLeaf']> { return resolveWorld(inst).twistLeaf(leaf!, angle!); }
+export function flutterLeaf(leaf?: Parameters<World['flutterLeaf']>[0], wind?: Parameters<World['flutterLeaf']>[1], inst?: World): ReturnType<World['flutterLeaf']> { return resolveWorld(inst).flutterLeaf(leaf!, wind!); }
+export function shakeLeaf(leaf?: Parameters<World['shakeLeaf']>[0], intensity?: Parameters<World['shakeLeaf']>[1], inst?: World): ReturnType<World['shakeLeaf']> { return resolveWorld(inst).shakeLeaf(leaf!, intensity!); }
+export function droopLeaf(leaf?: Parameters<World['droopLeaf']>[0], amount?: Parameters<World['droopLeaf']>[1], inst?: World): ReturnType<World['droopLeaf']> { return resolveWorld(inst).droopLeaf(leaf!, amount!); }
+export function restoreLeafPose(leaf?: Parameters<World['restoreLeafPose']>[0], inst?: World): ReturnType<World['restoreLeafPose']> { return resolveWorld(inst).restoreLeafPose(leaf!); }
+export function changeLeafColor(leaf?: Parameters<World['changeLeafColor']>[0], color?: Parameters<World['changeLeafColor']>[1], inst?: World): ReturnType<World['changeLeafColor']> { return resolveWorld(inst).changeLeafColor(leaf!, color!); }
+export function dryLeaf(leaf?: Parameters<World['dryLeaf']>[0], rate?: Parameters<World['dryLeaf']>[1], inst?: World): ReturnType<World['dryLeaf']> { return resolveWorld(inst).dryLeaf(leaf!, rate!); }
+export function detachLeaf(leaf?: Parameters<World['detachLeaf']>[0], inst?: World): ReturnType<World['detachLeaf']> { return resolveWorld(inst).detachLeaf(leaf!); }
+export function fallLeaf(leaf?: Parameters<World['fallLeaf']>[0], gravity?: Parameters<World['fallLeaf']>[1], inst?: World): ReturnType<World['fallLeaf']> { return resolveWorld(inst).fallLeaf(leaf!, gravity!); }
+export function landLeaf(leaf?: Parameters<World['landLeaf']>[0], surface?: Parameters<World['landLeaf']>[1], inst?: World): ReturnType<World['landLeaf']> { return resolveWorld(inst).landLeaf(leaf!, surface!); }
+export function applyWindToTree(tree?: Parameters<World['applyWindToTree']>[0], wind?: Parameters<World['applyWindToTree']>[1], inst?: World): ReturnType<World['applyWindToTree']> { return resolveWorld(inst).applyWindToTree(tree!, wind!); }
+export function applyWindToBranch(branch?: Parameters<World['applyWindToBranch']>[0], wind?: Parameters<World['applyWindToBranch']>[1], inst?: World): ReturnType<World['applyWindToBranch']> { return resolveWorld(inst).applyWindToBranch(branch!, wind!); }
+export function applyWindToLeaf(leaf?: Parameters<World['applyWindToLeaf']>[0], wind?: Parameters<World['applyWindToLeaf']>[1], inst?: World): ReturnType<World['applyWindToLeaf']> { return resolveWorld(inst).applyWindToLeaf(leaf!, wind!); }
+export function calculateWindPressure(object?: Parameters<World['calculateWindPressure']>[0], wind?: Parameters<World['calculateWindPressure']>[1], inst?: World): ReturnType<World['calculateWindPressure']> { return resolveWorld(inst).calculateWindPressure(object!, wind!); }
+export function calculateWindDrag(object?: Parameters<World['calculateWindDrag']>[0], wind?: Parameters<World['calculateWindDrag']>[1], inst?: World): ReturnType<World['calculateWindDrag']> { return resolveWorld(inst).calculateWindDrag(object!, wind!); }
+export function calculateWindTorque(object?: Parameters<World['calculateWindTorque']>[0], wind?: Parameters<World['calculateWindTorque']>[1], inst?: World): ReturnType<World['calculateWindTorque']> { return resolveWorld(inst).calculateWindTorque(object!, wind!); }
+export function swayTreeTrunk(tree?: Parameters<World['swayTreeTrunk']>[0], wind?: Parameters<World['swayTreeTrunk']>[1], inst?: World): ReturnType<World['swayTreeTrunk']> { return resolveWorld(inst).swayTreeTrunk(tree!, wind!); }
+export function swayTreeCanopy(tree?: Parameters<World['swayTreeCanopy']>[0], wind?: Parameters<World['swayTreeCanopy']>[1], inst?: World): ReturnType<World['swayTreeCanopy']> { return resolveWorld(inst).swayTreeCanopy(tree!, wind!); }
+export function oscillateBranch(branch?: Parameters<World['oscillateBranch']>[0], wind?: Parameters<World['oscillateBranch']>[1], inst?: World): ReturnType<World['oscillateBranch']> { return resolveWorld(inst).oscillateBranch(branch!, wind!); }
+export function flutterLeaves(leafGroup?: Parameters<World['flutterLeaves']>[0], wind?: Parameters<World['flutterLeaves']>[1], inst?: World): ReturnType<World['flutterLeaves']> { return resolveWorld(inst).flutterLeaves(leafGroup!, wind!); }
+export function simulateWindGust(gust?: Parameters<World['simulateWindGust']>[0], inst?: World): ReturnType<World['simulateWindGust']> { return resolveWorld(inst).simulateWindGust(gust!); }
+export function simulateTurbulentWind(wind?: Parameters<World['simulateTurbulentWind']>[0], inst?: World): ReturnType<World['simulateTurbulentWind']> { return resolveWorld(inst).simulateTurbulentWind(wind!); }
+export function simulateWindShear(wind?: Parameters<World['simulateWindShear']>[0], inst?: World): ReturnType<World['simulateWindShear']> { return resolveWorld(inst).simulateWindShear(wind!); }
+export function updateWindDirection(direction?: Parameters<World['updateWindDirection']>[0], inst?: World): ReturnType<World['updateWindDirection']> { return resolveWorld(inst).updateWindDirection(direction!); }
+export function updateWindStrength(strength?: Parameters<World['updateWindStrength']>[0], inst?: World): ReturnType<World['updateWindStrength']> { return resolveWorld(inst).updateWindStrength(strength!); }
+export function updateWindFrequency(frequency?: Parameters<World['updateWindFrequency']>[0], inst?: World): ReturnType<World['updateWindFrequency']> { return resolveWorld(inst).updateWindFrequency(frequency!); }
+export function detectWindDamage(object?: Parameters<World['detectWindDamage']>[0], inst?: World): ReturnType<World['detectWindDamage']> { return resolveWorld(inst).detectWindDamage(object!); }
+export function breakWindDamagedBranch(branch?: Parameters<World['breakWindDamagedBranch']>[0], inst?: World): ReturnType<World['breakWindDamagedBranch']> { return resolveWorld(inst).breakWindDamagedBranch(branch!); }
+export function shedLeavesInWind(tree?: Parameters<World['shedLeavesInWind']>[0], wind?: Parameters<World['shedLeavesInWind']>[1], inst?: World): ReturnType<World['shedLeavesInWind']> { return resolveWorld(inst).shedLeavesInWind(tree!, wind!); }
+export function stabilizeVegetationAfterWind(tree?: Parameters<World['stabilizeVegetationAfterWind']>[0], inst?: World): ReturnType<World['stabilizeVegetationAfterWind']> { return resolveWorld(inst).stabilizeVegetationAfterWind(tree!); }
+export function createRootSystem(tree?: Parameters<World['createRootSystem']>[0], inst?: World): ReturnType<World['createRootSystem']> { return resolveWorld(inst).createRootSystem(tree!); }
+export function growRoot(root?: Parameters<World['growRoot']>[0], amount?: Parameters<World['growRoot']>[1], inst?: World): ReturnType<World['growRoot']> { return resolveWorld(inst).growRoot(root!, amount!); }
+export function extendRootIntoSoil(root?: Parameters<World['extendRootIntoSoil']>[0], direction?: Parameters<World['extendRootIntoSoil']>[1], inst?: World): ReturnType<World['extendRootIntoSoil']> { return resolveWorld(inst).extendRootIntoSoil(root!, direction!); }
+export function thickenRoot(root?: Parameters<World['thickenRoot']>[0], amount?: Parameters<World['thickenRoot']>[1], inst?: World): ReturnType<World['thickenRoot']> { return resolveWorld(inst).thickenRoot(root!, amount!); }
+export function branchRootSystem(root?: Parameters<World['branchRootSystem']>[0], inst?: World): ReturnType<World['branchRootSystem']> { return resolveWorld(inst).branchRootSystem(root!); }
+export function detectRootObstacles(root?: Parameters<World['detectRootObstacles']>[0], inst?: World): ReturnType<World['detectRootObstacles']> { return resolveWorld(inst).detectRootObstacles(root!); }
+export function wrapRootAroundObstacle(root?: Parameters<World['wrapRootAroundObstacle']>[0], obstacle?: Parameters<World['wrapRootAroundObstacle']>[1], inst?: World): ReturnType<World['wrapRootAroundObstacle']> { return resolveWorld(inst).wrapRootAroundObstacle(root!, obstacle!); }
+export function penetrateSoil(root?: Parameters<World['penetrateSoil']>[0], soil?: Parameters<World['penetrateSoil']>[1], inst?: World): ReturnType<World['penetrateSoil']> { return resolveWorld(inst).penetrateSoil(root!, soil!); }
+export function absorbWaterThroughRoots(root?: Parameters<World['absorbWaterThroughRoots']>[0], inst?: World): ReturnType<World['absorbWaterThroughRoots']> { return resolveWorld(inst).absorbWaterThroughRoots(root!); }
+export function absorbNutrientsThroughRoots(root?: Parameters<World['absorbNutrientsThroughRoots']>[0], inst?: World): ReturnType<World['absorbNutrientsThroughRoots']> { return resolveWorld(inst).absorbNutrientsThroughRoots(root!); }
+export function detectRootDamage(root?: Parameters<World['detectRootDamage']>[0], inst?: World): ReturnType<World['detectRootDamage']> { return resolveWorld(inst).detectRootDamage(root!); }
+export function breakRoot(root?: Parameters<World['breakRoot']>[0], force?: Parameters<World['breakRoot']>[1], inst?: World): ReturnType<World['breakRoot']> { return resolveWorld(inst).breakRoot(root!, force!); }
+export function decayRoot(root?: Parameters<World['decayRoot']>[0], rate?: Parameters<World['decayRoot']>[1], inst?: World): ReturnType<World['decayRoot']> { return resolveWorld(inst).decayRoot(root!, rate!); }
+export function anchorTreeWithRoots(tree?: Parameters<World['anchorTreeWithRoots']>[0], inst?: World): ReturnType<World['anchorTreeWithRoots']> { return resolveWorld(inst).anchorTreeWithRoots(tree!); }
+export function loosenRootAnchorage(tree?: Parameters<World['loosenRootAnchorage']>[0], inst?: World): ReturnType<World['loosenRootAnchorage']> { return resolveWorld(inst).loosenRootAnchorage(tree!); }
+export function calculateRootStability(tree?: Parameters<World['calculateRootStability']>[0], inst?: World): ReturnType<World['calculateRootStability']> { return resolveWorld(inst).calculateRootStability(tree!); }
+export function simulateRootCompetition(root?: Parameters<World['simulateRootCompetition']>[0], neighbor?: Parameters<World['simulateRootCompetition']>[1], inst?: World): ReturnType<World['simulateRootCompetition']> { return resolveWorld(inst).simulateRootCompetition(root!, neighbor!); }
+export function updateRootGrowthDirection(root?: Parameters<World['updateRootGrowthDirection']>[0], inst?: World): ReturnType<World['updateRootGrowthDirection']> { return resolveWorld(inst).updateRootGrowthDirection(root!); }
+export function regenerateRootMesh(tree?: Parameters<World['regenerateRootMesh']>[0], inst?: World): ReturnType<World['regenerateRootMesh']> { return resolveWorld(inst).regenerateRootMesh(tree!); }
+export function updateRootSoilInteraction(tree?: Parameters<World['updateRootSoilInteraction']>[0], inst?: World): ReturnType<World['updateRootSoilInteraction']> { return resolveWorld(inst).updateRootSoilInteraction(tree!); }
+export function createFlower(plant?: Parameters<World['createFlower']>[0], inst?: World): ReturnType<World['createFlower']> { return resolveWorld(inst).createFlower(plant!); }
+export function initializeFlower(flower?: Parameters<World['initializeFlower']>[0], inst?: World): ReturnType<World['initializeFlower']> { return resolveWorld(inst).initializeFlower(flower!); }
+export function growFlower(flower?: Parameters<World['growFlower']>[0], amount?: Parameters<World['growFlower']>[1], inst?: World): ReturnType<World['growFlower']> { return resolveWorld(inst).growFlower(flower!, amount!); }
+export function developFlowerBud(flower?: Parameters<World['developFlowerBud']>[0], inst?: World): ReturnType<World['developFlowerBud']> { return resolveWorld(inst).developFlowerBud(flower!); }
+export function swellFlowerBud(flower?: Parameters<World['swellFlowerBud']>[0], inst?: World): ReturnType<World['swellFlowerBud']> { return resolveWorld(inst).swellFlowerBud(flower!); }
+export function openFlowerBud(flower?: Parameters<World['openFlowerBud']>[0], inst?: World): ReturnType<World['openFlowerBud']> { return resolveWorld(inst).openFlowerBud(flower!); }
+export function bloomFlower(flower?: Parameters<World['bloomFlower']>[0], inst?: World): ReturnType<World['bloomFlower']> { return resolveWorld(inst).bloomFlower(flower!); }
+export function unfoldPetals(flower?: Parameters<World['unfoldPetals']>[0], inst?: World): ReturnType<World['unfoldPetals']> { return resolveWorld(inst).unfoldPetals(flower!); }
+export function foldPetals(flower?: Parameters<World['foldPetals']>[0], inst?: World): ReturnType<World['foldPetals']> { return resolveWorld(inst).foldPetals(flower!); }
+export function rotateFlower(flower?: Parameters<World['rotateFlower']>[0], angle?: Parameters<World['rotateFlower']>[1], inst?: World): ReturnType<World['rotateFlower']> { return resolveWorld(inst).rotateFlower(flower!, angle!); }
+export function swayFlower(flower?: Parameters<World['swayFlower']>[0], wind?: Parameters<World['swayFlower']>[1], inst?: World): ReturnType<World['swayFlower']> { return resolveWorld(inst).swayFlower(flower!, wind!); }
+export function flutterPetals(flower?: Parameters<World['flutterPetals']>[0], wind?: Parameters<World['flutterPetals']>[1], inst?: World): ReturnType<World['flutterPetals']> { return resolveWorld(inst).flutterPetals(flower!, wind!); }
+export function changePetalColor(flower?: Parameters<World['changePetalColor']>[0], color?: Parameters<World['changePetalColor']>[1], inst?: World): ReturnType<World['changePetalColor']> { return resolveWorld(inst).changePetalColor(flower!, color!); }
+export function closeFlowerAtNight(flower?: Parameters<World['closeFlowerAtNight']>[0], inst?: World): ReturnType<World['closeFlowerAtNight']> { return resolveWorld(inst).closeFlowerAtNight(flower!); }
+export function reopenFlowerAtDay(flower?: Parameters<World['reopenFlowerAtDay']>[0], inst?: World): ReturnType<World['reopenFlowerAtDay']> { return resolveWorld(inst).reopenFlowerAtDay(flower!); }
+export function wiltFlower(flower?: Parameters<World['wiltFlower']>[0], rate?: Parameters<World['wiltFlower']>[1], inst?: World): ReturnType<World['wiltFlower']> { return resolveWorld(inst).wiltFlower(flower!, rate!); }
+export function dryPetals(flower?: Parameters<World['dryPetals']>[0], rate?: Parameters<World['dryPetals']>[1], inst?: World): ReturnType<World['dryPetals']> { return resolveWorld(inst).dryPetals(flower!, rate!); }
+export function detachPetal(petal?: Parameters<World['detachPetal']>[0], inst?: World): ReturnType<World['detachPetal']> { return resolveWorld(inst).detachPetal(petal!); }
+export function scatterPetals(flower?: Parameters<World['scatterPetals']>[0], force?: Parameters<World['scatterPetals']>[1], inst?: World): ReturnType<World['scatterPetals']> { return resolveWorld(inst).scatterPetals(flower!, force!); }
+export function dropWitheredFlower(flower?: Parameters<World['dropWitheredFlower']>[0], inst?: World): ReturnType<World['dropWitheredFlower']> { return resolveWorld(inst).dropWitheredFlower(flower!); }
+export function createFruit(plant?: Parameters<World['createFruit']>[0], inst?: World): ReturnType<World['createFruit']> { return resolveWorld(inst).createFruit(plant!); }
+export function developFruit(fruit?: Parameters<World['developFruit']>[0], inst?: World): ReturnType<World['developFruit']> { return resolveWorld(inst).developFruit(fruit!); }
+export function growFruit(fruit?: Parameters<World['growFruit']>[0], amount?: Parameters<World['growFruit']>[1], inst?: World): ReturnType<World['growFruit']> { return resolveWorld(inst).growFruit(fruit!, amount!); }
+export function ripenFruit(fruit?: Parameters<World['ripenFruit']>[0], rate?: Parameters<World['ripenFruit']>[1], inst?: World): ReturnType<World['ripenFruit']> { return resolveWorld(inst).ripenFruit(fruit!, rate!); }
+export function changeFruitColor(fruit?: Parameters<World['changeFruitColor']>[0], color?: Parameters<World['changeFruitColor']>[1], inst?: World): ReturnType<World['changeFruitColor']> { return resolveWorld(inst).changeFruitColor(fruit!, color!); }
+export function softenFruit(fruit?: Parameters<World['softenFruit']>[0], amount?: Parameters<World['softenFruit']>[1], inst?: World): ReturnType<World['softenFruit']> { return resolveWorld(inst).softenFruit(fruit!, amount!); }
+export function rotFruit(fruit?: Parameters<World['rotFruit']>[0], rate?: Parameters<World['rotFruit']>[1], inst?: World): ReturnType<World['rotFruit']> { return resolveWorld(inst).rotFruit(fruit!, rate!); }
+export function detachFruit(fruit?: Parameters<World['detachFruit']>[0], inst?: World): ReturnType<World['detachFruit']> { return resolveWorld(inst).detachFruit(fruit!); }
+export function fallFruit(fruit?: Parameters<World['fallFruit']>[0], gravity?: Parameters<World['fallFruit']>[1], inst?: World): ReturnType<World['fallFruit']> { return resolveWorld(inst).fallFruit(fruit!, gravity!); }
+export function bounceFruit(fruit?: Parameters<World['bounceFruit']>[0], surface?: Parameters<World['bounceFruit']>[1], inst?: World): ReturnType<World['bounceFruit']> { return resolveWorld(inst).bounceFruit(fruit!, surface!); }
+export function splitFruit(fruit?: Parameters<World['splitFruit']>[0], force?: Parameters<World['splitFruit']>[1], inst?: World): ReturnType<World['splitFruit']> { return resolveWorld(inst).splitFruit(fruit!, force!); }
+export function exposeSeeds(fruit?: Parameters<World['exposeSeeds']>[0], inst?: World): ReturnType<World['exposeSeeds']> { return resolveWorld(inst).exposeSeeds(fruit!); }
+export function createSeed(plant?: Parameters<World['createSeed']>[0], inst?: World): ReturnType<World['createSeed']> { return resolveWorld(inst).createSeed(plant!); }
+export function disperseSeed(seed?: Parameters<World['disperseSeed']>[0], force?: Parameters<World['disperseSeed']>[1], inst?: World): ReturnType<World['disperseSeed']> { return resolveWorld(inst).disperseSeed(seed!, force!); }
+export function burySeed(seed?: Parameters<World['burySeed']>[0], soil?: Parameters<World['burySeed']>[1], inst?: World): ReturnType<World['burySeed']> { return resolveWorld(inst).burySeed(seed!, soil!); }
+export function germinateSeed(seed?: Parameters<World['germinateSeed']>[0], inst?: World): ReturnType<World['germinateSeed']> { return resolveWorld(inst).germinateSeed(seed!); }
+export function sproutSeed(seed?: Parameters<World['sproutSeed']>[0], inst?: World): ReturnType<World['sproutSeed']> { return resolveWorld(inst).sproutSeed(seed!); }
+export function developSeedling(seedling?: Parameters<World['developSeedling']>[0], inst?: World): ReturnType<World['developSeedling']> { return resolveWorld(inst).developSeedling(seedling!); }
+export function maturePlant(plant?: Parameters<World['maturePlant']>[0], inst?: World): ReturnType<World['maturePlant']> { return resolveWorld(inst).maturePlant(plant!); }
+export function restartPlantGrowthCycle(plant?: Parameters<World['restartPlantGrowthCycle']>[0], inst?: World): ReturnType<World['restartPlantGrowthCycle']> { return resolveWorld(inst).restartPlantGrowthCycle(plant!); }
+export function calculatePlantHealth(plant?: Parameters<World['calculatePlantHealth']>[0], inst?: World): ReturnType<World['calculatePlantHealth']> { return resolveWorld(inst).calculatePlantHealth(plant!); }
+export function calculatePlantStress(plant?: Parameters<World['calculatePlantStress']>[0], inst?: World): ReturnType<World['calculatePlantStress']> { return resolveWorld(inst).calculatePlantStress(plant!); }
+export function detectPlantDrought(plant?: Parameters<World['detectPlantDrought']>[0], inst?: World): ReturnType<World['detectPlantDrought']> { return resolveWorld(inst).detectPlantDrought(plant!); }
+export function detectPlantDisease(plant?: Parameters<World['detectPlantDisease']>[0], inst?: World): ReturnType<World['detectPlantDisease']> { return resolveWorld(inst).detectPlantDisease(plant!); }
+export function detectPlantDamage(plant?: Parameters<World['detectPlantDamage']>[0], inst?: World): ReturnType<World['detectPlantDamage']> { return resolveWorld(inst).detectPlantDamage(plant!); }
+export function reducePlantVitality(plant?: Parameters<World['reducePlantVitality']>[0], amount?: Parameters<World['reducePlantVitality']>[1], inst?: World): ReturnType<World['reducePlantVitality']> { return resolveWorld(inst).reducePlantVitality(plant!, amount!); }
+export function wiltPlant(plant?: Parameters<World['wiltPlant']>[0], rate?: Parameters<World['wiltPlant']>[1], inst?: World): ReturnType<World['wiltPlant']> { return resolveWorld(inst).wiltPlant(plant!, rate!); }
+export function dryPlantLeaves(plant?: Parameters<World['dryPlantLeaves']>[0], rate?: Parameters<World['dryPlantLeaves']>[1], inst?: World): ReturnType<World['dryPlantLeaves']> { return resolveWorld(inst).dryPlantLeaves(plant!, rate!); }
+export function discolorPlantLeaves(plant?: Parameters<World['discolorPlantLeaves']>[0], color?: Parameters<World['discolorPlantLeaves']>[1], inst?: World): ReturnType<World['discolorPlantLeaves']> { return resolveWorld(inst).discolorPlantLeaves(plant!, color!); }
+export function shedDeadLeaves(plant?: Parameters<World['shedDeadLeaves']>[0], inst?: World): ReturnType<World['shedDeadLeaves']> { return resolveWorld(inst).shedDeadLeaves(plant!); }
+export function killPlant(plant?: Parameters<World['killPlant']>[0], inst?: World): ReturnType<World['killPlant']> { return resolveWorld(inst).killPlant(plant!); }
+export function enterDormancy(plant?: Parameters<World['enterDormancy']>[0], inst?: World): ReturnType<World['enterDormancy']> { return resolveWorld(inst).enterDormancy(plant!); }
+export function resumePlantGrowth(plant?: Parameters<World['resumePlantGrowth']>[0], inst?: World): ReturnType<World['resumePlantGrowth']> { return resolveWorld(inst).resumePlantGrowth(plant!); }
+export function decayPlantTissue(plant?: Parameters<World['decayPlantTissue']>[0], rate?: Parameters<World['decayPlantTissue']>[1], inst?: World): ReturnType<World['decayPlantTissue']> { return resolveWorld(inst).decayPlantTissue(plant!, rate!); }
+export function decomposeDeadPlant(plant?: Parameters<World['decomposeDeadPlant']>[0], inst?: World): ReturnType<World['decomposeDeadPlant']> { return resolveWorld(inst).decomposeDeadPlant(plant!); }
+export function detachDeadBranch(branch?: Parameters<World['detachDeadBranch']>[0], inst?: World): ReturnType<World['detachDeadBranch']> { return resolveWorld(inst).detachDeadBranch(branch!); }
+export function collapseDeadTree(tree?: Parameters<World['collapseDeadTree']>[0], inst?: World): ReturnType<World['collapseDeadTree']> { return resolveWorld(inst).collapseDeadTree(tree!); }
+export function spreadPlantDisease(plant?: Parameters<World['spreadPlantDisease']>[0], neighbor?: Parameters<World['spreadPlantDisease']>[1], inst?: World): ReturnType<World['spreadPlantDisease']> { return resolveWorld(inst).spreadPlantDisease(plant!, neighbor!); }
+export function regenerateDamagedPlant(plant?: Parameters<World['regenerateDamagedPlant']>[0], inst?: World): ReturnType<World['regenerateDamagedPlant']> { return resolveWorld(inst).regenerateDamagedPlant(plant!); }
+export function recyclePlantNutrients(plant?: Parameters<World['recyclePlantNutrients']>[0], soil?: Parameters<World['recyclePlantNutrients']>[1], inst?: World): ReturnType<World['recyclePlantNutrients']> { return resolveWorld(inst).recyclePlantNutrients(plant!, soil!); }
+export function createGrassPatch(area?: Parameters<World['createGrassPatch']>[0], inst?: World): ReturnType<World['createGrassPatch']> { return resolveWorld(inst).createGrassPatch(area!); }
+export function growGrassBlade(blade?: Parameters<World['growGrassBlade']>[0], inst?: World): ReturnType<World['growGrassBlade']> { return resolveWorld(inst).growGrassBlade(blade!); }
+export function bendGrassBlade(blade?: Parameters<World['bendGrassBlade']>[0], wind?: Parameters<World['bendGrassBlade']>[1], inst?: World): ReturnType<World['bendGrassBlade']> { return resolveWorld(inst).bendGrassBlade(blade!, wind!); }
+export function swayGrassPatch(patch?: Parameters<World['swayGrassPatch']>[0], wind?: Parameters<World['swayGrassPatch']>[1], inst?: World): ReturnType<World['swayGrassPatch']> { return resolveWorld(inst).swayGrassPatch(patch!, wind!); }
+export function flattenGrassPatch(patch?: Parameters<World['flattenGrassPatch']>[0], force?: Parameters<World['flattenGrassPatch']>[1], inst?: World): ReturnType<World['flattenGrassPatch']> { return resolveWorld(inst).flattenGrassPatch(patch!, force!); }
+export function restoreGrassPatch(patch?: Parameters<World['restoreGrassPatch']>[0], inst?: World): ReturnType<World['restoreGrassPatch']> { return resolveWorld(inst).restoreGrassPatch(patch!); }
+export function trampleGrassPatch(patch?: Parameters<World['trampleGrassPatch']>[0], inst?: World): ReturnType<World['trampleGrassPatch']> { return resolveWorld(inst).trampleGrassPatch(patch!); }
+export function regrowTrampledGrass(patch?: Parameters<World['regrowTrampledGrass']>[0], inst?: World): ReturnType<World['regrowTrampledGrass']> { return resolveWorld(inst).regrowTrampledGrass(patch!); }
+export function dryGrassPatch(patch?: Parameters<World['dryGrassPatch']>[0], rate?: Parameters<World['dryGrassPatch']>[1], inst?: World): ReturnType<World['dryGrassPatch']> { return resolveWorld(inst).dryGrassPatch(patch!, rate!); }
+export function igniteDryGrass(patch?: Parameters<World['igniteDryGrass']>[0], inst?: World): ReturnType<World['igniteDryGrass']> { return resolveWorld(inst).igniteDryGrass(patch!); }
+export function createShrub(species?: Parameters<World['createShrub']>[0], inst?: World): ReturnType<World['createShrub']> { return resolveWorld(inst).createShrub(species!); }
+export function growShrub(shrub?: Parameters<World['growShrub']>[0], amount?: Parameters<World['growShrub']>[1], inst?: World): ReturnType<World['growShrub']> { return resolveWorld(inst).growShrub(shrub!, amount!); }
+export function trimShrub(shrub?: Parameters<World['trimShrub']>[0], amount?: Parameters<World['trimShrub']>[1], inst?: World): ReturnType<World['trimShrub']> { return resolveWorld(inst).trimShrub(shrub!, amount!); }
+export function crushShrub(shrub?: Parameters<World['crushShrub']>[0], force?: Parameters<World['crushShrub']>[1], inst?: World): ReturnType<World['crushShrub']> { return resolveWorld(inst).crushShrub(shrub!, force!); }
+export function createVine(plant?: Parameters<World['createVine']>[0], inst?: World): ReturnType<World['createVine']> { return resolveWorld(inst).createVine(plant!); }
+export function extendVine(vine?: Parameters<World['extendVine']>[0], amount?: Parameters<World['extendVine']>[1], inst?: World): ReturnType<World['extendVine']> { return resolveWorld(inst).extendVine(vine!, amount!); }
+export function wrapVineAroundObject(vine?: Parameters<World['wrapVineAroundObject']>[0], object?: Parameters<World['wrapVineAroundObject']>[1], inst?: World): ReturnType<World['wrapVineAroundObject']> { return resolveWorld(inst).wrapVineAroundObject(vine!, object!); }
+export function detachVine(vine?: Parameters<World['detachVine']>[0], inst?: World): ReturnType<World['detachVine']> { return resolveWorld(inst).detachVine(vine!); }
+export function growMoss(surface?: Parameters<World['growMoss']>[0], inst?: World): ReturnType<World['growMoss']> { return resolveWorld(inst).growMoss(surface!); }
+export function dryMoss(surface?: Parameters<World['dryMoss']>[0], rate?: Parameters<World['dryMoss']>[1], inst?: World): ReturnType<World['dryMoss']> { return resolveWorld(inst).dryMoss(surface!, rate!); }
+export function createRock(type?: Parameters<World['createRock']>[0], inst?: World): ReturnType<World['createRock']> { return resolveWorld(inst).createRock(type!); }
+export function generateRockGeometry(rock?: Parameters<World['generateRockGeometry']>[0], inst?: World): ReturnType<World['generateRockGeometry']> { return resolveWorld(inst).generateRockGeometry(rock!); }
+export function setRockHardness(rock?: Parameters<World['setRockHardness']>[0], hardness?: Parameters<World['setRockHardness']>[1], inst?: World): ReturnType<World['setRockHardness']> { return resolveWorld(inst).setRockHardness(rock!, hardness!); }
+export function applyRockStress(rock?: Parameters<World['applyRockStress']>[0], force?: Parameters<World['applyRockStress']>[1], inst?: World): ReturnType<World['applyRockStress']> { return resolveWorld(inst).applyRockStress(rock!, force!); }
+export function detectRockCracks(rock?: Parameters<World['detectRockCracks']>[0], inst?: World): ReturnType<World['detectRockCracks']> { return resolveWorld(inst).detectRockCracks(rock!); }
+export function initiateRockFracture(rock?: Parameters<World['initiateRockFracture']>[0], inst?: World): ReturnType<World['initiateRockFracture']> { return resolveWorld(inst).initiateRockFracture(rock!); }
+export function fractureRock(rock?: Parameters<World['fractureRock']>[0], force?: Parameters<World['fractureRock']>[1], inst?: World): ReturnType<World['fractureRock']> { return resolveWorld(inst).fractureRock(rock!, force!); }
+export function splitRockIntoFragments(rock?: Parameters<World['splitRockIntoFragments']>[0], inst?: World): ReturnType<World['splitRockIntoFragments']> { return resolveWorld(inst).splitRockIntoFragments(rock!); }
+export function chipRockSurface(rock?: Parameters<World['chipRockSurface']>[0], impact?: Parameters<World['chipRockSurface']>[1], inst?: World): ReturnType<World['chipRockSurface']> { return resolveWorld(inst).chipRockSurface(rock!, impact!); }
+export function erodeRockSurface(rock?: Parameters<World['erodeRockSurface']>[0], rate?: Parameters<World['erodeRockSurface']>[1], inst?: World): ReturnType<World['erodeRockSurface']> { return resolveWorld(inst).erodeRockSurface(rock!, rate!); }
+export function weatherRock(rock?: Parameters<World['weatherRock']>[0], weather?: Parameters<World['weatherRock']>[1], inst?: World): ReturnType<World['weatherRock']> { return resolveWorld(inst).weatherRock(rock!, weather!); }
+export function dissolveRock(rock?: Parameters<World['dissolveRock']>[0], fluid?: Parameters<World['dissolveRock']>[1], inst?: World): ReturnType<World['dissolveRock']> { return resolveWorld(inst).dissolveRock(rock!, fluid!); }
+export function polishRockSurface(rock?: Parameters<World['polishRockSurface']>[0], amount?: Parameters<World['polishRockSurface']>[1], inst?: World): ReturnType<World['polishRockSurface']> { return resolveWorld(inst).polishRockSurface(rock!, amount!); }
+export function dislodgeRock(rock?: Parameters<World['dislodgeRock']>[0], force?: Parameters<World['dislodgeRock']>[1], inst?: World): ReturnType<World['dislodgeRock']> { return resolveWorld(inst).dislodgeRock(rock!, force!); }
+export function rollRock(rock?: Parameters<World['rollRock']>[0], direction?: Parameters<World['rollRock']>[1], inst?: World): ReturnType<World['rollRock']> { return resolveWorld(inst).rollRock(rock!, direction!); }
+export function slideRock(rock?: Parameters<World['slideRock']>[0], surface?: Parameters<World['slideRock']>[1], inst?: World): ReturnType<World['slideRock']> { return resolveWorld(inst).slideRock(rock!, surface!); }
+export function toppleRock(rock?: Parameters<World['toppleRock']>[0], force?: Parameters<World['toppleRock']>[1], inst?: World): ReturnType<World['toppleRock']> { return resolveWorld(inst).toppleRock(rock!, force!); }
+export function buryRock(rock?: Parameters<World['buryRock']>[0], sediment?: Parameters<World['buryRock']>[1], inst?: World): ReturnType<World['buryRock']> { return resolveWorld(inst).buryRock(rock!, sediment!); }
+export function exposeRock(rock?: Parameters<World['exposeRock']>[0], erosion?: Parameters<World['exposeRock']>[1], inst?: World): ReturnType<World['exposeRock']> { return resolveWorld(inst).exposeRock(rock!, erosion!); }
+export function regenerateRockCollision(rock?: Parameters<World['regenerateRockCollision']>[0], inst?: World): ReturnType<World['regenerateRockCollision']> { return resolveWorld(inst).regenerateRockCollision(rock!); }
+export function createMountain(region?: Parameters<World['createMountain']>[0], inst?: World): ReturnType<World['createMountain']> { return resolveWorld(inst).createMountain(region!); }
+export function generateMountainTerrain(region?: Parameters<World['generateMountainTerrain']>[0], inst?: World): ReturnType<World['generateMountainTerrain']> { return resolveWorld(inst).generateMountainTerrain(region!); }
+export function updateMountainHeight(region?: Parameters<World['updateMountainHeight']>[0], amount?: Parameters<World['updateMountainHeight']>[1], inst?: World): ReturnType<World['updateMountainHeight']> { return resolveWorld(inst).updateMountainHeight(region!, amount!); }
+export function deformMountainSurface(region?: Parameters<World['deformMountainSurface']>[0], force?: Parameters<World['deformMountainSurface']>[1], inst?: World): ReturnType<World['deformMountainSurface']> { return resolveWorld(inst).deformMountainSurface(region!, force!); }
+export function formRockyRidge(region?: Parameters<World['formRockyRidge']>[0], inst?: World): ReturnType<World['formRockyRidge']> { return resolveWorld(inst).formRockyRidge(region!); }
+export function formMountainValley(region?: Parameters<World['formMountainValley']>[0], inst?: World): ReturnType<World['formMountainValley']> { return resolveWorld(inst).formMountainValley(region!); }
+export function generateCliffFace(region?: Parameters<World['generateCliffFace']>[0], inst?: World): ReturnType<World['generateCliffFace']> { return resolveWorld(inst).generateCliffFace(region!); }
+export function erodeMountain(region?: Parameters<World['erodeMountain']>[0], rate?: Parameters<World['erodeMountain']>[1], inst?: World): ReturnType<World['erodeMountain']> { return resolveWorld(inst).erodeMountain(region!, rate!); }
+export function weatherMountainSurface(region?: Parameters<World['weatherMountainSurface']>[0], weather?: Parameters<World['weatherMountainSurface']>[1], inst?: World): ReturnType<World['weatherMountainSurface']> { return resolveWorld(inst).weatherMountainSurface(region!, weather!); }
+export function fractureMountainRock(region?: Parameters<World['fractureMountainRock']>[0], force?: Parameters<World['fractureMountainRock']>[1], inst?: World): ReturnType<World['fractureMountainRock']> { return resolveWorld(inst).fractureMountainRock(region!, force!); }
+export function triggerRockfall(region?: Parameters<World['triggerRockfall']>[0], inst?: World): ReturnType<World['triggerRockfall']> { return resolveWorld(inst).triggerRockfall(region!); }
+export function triggerLandslide(region?: Parameters<World['triggerLandslide']>[0], inst?: World): ReturnType<World['triggerLandslide']> { return resolveWorld(inst).triggerLandslide(region!); }
+export function collapseCliffSection(region?: Parameters<World['collapseCliffSection']>[0], section?: Parameters<World['collapseCliffSection']>[1], inst?: World): ReturnType<World['collapseCliffSection']> { return resolveWorld(inst).collapseCliffSection(region!, section!); }
+export function generateTalusSlope(region?: Parameters<World['generateTalusSlope']>[0], inst?: World): ReturnType<World['generateTalusSlope']> { return resolveWorld(inst).generateTalusSlope(region!); }
+export function depositMountainSediment(region?: Parameters<World['depositMountainSediment']>[0], sediment?: Parameters<World['depositMountainSediment']>[1], inst?: World): ReturnType<World['depositMountainSediment']> { return resolveWorld(inst).depositMountainSediment(region!, sediment!); }
+export function carveRiverValley(region?: Parameters<World['carveRiverValley']>[0], river?: Parameters<World['carveRiverValley']>[1], inst?: World): ReturnType<World['carveRiverValley']> { return resolveWorld(inst).carveRiverValley(region!, river!); }
+export function accumulateSnowOnMountain(region?: Parameters<World['accumulateSnowOnMountain']>[0], snow?: Parameters<World['accumulateSnowOnMountain']>[1], inst?: World): ReturnType<World['accumulateSnowOnMountain']> { return resolveWorld(inst).accumulateSnowOnMountain(region!, snow!); }
+export function meltMountainSnow(region?: Parameters<World['meltMountainSnow']>[0], temperature?: Parameters<World['meltMountainSnow']>[1], inst?: World): ReturnType<World['meltMountainSnow']> { return resolveWorld(inst).meltMountainSnow(region!, temperature!); }
+export function calculateSlopeStability(region?: Parameters<World['calculateSlopeStability']>[0], inst?: World): ReturnType<World['calculateSlopeStability']> { return resolveWorld(inst).calculateSlopeStability(region!); }
+export function updateMountainCollision(region?: Parameters<World['updateMountainCollision']>[0], inst?: World): ReturnType<World['updateMountainCollision']> { return resolveWorld(inst).updateMountainCollision(region!); }
+export function createSoilPatch(area?: Parameters<World['createSoilPatch']>[0], inst?: World): ReturnType<World['createSoilPatch']> { return resolveWorld(inst).createSoilPatch(area!); }
+export function initializeSoilProperties(soil?: Parameters<World['initializeSoilProperties']>[0], inst?: World): ReturnType<World['initializeSoilProperties']> { return resolveWorld(inst).initializeSoilProperties(soil!); }
+export function compactSoil(soil?: Parameters<World['compactSoil']>[0], force?: Parameters<World['compactSoil']>[1], inst?: World): ReturnType<World['compactSoil']> { return resolveWorld(inst).compactSoil(soil!, force!); }
+export function loosenSoil(soil?: Parameters<World['loosenSoil']>[0], amount?: Parameters<World['loosenSoil']>[1], inst?: World): ReturnType<World['loosenSoil']> { return resolveWorld(inst).loosenSoil(soil!, amount!); }
+export function deformSoilSurface(soil?: Parameters<World['deformSoilSurface']>[0], force?: Parameters<World['deformSoilSurface']>[1], inst?: World): ReturnType<World['deformSoilSurface']> { return resolveWorld(inst).deformSoilSurface(soil!, force!); }
+export function createFootprint(soil?: Parameters<World['createFootprint']>[0], foot?: Parameters<World['createFootprint']>[1], inst?: World): ReturnType<World['createFootprint']> { return resolveWorld(inst).createFootprint(soil!, foot!); }
+export function eraseFootprint(soil?: Parameters<World['eraseFootprint']>[0], rate?: Parameters<World['eraseFootprint']>[1], inst?: World): ReturnType<World['eraseFootprint']> { return resolveWorld(inst).eraseFootprint(soil!, rate!); }
+export function displaceSoil(soil?: Parameters<World['displaceSoil']>[0], direction?: Parameters<World['displaceSoil']>[1], inst?: World): ReturnType<World['displaceSoil']> { return resolveWorld(inst).displaceSoil(soil!, direction!); }
+export function excavateSoil(soil?: Parameters<World['excavateSoil']>[0], amount?: Parameters<World['excavateSoil']>[1], inst?: World): ReturnType<World['excavateSoil']> { return resolveWorld(inst).excavateSoil(soil!, amount!); }
+export function fillExcavation(soil?: Parameters<World['fillExcavation']>[0], material?: Parameters<World['fillExcavation']>[1], inst?: World): ReturnType<World['fillExcavation']> { return resolveWorld(inst).fillExcavation(soil!, material!); }
+export function erodeSoil(soil?: Parameters<World['erodeSoil']>[0], water?: Parameters<World['erodeSoil']>[1], inst?: World): ReturnType<World['erodeSoil']> { return resolveWorld(inst).erodeSoil(soil!, water!); }
+export function depositSediment(soil?: Parameters<World['depositSediment']>[0], sediment?: Parameters<World['depositSediment']>[1], inst?: World): ReturnType<World['depositSediment']> { return resolveWorld(inst).depositSediment(soil!, sediment!); }
+export function liquefySoil(soil?: Parameters<World['liquefySoil']>[0], saturation?: Parameters<World['liquefySoil']>[1], inst?: World): ReturnType<World['liquefySoil']> { return resolveWorld(inst).liquefySoil(soil!, saturation!); }
+export function dryMud(mud?: Parameters<World['dryMud']>[0], rate?: Parameters<World['dryMud']>[1], inst?: World): ReturnType<World['dryMud']> { return resolveWorld(inst).dryMud(mud!, rate!); }
+export function crackDryMud(mud?: Parameters<World['crackDryMud']>[0], inst?: World): ReturnType<World['crackDryMud']> { return resolveWorld(inst).crackDryMud(mud!); }
+export function splashMud(mud?: Parameters<World['splashMud']>[0], impact?: Parameters<World['splashMud']>[1], inst?: World): ReturnType<World['splashMud']> { return resolveWorld(inst).splashMud(mud!, impact!); }
+export function simulateSandSliding(sand?: Parameters<World['simulateSandSliding']>[0], slope?: Parameters<World['simulateSandSliding']>[1], inst?: World): ReturnType<World['simulateSandSliding']> { return resolveWorld(inst).simulateSandSliding(sand!, slope!); }
+export function formSandDune(sand?: Parameters<World['formSandDune']>[0], wind?: Parameters<World['formSandDune']>[1], inst?: World): ReturnType<World['formSandDune']> { return resolveWorld(inst).formSandDune(sand!, wind!); }
+export function reshapeSandDune(dune?: Parameters<World['reshapeSandDune']>[0], wind?: Parameters<World['reshapeSandDune']>[1], inst?: World): ReturnType<World['reshapeSandDune']> { return resolveWorld(inst).reshapeSandDune(dune!, wind!); }
+export function updateTerrainSurface(terrain?: Parameters<World['updateTerrainSurface']>[0], inst?: World): ReturnType<World['updateTerrainSurface']> { return resolveWorld(inst).updateTerrainSurface(terrain!); }
+export function createWaterBody(type?: Parameters<World['createWaterBody']>[0], inst?: World): ReturnType<World['createWaterBody']> { return resolveWorld(inst).createWaterBody(type!); }
+export function initializeWaterSimulation(water?: Parameters<World['initializeWaterSimulation']>[0], inst?: World): ReturnType<World['initializeWaterSimulation']> { return resolveWorld(inst).initializeWaterSimulation(water!); }
+export function updateWaterSimulation(water?: Parameters<World['updateWaterSimulation']>[0], deltaTime?: Parameters<World['updateWaterSimulation']>[1], inst?: World): ReturnType<World['updateWaterSimulation']> { return resolveWorld(inst).updateWaterSimulation(water!, deltaTime!); }
+export function calculateWaterFlow(water?: Parameters<World['calculateWaterFlow']>[0], inst?: World): ReturnType<World['calculateWaterFlow']> { return resolveWorld(inst).calculateWaterFlow(water!); }
+export function updateWaterLevel(water?: Parameters<World['updateWaterLevel']>[0], level?: Parameters<World['updateWaterLevel']>[1], inst?: World): ReturnType<World['updateWaterLevel']> { return resolveWorld(inst).updateWaterLevel(water!, level!); }
+export function simulateWaterCurrent(water?: Parameters<World['simulateWaterCurrent']>[0], force?: Parameters<World['simulateWaterCurrent']>[1], inst?: World): ReturnType<World['simulateWaterCurrent']> { return resolveWorld(inst).simulateWaterCurrent(water!, force!); }
+export function generateWaterWaves(water?: Parameters<World['generateWaterWaves']>[0], wind?: Parameters<World['generateWaterWaves']>[1], inst?: World): ReturnType<World['generateWaterWaves']> { return resolveWorld(inst).generateWaterWaves(water!, wind!); }
+export function propagateWaterWave(wave?: Parameters<World['propagateWaterWave']>[0], inst?: World): ReturnType<World['propagateWaterWave']> { return resolveWorld(inst).propagateWaterWave(wave!); }
+export function reflectWaterWave(wave?: Parameters<World['reflectWaterWave']>[0], surface?: Parameters<World['reflectWaterWave']>[1], inst?: World): ReturnType<World['reflectWaterWave']> { return resolveWorld(inst).reflectWaterWave(wave!, surface!); }
+export function createWaterRipple(position?: Parameters<World['createWaterRipple']>[0], inst?: World): ReturnType<World['createWaterRipple']> { return resolveWorld(inst).createWaterRipple(position!); }
+export function createSplash(position?: Parameters<World['createSplash']>[0], force?: Parameters<World['createSplash']>[1], inst?: World): ReturnType<World['createSplash']> { return resolveWorld(inst).createSplash(position!, force!); }
+export function simulateWaterDroplets(splash?: Parameters<World['simulateWaterDroplets']>[0], inst?: World): ReturnType<World['simulateWaterDroplets']> { return resolveWorld(inst).simulateWaterDroplets(splash!); }
+export function simulateWaterfall(waterfall?: Parameters<World['simulateWaterfall']>[0], inst?: World): ReturnType<World['simulateWaterfall']> { return resolveWorld(inst).simulateWaterfall(waterfall!); }
+export function simulateRiverFlow(river?: Parameters<World['simulateRiverFlow']>[0], inst?: World): ReturnType<World['simulateRiverFlow']> { return resolveWorld(inst).simulateRiverFlow(river!); }
+export function simulateStreamFlow(stream?: Parameters<World['simulateStreamFlow']>[0], inst?: World): ReturnType<World['simulateStreamFlow']> { return resolveWorld(inst).simulateStreamFlow(stream!); }
+export function simulateFlooding(area?: Parameters<World['simulateFlooding']>[0], water?: Parameters<World['simulateFlooding']>[1], inst?: World): ReturnType<World['simulateFlooding']> { return resolveWorld(inst).simulateFlooding(area!, water!); }
+export function erodeRiverbank(riverbank?: Parameters<World['erodeRiverbank']>[0], water?: Parameters<World['erodeRiverbank']>[1], inst?: World): ReturnType<World['erodeRiverbank']> { return resolveWorld(inst).erodeRiverbank(riverbank!, water!); }
+export function depositRiverSediment(river?: Parameters<World['depositRiverSediment']>[0], sediment?: Parameters<World['depositRiverSediment']>[1], inst?: World): ReturnType<World['depositRiverSediment']> { return resolveWorld(inst).depositRiverSediment(river!, sediment!); }
+export function freezeWaterSurface(water?: Parameters<World['freezeWaterSurface']>[0], temperature?: Parameters<World['freezeWaterSurface']>[1], inst?: World): ReturnType<World['freezeWaterSurface']> { return resolveWorld(inst).freezeWaterSurface(water!, temperature!); }
+export function meltWaterSurface(water?: Parameters<World['meltWaterSurface']>[0], temperature?: Parameters<World['meltWaterSurface']>[1], inst?: World): ReturnType<World['meltWaterSurface']> { return resolveWorld(inst).meltWaterSurface(water!, temperature!); }
+export function createRainSystem(inst?: World): ReturnType<World['createRainSystem']> { return resolveWorld(inst).createRainSystem(); }
+export function spawnRaindrops(area?: Parameters<World['spawnRaindrops']>[0], inst?: World): ReturnType<World['spawnRaindrops']> { return resolveWorld(inst).spawnRaindrops(area!); }
+export function updateRaindropMotion(drop?: Parameters<World['updateRaindropMotion']>[0], deltaTime?: Parameters<World['updateRaindropMotion']>[1], inst?: World): ReturnType<World['updateRaindropMotion']> { return resolveWorld(inst).updateRaindropMotion(drop!, deltaTime!); }
+export function applyWindToRaindrops(drops?: Parameters<World['applyWindToRaindrops']>[0], wind?: Parameters<World['applyWindToRaindrops']>[1], inst?: World): ReturnType<World['applyWindToRaindrops']> { return resolveWorld(inst).applyWindToRaindrops(drops!, wind!); }
+export function createRainSplash(position?: Parameters<World['createRainSplash']>[0], inst?: World): ReturnType<World['createRainSplash']> { return resolveWorld(inst).createRainSplash(position!); }
+export function accumulateRainwater(surface?: Parameters<World['accumulateRainwater']>[0], amount?: Parameters<World['accumulateRainwater']>[1], inst?: World): ReturnType<World['accumulateRainwater']> { return resolveWorld(inst).accumulateRainwater(surface!, amount!); }
+export function createSnowfallSystem(inst?: World): ReturnType<World['createSnowfallSystem']> { return resolveWorld(inst).createSnowfallSystem(); }
+export function spawnSnowflakes(area?: Parameters<World['spawnSnowflakes']>[0], inst?: World): ReturnType<World['spawnSnowflakes']> { return resolveWorld(inst).spawnSnowflakes(area!); }
+export function updateSnowflakeMotion(flake?: Parameters<World['updateSnowflakeMotion']>[0], deltaTime?: Parameters<World['updateSnowflakeMotion']>[1], inst?: World): ReturnType<World['updateSnowflakeMotion']> { return resolveWorld(inst).updateSnowflakeMotion(flake!, deltaTime!); }
+export function accumulateSnow(surface?: Parameters<World['accumulateSnow']>[0], amount?: Parameters<World['accumulateSnow']>[1], inst?: World): ReturnType<World['accumulateSnow']> { return resolveWorld(inst).accumulateSnow(surface!, amount!); }
+export function compactSnow(snow?: Parameters<World['compactSnow']>[0], force?: Parameters<World['compactSnow']>[1], inst?: World): ReturnType<World['compactSnow']> { return resolveWorld(inst).compactSnow(snow!, force!); }
+export function meltSnow(snow?: Parameters<World['meltSnow']>[0], temperature?: Parameters<World['meltSnow']>[1], inst?: World): ReturnType<World['meltSnow']> { return resolveWorld(inst).meltSnow(snow!, temperature!); }
+export function createIcicle(surface?: Parameters<World['createIcicle']>[0], inst?: World): ReturnType<World['createIcicle']> { return resolveWorld(inst).createIcicle(surface!); }
+export function growIcicle(icicle?: Parameters<World['growIcicle']>[0], temperature?: Parameters<World['growIcicle']>[1], inst?: World): ReturnType<World['growIcicle']> { return resolveWorld(inst).growIcicle(icicle!, temperature!); }
+export function breakIcicle(icicle?: Parameters<World['breakIcicle']>[0], force?: Parameters<World['breakIcicle']>[1], inst?: World): ReturnType<World['breakIcicle']> { return resolveWorld(inst).breakIcicle(icicle!, force!); }
+export function freezeWetSurface(surface?: Parameters<World['freezeWetSurface']>[0], temperature?: Parameters<World['freezeWetSurface']>[1], inst?: World): ReturnType<World['freezeWetSurface']> { return resolveWorld(inst).freezeWetSurface(surface!, temperature!); }
+export function thawFrozenSurface(surface?: Parameters<World['thawFrozenSurface']>[0], temperature?: Parameters<World['thawFrozenSurface']>[1], inst?: World): ReturnType<World['thawFrozenSurface']> { return resolveWorld(inst).thawFrozenSurface(surface!, temperature!); }
+export function createHailstone(size?: Parameters<World['createHailstone']>[0], inst?: World): ReturnType<World['createHailstone']> { return resolveWorld(inst).createHailstone(size!); }
+export function spawnHailstorm(area?: Parameters<World['spawnHailstorm']>[0], inst?: World): ReturnType<World['spawnHailstorm']> { return resolveWorld(inst).spawnHailstorm(area!); }
+export function simulateHailImpact(hailstone?: Parameters<World['simulateHailImpact']>[0], surface?: Parameters<World['simulateHailImpact']>[1], inst?: World): ReturnType<World['simulateHailImpact']> { return resolveWorld(inst).simulateHailImpact(hailstone!, surface!); }
+export function createWindField(inst?: World): ReturnType<World['createWindField']> { return resolveWorld(inst).createWindField(); }
+export function updateWindField(field?: Parameters<World['updateWindField']>[0], deltaTime?: Parameters<World['updateWindField']>[1], inst?: World): ReturnType<World['updateWindField']> { return resolveWorld(inst).updateWindField(field!, deltaTime!); }
+export function setWindDirection(direction?: Parameters<World['setWindDirection']>[0], inst?: World): ReturnType<World['setWindDirection']> { return resolveWorld(inst).setWindDirection(direction!); }
+export function setWindSpeed(speed?: Parameters<World['setWindSpeed']>[0], inst?: World): ReturnType<World['setWindSpeed']> { return resolveWorld(inst).setWindSpeed(speed!); }
+export function simulateWindTurbulence(field?: Parameters<World['simulateWindTurbulence']>[0], inst?: World): ReturnType<World['simulateWindTurbulence']> { return resolveWorld(inst).simulateWindTurbulence(field!); }
+export function simulateThermalUpdraft(field?: Parameters<World['simulateThermalUpdraft']>[0], inst?: World): ReturnType<World['simulateThermalUpdraft']> { return resolveWorld(inst).simulateThermalUpdraft(field!); }
+export function simulateDowndraft(field?: Parameters<World['simulateDowndraft']>[0], inst?: World): ReturnType<World['simulateDowndraft']> { return resolveWorld(inst).simulateDowndraft(field!); }
+export function simulateDustDevil(position?: Parameters<World['simulateDustDevil']>[0], inst?: World): ReturnType<World['simulateDustDevil']> { return resolveWorld(inst).simulateDustDevil(position!); }
+export function simulateTornado(tornado?: Parameters<World['simulateTornado']>[0], inst?: World): ReturnType<World['simulateTornado']> { return resolveWorld(inst).simulateTornado(tornado!); }
+export function applyWindToParticles(particles?: Parameters<World['applyWindToParticles']>[0], wind?: Parameters<World['applyWindToParticles']>[1], inst?: World): ReturnType<World['applyWindToParticles']> { return resolveWorld(inst).applyWindToParticles(particles!, wind!); }
+export function applyWindToCloth(cloth?: Parameters<World['applyWindToCloth']>[0], wind?: Parameters<World['applyWindToCloth']>[1], inst?: World): ReturnType<World['applyWindToCloth']> { return resolveWorld(inst).applyWindToCloth(cloth!, wind!); }
+export function applyWindToFlags(flags?: Parameters<World['applyWindToFlags']>[0], wind?: Parameters<World['applyWindToFlags']>[1], inst?: World): ReturnType<World['applyWindToFlags']> { return resolveWorld(inst).applyWindToFlags(flags!, wind!); }
+export function applyWindToStructures(structures?: Parameters<World['applyWindToStructures']>[0], wind?: Parameters<World['applyWindToStructures']>[1], inst?: World): ReturnType<World['applyWindToStructures']> { return resolveWorld(inst).applyWindToStructures(structures!, wind!); }
+export function calculateWindLoad(structure?: Parameters<World['calculateWindLoad']>[0], wind?: Parameters<World['calculateWindLoad']>[1], inst?: World): ReturnType<World['calculateWindLoad']> { return resolveWorld(inst).calculateWindLoad(structure!, wind!); }
+export function updateAtmosphericPressure(field?: Parameters<World['updateAtmosphericPressure']>[0], inst?: World): ReturnType<World['updateAtmosphericPressure']> { return resolveWorld(inst).updateAtmosphericPressure(field!); }
+export function createCloud(cloudType?: Parameters<World['createCloud']>[0], inst?: World): ReturnType<World['createCloud']> { return resolveWorld(inst).createCloud(cloudType!); }
+export function generateCloudVolume(cloud?: Parameters<World['generateCloudVolume']>[0], inst?: World): ReturnType<World['generateCloudVolume']> { return resolveWorld(inst).generateCloudVolume(cloud!); }
+export function updateCloudShape(cloud?: Parameters<World['updateCloudShape']>[0], deltaTime?: Parameters<World['updateCloudShape']>[1], inst?: World): ReturnType<World['updateCloudShape']> { return resolveWorld(inst).updateCloudShape(cloud!, deltaTime!); }
+export function moveCloudWithWind(cloud?: Parameters<World['moveCloudWithWind']>[0], wind?: Parameters<World['moveCloudWithWind']>[1], inst?: World): ReturnType<World['moveCloudWithWind']> { return resolveWorld(inst).moveCloudWithWind(cloud!, wind!); }
+export function mergeClouds(cloudA?: Parameters<World['mergeClouds']>[0], cloudB?: Parameters<World['mergeClouds']>[1], inst?: World): ReturnType<World['mergeClouds']> { return resolveWorld(inst).mergeClouds(cloudA!, cloudB!); }
+export function separateClouds(cloudA?: Parameters<World['separateClouds']>[0], cloudB?: Parameters<World['separateClouds']>[1], inst?: World): ReturnType<World['separateClouds']> { return resolveWorld(inst).separateClouds(cloudA!, cloudB!); }
+export function dissipateCloud(cloud?: Parameters<World['dissipateCloud']>[0], rate?: Parameters<World['dissipateCloud']>[1], inst?: World): ReturnType<World['dissipateCloud']> { return resolveWorld(inst).dissipateCloud(cloud!, rate!); }
+export function condenseCloudVapor(cloud?: Parameters<World['condenseCloudVapor']>[0], inst?: World): ReturnType<World['condenseCloudVapor']> { return resolveWorld(inst).condenseCloudVapor(cloud!); }
+export function simulateCumulusGrowth(cloud?: Parameters<World['simulateCumulusGrowth']>[0], inst?: World): ReturnType<World['simulateCumulusGrowth']> { return resolveWorld(inst).simulateCumulusGrowth(cloud!); }
+export function simulateStormCloudGrowth(cloud?: Parameters<World['simulateStormCloudGrowth']>[0], inst?: World): ReturnType<World['simulateStormCloudGrowth']> { return resolveWorld(inst).simulateStormCloudGrowth(cloud!); }
+export function createFogVolume(area?: Parameters<World['createFogVolume']>[0], inst?: World): ReturnType<World['createFogVolume']> { return resolveWorld(inst).createFogVolume(area!); }
+export function spreadFog(fog?: Parameters<World['spreadFog']>[0], wind?: Parameters<World['spreadFog']>[1], inst?: World): ReturnType<World['spreadFog']> { return resolveWorld(inst).spreadFog(fog!, wind!); }
+export function dissipateFog(fog?: Parameters<World['dissipateFog']>[0], temperature?: Parameters<World['dissipateFog']>[1], inst?: World): ReturnType<World['dissipateFog']> { return resolveWorld(inst).dissipateFog(fog!, temperature!); }
+export function simulateGroundFog(area?: Parameters<World['simulateGroundFog']>[0], inst?: World): ReturnType<World['simulateGroundFog']> { return resolveWorld(inst).simulateGroundFog(area!); }
+export function simulateMistOverWater(water?: Parameters<World['simulateMistOverWater']>[0], inst?: World): ReturnType<World['simulateMistOverWater']> { return resolveWorld(inst).simulateMistOverWater(water!); }
+export function simulateAtmosphericHaze(atmosphere?: Parameters<World['simulateAtmosphericHaze']>[0], inst?: World): ReturnType<World['simulateAtmosphericHaze']> { return resolveWorld(inst).simulateAtmosphericHaze(atmosphere!); }
+export function createRainbow(atmosphere?: Parameters<World['createRainbow']>[0], inst?: World): ReturnType<World['createRainbow']> { return resolveWorld(inst).createRainbow(atmosphere!); }
+export function updateRainbowVisibility(rainbow?: Parameters<World['updateRainbowVisibility']>[0], inst?: World): ReturnType<World['updateRainbowVisibility']> { return resolveWorld(inst).updateRainbowVisibility(rainbow!); }
+export function simulateHeatShimmer(area?: Parameters<World['simulateHeatShimmer']>[0], inst?: World): ReturnType<World['simulateHeatShimmer']> { return resolveWorld(inst).simulateHeatShimmer(area!); }
+export function updateSkyAtmosphere(atmosphere?: Parameters<World['updateSkyAtmosphere']>[0], inst?: World): ReturnType<World['updateSkyAtmosphere']> { return resolveWorld(inst).updateSkyAtmosphere(atmosphere!); }
+export function createThunderstorm(area?: Parameters<World['createThunderstorm']>[0], inst?: World): ReturnType<World['createThunderstorm']> { return resolveWorld(inst).createThunderstorm(area!); }
+export function accumulateStormEnergy(storm?: Parameters<World['accumulateStormEnergy']>[0], inst?: World): ReturnType<World['accumulateStormEnergy']> { return resolveWorld(inst).accumulateStormEnergy(storm!); }
+export function generateLightningBolt(storm?: Parameters<World['generateLightningBolt']>[0], inst?: World): ReturnType<World['generateLightningBolt']> { return resolveWorld(inst).generateLightningBolt(storm!); }
+export function branchLightningBolt(bolt?: Parameters<World['branchLightningBolt']>[0], inst?: World): ReturnType<World['branchLightningBolt']> { return resolveWorld(inst).branchLightningBolt(bolt!); }
+export function illuminateSceneWithLightning(bolt?: Parameters<World['illuminateSceneWithLightning']>[0], inst?: World): ReturnType<World['illuminateSceneWithLightning']> { return resolveWorld(inst).illuminateSceneWithLightning(bolt!); }
+export function createLightningFlash(position?: Parameters<World['createLightningFlash']>[0], inst?: World): ReturnType<World['createLightningFlash']> { return resolveWorld(inst).createLightningFlash(position!); }
+export function calculateLightningStrikeTarget(storm?: Parameters<World['calculateLightningStrikeTarget']>[0], inst?: World): ReturnType<World['calculateLightningStrikeTarget']> { return resolveWorld(inst).calculateLightningStrikeTarget(storm!); }
+export function strikeLightningTarget(target?: Parameters<World['strikeLightningTarget']>[0], inst?: World): ReturnType<World['strikeLightningTarget']> { return resolveWorld(inst).strikeLightningTarget(target!); }
+export function applyLightningDamage(target?: Parameters<World['applyLightningDamage']>[0], inst?: World): ReturnType<World['applyLightningDamage']> { return resolveWorld(inst).applyLightningDamage(target!); }
+export function createThunderSound(bolt?: Parameters<World['createThunderSound']>[0], inst?: World): ReturnType<World['createThunderSound']> { return resolveWorld(inst).createThunderSound(bolt!); }
+export function propagateThunderWave(position?: Parameters<World['propagateThunderWave']>[0], inst?: World): ReturnType<World['propagateThunderWave']> { return resolveWorld(inst).propagateThunderWave(position!); }
+export function createStormWind(storm?: Parameters<World['createStormWind']>[0], inst?: World): ReturnType<World['createStormWind']> { return resolveWorld(inst).createStormWind(storm!); }
+export function generateStormRain(storm?: Parameters<World['generateStormRain']>[0], inst?: World): ReturnType<World['generateStormRain']> { return resolveWorld(inst).generateStormRain(storm!); }
+export function spawnStormDebris(storm?: Parameters<World['spawnStormDebris']>[0], inst?: World): ReturnType<World['spawnStormDebris']> { return resolveWorld(inst).spawnStormDebris(storm!); }
+export function simulateStormSurge(coast?: Parameters<World['simulateStormSurge']>[0], inst?: World): ReturnType<World['simulateStormSurge']> { return resolveWorld(inst).simulateStormSurge(coast!); }
+export function calculateStormDamage(structures?: Parameters<World['calculateStormDamage']>[0], inst?: World): ReturnType<World['calculateStormDamage']> { return resolveWorld(inst).calculateStormDamage(structures!); }
+export function dissipateThunderstorm(storm?: Parameters<World['dissipateThunderstorm']>[0], inst?: World): ReturnType<World['dissipateThunderstorm']> { return resolveWorld(inst).dissipateThunderstorm(storm!); }
+export function simulateHurricane(hurricane?: Parameters<World['simulateHurricane']>[0], inst?: World): ReturnType<World['simulateHurricane']> { return resolveWorld(inst).simulateHurricane(hurricane!); }
+export function simulateCyclone(cyclone?: Parameters<World['simulateCyclone']>[0], inst?: World): ReturnType<World['simulateCyclone']> { return resolveWorld(inst).simulateCyclone(cyclone!); }
+export function updateStormRecovery(area?: Parameters<World['updateStormRecovery']>[0], inst?: World): ReturnType<World['updateStormRecovery']> { return resolveWorld(inst).updateStormRecovery(area!); }
+export function createFire(source?: Parameters<World['createFire']>[0], inst?: World): ReturnType<World['createFire']> { return resolveWorld(inst).createFire(source!); }
+export function igniteObject(object?: Parameters<World['igniteObject']>[0], ignitionSource?: Parameters<World['igniteObject']>[1], inst?: World): ReturnType<World['igniteObject']> { return resolveWorld(inst).igniteObject(object!, ignitionSource!); }
+export function extinguishFire(fire?: Parameters<World['extinguishFire']>[0], inst?: World): ReturnType<World['extinguishFire']> { return resolveWorld(inst).extinguishFire(fire!); }
+export function spreadFire(fire?: Parameters<World['spreadFire']>[0], target?: Parameters<World['spreadFire']>[1], inst?: World): ReturnType<World['spreadFire']> { return resolveWorld(inst).spreadFire(fire!, target!); }
+export function calculateCombustionRate(object?: Parameters<World['calculateCombustionRate']>[0], inst?: World): ReturnType<World['calculateCombustionRate']> { return resolveWorld(inst).calculateCombustionRate(object!); }
+export function calculateFireTemperature(fire?: Parameters<World['calculateFireTemperature']>[0], inst?: World): ReturnType<World['calculateFireTemperature']> { return resolveWorld(inst).calculateFireTemperature(fire!); }
+export function updateFlameShape(fire?: Parameters<World['updateFlameShape']>[0], inst?: World): ReturnType<World['updateFlameShape']> { return resolveWorld(inst).updateFlameShape(fire!); }
+export function spawnFireParticles(fire?: Parameters<World['spawnFireParticles']>[0], inst?: World): ReturnType<World['spawnFireParticles']> { return resolveWorld(inst).spawnFireParticles(fire!); }
+export function generateSmoke(fire?: Parameters<World['generateSmoke']>[0], inst?: World): ReturnType<World['generateSmoke']> { return resolveWorld(inst).generateSmoke(fire!); }
+export function spreadSmoke(smoke?: Parameters<World['spreadSmoke']>[0], wind?: Parameters<World['spreadSmoke']>[1], inst?: World): ReturnType<World['spreadSmoke']> { return resolveWorld(inst).spreadSmoke(smoke!, wind!); }
+export function dissipateSmoke(smoke?: Parameters<World['dissipateSmoke']>[0], rate?: Parameters<World['dissipateSmoke']>[1], inst?: World): ReturnType<World['dissipateSmoke']> { return resolveWorld(inst).dissipateSmoke(smoke!, rate!); }
+export function createEmber(emberSource?: Parameters<World['createEmber']>[0], inst?: World): ReturnType<World['createEmber']> { return resolveWorld(inst).createEmber(emberSource!); }
+export function scatterEmbers(embers?: Parameters<World['scatterEmbers']>[0], wind?: Parameters<World['scatterEmbers']>[1], inst?: World): ReturnType<World['scatterEmbers']> { return resolveWorld(inst).scatterEmbers(embers!, wind!); }
+export function igniteDryVegetation(plant?: Parameters<World['igniteDryVegetation']>[0], inst?: World): ReturnType<World['igniteDryVegetation']> { return resolveWorld(inst).igniteDryVegetation(plant!); }
+export function charObjectSurface(object?: Parameters<World['charObjectSurface']>[0], heat?: Parameters<World['charObjectSurface']>[1], inst?: World): ReturnType<World['charObjectSurface']> { return resolveWorld(inst).charObjectSurface(object!, heat!); }
+export function burnObjectMaterial(object?: Parameters<World['burnObjectMaterial']>[0], rate?: Parameters<World['burnObjectMaterial']>[1], inst?: World): ReturnType<World['burnObjectMaterial']> { return resolveWorld(inst).burnObjectMaterial(object!, rate!); }
+export function deformObjectByHeat(object?: Parameters<World['deformObjectByHeat']>[0], heat?: Parameters<World['deformObjectByHeat']>[1], inst?: World): ReturnType<World['deformObjectByHeat']> { return resolveWorld(inst).deformObjectByHeat(object!, heat!); }
+export function meltObjectMaterial(object?: Parameters<World['meltObjectMaterial']>[0], temperature?: Parameters<World['meltObjectMaterial']>[1], inst?: World): ReturnType<World['meltObjectMaterial']> { return resolveWorld(inst).meltObjectMaterial(object!, temperature!); }
+export function coolBurningObject(object?: Parameters<World['coolBurningObject']>[0], rate?: Parameters<World['coolBurningObject']>[1], inst?: World): ReturnType<World['coolBurningObject']> { return resolveWorld(inst).coolBurningObject(object!, rate!); }
+export function calculateFireDamage(object?: Parameters<World['calculateFireDamage']>[0], inst?: World): ReturnType<World['calculateFireDamage']> { return resolveWorld(inst).calculateFireDamage(object!); }
+export function createRockfall(region?: Parameters<World['createRockfall']>[0], inst?: World): ReturnType<World['createRockfall']> { return resolveWorld(inst).createRockfall(region!); }
+export function releaseRockFromSlope(rock?: Parameters<World['releaseRockFromSlope']>[0], slope?: Parameters<World['releaseRockFromSlope']>[1], inst?: World): ReturnType<World['releaseRockFromSlope']> { return resolveWorld(inst).releaseRockFromSlope(rock!, slope!); }
+export function calculateRockfallTrajectory(rock?: Parameters<World['calculateRockfallTrajectory']>[0], inst?: World): ReturnType<World['calculateRockfallTrajectory']> { return resolveWorld(inst).calculateRockfallTrajectory(rock!); }
+export function simulateRockBouncing(rock?: Parameters<World['simulateRockBouncing']>[0], surface?: Parameters<World['simulateRockBouncing']>[1], inst?: World): ReturnType<World['simulateRockBouncing']> { return resolveWorld(inst).simulateRockBouncing(rock!, surface!); }
+export function simulateRockRolling(rock?: Parameters<World['simulateRockRolling']>[0], slope?: Parameters<World['simulateRockRolling']>[1], inst?: World): ReturnType<World['simulateRockRolling']> { return resolveWorld(inst).simulateRockRolling(rock!, slope!); }
+export function simulateRockFragmentation(rock?: Parameters<World['simulateRockFragmentation']>[0], inst?: World): ReturnType<World['simulateRockFragmentation']> { return resolveWorld(inst).simulateRockFragmentation(rock!); }
+export function createLandslide(region?: Parameters<World['createLandslide']>[0], inst?: World): ReturnType<World['createLandslide']> { return resolveWorld(inst).createLandslide(region!); }
+export function calculateSlopeFailure(region?: Parameters<World['calculateSlopeFailure']>[0], inst?: World): ReturnType<World['calculateSlopeFailure']> { return resolveWorld(inst).calculateSlopeFailure(region!); }
+export function displaceLandslideSoil(landslide?: Parameters<World['displaceLandslideSoil']>[0], inst?: World): ReturnType<World['displaceLandslideSoil']> { return resolveWorld(inst).displaceLandslideSoil(landslide!); }
+export function simulateDebrisFlow(flow?: Parameters<World['simulateDebrisFlow']>[0], inst?: World): ReturnType<World['simulateDebrisFlow']> { return resolveWorld(inst).simulateDebrisFlow(flow!); }
+export function depositLandslideDebris(landslide?: Parameters<World['depositLandslideDebris']>[0], inst?: World): ReturnType<World['depositLandslideDebris']> { return resolveWorld(inst).depositLandslideDebris(landslide!); }
+export function createAvalanche(region?: Parameters<World['createAvalanche']>[0], inst?: World): ReturnType<World['createAvalanche']> { return resolveWorld(inst).createAvalanche(region!); }
+export function triggerSnowSlabFailure(snowpack?: Parameters<World['triggerSnowSlabFailure']>[0], inst?: World): ReturnType<World['triggerSnowSlabFailure']> { return resolveWorld(inst).triggerSnowSlabFailure(snowpack!); }
+export function simulateAvalancheMotion(avalanche?: Parameters<World['simulateAvalancheMotion']>[0], inst?: World): ReturnType<World['simulateAvalancheMotion']> { return resolveWorld(inst).simulateAvalancheMotion(avalanche!); }
+export function simulateAvalancheDebris(avalanche?: Parameters<World['simulateAvalancheDebris']>[0], inst?: World): ReturnType<World['simulateAvalancheDebris']> { return resolveWorld(inst).simulateAvalancheDebris(avalanche!); }
+export function buryObjectsInDebris(objects?: Parameters<World['buryObjectsInDebris']>[0], debris?: Parameters<World['buryObjectsInDebris']>[1], inst?: World): ReturnType<World['buryObjectsInDebris']> { return resolveWorld(inst).buryObjectsInDebris(objects!, debris!); }
+export function calculateBurialDepth(object?: Parameters<World['calculateBurialDepth']>[0], debris?: Parameters<World['calculateBurialDepth']>[1], inst?: World): ReturnType<World['calculateBurialDepth']> { return resolveWorld(inst).calculateBurialDepth(object!, debris!); }
+export function stabilizeDamagedSlope(region?: Parameters<World['stabilizeDamagedSlope']>[0], inst?: World): ReturnType<World['stabilizeDamagedSlope']> { return resolveWorld(inst).stabilizeDamagedSlope(region!); }
+export function erodeUnstableSlope(region?: Parameters<World['erodeUnstableSlope']>[0], inst?: World): ReturnType<World['erodeUnstableSlope']> { return resolveWorld(inst).erodeUnstableSlope(region!); }
+export function updateSlopeAfterFailure(region?: Parameters<World['updateSlopeAfterFailure']>[0], inst?: World): ReturnType<World['updateSlopeAfterFailure']> { return resolveWorld(inst).updateSlopeAfterFailure(region!); }
+export function createBuilding(type?: Parameters<World['createBuilding']>[0], inst?: World): ReturnType<World['createBuilding']> { return resolveWorld(inst).createBuilding(type!); }
+export function initializeBuilding(building?: Parameters<World['initializeBuilding']>[0], inst?: World): ReturnType<World['initializeBuilding']> { return resolveWorld(inst).initializeBuilding(building!); }
+export function generateBuildingGeometry(building?: Parameters<World['generateBuildingGeometry']>[0], inst?: World): ReturnType<World['generateBuildingGeometry']> { return resolveWorld(inst).generateBuildingGeometry(building!); }
+export function generateBuildingFoundation(building?: Parameters<World['generateBuildingFoundation']>[0], inst?: World): ReturnType<World['generateBuildingFoundation']> { return resolveWorld(inst).generateBuildingFoundation(building!); }
+export function generateBuildingWalls(building?: Parameters<World['generateBuildingWalls']>[0], inst?: World): ReturnType<World['generateBuildingWalls']> { return resolveWorld(inst).generateBuildingWalls(building!); }
+export function generateBuildingRoof(building?: Parameters<World['generateBuildingRoof']>[0], inst?: World): ReturnType<World['generateBuildingRoof']> { return resolveWorld(inst).generateBuildingRoof(building!); }
+export function generateBuildingFloors(building?: Parameters<World['generateBuildingFloors']>[0], inst?: World): ReturnType<World['generateBuildingFloors']> { return resolveWorld(inst).generateBuildingFloors(building!); }
+export function generateBuildingColumns(building?: Parameters<World['generateBuildingColumns']>[0], inst?: World): ReturnType<World['generateBuildingColumns']> { return resolveWorld(inst).generateBuildingColumns(building!); }
+export function generateBuildingBeams(building?: Parameters<World['generateBuildingBeams']>[0], inst?: World): ReturnType<World['generateBuildingBeams']> { return resolveWorld(inst).generateBuildingBeams(building!); }
+export function connectStructuralElements(building?: Parameters<World['connectStructuralElements']>[0], inst?: World): ReturnType<World['connectStructuralElements']> { return resolveWorld(inst).connectStructuralElements(building!); }
+export function calculateBuildingMass(building?: Parameters<World['calculateBuildingMass']>[0], inst?: World): ReturnType<World['calculateBuildingMass']> { return resolveWorld(inst).calculateBuildingMass(building!); }
+export function calculateBuildingCenterOfMass(building?: Parameters<World['calculateBuildingCenterOfMass']>[0], inst?: World): ReturnType<World['calculateBuildingCenterOfMass']> { return resolveWorld(inst).calculateBuildingCenterOfMass(building!); }
+export function calculateStructuralStress(building?: Parameters<World['calculateStructuralStress']>[0], inst?: World): ReturnType<World['calculateStructuralStress']> { return resolveWorld(inst).calculateStructuralStress(building!); }
+export function calculateStructuralLoad(building?: Parameters<World['calculateStructuralLoad']>[0], inst?: World): ReturnType<World['calculateStructuralLoad']> { return resolveWorld(inst).calculateStructuralLoad(building!); }
+export function detectStructuralWeakness(building?: Parameters<World['detectStructuralWeakness']>[0], inst?: World): ReturnType<World['detectStructuralWeakness']> { return resolveWorld(inst).detectStructuralWeakness(building!); }
+export function updateBuildingCondition(building?: Parameters<World['updateBuildingCondition']>[0], inst?: World): ReturnType<World['updateBuildingCondition']> { return resolveWorld(inst).updateBuildingCondition(building!); }
+export function repairBuildingDamage(building?: Parameters<World['repairBuildingDamage']>[0], inst?: World): ReturnType<World['repairBuildingDamage']> { return resolveWorld(inst).repairBuildingDamage(building!); }
+export function renovateBuilding(building?: Parameters<World['renovateBuilding']>[0], inst?: World): ReturnType<World['renovateBuilding']> { return resolveWorld(inst).renovateBuilding(building!); }
+export function demolishBuilding(building?: Parameters<World['demolishBuilding']>[0], inst?: World): ReturnType<World['demolishBuilding']> { return resolveWorld(inst).demolishBuilding(building!); }
+export function regenerateBuildingCollision(building?: Parameters<World['regenerateBuildingCollision']>[0], inst?: World): ReturnType<World['regenerateBuildingCollision']> { return resolveWorld(inst).regenerateBuildingCollision(building!); }
+export function createWall(building?: Parameters<World['createWall']>[0], inst?: World): ReturnType<World['createWall']> { return resolveWorld(inst).createWall(building!); }
+export function crackWall(wall?: Parameters<World['crackWall']>[0], force?: Parameters<World['crackWall']>[1], inst?: World): ReturnType<World['crackWall']> { return resolveWorld(inst).crackWall(wall!, force!); }
+export function chipWallSurface(wall?: Parameters<World['chipWallSurface']>[0], impact?: Parameters<World['chipWallSurface']>[1], inst?: World): ReturnType<World['chipWallSurface']> { return resolveWorld(inst).chipWallSurface(wall!, impact!); }
+export function breakWall(wall?: Parameters<World['breakWall']>[0], force?: Parameters<World['breakWall']>[1], inst?: World): ReturnType<World['breakWall']> { return resolveWorld(inst).breakWall(wall!, force!); }
+export function collapseWallSection(wall?: Parameters<World['collapseWallSection']>[0], section?: Parameters<World['collapseWallSection']>[1], inst?: World): ReturnType<World['collapseWallSection']> { return resolveWorld(inst).collapseWallSection(wall!, section!); }
+export function createRoof(building?: Parameters<World['createRoof']>[0], inst?: World): ReturnType<World['createRoof']> { return resolveWorld(inst).createRoof(building!); }
+export function bendRoof(roof?: Parameters<World['bendRoof']>[0], load?: Parameters<World['bendRoof']>[1], inst?: World): ReturnType<World['bendRoof']> { return resolveWorld(inst).bendRoof(roof!, load!); }
+export function crackRoof(roof?: Parameters<World['crackRoof']>[0], force?: Parameters<World['crackRoof']>[1], inst?: World): ReturnType<World['crackRoof']> { return resolveWorld(inst).crackRoof(roof!, force!); }
+export function detachRoofPanel(roof?: Parameters<World['detachRoofPanel']>[0], panel?: Parameters<World['detachRoofPanel']>[1], inst?: World): ReturnType<World['detachRoofPanel']> { return resolveWorld(inst).detachRoofPanel(roof!, panel!); }
+export function collapseRoof(roof?: Parameters<World['collapseRoof']>[0], load?: Parameters<World['collapseRoof']>[1], inst?: World): ReturnType<World['collapseRoof']> { return resolveWorld(inst).collapseRoof(roof!, load!); }
+export function createDoor(building?: Parameters<World['createDoor']>[0], inst?: World): ReturnType<World['createDoor']> { return resolveWorld(inst).createDoor(building!); }
+export function openDoor(door?: Parameters<World['openDoor']>[0], inst?: World): ReturnType<World['openDoor']> { return resolveWorld(inst).openDoor(door!); }
+export function closeDoor(door?: Parameters<World['closeDoor']>[0], inst?: World): ReturnType<World['closeDoor']> { return resolveWorld(inst).closeDoor(door!); }
+export function breakDoor(door?: Parameters<World['breakDoor']>[0], force?: Parameters<World['breakDoor']>[1], inst?: World): ReturnType<World['breakDoor']> { return resolveWorld(inst).breakDoor(door!, force!); }
+export function detachDoorFromFrame(door?: Parameters<World['detachDoorFromFrame']>[0], inst?: World): ReturnType<World['detachDoorFromFrame']> { return resolveWorld(inst).detachDoorFromFrame(door!); }
+export function createWindow(building?: Parameters<World['createWindow']>[0], inst?: World): ReturnType<World['createWindow']> { return resolveWorld(inst).createWindow(building!); }
+export function crackWindowGlass(window?: Parameters<World['crackWindowGlass']>[0], impact?: Parameters<World['crackWindowGlass']>[1], inst?: World): ReturnType<World['crackWindowGlass']> { return resolveWorld(inst).crackWindowGlass(window!, impact!); }
+export function shatterWindowGlass(window?: Parameters<World['shatterWindowGlass']>[0], force?: Parameters<World['shatterWindowGlass']>[1], inst?: World): ReturnType<World['shatterWindowGlass']> { return resolveWorld(inst).shatterWindowGlass(window!, force!); }
+export function scatterGlassFragments(window?: Parameters<World['scatterGlassFragments']>[0], inst?: World): ReturnType<World['scatterGlassFragments']> { return resolveWorld(inst).scatterGlassFragments(window!); }
+export function repairWindow(window?: Parameters<World['repairWindow']>[0], inst?: World): ReturnType<World['repairWindow']> { return resolveWorld(inst).repairWindow(window!); }
+export function initiateStructuralCollapse(building?: Parameters<World['initiateStructuralCollapse']>[0], inst?: World): ReturnType<World['initiateStructuralCollapse']> { return resolveWorld(inst).initiateStructuralCollapse(building!); }
+export function calculateCollapseSequence(building?: Parameters<World['calculateCollapseSequence']>[0], inst?: World): ReturnType<World['calculateCollapseSequence']> { return resolveWorld(inst).calculateCollapseSequence(building!); }
+export function weakenStructuralSupport(support?: Parameters<World['weakenStructuralSupport']>[0], inst?: World): ReturnType<World['weakenStructuralSupport']> { return resolveWorld(inst).weakenStructuralSupport(support!); }
+export function removeStructuralSupport(support?: Parameters<World['removeStructuralSupport']>[0], inst?: World): ReturnType<World['removeStructuralSupport']> { return resolveWorld(inst).removeStructuralSupport(support!); }
+export function fractureStructuralJoint(joint?: Parameters<World['fractureStructuralJoint']>[0], inst?: World): ReturnType<World['fractureStructuralJoint']> { return resolveWorld(inst).fractureStructuralJoint(joint!); }
+export function breakStructuralBeam(beam?: Parameters<World['breakStructuralBeam']>[0], force?: Parameters<World['breakStructuralBeam']>[1], inst?: World): ReturnType<World['breakStructuralBeam']> { return resolveWorld(inst).breakStructuralBeam(beam!, force!); }
+export function buckleStructuralColumn(column?: Parameters<World['buckleStructuralColumn']>[0], load?: Parameters<World['buckleStructuralColumn']>[1], inst?: World): ReturnType<World['buckleStructuralColumn']> { return resolveWorld(inst).buckleStructuralColumn(column!, load!); }
+export function triggerProgressiveCollapse(building?: Parameters<World['triggerProgressiveCollapse']>[0], inst?: World): ReturnType<World['triggerProgressiveCollapse']> { return resolveWorld(inst).triggerProgressiveCollapse(building!); }
+export function simulateFloorCollapse(floor?: Parameters<World['simulateFloorCollapse']>[0], inst?: World): ReturnType<World['simulateFloorCollapse']> { return resolveWorld(inst).simulateFloorCollapse(floor!); }
+export function simulateRoofCollapse(roof?: Parameters<World['simulateRoofCollapse']>[0], inst?: World): ReturnType<World['simulateRoofCollapse']> { return resolveWorld(inst).simulateRoofCollapse(roof!); }
+export function detachStructuralDebris(building?: Parameters<World['detachStructuralDebris']>[0], inst?: World): ReturnType<World['detachStructuralDebris']> { return resolveWorld(inst).detachStructuralDebris(building!); }
+export function spawnBuildingFragments(building?: Parameters<World['spawnBuildingFragments']>[0], inst?: World): ReturnType<World['spawnBuildingFragments']> { return resolveWorld(inst).spawnBuildingFragments(building!); }
+export function applyImpulseToDebris(debris?: Parameters<World['applyImpulseToDebris']>[0], impulse?: Parameters<World['applyImpulseToDebris']>[1], inst?: World): ReturnType<World['applyImpulseToDebris']> { return resolveWorld(inst).applyImpulseToDebris(debris!, impulse!); }
+export function simulateDebrisCollision(debris?: Parameters<World['simulateDebrisCollision']>[0], inst?: World): ReturnType<World['simulateDebrisCollision']> { return resolveWorld(inst).simulateDebrisCollision(debris!); }
+export function simulateDebrisPile(debris?: Parameters<World['simulateDebrisPile']>[0], inst?: World): ReturnType<World['simulateDebrisPile']> { return resolveWorld(inst).simulateDebrisPile(debris!); }
+export function settleDebrisPile(debris?: Parameters<World['settleDebrisPile']>[0], inst?: World): ReturnType<World['settleDebrisPile']> { return resolveWorld(inst).settleDebrisPile(debris!); }
+export function generateDustCloud(debris?: Parameters<World['generateDustCloud']>[0], inst?: World): ReturnType<World['generateDustCloud']> { return resolveWorld(inst).generateDustCloud(debris!); }
+export function dissipateCollapseDust(dust?: Parameters<World['dissipateCollapseDust']>[0], inst?: World): ReturnType<World['dissipateCollapseDust']> { return resolveWorld(inst).dissipateCollapseDust(dust!); }
+export function updateCollapsedBuilding(building?: Parameters<World['updateCollapsedBuilding']>[0], inst?: World): ReturnType<World['updateCollapsedBuilding']> { return resolveWorld(inst).updateCollapsedBuilding(building!); }
+export function clearBuildingDebris(building?: Parameters<World['clearBuildingDebris']>[0], inst?: World): ReturnType<World['clearBuildingDebris']> { return resolveWorld(inst).clearBuildingDebris(building!); }
+export function createFurniture(type?: Parameters<World['createFurniture']>[0], inst?: World): ReturnType<World['createFurniture']> { return resolveWorld(inst).createFurniture(type!); }
+export function moveFurniture(furniture?: Parameters<World['moveFurniture']>[0], position?: Parameters<World['moveFurniture']>[1], inst?: World): ReturnType<World['moveFurniture']> { return resolveWorld(inst).moveFurniture(furniture!, position!); }
+export function rotateFurniture(furniture?: Parameters<World['rotateFurniture']>[0], angle?: Parameters<World['rotateFurniture']>[1], inst?: World): ReturnType<World['rotateFurniture']> { return resolveWorld(inst).rotateFurniture(furniture!, angle!); }
+export function slideFurniture(furniture?: Parameters<World['slideFurniture']>[0], surface?: Parameters<World['slideFurniture']>[1], inst?: World): ReturnType<World['slideFurniture']> { return resolveWorld(inst).slideFurniture(furniture!, surface!); }
+export function toppleChair(chair?: Parameters<World['toppleChair']>[0], force?: Parameters<World['toppleChair']>[1], inst?: World): ReturnType<World['toppleChair']> { return resolveWorld(inst).toppleChair(chair!, force!); }
+export function pullChair(chair?: Parameters<World['pullChair']>[0], direction?: Parameters<World['pullChair']>[1], inst?: World): ReturnType<World['pullChair']> { return resolveWorld(inst).pullChair(chair!, direction!); }
+export function pushTable(table?: Parameters<World['pushTable']>[0], force?: Parameters<World['pushTable']>[1], inst?: World): ReturnType<World['pushTable']> { return resolveWorld(inst).pushTable(table!, force!); }
+export function overturnTable(table?: Parameters<World['overturnTable']>[0], force?: Parameters<World['overturnTable']>[1], inst?: World): ReturnType<World['overturnTable']> { return resolveWorld(inst).overturnTable(table!, force!); }
+export function openDrawer(drawer?: Parameters<World['openDrawer']>[0], inst?: World): ReturnType<World['openDrawer']> { return resolveWorld(inst).openDrawer(drawer!); }
+export function closeDrawer(drawer?: Parameters<World['closeDrawer']>[0], inst?: World): ReturnType<World['closeDrawer']> { return resolveWorld(inst).closeDrawer(drawer!); }
+export function openCabinet(cabinet?: Parameters<World['openCabinet']>[0], inst?: World): ReturnType<World['openCabinet']> { return resolveWorld(inst).openCabinet(cabinet!); }
+export function closeCabinet(cabinet?: Parameters<World['closeCabinet']>[0], inst?: World): ReturnType<World['closeCabinet']> { return resolveWorld(inst).closeCabinet(cabinet!); }
+export function breakFurnitureJoint(furniture?: Parameters<World['breakFurnitureJoint']>[0], joint?: Parameters<World['breakFurnitureJoint']>[1], inst?: World): ReturnType<World['breakFurnitureJoint']> { return resolveWorld(inst).breakFurnitureJoint(furniture!, joint!); }
+export function splitWoodenFurniture(furniture?: Parameters<World['splitWoodenFurniture']>[0], inst?: World): ReturnType<World['splitWoodenFurniture']> { return resolveWorld(inst).splitWoodenFurniture(furniture!); }
+export function shatterCeramicObject(object?: Parameters<World['shatterCeramicObject']>[0], impact?: Parameters<World['shatterCeramicObject']>[1], inst?: World): ReturnType<World['shatterCeramicObject']> { return resolveWorld(inst).shatterCeramicObject(object!, impact!); }
+export function breakGlassObject(object?: Parameters<World['breakGlassObject']>[0], impact?: Parameters<World['breakGlassObject']>[1], inst?: World): ReturnType<World['breakGlassObject']> { return resolveWorld(inst).breakGlassObject(object!, impact!); }
+export function deformMetalObject(object?: Parameters<World['deformMetalObject']>[0], force?: Parameters<World['deformMetalObject']>[1], inst?: World): ReturnType<World['deformMetalObject']> { return resolveWorld(inst).deformMetalObject(object!, force!); }
+export function tearFabricObject(object?: Parameters<World['tearFabricObject']>[0], force?: Parameters<World['tearFabricObject']>[1], inst?: World): ReturnType<World['tearFabricObject']> { return resolveWorld(inst).tearFabricObject(object!, force!); }
+export function scatterHouseholdObjects(objects?: Parameters<World['scatterHouseholdObjects']>[0], impulse?: Parameters<World['scatterHouseholdObjects']>[1], inst?: World): ReturnType<World['scatterHouseholdObjects']> { return resolveWorld(inst).scatterHouseholdObjects(objects!, impulse!); }
+export function restoreFurnitureState(furniture?: Parameters<World['restoreFurnitureState']>[0], inst?: World): ReturnType<World['restoreFurnitureState']> { return resolveWorld(inst).restoreFurnitureState(furniture!); }
+export function initializeRigidBody(object?: Parameters<World['initializeRigidBody']>[0], inst?: World): ReturnType<World['initializeRigidBody']> { return resolveWorld(inst).initializeRigidBody(object!); }
+export function setObjectMass(object?: Parameters<World['setObjectMass']>[0], mass?: Parameters<World['setObjectMass']>[1], inst?: World): ReturnType<World['setObjectMass']> { return resolveWorld(inst).setObjectMass(object!, mass!); }
+export function setObjectDensity(object?: Parameters<World['setObjectDensity']>[0], density?: Parameters<World['setObjectDensity']>[1], inst?: World): ReturnType<World['setObjectDensity']> { return resolveWorld(inst).setObjectDensity(object!, density!); }
+export function setObjectFriction(object?: Parameters<World['setObjectFriction']>[0], friction?: Parameters<World['setObjectFriction']>[1], inst?: World): ReturnType<World['setObjectFriction']> { return resolveWorld(inst).setObjectFriction(object!, friction!); }
+export function setObjectRestitution(object?: Parameters<World['setObjectRestitution']>[0], restitution?: Parameters<World['setObjectRestitution']>[1], inst?: World): ReturnType<World['setObjectRestitution']> { return resolveWorld(inst).setObjectRestitution(object!, restitution!); }
+export function applyForceToObject(object?: Parameters<World['applyForceToObject']>[0], force?: Parameters<World['applyForceToObject']>[1], inst?: World): ReturnType<World['applyForceToObject']> { return resolveWorld(inst).applyForceToObject(object!, force!); }
+export function applyImpulseToObject(object?: Parameters<World['applyImpulseToObject']>[0], impulse?: Parameters<World['applyImpulseToObject']>[1], inst?: World): ReturnType<World['applyImpulseToObject']> { return resolveWorld(inst).applyImpulseToObject(object!, impulse!); }
+export function applyTorqueToObject(object?: Parameters<World['applyTorqueToObject']>[0], torque?: Parameters<World['applyTorqueToObject']>[1], inst?: World): ReturnType<World['applyTorqueToObject']> { return resolveWorld(inst).applyTorqueToObject(object!, torque!); }
+export function calculateObjectVelocity(object?: Parameters<World['calculateObjectVelocity']>[0], inst?: World): ReturnType<World['calculateObjectVelocity']> { return resolveWorld(inst).calculateObjectVelocity(object!); }
+export function calculateObjectAcceleration(object?: Parameters<World['calculateObjectAcceleration']>[0], inst?: World): ReturnType<World['calculateObjectAcceleration']> { return resolveWorld(inst).calculateObjectAcceleration(object!); }
+export function calculateAngularVelocity(object?: Parameters<World['calculateAngularVelocity']>[0], inst?: World): ReturnType<World['calculateAngularVelocity']> { return resolveWorld(inst).calculateAngularVelocity(object!); }
+export function simulateObjectGravity(object?: Parameters<World['simulateObjectGravity']>[0], inst?: World): ReturnType<World['simulateObjectGravity']> { return resolveWorld(inst).simulateObjectGravity(object!); }
+export function simulateObjectAirResistance(object?: Parameters<World['simulateObjectAirResistance']>[0], inst?: World): ReturnType<World['simulateObjectAirResistance']> { return resolveWorld(inst).simulateObjectAirResistance(object!); }
+export function detectObjectCollision(objectA?: Parameters<World['detectObjectCollision']>[0], objectB?: Parameters<World['detectObjectCollision']>[1], inst?: World): ReturnType<World['detectObjectCollision']> { return resolveWorld(inst).detectObjectCollision(objectA!, objectB!); }
+export function resolveObjectCollision(objectA?: Parameters<World['resolveObjectCollision']>[0], objectB?: Parameters<World['resolveObjectCollision']>[1], inst?: World): ReturnType<World['resolveObjectCollision']> { return resolveWorld(inst).resolveObjectCollision(objectA!, objectB!); }
+export function calculateImpactEnergy(objectA?: Parameters<World['calculateImpactEnergy']>[0], objectB?: Parameters<World['calculateImpactEnergy']>[1], inst?: World): ReturnType<World['calculateImpactEnergy']> { return resolveWorld(inst).calculateImpactEnergy(objectA!, objectB!); }
+export function calculateImpactDamage(object?: Parameters<World['calculateImpactDamage']>[0], impact?: Parameters<World['calculateImpactDamage']>[1], inst?: World): ReturnType<World['calculateImpactDamage']> { return resolveWorld(inst).calculateImpactDamage(object!, impact!); }
+export function simulateObjectPenetration(object?: Parameters<World['simulateObjectPenetration']>[0], surface?: Parameters<World['simulateObjectPenetration']>[1], inst?: World): ReturnType<World['simulateObjectPenetration']> { return resolveWorld(inst).simulateObjectPenetration(object!, surface!); }
+export function simulateObjectBounce(object?: Parameters<World['simulateObjectBounce']>[0], surface?: Parameters<World['simulateObjectBounce']>[1], inst?: World): ReturnType<World['simulateObjectBounce']> { return resolveWorld(inst).simulateObjectBounce(object!, surface!); }
+export function settleRigidBody(object?: Parameters<World['settleRigidBody']>[0], inst?: World): ReturnType<World['settleRigidBody']> { return resolveWorld(inst).settleRigidBody(object!); }
+export function initializeDestructionSystem(object?: Parameters<World['initializeDestructionSystem']>[0], inst?: World): ReturnType<World['initializeDestructionSystem']> { return resolveWorld(inst).initializeDestructionSystem(object!); }
+export function defineFractureRegions(object?: Parameters<World['defineFractureRegions']>[0], inst?: World): ReturnType<World['defineFractureRegions']> { return resolveWorld(inst).defineFractureRegions(object!); }
+export function calculateFractureThreshold(object?: Parameters<World['calculateFractureThreshold']>[0], inst?: World): ReturnType<World['calculateFractureThreshold']> { return resolveWorld(inst).calculateFractureThreshold(object!); }
+export function detectCuttingContact(object?: Parameters<World['detectCuttingContact']>[0], tool?: Parameters<World['detectCuttingContact']>[1], inst?: World): ReturnType<World['detectCuttingContact']> { return resolveWorld(inst).detectCuttingContact(object!, tool!); }
+export function applyCuttingForce(object?: Parameters<World['applyCuttingForce']>[0], tool?: Parameters<World['applyCuttingForce']>[1], inst?: World): ReturnType<World['applyCuttingForce']> { return resolveWorld(inst).applyCuttingForce(object!, tool!); }
+export function sliceObject(object?: Parameters<World['sliceObject']>[0], plane?: Parameters<World['sliceObject']>[1], inst?: World): ReturnType<World['sliceObject']> { return resolveWorld(inst).sliceObject(object!, plane!); }
+export function cutObjectIntoPieces(object?: Parameters<World['cutObjectIntoPieces']>[0], cutPath?: Parameters<World['cutObjectIntoPieces']>[1], inst?: World): ReturnType<World['cutObjectIntoPieces']> { return resolveWorld(inst).cutObjectIntoPieces(object!, cutPath!); }
+export function severBranchWithBlade(branch?: Parameters<World['severBranchWithBlade']>[0], blade?: Parameters<World['severBranchWithBlade']>[1], inst?: World): ReturnType<World['severBranchWithBlade']> { return resolveWorld(inst).severBranchWithBlade(branch!, blade!); }
+export function chopTreeTrunk(tree?: Parameters<World['chopTreeTrunk']>[0], blade?: Parameters<World['chopTreeTrunk']>[1], inst?: World): ReturnType<World['chopTreeTrunk']> { return resolveWorld(inst).chopTreeTrunk(tree!, blade!); }
+export function splitWoodLog(log?: Parameters<World['splitWoodLog']>[0], tool?: Parameters<World['splitWoodLog']>[1], inst?: World): ReturnType<World['splitWoodLog']> { return resolveWorld(inst).splitWoodLog(log!, tool!); }
+export function breakObjectAtJoint(object?: Parameters<World['breakObjectAtJoint']>[0], joint?: Parameters<World['breakObjectAtJoint']>[1], inst?: World): ReturnType<World['breakObjectAtJoint']> { return resolveWorld(inst).breakObjectAtJoint(object!, joint!); }
+export function snapObjectInHalf(object?: Parameters<World['snapObjectInHalf']>[0], force?: Parameters<World['snapObjectInHalf']>[1], inst?: World): ReturnType<World['snapObjectInHalf']> { return resolveWorld(inst).snapObjectInHalf(object!, force!); }
+export function fractureObjectSurface(object?: Parameters<World['fractureObjectSurface']>[0], impact?: Parameters<World['fractureObjectSurface']>[1], inst?: World): ReturnType<World['fractureObjectSurface']> { return resolveWorld(inst).fractureObjectSurface(object!, impact!); }
+export function shatterObject(object?: Parameters<World['shatterObject']>[0], impulse?: Parameters<World['shatterObject']>[1], inst?: World): ReturnType<World['shatterObject']> { return resolveWorld(inst).shatterObject(object!, impulse!); }
+export function splitRockWithImpact(rock?: Parameters<World['splitRockWithImpact']>[0], impact?: Parameters<World['splitRockWithImpact']>[1], inst?: World): ReturnType<World['splitRockWithImpact']> { return resolveWorld(inst).splitRockWithImpact(rock!, impact!); }
+export function detachObjectPart(object?: Parameters<World['detachObjectPart']>[0], part?: Parameters<World['detachObjectPart']>[1], inst?: World): ReturnType<World['detachObjectPart']> { return resolveWorld(inst).detachObjectPart(object!, part!); }
+export function calculateDetachedPartVelocity(part?: Parameters<World['calculateDetachedPartVelocity']>[0], inst?: World): ReturnType<World['calculateDetachedPartVelocity']> { return resolveWorld(inst).calculateDetachedPartVelocity(part!); }
+export function spawnDetachedFragments(object?: Parameters<World['spawnDetachedFragments']>[0], inst?: World): ReturnType<World['spawnDetachedFragments']> { return resolveWorld(inst).spawnDetachedFragments(object!); }
+export function applyDebrisPhysics(fragments?: Parameters<World['applyDebrisPhysics']>[0], inst?: World): ReturnType<World['applyDebrisPhysics']> { return resolveWorld(inst).applyDebrisPhysics(fragments!); }
+export function finalizeObjectDestruction(object?: Parameters<World['finalizeObjectDestruction']>[0], inst?: World): ReturnType<World['finalizeObjectDestruction']> { return resolveWorld(inst).finalizeObjectDestruction(object!); }
+export function createSoftBody(object?: Parameters<World['createSoftBody']>[0], inst?: World): ReturnType<World['createSoftBody']> { return resolveWorld(inst).createSoftBody(object!); }
+export function initializeSoftBodyPhysics(object?: Parameters<World['initializeSoftBodyPhysics']>[0], inst?: World): ReturnType<World['initializeSoftBodyPhysics']> { return resolveWorld(inst).initializeSoftBodyPhysics(object!); }
+export function deformSoftBody(object?: Parameters<World['deformSoftBody']>[0], force?: Parameters<World['deformSoftBody']>[1], inst?: World): ReturnType<World['deformSoftBody']> { return resolveWorld(inst).deformSoftBody(object!, force!); }
+export function stretchSoftBody(object?: Parameters<World['stretchSoftBody']>[0], amount?: Parameters<World['stretchSoftBody']>[1], inst?: World): ReturnType<World['stretchSoftBody']> { return resolveWorld(inst).stretchSoftBody(object!, amount!); }
+export function compressSoftBody(object?: Parameters<World['compressSoftBody']>[0], amount?: Parameters<World['compressSoftBody']>[1], inst?: World): ReturnType<World['compressSoftBody']> { return resolveWorld(inst).compressSoftBody(object!, amount!); }
+export function bendSoftBody(object?: Parameters<World['bendSoftBody']>[0], force?: Parameters<World['bendSoftBody']>[1], inst?: World): ReturnType<World['bendSoftBody']> { return resolveWorld(inst).bendSoftBody(object!, force!); }
+export function twistSoftBody(object?: Parameters<World['twistSoftBody']>[0], torque?: Parameters<World['twistSoftBody']>[1], inst?: World): ReturnType<World['twistSoftBody']> { return resolveWorld(inst).twistSoftBody(object!, torque!); }
+export function restoreSoftBodyShape(object?: Parameters<World['restoreSoftBodyShape']>[0], inst?: World): ReturnType<World['restoreSoftBodyShape']> { return resolveWorld(inst).restoreSoftBodyShape(object!); }
+export function simulateClothMotion(cloth?: Parameters<World['simulateClothMotion']>[0], inst?: World): ReturnType<World['simulateClothMotion']> { return resolveWorld(inst).simulateClothMotion(cloth!); }
+export function simulateClothWind(cloth?: Parameters<World['simulateClothWind']>[0], wind?: Parameters<World['simulateClothWind']>[1], inst?: World): ReturnType<World['simulateClothWind']> { return resolveWorld(inst).simulateClothWind(cloth!, wind!); }
+export function foldCloth(cloth?: Parameters<World['foldCloth']>[0], inst?: World): ReturnType<World['foldCloth']> { return resolveWorld(inst).foldCloth(cloth!); }
+export function unfoldCloth(cloth?: Parameters<World['unfoldCloth']>[0], inst?: World): ReturnType<World['unfoldCloth']> { return resolveWorld(inst).unfoldCloth(cloth!); }
+export function tearCloth(cloth?: Parameters<World['tearCloth']>[0], force?: Parameters<World['tearCloth']>[1], inst?: World): ReturnType<World['tearCloth']> { return resolveWorld(inst).tearCloth(cloth!, force!); }
+export function simulatePaperBending(paper?: Parameters<World['simulatePaperBending']>[0], force?: Parameters<World['simulatePaperBending']>[1], inst?: World): ReturnType<World['simulatePaperBending']> { return resolveWorld(inst).simulatePaperBending(paper!, force!); }
+export function crumplePaper(paper?: Parameters<World['crumplePaper']>[0], inst?: World): ReturnType<World['crumplePaper']> { return resolveWorld(inst).crumplePaper(paper!); }
+export function tearPaper(paper?: Parameters<World['tearPaper']>[0], force?: Parameters<World['tearPaper']>[1], inst?: World): ReturnType<World['tearPaper']> { return resolveWorld(inst).tearPaper(paper!, force!); }
+export function burnPaper(paper?: Parameters<World['burnPaper']>[0], rate?: Parameters<World['burnPaper']>[1], inst?: World): ReturnType<World['burnPaper']> { return resolveWorld(inst).burnPaper(paper!, rate!); }
+export function simulateRopeMotion(rope?: Parameters<World['simulateRopeMotion']>[0], inst?: World): ReturnType<World['simulateRopeMotion']> { return resolveWorld(inst).simulateRopeMotion(rope!); }
+export function stretchRope(rope?: Parameters<World['stretchRope']>[0], force?: Parameters<World['stretchRope']>[1], inst?: World): ReturnType<World['stretchRope']> { return resolveWorld(inst).stretchRope(rope!, force!); }
+export function snapRope(rope?: Parameters<World['snapRope']>[0], force?: Parameters<World['snapRope']>[1], inst?: World): ReturnType<World['snapRope']> { return resolveWorld(inst).snapRope(rope!, force!); }
+export function createMechanicalObject(type?: Parameters<World['createMechanicalObject']>[0], inst?: World): ReturnType<World['createMechanicalObject']> { return resolveWorld(inst).createMechanicalObject(type!); }
+export function initializeMechanicalJoints(object?: Parameters<World['initializeMechanicalJoints']>[0], inst?: World): ReturnType<World['initializeMechanicalJoints']> { return resolveWorld(inst).initializeMechanicalJoints(object!); }
+export function rotateMechanicalJoint(joint?: Parameters<World['rotateMechanicalJoint']>[0], angle?: Parameters<World['rotateMechanicalJoint']>[1], inst?: World): ReturnType<World['rotateMechanicalJoint']> { return resolveWorld(inst).rotateMechanicalJoint(joint!, angle!); }
+export function slideMechanicalJoint(joint?: Parameters<World['slideMechanicalJoint']>[0], distance?: Parameters<World['slideMechanicalJoint']>[1], inst?: World): ReturnType<World['slideMechanicalJoint']> { return resolveWorld(inst).slideMechanicalJoint(joint!, distance!); }
+export function lockMechanicalJoint(joint?: Parameters<World['lockMechanicalJoint']>[0], inst?: World): ReturnType<World['lockMechanicalJoint']> { return resolveWorld(inst).lockMechanicalJoint(joint!); }
+export function unlockMechanicalJoint(joint?: Parameters<World['unlockMechanicalJoint']>[0], inst?: World): ReturnType<World['unlockMechanicalJoint']> { return resolveWorld(inst).unlockMechanicalJoint(joint!); }
+export function applyMechanicalTorque(object?: Parameters<World['applyMechanicalTorque']>[0], torque?: Parameters<World['applyMechanicalTorque']>[1], inst?: World): ReturnType<World['applyMechanicalTorque']> { return resolveWorld(inst).applyMechanicalTorque(object!, torque!); }
+export function bendMetalSheet(sheet?: Parameters<World['bendMetalSheet']>[0], force?: Parameters<World['bendMetalSheet']>[1], inst?: World): ReturnType<World['bendMetalSheet']> { return resolveWorld(inst).bendMetalSheet(sheet!, force!); }
+export function dentMetalSurface(object?: Parameters<World['dentMetalSurface']>[0], impact?: Parameters<World['dentMetalSurface']>[1], inst?: World): ReturnType<World['dentMetalSurface']> { return resolveWorld(inst).dentMetalSurface(object!, impact!); }
+export function deformMetalStructure(object?: Parameters<World['deformMetalStructure']>[0], load?: Parameters<World['deformMetalStructure']>[1], inst?: World): ReturnType<World['deformMetalStructure']> { return resolveWorld(inst).deformMetalStructure(object!, load!); }
+export function fractureMetalPart(object?: Parameters<World['fractureMetalPart']>[0], force?: Parameters<World['fractureMetalPart']>[1], inst?: World): ReturnType<World['fractureMetalPart']> { return resolveWorld(inst).fractureMetalPart(object!, force!); }
+export function fatigueMetalMaterial(object?: Parameters<World['fatigueMetalMaterial']>[0], cycles?: Parameters<World['fatigueMetalMaterial']>[1], inst?: World): ReturnType<World['fatigueMetalMaterial']> { return resolveWorld(inst).fatigueMetalMaterial(object!, cycles!); }
+export function corrodeMetalSurface(object?: Parameters<World['corrodeMetalSurface']>[0], rate?: Parameters<World['corrodeMetalSurface']>[1], inst?: World): ReturnType<World['corrodeMetalSurface']> { return resolveWorld(inst).corrodeMetalSurface(object!, rate!); }
+export function rustMetalObject(object?: Parameters<World['rustMetalObject']>[0], moisture?: Parameters<World['rustMetalObject']>[1], inst?: World): ReturnType<World['rustMetalObject']> { return resolveWorld(inst).rustMetalObject(object!, moisture!); }
+export function heatMetalObject(object?: Parameters<World['heatMetalObject']>[0], temperature?: Parameters<World['heatMetalObject']>[1], inst?: World): ReturnType<World['heatMetalObject']> { return resolveWorld(inst).heatMetalObject(object!, temperature!); }
+export function coolMetalObject(object?: Parameters<World['coolMetalObject']>[0], rate?: Parameters<World['coolMetalObject']>[1], inst?: World): ReturnType<World['coolMetalObject']> { return resolveWorld(inst).coolMetalObject(object!, rate!); }
+export function expandMetalObject(object?: Parameters<World['expandMetalObject']>[0], temperature?: Parameters<World['expandMetalObject']>[1], inst?: World): ReturnType<World['expandMetalObject']> { return resolveWorld(inst).expandMetalObject(object!, temperature!); }
+export function contractMetalObject(object?: Parameters<World['contractMetalObject']>[0], temperature?: Parameters<World['contractMetalObject']>[1], inst?: World): ReturnType<World['contractMetalObject']> { return resolveWorld(inst).contractMetalObject(object!, temperature!); }
+export function jamMechanicalJoint(joint?: Parameters<World['jamMechanicalJoint']>[0], inst?: World): ReturnType<World['jamMechanicalJoint']> { return resolveWorld(inst).jamMechanicalJoint(joint!); }
+export function repairMechanicalObject(object?: Parameters<World['repairMechanicalObject']>[0], inst?: World): ReturnType<World['repairMechanicalObject']> { return resolveWorld(inst).repairMechanicalObject(object!); }
+export function createSettlement(region?: Parameters<World['createSettlement']>[0], inst?: World): ReturnType<World['createSettlement']> { return resolveWorld(inst).createSettlement(region!); }
+export function generateBuildingPlot(region?: Parameters<World['generateBuildingPlot']>[0], inst?: World): ReturnType<World['generateBuildingPlot']> { return resolveWorld(inst).generateBuildingPlot(region!); }
+export function placeBuildingOnTerrain(building?: Parameters<World['placeBuildingOnTerrain']>[0], terrain?: Parameters<World['placeBuildingOnTerrain']>[1], inst?: World): ReturnType<World['placeBuildingOnTerrain']> { return resolveWorld(inst).placeBuildingOnTerrain(building!, terrain!); }
+export function constructFoundation(building?: Parameters<World['constructFoundation']>[0], terrain?: Parameters<World['constructFoundation']>[1], inst?: World): ReturnType<World['constructFoundation']> { return resolveWorld(inst).constructFoundation(building!, terrain!); }
+export function constructWallSection(building?: Parameters<World['constructWallSection']>[0], section?: Parameters<World['constructWallSection']>[1], inst?: World): ReturnType<World['constructWallSection']> { return resolveWorld(inst).constructWallSection(building!, section!); }
+export function installRoofSection(building?: Parameters<World['installRoofSection']>[0], section?: Parameters<World['installRoofSection']>[1], inst?: World): ReturnType<World['installRoofSection']> { return resolveWorld(inst).installRoofSection(building!, section!); }
+export function installWindow(building?: Parameters<World['installWindow']>[0], window?: Parameters<World['installWindow']>[1], inst?: World): ReturnType<World['installWindow']> { return resolveWorld(inst).installWindow(building!, window!); }
+export function installDoor(building?: Parameters<World['installDoor']>[0], door?: Parameters<World['installDoor']>[1], inst?: World): ReturnType<World['installDoor']> { return resolveWorld(inst).installDoor(building!, door!); }
+export function constructBridge(region?: Parameters<World['constructBridge']>[0], inst?: World): ReturnType<World['constructBridge']> { return resolveWorld(inst).constructBridge(region!); }
+export function constructRoad(region?: Parameters<World['constructRoad']>[0], inst?: World): ReturnType<World['constructRoad']> { return resolveWorld(inst).constructRoad(region!); }
+export function paveRoadSurface(road?: Parameters<World['paveRoadSurface']>[0], inst?: World): ReturnType<World['paveRoadSurface']> { return resolveWorld(inst).paveRoadSurface(road!); }
+export function crackRoadSurface(road?: Parameters<World['crackRoadSurface']>[0], load?: Parameters<World['crackRoadSurface']>[1], inst?: World): ReturnType<World['crackRoadSurface']> { return resolveWorld(inst).crackRoadSurface(road!, load!); }
+export function erodeRoadSurface(road?: Parameters<World['erodeRoadSurface']>[0], weather?: Parameters<World['erodeRoadSurface']>[1], inst?: World): ReturnType<World['erodeRoadSurface']> { return resolveWorld(inst).erodeRoadSurface(road!, weather!); }
+export function generatePothole(road?: Parameters<World['generatePothole']>[0], position?: Parameters<World['generatePothole']>[1], inst?: World): ReturnType<World['generatePothole']> { return resolveWorld(inst).generatePothole(road!, position!); }
+export function repairRoadSurface(road?: Parameters<World['repairRoadSurface']>[0], inst?: World): ReturnType<World['repairRoadSurface']> { return resolveWorld(inst).repairRoadSurface(road!); }
+export function constructFence(region?: Parameters<World['constructFence']>[0], inst?: World): ReturnType<World['constructFence']> { return resolveWorld(inst).constructFence(region!); }
+export function breakFenceSection(fence?: Parameters<World['breakFenceSection']>[0], section?: Parameters<World['breakFenceSection']>[1], inst?: World): ReturnType<World['breakFenceSection']> { return resolveWorld(inst).breakFenceSection(fence!, section!); }
+export function constructDam(region?: Parameters<World['constructDam']>[0], inst?: World): ReturnType<World['constructDam']> { return resolveWorld(inst).constructDam(region!); }
+export function breachDam(dam?: Parameters<World['breachDam']>[0], force?: Parameters<World['breachDam']>[1], inst?: World): ReturnType<World['breachDam']> { return resolveWorld(inst).breachDam(dam!, force!); }
+export function updateBuiltEnvironment(region?: Parameters<World['updateBuiltEnvironment']>[0], inst?: World): ReturnType<World['updateBuiltEnvironment']> { return resolveWorld(inst).updateBuiltEnvironment(region!); }
+export function createEarthquake(region?: Parameters<World['createEarthquake']>[0], inst?: World): ReturnType<World['createEarthquake']> { return resolveWorld(inst).createEarthquake(region!); }
+export function calculateSeismicWave(earthquake?: Parameters<World['calculateSeismicWave']>[0], inst?: World): ReturnType<World['calculateSeismicWave']> { return resolveWorld(inst).calculateSeismicWave(earthquake!); }
+export function propagateSeismicWave(wave?: Parameters<World['propagateSeismicWave']>[0], inst?: World): ReturnType<World['propagateSeismicWave']> { return resolveWorld(inst).propagateSeismicWave(wave!); }
+export function shakeTerrain(terrain?: Parameters<World['shakeTerrain']>[0], wave?: Parameters<World['shakeTerrain']>[1], inst?: World): ReturnType<World['shakeTerrain']> { return resolveWorld(inst).shakeTerrain(terrain!, wave!); }
+export function shakeBuilding(building?: Parameters<World['shakeBuilding']>[0], wave?: Parameters<World['shakeBuilding']>[1], inst?: World): ReturnType<World['shakeBuilding']> { return resolveWorld(inst).shakeBuilding(building!, wave!); }
+export function triggerGroundRupture(region?: Parameters<World['triggerGroundRupture']>[0], inst?: World): ReturnType<World['triggerGroundRupture']> { return resolveWorld(inst).triggerGroundRupture(region!); }
+export function generateGroundCracks(region?: Parameters<World['generateGroundCracks']>[0], inst?: World): ReturnType<World['generateGroundCracks']> { return resolveWorld(inst).generateGroundCracks(region!); }
+export function widenGroundCracks(region?: Parameters<World['widenGroundCracks']>[0], inst?: World): ReturnType<World['widenGroundCracks']> { return resolveWorld(inst).widenGroundCracks(region!); }
+export function triggerLiquefaction(region?: Parameters<World['triggerLiquefaction']>[0], inst?: World): ReturnType<World['triggerLiquefaction']> { return resolveWorld(inst).triggerLiquefaction(region!); }
+export function calculateSeismicDamage(region?: Parameters<World['calculateSeismicDamage']>[0], inst?: World): ReturnType<World['calculateSeismicDamage']> { return resolveWorld(inst).calculateSeismicDamage(region!); }
+export function createVolcano(region?: Parameters<World['createVolcano']>[0], inst?: World): ReturnType<World['createVolcano']> { return resolveWorld(inst).createVolcano(region!); }
+export function accumulateMagmaPressure(volcano?: Parameters<World['accumulateMagmaPressure']>[0], inst?: World): ReturnType<World['accumulateMagmaPressure']> { return resolveWorld(inst).accumulateMagmaPressure(volcano!); }
+export function simulateMagmaMovement(volcano?: Parameters<World['simulateMagmaMovement']>[0], inst?: World): ReturnType<World['simulateMagmaMovement']> { return resolveWorld(inst).simulateMagmaMovement(volcano!); }
+export function triggerVolcanicEruption(volcano?: Parameters<World['triggerVolcanicEruption']>[0], inst?: World): ReturnType<World['triggerVolcanicEruption']> { return resolveWorld(inst).triggerVolcanicEruption(volcano!); }
+export function spawnVolcanicProjectiles(volcano?: Parameters<World['spawnVolcanicProjectiles']>[0], inst?: World): ReturnType<World['spawnVolcanicProjectiles']> { return resolveWorld(inst).spawnVolcanicProjectiles(volcano!); }
+export function simulateLavaFlow(volcano?: Parameters<World['simulateLavaFlow']>[0], inst?: World): ReturnType<World['simulateLavaFlow']> { return resolveWorld(inst).simulateLavaFlow(volcano!); }
+export function coolLavaFlow(lava?: Parameters<World['coolLavaFlow']>[0], inst?: World): ReturnType<World['coolLavaFlow']> { return resolveWorld(inst).coolLavaFlow(lava!); }
+export function solidifyLava(lava?: Parameters<World['solidifyLava']>[0], inst?: World): ReturnType<World['solidifyLava']> { return resolveWorld(inst).solidifyLava(lava!); }
+export function generateVolcanicAsh(volcano?: Parameters<World['generateVolcanicAsh']>[0], inst?: World): ReturnType<World['generateVolcanicAsh']> { return resolveWorld(inst).generateVolcanicAsh(volcano!); }
+export function updateGeologicalRecovery(region?: Parameters<World['updateGeologicalRecovery']>[0], inst?: World): ReturnType<World['updateGeologicalRecovery']> { return resolveWorld(inst).updateGeologicalRecovery(region!); }
+export function createGlacier(region?: Parameters<World['createGlacier']>[0], inst?: World): ReturnType<World['createGlacier']> { return resolveWorld(inst).createGlacier(region!); }
+export function accumulateGlacierSnow(glacier?: Parameters<World['accumulateGlacierSnow']>[0], inst?: World): ReturnType<World['accumulateGlacierSnow']> { return resolveWorld(inst).accumulateGlacierSnow(glacier!); }
+export function compactGlacierSnow(glacier?: Parameters<World['compactGlacierSnow']>[0], inst?: World): ReturnType<World['compactGlacierSnow']> { return resolveWorld(inst).compactGlacierSnow(glacier!); }
+export function simulateGlacierFlow(glacier?: Parameters<World['simulateGlacierFlow']>[0], inst?: World): ReturnType<World['simulateGlacierFlow']> { return resolveWorld(inst).simulateGlacierFlow(glacier!); }
+export function deformGlacierSurface(glacier?: Parameters<World['deformGlacierSurface']>[0], inst?: World): ReturnType<World['deformGlacierSurface']> { return resolveWorld(inst).deformGlacierSurface(glacier!); }
+export function generateGlacierCrevasse(glacier?: Parameters<World['generateGlacierCrevasse']>[0], inst?: World): ReturnType<World['generateGlacierCrevasse']> { return resolveWorld(inst).generateGlacierCrevasse(glacier!); }
+export function widenGlacierCrevasse(glacier?: Parameters<World['widenGlacierCrevasse']>[0], inst?: World): ReturnType<World['widenGlacierCrevasse']> { return resolveWorld(inst).widenGlacierCrevasse(glacier!); }
+export function fractureGlacierIce(glacier?: Parameters<World['fractureGlacierIce']>[0], inst?: World): ReturnType<World['fractureGlacierIce']> { return resolveWorld(inst).fractureGlacierIce(glacier!); }
+export function calveGlacierIceberg(glacier?: Parameters<World['calveGlacierIceberg']>[0], inst?: World): ReturnType<World['calveGlacierIceberg']> { return resolveWorld(inst).calveGlacierIceberg(glacier!); }
+export function createIceberg(region?: Parameters<World['createIceberg']>[0], inst?: World): ReturnType<World['createIceberg']> { return resolveWorld(inst).createIceberg(region!); }
+export function driftIceberg(iceberg?: Parameters<World['driftIceberg']>[0], current?: Parameters<World['driftIceberg']>[1], inst?: World): ReturnType<World['driftIceberg']> { return resolveWorld(inst).driftIceberg(iceberg!, current!); }
+export function rotateIceberg(iceberg?: Parameters<World['rotateIceberg']>[0], torque?: Parameters<World['rotateIceberg']>[1], inst?: World): ReturnType<World['rotateIceberg']> { return resolveWorld(inst).rotateIceberg(iceberg!, torque!); }
+export function meltIceberg(iceberg?: Parameters<World['meltIceberg']>[0], temperature?: Parameters<World['meltIceberg']>[1], inst?: World): ReturnType<World['meltIceberg']> { return resolveWorld(inst).meltIceberg(iceberg!, temperature!); }
+export function simulateSeaIceFormation(water?: Parameters<World['simulateSeaIceFormation']>[0], inst?: World): ReturnType<World['simulateSeaIceFormation']> { return resolveWorld(inst).simulateSeaIceFormation(water!); }
+export function simulateSeaIceBreakup(ice?: Parameters<World['simulateSeaIceBreakup']>[0], inst?: World): ReturnType<World['simulateSeaIceBreakup']> { return resolveWorld(inst).simulateSeaIceBreakup(ice!); }
+export function driftSeaIce(ice?: Parameters<World['driftSeaIce']>[0], current?: Parameters<World['driftSeaIce']>[1], inst?: World): ReturnType<World['driftSeaIce']> { return resolveWorld(inst).driftSeaIce(ice!, current!); }
+export function collideIceFloes(iceA?: Parameters<World['collideIceFloes']>[0], iceB?: Parameters<World['collideIceFloes']>[1], inst?: World): ReturnType<World['collideIceFloes']> { return resolveWorld(inst).collideIceFloes(iceA!, iceB!); }
+export function freezeGroundWater(ground?: Parameters<World['freezeGroundWater']>[0], inst?: World): ReturnType<World['freezeGroundWater']> { return resolveWorld(inst).freezeGroundWater(ground!); }
+export function thawPermafrost(ground?: Parameters<World['thawPermafrost']>[0], temperature?: Parameters<World['thawPermafrost']>[1], inst?: World): ReturnType<World['thawPermafrost']> { return resolveWorld(inst).thawPermafrost(ground!, temperature!); }
+export function updateCryosphereState(region?: Parameters<World['updateCryosphereState']>[0], inst?: World): ReturnType<World['updateCryosphereState']> { return resolveWorld(inst).updateCryosphereState(region!); }
+export function createSunLight(inst?: World): ReturnType<World['createSunLight']> { return resolveWorld(inst).createSunLight(); }
+export function updateSunPosition(time?: Parameters<World['updateSunPosition']>[0], inst?: World): ReturnType<World['updateSunPosition']> { return resolveWorld(inst).updateSunPosition(time!); }
+export function updateSunIntensity(intensity?: Parameters<World['updateSunIntensity']>[0], inst?: World): ReturnType<World['updateSunIntensity']> { return resolveWorld(inst).updateSunIntensity(intensity!); }
+export function calculateSunlightDirection(inst?: World): ReturnType<World['calculateSunlightDirection']> { return resolveWorld(inst).calculateSunlightDirection(); }
+export function updateShadowDirection(inst?: World): ReturnType<World['updateShadowDirection']> { return resolveWorld(inst).updateShadowDirection(); }
+export function updateShadowLength(inst?: World): ReturnType<World['updateShadowLength']> { return resolveWorld(inst).updateShadowLength(); }
+export function calculateSurfaceSolarHeating(surface?: Parameters<World['calculateSurfaceSolarHeating']>[0], inst?: World): ReturnType<World['calculateSurfaceSolarHeating']> { return resolveWorld(inst).calculateSurfaceSolarHeating(surface!); }
+export function heatObjectSurface(object?: Parameters<World['heatObjectSurface']>[0], energy?: Parameters<World['heatObjectSurface']>[1], inst?: World): ReturnType<World['heatObjectSurface']> { return resolveWorld(inst).heatObjectSurface(object!, energy!); }
+export function coolObjectSurface(object?: Parameters<World['coolObjectSurface']>[0], rate?: Parameters<World['coolObjectSurface']>[1], inst?: World): ReturnType<World['coolObjectSurface']> { return resolveWorld(inst).coolObjectSurface(object!, rate!); }
+export function simulateThermalExpansion(object?: Parameters<World['simulateThermalExpansion']>[0], temperature?: Parameters<World['simulateThermalExpansion']>[1], inst?: World): ReturnType<World['simulateThermalExpansion']> { return resolveWorld(inst).simulateThermalExpansion(object!, temperature!); }
+export function simulateThermalContraction(object?: Parameters<World['simulateThermalContraction']>[0], temperature?: Parameters<World['simulateThermalContraction']>[1], inst?: World): ReturnType<World['simulateThermalContraction']> { return resolveWorld(inst).simulateThermalContraction(object!, temperature!); }
+export function fadeSunlightAtDusk(inst?: World): ReturnType<World['fadeSunlightAtDusk']> { return resolveWorld(inst).fadeSunlightAtDusk(); }
+export function restoreSunlightAtDawn(inst?: World): ReturnType<World['restoreSunlightAtDawn']> { return resolveWorld(inst).restoreSunlightAtDawn(); }
+export function updateNightLighting(inst?: World): ReturnType<World['updateNightLighting']> { return resolveWorld(inst).updateNightLighting(); }
+export function simulateMoonlight(inst?: World): ReturnType<World['simulateMoonlight']> { return resolveWorld(inst).simulateMoonlight(); }
+export function updateCloudShadowMovement(cloud?: Parameters<World['updateCloudShadowMovement']>[0], inst?: World): ReturnType<World['updateCloudShadowMovement']> { return resolveWorld(inst).updateCloudShadowMovement(cloud!); }
+export function updateVegetationLightExposure(plant?: Parameters<World['updateVegetationLightExposure']>[0], inst?: World): ReturnType<World['updateVegetationLightExposure']> { return resolveWorld(inst).updateVegetationLightExposure(plant!); }
+export function calculateSurfaceReflectance(surface?: Parameters<World['calculateSurfaceReflectance']>[0], inst?: World): ReturnType<World['calculateSurfaceReflectance']> { return resolveWorld(inst).calculateSurfaceReflectance(surface!); }
+export function simulateHeatTransfer(objectA?: Parameters<World['simulateHeatTransfer']>[0], objectB?: Parameters<World['simulateHeatTransfer']>[1], inst?: World): ReturnType<World['simulateHeatTransfer']> { return resolveWorld(inst).simulateHeatTransfer(objectA!, objectB!); }
+export function updateEnvironmentalTemperature(region?: Parameters<World['updateEnvironmentalTemperature']>[0], inst?: World): ReturnType<World['updateEnvironmentalTemperature']> { return resolveWorld(inst).updateEnvironmentalTemperature(region!); }
+export function createParticleSystem(type?: Parameters<World['createParticleSystem']>[0], inst?: World): ReturnType<World['createParticleSystem']> { return resolveWorld(inst).createParticleSystem(type!); }
+export function spawnParticles(system?: Parameters<World['spawnParticles']>[0], count?: Parameters<World['spawnParticles']>[1], inst?: World): ReturnType<World['spawnParticles']> { return resolveWorld(inst).spawnParticles(system!, count!); }
+export function updateParticleMotion(particle?: Parameters<World['updateParticleMotion']>[0], deltaTime?: Parameters<World['updateParticleMotion']>[1], inst?: World): ReturnType<World['updateParticleMotion']> { return resolveWorld(inst).updateParticleMotion(particle!, deltaTime!); }
+export function applyParticleGravity(particle?: Parameters<World['applyParticleGravity']>[0], inst?: World): ReturnType<World['applyParticleGravity']> { return resolveWorld(inst).applyParticleGravity(particle!); }
+export function applyParticleWind(particle?: Parameters<World['applyParticleWind']>[0], wind?: Parameters<World['applyParticleWind']>[1], inst?: World): ReturnType<World['applyParticleWind']> { return resolveWorld(inst).applyParticleWind(particle!, wind!); }
+export function calculateParticleDrag(particle?: Parameters<World['calculateParticleDrag']>[0], inst?: World): ReturnType<World['calculateParticleDrag']> { return resolveWorld(inst).calculateParticleDrag(particle!); }
+export function simulateDustCloud(position?: Parameters<World['simulateDustCloud']>[0], force?: Parameters<World['simulateDustCloud']>[1], inst?: World): ReturnType<World['simulateDustCloud']> { return resolveWorld(inst).simulateDustCloud(position!, force!); }
+export function spreadDustCloud(cloud?: Parameters<World['spreadDustCloud']>[0], wind?: Parameters<World['spreadDustCloud']>[1], inst?: World): ReturnType<World['spreadDustCloud']> { return resolveWorld(inst).spreadDustCloud(cloud!, wind!); }
+export function dissipateDustCloud(cloud?: Parameters<World['dissipateDustCloud']>[0], rate?: Parameters<World['dissipateDustCloud']>[1], inst?: World): ReturnType<World['dissipateDustCloud']> { return resolveWorld(inst).dissipateDustCloud(cloud!, rate!); }
+export function createSandBurst(position?: Parameters<World['createSandBurst']>[0], force?: Parameters<World['createSandBurst']>[1], inst?: World): ReturnType<World['createSandBurst']> { return resolveWorld(inst).createSandBurst(position!, force!); }
+export function simulateBlowingSand(sand?: Parameters<World['simulateBlowingSand']>[0], wind?: Parameters<World['simulateBlowingSand']>[1], inst?: World): ReturnType<World['simulateBlowingSand']> { return resolveWorld(inst).simulateBlowingSand(sand!, wind!); }
+export function simulateDustDevilParticles(particles?: Parameters<World['simulateDustDevilParticles']>[0], inst?: World): ReturnType<World['simulateDustDevilParticles']> { return resolveWorld(inst).simulateDustDevilParticles(particles!); }
+export function spawnPollenParticles(plant?: Parameters<World['spawnPollenParticles']>[0], inst?: World): ReturnType<World['spawnPollenParticles']> { return resolveWorld(inst).spawnPollenParticles(plant!); }
+export function dispersePollen(pollen?: Parameters<World['dispersePollen']>[0], wind?: Parameters<World['dispersePollen']>[1], inst?: World): ReturnType<World['dispersePollen']> { return resolveWorld(inst).dispersePollen(pollen!, wind!); }
+export function spawnFallingLeaves(tree?: Parameters<World['spawnFallingLeaves']>[0], inst?: World): ReturnType<World['spawnFallingLeaves']> { return resolveWorld(inst).spawnFallingLeaves(tree!); }
+export function simulateFallingLeafParticles(leaves?: Parameters<World['simulateFallingLeafParticles']>[0], inst?: World): ReturnType<World['simulateFallingLeafParticles']> { return resolveWorld(inst).simulateFallingLeafParticles(leaves!); }
+export function spawnFallingPetals(flower?: Parameters<World['spawnFallingPetals']>[0], inst?: World): ReturnType<World['spawnFallingPetals']> { return resolveWorld(inst).spawnFallingPetals(flower!); }
+export function spawnAshParticles(fire?: Parameters<World['spawnAshParticles']>[0], inst?: World): ReturnType<World['spawnAshParticles']> { return resolveWorld(inst).spawnAshParticles(fire!); }
+export function simulateAshDeposition(surface?: Parameters<World['simulateAshDeposition']>[0], ash?: Parameters<World['simulateAshDeposition']>[1], inst?: World): ReturnType<World['simulateAshDeposition']> { return resolveWorld(inst).simulateAshDeposition(surface!, ash!); }
+export function recycleExpiredParticles(system?: Parameters<World['recycleExpiredParticles']>[0], inst?: World): ReturnType<World['recycleExpiredParticles']> { return resolveWorld(inst).recycleExpiredParticles(system!); }
+export function calculateWeatheringRate(object?: Parameters<World['calculateWeatheringRate']>[0], inst?: World): ReturnType<World['calculateWeatheringRate']> { return resolveWorld(inst).calculateWeatheringRate(object!); }
+export function applyMechanicalWeathering(object?: Parameters<World['applyMechanicalWeathering']>[0], force?: Parameters<World['applyMechanicalWeathering']>[1], inst?: World): ReturnType<World['applyMechanicalWeathering']> { return resolveWorld(inst).applyMechanicalWeathering(object!, force!); }
+export function applyChemicalWeathering(object?: Parameters<World['applyChemicalWeathering']>[0], fluid?: Parameters<World['applyChemicalWeathering']>[1], inst?: World): ReturnType<World['applyChemicalWeathering']> { return resolveWorld(inst).applyChemicalWeathering(object!, fluid!); }
+export function applyFreezeThawWeathering(object?: Parameters<World['applyFreezeThawWeathering']>[0], temperature?: Parameters<World['applyFreezeThawWeathering']>[1], inst?: World): ReturnType<World['applyFreezeThawWeathering']> { return resolveWorld(inst).applyFreezeThawWeathering(object!, temperature!); }
+export function erodeObjectSurface(object?: Parameters<World['erodeObjectSurface']>[0], rate?: Parameters<World['erodeObjectSurface']>[1], inst?: World): ReturnType<World['erodeObjectSurface']> { return resolveWorld(inst).erodeObjectSurface(object!, rate!); }
+export function erodeBuildingFacade(building?: Parameters<World['erodeBuildingFacade']>[0], rate?: Parameters<World['erodeBuildingFacade']>[1], inst?: World): ReturnType<World['erodeBuildingFacade']> { return resolveWorld(inst).erodeBuildingFacade(building!, rate!); }
+export function erodeRockFormation(rock?: Parameters<World['erodeRockFormation']>[0], water?: Parameters<World['erodeRockFormation']>[1], inst?: World): ReturnType<World['erodeRockFormation']> { return resolveWorld(inst).erodeRockFormation(rock!, water!); }
+export function erodeSoilLayer(soil?: Parameters<World['erodeSoilLayer']>[0], water?: Parameters<World['erodeSoilLayer']>[1], inst?: World): ReturnType<World['erodeSoilLayer']> { return resolveWorld(inst).erodeSoilLayer(soil!, water!); }
+export function weatherWoodSurface(wood?: Parameters<World['weatherWoodSurface']>[0], weather?: Parameters<World['weatherWoodSurface']>[1], inst?: World): ReturnType<World['weatherWoodSurface']> { return resolveWorld(inst).weatherWoodSurface(wood!, weather!); }
+export function fadePaintSurface(object?: Parameters<World['fadePaintSurface']>[0], sunlight?: Parameters<World['fadePaintSurface']>[1], inst?: World): ReturnType<World['fadePaintSurface']> { return resolveWorld(inst).fadePaintSurface(object!, sunlight!); }
+export function peelPaintSurface(object?: Parameters<World['peelPaintSurface']>[0], rate?: Parameters<World['peelPaintSurface']>[1], inst?: World): ReturnType<World['peelPaintSurface']> { return resolveWorld(inst).peelPaintSurface(object!, rate!); }
+export function corrodeConcreteSurface(object?: Parameters<World['corrodeConcreteSurface']>[0], rate?: Parameters<World['corrodeConcreteSurface']>[1], inst?: World): ReturnType<World['corrodeConcreteSurface']> { return resolveWorld(inst).corrodeConcreteSurface(object!, rate!); }
+export function growMoldOnSurface(object?: Parameters<World['growMoldOnSurface']>[0], humidity?: Parameters<World['growMoldOnSurface']>[1], inst?: World): ReturnType<World['growMoldOnSurface']> { return resolveWorld(inst).growMoldOnSurface(object!, humidity!); }
+export function spreadSurfaceMoss(object?: Parameters<World['spreadSurfaceMoss']>[0], moisture?: Parameters<World['spreadSurfaceMoss']>[1], inst?: World): ReturnType<World['spreadSurfaceMoss']> { return resolveWorld(inst).spreadSurfaceMoss(object!, moisture!); }
+export function accumulateDirtOnSurface(object?: Parameters<World['accumulateDirtOnSurface']>[0], amount?: Parameters<World['accumulateDirtOnSurface']>[1], inst?: World): ReturnType<World['accumulateDirtOnSurface']> { return resolveWorld(inst).accumulateDirtOnSurface(object!, amount!); }
+export function accumulateDustOnSurface(object?: Parameters<World['accumulateDustOnSurface']>[0], amount?: Parameters<World['accumulateDustOnSurface']>[1], inst?: World): ReturnType<World['accumulateDustOnSurface']> { return resolveWorld(inst).accumulateDustOnSurface(object!, amount!); }
+export function washDirtFromSurface(object?: Parameters<World['washDirtFromSurface']>[0], water?: Parameters<World['washDirtFromSurface']>[1], inst?: World): ReturnType<World['washDirtFromSurface']> { return resolveWorld(inst).washDirtFromSurface(object!, water!); }
+export function degradeMaterialProperties(object?: Parameters<World['degradeMaterialProperties']>[0], rate?: Parameters<World['degradeMaterialProperties']>[1], inst?: World): ReturnType<World['degradeMaterialProperties']> { return resolveWorld(inst).degradeMaterialProperties(object!, rate!); }
+export function calculateMaterialLifetime(object?: Parameters<World['calculateMaterialLifetime']>[0], inst?: World): ReturnType<World['calculateMaterialLifetime']> { return resolveWorld(inst).calculateMaterialLifetime(object!); }
+export function transitionObjectToRuins(object?: Parameters<World['transitionObjectToRuins']>[0], inst?: World): ReturnType<World['transitionObjectToRuins']> { return resolveWorld(inst).transitionObjectToRuins(object!); }
+export function initializeEcosystem(region?: Parameters<World['initializeEcosystem']>[0], inst?: World): ReturnType<World['initializeEcosystem']> { return resolveWorld(inst).initializeEcosystem(region!); }
+export function updateEcosystem(region?: Parameters<World['updateEcosystem']>[0], deltaTime?: Parameters<World['updateEcosystem']>[1], inst?: World): ReturnType<World['updateEcosystem']> { return resolveWorld(inst).updateEcosystem(region!, deltaTime!); }
+export function calculateVegetationDensity(region?: Parameters<World['calculateVegetationDensity']>[0], inst?: World): ReturnType<World['calculateVegetationDensity']> { return resolveWorld(inst).calculateVegetationDensity(region!); }
+export function calculateSoilMoisture(region?: Parameters<World['calculateSoilMoisture']>[0], inst?: World): ReturnType<World['calculateSoilMoisture']> { return resolveWorld(inst).calculateSoilMoisture(region!); }
+export function calculateNutrientAvailability(region?: Parameters<World['calculateNutrientAvailability']>[0], inst?: World): ReturnType<World['calculateNutrientAvailability']> { return resolveWorld(inst).calculateNutrientAvailability(region!); }
+export function simulatePlantCompetition(plantA?: Parameters<World['simulatePlantCompetition']>[0], plantB?: Parameters<World['simulatePlantCompetition']>[1], inst?: World): ReturnType<World['simulatePlantCompetition']> { return resolveWorld(inst).simulatePlantCompetition(plantA!, plantB!); }
+export function simulateCanopyCompetition(treeA?: Parameters<World['simulateCanopyCompetition']>[0], treeB?: Parameters<World['simulateCanopyCompetition']>[1], inst?: World): ReturnType<World['simulateCanopyCompetition']> { return resolveWorld(inst).simulateCanopyCompetition(treeA!, treeB!); }
+export function calculateLightCompetition(plant?: Parameters<World['calculateLightCompetition']>[0], neighbors?: Parameters<World['calculateLightCompetition']>[1], inst?: World): ReturnType<World['calculateLightCompetition']> { return resolveWorld(inst).calculateLightCompetition(plant!, neighbors!); }
+export function spreadSeedsAcrossRegion(region?: Parameters<World['spreadSeedsAcrossRegion']>[0], wind?: Parameters<World['spreadSeedsAcrossRegion']>[1], inst?: World): ReturnType<World['spreadSeedsAcrossRegion']> { return resolveWorld(inst).spreadSeedsAcrossRegion(region!, wind!); }
+export function disperseSeedsByWater(region?: Parameters<World['disperseSeedsByWater']>[0], water?: Parameters<World['disperseSeedsByWater']>[1], inst?: World): ReturnType<World['disperseSeedsByWater']> { return resolveWorld(inst).disperseSeedsByWater(region!, water!); }
+export function spreadWildfireAcrossRegion(region?: Parameters<World['spreadWildfireAcrossRegion']>[0], inst?: World): ReturnType<World['spreadWildfireAcrossRegion']> { return resolveWorld(inst).spreadWildfireAcrossRegion(region!); }
+export function simulateHabitatRecovery(region?: Parameters<World['simulateHabitatRecovery']>[0], inst?: World): ReturnType<World['simulateHabitatRecovery']> { return resolveWorld(inst).simulateHabitatRecovery(region!); }
+export function regenerateVegetation(region?: Parameters<World['regenerateVegetation']>[0], inst?: World): ReturnType<World['regenerateVegetation']> { return resolveWorld(inst).regenerateVegetation(region!); }
+export function restoreDamagedSoil(region?: Parameters<World['restoreDamagedSoil']>[0], inst?: World): ReturnType<World['restoreDamagedSoil']> { return resolveWorld(inst).restoreDamagedSoil(region!); }
+export function simulateWetlandExpansion(region?: Parameters<World['simulateWetlandExpansion']>[0], inst?: World): ReturnType<World['simulateWetlandExpansion']> { return resolveWorld(inst).simulateWetlandExpansion(region!); }
+export function simulateDesertification(region?: Parameters<World['simulateDesertification']>[0], inst?: World): ReturnType<World['simulateDesertification']> { return resolveWorld(inst).simulateDesertification(region!); }
+export function simulateCoastalErosion(region?: Parameters<World['simulateCoastalErosion']>[0], inst?: World): ReturnType<World['simulateCoastalErosion']> { return resolveWorld(inst).simulateCoastalErosion(region!); }
+export function simulateRiverDeltaGrowth(region?: Parameters<World['simulateRiverDeltaGrowth']>[0], inst?: World): ReturnType<World['simulateRiverDeltaGrowth']> { return resolveWorld(inst).simulateRiverDeltaGrowth(region!); }
+export function updateEcosystemBalance(region?: Parameters<World['updateEcosystemBalance']>[0], inst?: World): ReturnType<World['updateEcosystemBalance']> { return resolveWorld(inst).updateEcosystemBalance(region!); }
+export function initializeObjectLifecycle(object?: Parameters<World['initializeObjectLifecycle']>[0], inst?: World): ReturnType<World['initializeObjectLifecycle']> { return resolveWorld(inst).initializeObjectLifecycle(object!); }
+export function updateObjectLifecycle(object?: Parameters<World['updateObjectLifecycle']>[0], deltaTime?: Parameters<World['updateObjectLifecycle']>[1], inst?: World): ReturnType<World['updateObjectLifecycle']> { return resolveWorld(inst).updateObjectLifecycle(object!, deltaTime!); }
+export function setObjectAge(object?: Parameters<World['setObjectAge']>[0], age?: Parameters<World['setObjectAge']>[1], inst?: World): ReturnType<World['setObjectAge']> { return resolveWorld(inst).setObjectAge(object!, age!); }
+export function calculateObjectAge(object?: Parameters<World['calculateObjectAge']>[0], inst?: World): ReturnType<World['calculateObjectAge']> { return resolveWorld(inst).calculateObjectAge(object!); }
+export function growObjectOverTime(object?: Parameters<World['growObjectOverTime']>[0], duration?: Parameters<World['growObjectOverTime']>[1], inst?: World): ReturnType<World['growObjectOverTime']> { return resolveWorld(inst).growObjectOverTime(object!, duration!); }
+export function shrinkObjectOverTime(object?: Parameters<World['shrinkObjectOverTime']>[0], duration?: Parameters<World['shrinkObjectOverTime']>[1], inst?: World): ReturnType<World['shrinkObjectOverTime']> { return resolveWorld(inst).shrinkObjectOverTime(object!, duration!); }
+export function matureObject(object?: Parameters<World['matureObject']>[0], inst?: World): ReturnType<World['matureObject']> { return resolveWorld(inst).matureObject(object!); }
+export function weakenObjectOverTime(object?: Parameters<World['weakenObjectOverTime']>[0], rate?: Parameters<World['weakenObjectOverTime']>[1], inst?: World): ReturnType<World['weakenObjectOverTime']> { return resolveWorld(inst).weakenObjectOverTime(object!, rate!); }
+export function fatigueObjectOverTime(object?: Parameters<World['fatigueObjectOverTime']>[0], load?: Parameters<World['fatigueObjectOverTime']>[1], inst?: World): ReturnType<World['fatigueObjectOverTime']> { return resolveWorld(inst).fatigueObjectOverTime(object!, load!); }
+export function accumulateObjectDamage(object?: Parameters<World['accumulateObjectDamage']>[0], damage?: Parameters<World['accumulateObjectDamage']>[1], inst?: World): ReturnType<World['accumulateObjectDamage']> { return resolveWorld(inst).accumulateObjectDamage(object!, damage!); }
+export function recoverObjectCondition(object?: Parameters<World['recoverObjectCondition']>[0], rate?: Parameters<World['recoverObjectCondition']>[1], inst?: World): ReturnType<World['recoverObjectCondition']> { return resolveWorld(inst).recoverObjectCondition(object!, rate!); }
+export function decayObjectOverTime(object?: Parameters<World['decayObjectOverTime']>[0], rate?: Parameters<World['decayObjectOverTime']>[1], inst?: World): ReturnType<World['decayObjectOverTime']> { return resolveWorld(inst).decayObjectOverTime(object!, rate!); }
+export function decomposeObjectOverTime(object?: Parameters<World['decomposeObjectOverTime']>[0], rate?: Parameters<World['decomposeObjectOverTime']>[1], inst?: World): ReturnType<World['decomposeObjectOverTime']> { return resolveWorld(inst).decomposeObjectOverTime(object!, rate!); }
+export function fadeObjectOverTime(object?: Parameters<World['fadeObjectOverTime']>[0], rate?: Parameters<World['fadeObjectOverTime']>[1], inst?: World): ReturnType<World['fadeObjectOverTime']> { return resolveWorld(inst).fadeObjectOverTime(object!, rate!); }
+export function disintegrateObjectOverTime(object?: Parameters<World['disintegrateObjectOverTime']>[0], rate?: Parameters<World['disintegrateObjectOverTime']>[1], inst?: World): ReturnType<World['disintegrateObjectOverTime']> { return resolveWorld(inst).disintegrateObjectOverTime(object!, rate!); }
+export function triggerObjectFailure(object?: Parameters<World['triggerObjectFailure']>[0], inst?: World): ReturnType<World['triggerObjectFailure']> { return resolveWorld(inst).triggerObjectFailure(object!); }
+export function replaceObjectWithDebris(object?: Parameters<World['replaceObjectWithDebris']>[0], inst?: World): ReturnType<World['replaceObjectWithDebris']> { return resolveWorld(inst).replaceObjectWithDebris(object!); }
+export function regenerateObjectFromState(object?: Parameters<World['regenerateObjectFromState']>[0], state?: Parameters<World['regenerateObjectFromState']>[1], inst?: World): ReturnType<World['regenerateObjectFromState']> { return resolveWorld(inst).regenerateObjectFromState(object!, state!); }
+export function advanceSeasonalChanges(region?: Parameters<World['advanceSeasonalChanges']>[0], season?: Parameters<World['advanceSeasonalChanges']>[1], inst?: World): ReturnType<World['advanceSeasonalChanges']> { return resolveWorld(inst).advanceSeasonalChanges(region!, season!); }
+export function updateWorldAging(region?: Parameters<World['updateWorldAging']>[0], deltaTime?: Parameters<World['updateWorldAging']>[1], inst?: World): ReturnType<World['updateWorldAging']> { return resolveWorld(inst).updateWorldAging(region!, deltaTime!); }
+export function detectToolContact(tool?: Parameters<World['detectToolContact']>[0], object?: Parameters<World['detectToolContact']>[1], inst?: World): ReturnType<World['detectToolContact']> { return resolveWorld(inst).detectToolContact(tool!, object!); }
+export function calculateToolImpact(tool?: Parameters<World['calculateToolImpact']>[0], object?: Parameters<World['calculateToolImpact']>[1], inst?: World): ReturnType<World['calculateToolImpact']> { return resolveWorld(inst).calculateToolImpact(tool!, object!); }
+export function applyHammerImpact(object?: Parameters<World['applyHammerImpact']>[0], impact?: Parameters<World['applyHammerImpact']>[1], inst?: World): ReturnType<World['applyHammerImpact']> { return resolveWorld(inst).applyHammerImpact(object!, impact!); }
+export function strikeObjectWithTool(object?: Parameters<World['strikeObjectWithTool']>[0], tool?: Parameters<World['strikeObjectWithTool']>[1], inst?: World): ReturnType<World['strikeObjectWithTool']> { return resolveWorld(inst).strikeObjectWithTool(object!, tool!); }
+export function cutVegetationWithTool(plant?: Parameters<World['cutVegetationWithTool']>[0], tool?: Parameters<World['cutVegetationWithTool']>[1], inst?: World): ReturnType<World['cutVegetationWithTool']> { return resolveWorld(inst).cutVegetationWithTool(plant!, tool!); }
+export function sawWoodObject(wood?: Parameters<World['sawWoodObject']>[0], tool?: Parameters<World['sawWoodObject']>[1], inst?: World): ReturnType<World['sawWoodObject']> { return resolveWorld(inst).sawWoodObject(wood!, tool!); }
+export function digTerrainWithTool(terrain?: Parameters<World['digTerrainWithTool']>[0], tool?: Parameters<World['digTerrainWithTool']>[1], inst?: World): ReturnType<World['digTerrainWithTool']> { return resolveWorld(inst).digTerrainWithTool(terrain!, tool!); }
+export function excavateRockWithTool(rock?: Parameters<World['excavateRockWithTool']>[0], tool?: Parameters<World['excavateRockWithTool']>[1], inst?: World): ReturnType<World['excavateRockWithTool']> { return resolveWorld(inst).excavateRockWithTool(rock!, tool!); }
+export function chipStoneWithTool(rock?: Parameters<World['chipStoneWithTool']>[0], tool?: Parameters<World['chipStoneWithTool']>[1], inst?: World): ReturnType<World['chipStoneWithTool']> { return resolveWorld(inst).chipStoneWithTool(rock!, tool!); }
+export function breakIceWithTool(ice?: Parameters<World['breakIceWithTool']>[0], tool?: Parameters<World['breakIceWithTool']>[1], inst?: World): ReturnType<World['breakIceWithTool']> { return resolveWorld(inst).breakIceWithTool(ice!, tool!); }
+export function pryOpenObject(object?: Parameters<World['pryOpenObject']>[0], tool?: Parameters<World['pryOpenObject']>[1], inst?: World): ReturnType<World['pryOpenObject']> { return resolveWorld(inst).pryOpenObject(object!, tool!); }
+export function leverObjectWithTool(object?: Parameters<World['leverObjectWithTool']>[0], tool?: Parameters<World['leverObjectWithTool']>[1], inst?: World): ReturnType<World['leverObjectWithTool']> { return resolveWorld(inst).leverObjectWithTool(object!, tool!); }
+export function drillIntoMaterial(object?: Parameters<World['drillIntoMaterial']>[0], tool?: Parameters<World['drillIntoMaterial']>[1], inst?: World): ReturnType<World['drillIntoMaterial']> { return resolveWorld(inst).drillIntoMaterial(object!, tool!); }
+export function grindMaterialSurface(object?: Parameters<World['grindMaterialSurface']>[0], tool?: Parameters<World['grindMaterialSurface']>[1], inst?: World): ReturnType<World['grindMaterialSurface']> { return resolveWorld(inst).grindMaterialSurface(object!, tool!); }
+export function polishMaterialSurface(object?: Parameters<World['polishMaterialSurface']>[0], tool?: Parameters<World['polishMaterialSurface']>[1], inst?: World): ReturnType<World['polishMaterialSurface']> { return resolveWorld(inst).polishMaterialSurface(object!, tool!); }
+export function weldMetalParts(partA?: Parameters<World['weldMetalParts']>[0], partB?: Parameters<World['weldMetalParts']>[1], inst?: World): ReturnType<World['weldMetalParts']> { return resolveWorld(inst).weldMetalParts(partA!, partB!); }
+export function fastenStructuralParts(partA?: Parameters<World['fastenStructuralParts']>[0], partB?: Parameters<World['fastenStructuralParts']>[1], inst?: World): ReturnType<World['fastenStructuralParts']> { return resolveWorld(inst).fastenStructuralParts(partA!, partB!); }
+export function detachFastenedPart(object?: Parameters<World['detachFastenedPart']>[0], part?: Parameters<World['detachFastenedPart']>[1], inst?: World): ReturnType<World['detachFastenedPart']> { return resolveWorld(inst).detachFastenedPart(object!, part!); }
+export function repairObjectWithMaterial(object?: Parameters<World['repairObjectWithMaterial']>[0], material?: Parameters<World['repairObjectWithMaterial']>[1], inst?: World): ReturnType<World['repairObjectWithMaterial']> { return resolveWorld(inst).repairObjectWithMaterial(object!, material!); }
+export function updateToolDamage(tool?: Parameters<World['updateToolDamage']>[0], impact?: Parameters<World['updateToolDamage']>[1], inst?: World): ReturnType<World['updateToolDamage']> { return resolveWorld(inst).updateToolDamage(tool!, impact!); }
+export function initializeDestructionGraph(object?: Parameters<World['initializeDestructionGraph']>[0], inst?: World): ReturnType<World['initializeDestructionGraph']> { return resolveWorld(inst).initializeDestructionGraph(object!); }
+export function generateFracturePattern(object?: Parameters<World['generateFracturePattern']>[0], impact?: Parameters<World['generateFracturePattern']>[1], inst?: World): ReturnType<World['generateFracturePattern']> { return resolveWorld(inst).generateFracturePattern(object!, impact!); }
+export function calculateFracturePropagation(object?: Parameters<World['calculateFracturePropagation']>[0], inst?: World): ReturnType<World['calculateFracturePropagation']> { return resolveWorld(inst).calculateFracturePropagation(object!); }
+export function propagateStructuralCrack(object?: Parameters<World['propagateStructuralCrack']>[0], crack?: Parameters<World['propagateStructuralCrack']>[1], inst?: World): ReturnType<World['propagateStructuralCrack']> { return resolveWorld(inst).propagateStructuralCrack(object!, crack!); }
+export function calculateBreakPoint(object?: Parameters<World['calculateBreakPoint']>[0], force?: Parameters<World['calculateBreakPoint']>[1], inst?: World): ReturnType<World['calculateBreakPoint']> { return resolveWorld(inst).calculateBreakPoint(object!, force!); }
+export function calculateFractureEnergy(object?: Parameters<World['calculateFractureEnergy']>[0], force?: Parameters<World['calculateFractureEnergy']>[1], inst?: World): ReturnType<World['calculateFractureEnergy']> { return resolveWorld(inst).calculateFractureEnergy(object!, force!); }
+export function splitMeshAlongPlane(object?: Parameters<World['splitMeshAlongPlane']>[0], plane?: Parameters<World['splitMeshAlongPlane']>[1], inst?: World): ReturnType<World['splitMeshAlongPlane']> { return resolveWorld(inst).splitMeshAlongPlane(object!, plane!); }
+export function splitMeshAlongCurve(object?: Parameters<World['splitMeshAlongCurve']>[0], curve?: Parameters<World['splitMeshAlongCurve']>[1], inst?: World): ReturnType<World['splitMeshAlongCurve']> { return resolveWorld(inst).splitMeshAlongCurve(object!, curve!); }
+export function createFractureCapSurface(object?: Parameters<World['createFractureCapSurface']>[0], fracture?: Parameters<World['createFractureCapSurface']>[1], inst?: World): ReturnType<World['createFractureCapSurface']> { return resolveWorld(inst).createFractureCapSurface(object!, fracture!); }
+export function generateFractureDebris(object?: Parameters<World['generateFractureDebris']>[0], fracture?: Parameters<World['generateFractureDebris']>[1], inst?: World): ReturnType<World['generateFractureDebris']> { return resolveWorld(inst).generateFractureDebris(object!, fracture!); }
+export function assignDebrisMass(fragments?: Parameters<World['assignDebrisMass']>[0], inst?: World): ReturnType<World['assignDebrisMass']> { return resolveWorld(inst).assignDebrisMass(fragments!); }
+export function assignDebrisCollision(fragments?: Parameters<World['assignDebrisCollision']>[0], inst?: World): ReturnType<World['assignDebrisCollision']> { return resolveWorld(inst).assignDebrisCollision(fragments!); }
+export function calculateDebrisTrajectory(fragment?: Parameters<World['calculateDebrisTrajectory']>[0], inst?: World): ReturnType<World['calculateDebrisTrajectory']> { return resolveWorld(inst).calculateDebrisTrajectory(fragment!); }
+export function simulateDebrisPileCollapse(pile?: Parameters<World['simulateDebrisPileCollapse']>[0], inst?: World): ReturnType<World['simulateDebrisPileCollapse']> { return resolveWorld(inst).simulateDebrisPileCollapse(pile!); }
+export function detectSecondaryImpact(debris?: Parameters<World['detectSecondaryImpact']>[0], inst?: World): ReturnType<World['detectSecondaryImpact']> { return resolveWorld(inst).detectSecondaryImpact(debris!); }
+export function triggerSecondaryFracture(object?: Parameters<World['triggerSecondaryFracture']>[0], impact?: Parameters<World['triggerSecondaryFracture']>[1], inst?: World): ReturnType<World['triggerSecondaryFracture']> { return resolveWorld(inst).triggerSecondaryFracture(object!, impact!); }
+export function simulateProgressiveObjectFailure(object?: Parameters<World['simulateProgressiveObjectFailure']>[0], inst?: World): ReturnType<World['simulateProgressiveObjectFailure']> { return resolveWorld(inst).simulateProgressiveObjectFailure(object!); }
+export function stabilizeRemainingStructure(object?: Parameters<World['stabilizeRemainingStructure']>[0], inst?: World): ReturnType<World['stabilizeRemainingStructure']> { return resolveWorld(inst).stabilizeRemainingStructure(object!); }
+export function rebuildDestructibleMesh(object?: Parameters<World['rebuildDestructibleMesh']>[0], inst?: World): ReturnType<World['rebuildDestructibleMesh']> { return resolveWorld(inst).rebuildDestructibleMesh(object!); }
+export function finalizeDestructionState(object?: Parameters<World['finalizeDestructionState']>[0], inst?: World): ReturnType<World['finalizeDestructionState']> { return resolveWorld(inst).finalizeDestructionState(object!); }
+export function initializeWorldAnimation(inst?: World): ReturnType<World['initializeWorldAnimation']> { return resolveWorld(inst).initializeWorldAnimation(); }
+export function loadWorldAnimationClips(inst?: World): ReturnType<World['loadWorldAnimationClips']> { return resolveWorld(inst).loadWorldAnimationClips(); }
+export function playWorldAnimation(object?: Parameters<World['playWorldAnimation']>[0], animation?: Parameters<World['playWorldAnimation']>[1], inst?: World): ReturnType<World['playWorldAnimation']> { return resolveWorld(inst).playWorldAnimation(object!, animation!); }
+export function blendWorldAnimations(object?: Parameters<World['blendWorldAnimations']>[0], animations?: Parameters<World['blendWorldAnimations']>[1], inst?: World): ReturnType<World['blendWorldAnimations']> { return resolveWorld(inst).blendWorldAnimations(object!, animations!); }
+export function crossFadeWorldAnimation(object?: Parameters<World['crossFadeWorldAnimation']>[0], from?: Parameters<World['crossFadeWorldAnimation']>[1], to?: Parameters<World['crossFadeWorldAnimation']>[2], inst?: World): ReturnType<World['crossFadeWorldAnimation']> { return resolveWorld(inst).crossFadeWorldAnimation(object!, from!, to!); }
+export function updateWorldAnimationMixer(deltaTime?: Parameters<World['updateWorldAnimationMixer']>[0], inst?: World): ReturnType<World['updateWorldAnimationMixer']> { return resolveWorld(inst).updateWorldAnimationMixer(deltaTime!); }
+export function applyRootMotionToObject(object?: Parameters<World['applyRootMotionToObject']>[0], motion?: Parameters<World['applyRootMotionToObject']>[1], inst?: World): ReturnType<World['applyRootMotionToObject']> { return resolveWorld(inst).applyRootMotionToObject(object!, motion!); }
+export function interpolateObjectPosition(object?: Parameters<World['interpolateObjectPosition']>[0], deltaTime?: Parameters<World['interpolateObjectPosition']>[1], inst?: World): ReturnType<World['interpolateObjectPosition']> { return resolveWorld(inst).interpolateObjectPosition(object!, deltaTime!); }
+export function interpolateObjectRotation(object?: Parameters<World['interpolateObjectRotation']>[0], deltaTime?: Parameters<World['interpolateObjectRotation']>[1], inst?: World): ReturnType<World['interpolateObjectRotation']> { return resolveWorld(inst).interpolateObjectRotation(object!, deltaTime!); }
+export function updateObjectLOD(object?: Parameters<World['updateObjectLOD']>[0], inst?: World): ReturnType<World['updateObjectLOD']> { return resolveWorld(inst).updateObjectLOD(object!); }
+export function updateVegetationLOD(region?: Parameters<World['updateVegetationLOD']>[0], inst?: World): ReturnType<World['updateVegetationLOD']> { return resolveWorld(inst).updateVegetationLOD(region!); }
+export function updateDestructionLOD(object?: Parameters<World['updateDestructionLOD']>[0], inst?: World): ReturnType<World['updateDestructionLOD']> { return resolveWorld(inst).updateDestructionLOD(object!); }
+export function cullInvisibleWorldObjects(inst?: World): ReturnType<World['cullInvisibleWorldObjects']> { return resolveWorld(inst).cullInvisibleWorldObjects(); }
+export function sleepInactiveRigidBodies(inst?: World): ReturnType<World['sleepInactiveRigidBodies']> { return resolveWorld(inst).sleepInactiveRigidBodies(); }
+export function wakeRigidBody(object?: Parameters<World['wakeRigidBody']>[0], inst?: World): ReturnType<World['wakeRigidBody']> { return resolveWorld(inst).wakeRigidBody(object!); }
+export function synchronizePhysicsAndAnimation(object?: Parameters<World['synchronizePhysicsAndAnimation']>[0], inst?: World): ReturnType<World['synchronizePhysicsAndAnimation']> { return resolveWorld(inst).synchronizePhysicsAndAnimation(object!); }
+export function rebuildWorldCollision(region?: Parameters<World['rebuildWorldCollision']>[0], inst?: World): ReturnType<World['rebuildWorldCollision']> { return resolveWorld(inst).rebuildWorldCollision(region!); }
+export function updateWorldNavigation(region?: Parameters<World['updateWorldNavigation']>[0], inst?: World): ReturnType<World['updateWorldNavigation']> { return resolveWorld(inst).updateWorldNavigation(region!); }
+export function validateWorldSimulation(region?: Parameters<World['validateWorldSimulation']>[0], inst?: World): ReturnType<World['validateWorldSimulation']> { return resolveWorld(inst).validateWorldSimulation(region!); }
+export function optimizeWorldSimulationPerformance(inst?: World): ReturnType<World['optimizeWorldSimulationPerformance']> { return resolveWorld(inst).optimizeWorldSimulationPerformance(); }

@@ -254,7 +254,7 @@ export class AssetParser {
     return this.dracoLoader;
   }
 
-  async parse(path: string, extraOpts?: { mtlPath?: string; mtlText?: string; tags?: string[]; category?: any }): Promise<ParsedAsset> {
+  async parse(path: string, extraOpts?: { mtlPath?: string; mtlText?: string; tags?: string[]; category?: unknown }): Promise<ParsedAsset> {
     return this.load(path, extraOpts);
   }
 

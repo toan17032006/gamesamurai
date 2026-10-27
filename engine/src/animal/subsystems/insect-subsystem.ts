@@ -83,16 +83,16 @@ export class InsectSubsystem {
   public inspectFoodWithPalps(): void { recordSubsystemAction(this, 'inspectFoodWithPalps', 'InsectSubsystem'); }
   public feedOnNectar(): void { recordSubsystemAction(this, 'feedOnNectar', 'InsectSubsystem'); }
   public chewPlantMaterial(): void { recordSubsystemAction(this, 'chewPlantMaterial', 'InsectSubsystem'); }
-  public bitePlantLeaf(leaf: any): void { recordSubsystemAction(this, 'bitePlantLeaf', 'InsectSubsystem'); }
-  public probeFoodSource(source: any): void { recordSubsystemAction(this, 'probeFoodSource', 'InsectSubsystem'); }
-  public followPheromoneTrail(trail: any): void { recordSubsystemAction(this, 'followPheromoneTrail', 'InsectSubsystem'); }
+  public bitePlantLeaf(leaf: unknown): void { recordSubsystemAction(this, 'bitePlantLeaf', 'InsectSubsystem'); }
+  public probeFoodSource(source: unknown): void { recordSubsystemAction(this, 'probeFoodSource', 'InsectSubsystem'); }
+  public followPheromoneTrail(trail: unknown): void { recordSubsystemAction(this, 'followPheromoneTrail', 'InsectSubsystem'); }
   public depositPheromone(type: string): void { recordSubsystemAction(this, 'depositPheromone', 'InsectSubsystem'); }
   public detectColonyPheromone(): boolean { return true; }
-  public recruitColonyMembers(target: any): void { recordSubsystemAction(this, 'recruitColonyMembers', 'InsectSubsystem'); }
-  public carrySmallObject(object: any): void { recordSubsystemAction(this, 'carrySmallObject', 'InsectSubsystem'); }
-  public transportFoodToNest(food: any): void { this.carrySmallObject(food); }
+  public recruitColonyMembers(target: unknown): void { recordSubsystemAction(this, 'recruitColonyMembers', 'InsectSubsystem'); }
+  public carrySmallObject(object: unknown): void { recordSubsystemAction(this, 'carrySmallObject', 'InsectSubsystem'); }
+  public transportFoodToNest(food: unknown): void { this.carrySmallObject(food); }
   public digInsectBurrow(): void { recordSubsystemAction(this, 'digInsectBurrow', 'InsectSubsystem'); }
-  public constructNestMaterial(material: any): void { recordSubsystemAction(this, 'constructNestMaterial', 'InsectSubsystem'); }
+  public constructNestMaterial(material: unknown): void { recordSubsystemAction(this, 'constructNestMaterial', 'InsectSubsystem'); }
   public groomBodySurface(): void { recordSubsystemAction(this, 'groomBodySurface', 'InsectSubsystem'); }
   public groomAntennae(): void { recordSubsystemAction(this, 'groomAntennae', 'InsectSubsystem'); }
   public performMatingDisplay(): void { recordSubsystemAction(this, 'performMatingDisplay', 'InsectSubsystem'); }

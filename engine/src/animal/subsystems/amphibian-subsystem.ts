@@ -28,7 +28,7 @@ export class AmphibianSubsystem {
   public updateAmphibianBodyFlexion(): void { recordSubsystemAction(this, 'updateAmphibianBodyFlexion', 'AmphibianSubsystem'); }
   public calculateAmphibianStride(): number { return 0.25; }
   public calculateFrogJumpForce(): number { return 120.0; }
-  public calculateFrogLandingPose(): any { return { crouched: true }; }
+  public calculateFrogLandingPose() { return { crouched: true }; }
   public maintainAmphibianBalance(): void { recordSubsystemAction(this, 'maintainAmphibianBalance', 'AmphibianSubsystem'); }
   public blendAmphibianGait(): void { recordSubsystemAction(this, 'blendAmphibianGait', 'AmphibianSubsystem'); }
   public updateAmphibianPosture(): void { recordSubsystemAction(this, 'updateAmphibianPosture', 'AmphibianSubsystem'); }
@@ -49,8 +49,8 @@ export class AmphibianSubsystem {
   public undulateSalamanderTail(): void { recordSubsystemAction(this, 'undulateSalamanderTail', 'AmphibianSubsystem'); }
   public climbWetSurface(): void { recordSubsystemAction(this, 'climbWetSurface', 'AmphibianSubsystem'); }
   public flickFrogTongue(): void { recordSubsystemAction(this, 'flickFrogTongue', 'AmphibianSubsystem'); }
-  public captureInsectWithTongue(insect: any): void { this.flickFrogTongue(); }
-  public swallowSmallPrey(prey: any): void { recordSubsystemAction(this, 'swallowSmallPrey', 'AmphibianSubsystem'); }
+  public captureInsectWithTongue(insect: unknown): void { this.flickFrogTongue(); }
+  public swallowSmallPrey(prey: unknown): void { recordSubsystemAction(this, 'swallowSmallPrey', 'AmphibianSubsystem'); }
   public breatheThroughSkin(): void { recordSubsystemAction(this, 'breatheThroughSkin', 'AmphibianSubsystem'); }
   public enterWaterFromLand(): void { this.inWater = true; }
   public performAmphibianIdleMotion(): void { recordSubsystemAction(this, 'performAmphibianIdleMotion', 'AmphibianSubsystem'); }

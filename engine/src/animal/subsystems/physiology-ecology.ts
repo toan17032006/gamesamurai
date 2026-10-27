@@ -38,8 +38,8 @@ export class PhysiologyEcologySubsystem {
   };
 
   public stage: 'neonate' | 'juvenile' | 'adult' | 'senior' = 'adult';
-  public groupLeader: any = null;
-  public groupMembers: Set<any> = new Set();
+  public groupLeader: unknown = null;
+  public groupMembers: Set<unknown> = new Set();
   public territoryBounds: { min: Vec3; max: Vec3 } = { min: { x: -50, y: 0, z: -50 }, max: { x: 50, y: 10, z: 50 } };
   public currentLOD = 0;
   public animationTime = 0;
@@ -71,32 +71,32 @@ export class PhysiologyEcologySubsystem {
   public detectPotentialFood(): boolean { return true; }
   public classifyFoodSource(): string { return 'prey'; }
   public evaluateFoodSafety(): boolean { return true; }
-  public approachFoodSource(source: any): void { this.behavior.activeTarget = source; }
-  public investigateFoodSource(source: any): void { recordSubsystemAction(this, 'investigateFoodSource', 'PhysiologyEcologySubsystem'); }
-  public selectFoodItem(items: any[]): any { return items[0]; }
-  public captureFoodItem(item: any): void { recordSubsystemAction(this, 'captureFoodItem', 'PhysiologyEcologySubsystem'); }
-  public manipulateFoodItem(item: any): void { recordSubsystemAction(this, 'manipulateFoodItem', 'PhysiologyEcologySubsystem'); }
-  public ingestFoodItem(item: any): void { this.behavior.hunger = Math.max(0, this.behavior.hunger - 40); }
+  public approachFoodSource(source: unknown): void { this.behavior.activeTarget = source; }
+  public investigateFoodSource(source: unknown): void { recordSubsystemAction(this, 'investigateFoodSource', 'PhysiologyEcologySubsystem'); }
+  public selectFoodItem(items: unknown[]) { return items[0]; }
+  public captureFoodItem(item: unknown): void { recordSubsystemAction(this, 'captureFoodItem', 'PhysiologyEcologySubsystem'); }
+  public manipulateFoodItem(item: unknown): void { recordSubsystemAction(this, 'manipulateFoodItem', 'PhysiologyEcologySubsystem'); }
+  public ingestFoodItem(item: unknown): void { this.behavior.hunger = Math.max(0, this.behavior.hunger - 40); }
   public processFoodInMouth(): void { recordSubsystemAction(this, 'processFoodInMouth', 'PhysiologyEcologySubsystem'); }
   public swallowFoodBolus(): void { recordSubsystemAction(this, 'swallowFoodBolus', 'PhysiologyEcologySubsystem'); }
-  public trackPreyMovement(prey: any): void { this.behavior.activeTarget = prey; }
-  public stalkPrey(prey: any): void { this.behavior.currentMotivation = 'hunting'; }
-  public pursuePrey(prey: any): void { recordSubsystemAction(this, 'pursuePrey', 'PhysiologyEcologySubsystem'); }
-  public interceptPrey(prey: any): void { recordSubsystemAction(this, 'interceptPrey', 'PhysiologyEcologySubsystem'); }
-  public executePredatoryStrike(prey: any): void { recordSubsystemAction(this, 'executePredatoryStrike', 'PhysiologyEcologySubsystem'); }
-  public secureCapturedPrey(prey: any): void { recordSubsystemAction(this, 'secureCapturedPrey', 'PhysiologyEcologySubsystem'); }
-  public shareFoodWithGroup(group: any): void { recordSubsystemAction(this, 'shareFoodWithGroup', 'PhysiologyEcologySubsystem'); }
+  public trackPreyMovement(prey: unknown): void { this.behavior.activeTarget = prey; }
+  public stalkPrey(prey: unknown): void { this.behavior.currentMotivation = 'hunting'; }
+  public pursuePrey(prey: unknown): void { recordSubsystemAction(this, 'pursuePrey', 'PhysiologyEcologySubsystem'); }
+  public interceptPrey(prey: unknown): void { recordSubsystemAction(this, 'interceptPrey', 'PhysiologyEcologySubsystem'); }
+  public executePredatoryStrike(prey: unknown): void { recordSubsystemAction(this, 'executePredatoryStrike', 'PhysiologyEcologySubsystem'); }
+  public secureCapturedPrey(prey: unknown): void { recordSubsystemAction(this, 'secureCapturedPrey', 'PhysiologyEcologySubsystem'); }
+  public shareFoodWithGroup(group: unknown): void { recordSubsystemAction(this, 'shareFoodWithGroup', 'PhysiologyEcologySubsystem'); }
   public updateFeedingMotivation(): void { this.behavior.hunger += 0.05; }
 
   // 681–700. Sinh sản, giao phối và chăm sóc con non
   public initializeReproductiveBehavior(): void { recordSubsystemAction(this, 'initializeReproductiveBehavior', 'PhysiologyEcologySubsystem'); }
   public detectReproductiveReadiness(): boolean { return true; }
   public detectPotentialMate(): boolean { return true; }
-  public approachPotentialMate(mate: any): void { recordSubsystemAction(this, 'approachPotentialMate', 'PhysiologyEcologySubsystem'); }
+  public approachPotentialMate(mate: unknown): void { recordSubsystemAction(this, 'approachPotentialMate', 'PhysiologyEcologySubsystem'); }
   public performCourtshipBehavior(): void { this.behavior.currentMotivation = 'courting'; }
   public performCourtshipVocalization(): void { recordSubsystemAction(this, 'performCourtshipVocalization', 'PhysiologyEcologySubsystem'); }
   public performCourtshipDisplay(): void { recordSubsystemAction(this, 'performCourtshipDisplay', 'PhysiologyEcologySubsystem'); }
-  public evaluateMateCompatibility(mate: any): boolean { return true; }
+  public evaluateMateCompatibility(mate: unknown): boolean { return true; }
   public initiateMatingSequence(): void { recordSubsystemAction(this, 'initiateMatingSequence', 'PhysiologyEcologySubsystem'); }
   public terminateMatingSequence(): void { recordSubsystemAction(this, 'terminateMatingSequence', 'PhysiologyEcologySubsystem'); }
   public searchForNestingSite(): void { recordSubsystemAction(this, 'searchForNestingSite', 'PhysiologyEcologySubsystem'); }
@@ -105,10 +105,10 @@ export class PhysiologyEcologySubsystem {
   public layEggs(): void { recordSubsystemAction(this, 'layEggs', 'PhysiologyEcologySubsystem'); }
   public incubateEggs(): void { recordSubsystemAction(this, 'incubateEggs', 'PhysiologyEcologySubsystem'); }
   public guardNest(): void { recordSubsystemAction(this, 'guardNest', 'PhysiologyEcologySubsystem'); }
-  public recognizeOffspring(offspring: any): boolean { return true; }
-  public retrieveOffspring(offspring: any): void { recordSubsystemAction(this, 'retrieveOffspring', 'PhysiologyEcologySubsystem'); }
-  public feedOffspring(offspring: any): void { recordSubsystemAction(this, 'feedOffspring', 'PhysiologyEcologySubsystem'); }
-  public protectOffspring(offspring: any): void { this.behavior.aggression = 80; }
+  public recognizeOffspring(offspring: unknown): boolean { return true; }
+  public retrieveOffspring(offspring: unknown): void { recordSubsystemAction(this, 'retrieveOffspring', 'PhysiologyEcologySubsystem'); }
+  public feedOffspring(offspring: unknown): void { recordSubsystemAction(this, 'feedOffspring', 'PhysiologyEcologySubsystem'); }
+  public protectOffspring(offspring: unknown): void { this.behavior.aggression = 80; }
 
   // 701–720. Phát triển, sinh trưởng và thay đổi cơ thể
   public initializeAnimalDevelopment(): void { recordSubsystemAction(this, 'initializeAnimalDevelopment', 'PhysiologyEcologySubsystem'); }
@@ -179,33 +179,33 @@ export class PhysiologyEcologySubsystem {
   public initiateDefensiveBehavior(): void { this.behavior.aggression = 60; }
   public investigateNovelStimulus(): void { this.behavior.currentMotivation = 'foraging'; }
   public updateBehavioralMemory(): void { recordSubsystemAction(this, 'updateBehavioralMemory', 'PhysiologyEcologySubsystem'); }
-  public transitionBehaviorState(newState = 'idle'): void { this.behavior.currentMotivation = newState as any; }
+  public transitionBehaviorState(newState = 'idle'): void { this.behavior.currentMotivation = newState as AnimalBehaviorState['currentMotivation']; }
 
   // 761–780. Bầy đàn, giao tiếp và lãnh thổ
   public initializeSocialBehavior(): void { recordSubsystemAction(this, 'initializeSocialBehavior', 'PhysiologyEcologySubsystem'); }
-  public detectNearbyConspecifics(): any[] { return Array.from(this.groupMembers); }
-  public recognizeIndividualAnimal(animal: any): boolean { return true; }
+  public detectNearbyConspecifics(): unknown[] { return Array.from(this.groupMembers); }
+  public recognizeIndividualAnimal(animal: unknown): boolean { return true; }
   public maintainGroupSpacing(): void { recordSubsystemAction(this, 'maintainGroupSpacing', 'PhysiologyEcologySubsystem'); }
-  public followGroupLeader(leader: any): void { this.groupLeader = leader; }
-  public electGroupLeader(group: any): any { return this.groupLeader; }
-  public synchronizeGroupMovement(group: any): void { recordSubsystemAction(this, 'synchronizeGroupMovement', 'PhysiologyEcologySubsystem'); }
-  public joinAnimalGroup(group: any): void { this.groupMembers.add(group); }
-  public leaveAnimalGroup(group: any): void { this.groupMembers.delete(group); }
-  public coordinateGroupForaging(group: any): void { recordSubsystemAction(this, 'coordinateGroupForaging', 'PhysiologyEcologySubsystem'); }
-  public performSocialGreeting(animal: any): void { recordSubsystemAction(this, 'performSocialGreeting', 'PhysiologyEcologySubsystem'); }
-  public initiateSocialGrooming(animal: any): void { recordSubsystemAction(this, 'initiateSocialGrooming', 'PhysiologyEcologySubsystem'); }
-  public exchangeVocalSignals(signal: any): void { recordSubsystemAction(this, 'exchangeVocalSignals', 'PhysiologyEcologySubsystem'); }
+  public followGroupLeader(leader: unknown): void { this.groupLeader = leader; }
+  public electGroupLeader(group: unknown) { return this.groupLeader; }
+  public synchronizeGroupMovement(group: unknown): void { recordSubsystemAction(this, 'synchronizeGroupMovement', 'PhysiologyEcologySubsystem'); }
+  public joinAnimalGroup(group: unknown): void { this.groupMembers.add(group); }
+  public leaveAnimalGroup(group: unknown): void { this.groupMembers.delete(group); }
+  public coordinateGroupForaging(group: unknown): void { recordSubsystemAction(this, 'coordinateGroupForaging', 'PhysiologyEcologySubsystem'); }
+  public performSocialGreeting(animal: unknown): void { recordSubsystemAction(this, 'performSocialGreeting', 'PhysiologyEcologySubsystem'); }
+  public initiateSocialGrooming(animal: unknown): void { recordSubsystemAction(this, 'initiateSocialGrooming', 'PhysiologyEcologySubsystem'); }
+  public exchangeVocalSignals(signal: unknown): void { recordSubsystemAction(this, 'exchangeVocalSignals', 'PhysiologyEcologySubsystem'); }
   public performAlarmCall(): void { recordSubsystemAction(this, 'performAlarmCall', 'PhysiologyEcologySubsystem'); }
-  public respondToAlarmCall(signal: any): void { this.behavior.fear = 70; }
-  public establishTerritorialBoundary(area: any): void { recordSubsystemAction(this, 'establishTerritorialBoundary', 'PhysiologyEcologySubsystem'); }
-  public patrolTerritory(area: any): void { this.behavior.currentMotivation = 'territorial'; }
-  public markTerritory(location: any): void { recordSubsystemAction(this, 'markTerritory', 'PhysiologyEcologySubsystem'); }
-  public defendTerritory(intruder: any): void { this.behavior.aggression = 90; }
-  public resolveSocialConflict(animal: any): void { recordSubsystemAction(this, 'resolveSocialConflict', 'PhysiologyEcologySubsystem'); }
+  public respondToAlarmCall(signal: unknown): void { this.behavior.fear = 70; }
+  public establishTerritorialBoundary(area: unknown): void { recordSubsystemAction(this, 'establishTerritorialBoundary', 'PhysiologyEcologySubsystem'); }
+  public patrolTerritory(area: unknown): void { this.behavior.currentMotivation = 'territorial'; }
+  public markTerritory(location: unknown): void { recordSubsystemAction(this, 'markTerritory', 'PhysiologyEcologySubsystem'); }
+  public defendTerritory(intruder: unknown): void { this.behavior.aggression = 90; }
+  public resolveSocialConflict(animal: unknown): void { recordSubsystemAction(this, 'resolveSocialConflict', 'PhysiologyEcologySubsystem'); }
 
   // 781–800. Vật lý, animation, AI và tối ưu hóa
   public initializeAnimalPhysics(): void { recordSubsystemAction(this, 'initializeAnimalPhysics', 'PhysiologyEcologySubsystem'); }
-  public createAnimalCollider(): any { return { type: 'box', size: { x: 1, y: 1, z: 2 } }; }
+  public createAnimalCollider() { return { type: 'box', size: { x: 1, y: 1, z: 2 } }; }
   public applyAnimalGravity(deltaTime: number): void { recordSubsystemAction(this, 'applyAnimalGravity', 'PhysiologyEcologySubsystem'); }
   public applyAnimalForce(force: Vec3): void { recordSubsystemAction(this, 'applyAnimalForce', 'PhysiologyEcologySubsystem'); }
   public resolveAnimalCollision(): void { recordSubsystemAction(this, 'resolveAnimalCollision', 'PhysiologyEcologySubsystem'); }
@@ -226,7 +226,7 @@ export class PhysiologyEcologySubsystem {
     return this.currentLOD;
   }
   public interpolateAnimalPosition(target: Vec3, alpha = 0.2): void { recordSubsystemAction(this, 'interpolateAnimalPosition', 'PhysiologyEcologySubsystem'); }
-  public interpolateAnimalRotation(target: any, alpha = 0.2): void { recordSubsystemAction(this, 'interpolateAnimalRotation', 'PhysiologyEcologySubsystem'); }
+  public interpolateAnimalRotation(target: unknown, alpha = 0.2): void { recordSubsystemAction(this, 'interpolateAnimalRotation', 'PhysiologyEcologySubsystem'); }
   public synchronizeAnimalPhysics(): void { recordSubsystemAction(this, 'synchronizeAnimalPhysics', 'PhysiologyEcologySubsystem'); }
   public optimizeAnimalSimulation(): void { recordSubsystemAction(this, 'optimizeAnimalSimulation', 'PhysiologyEcologySubsystem'); }
 }

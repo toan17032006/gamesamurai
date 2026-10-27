@@ -18,7 +18,8 @@
     "baseUrl": ".",
     "typeRoots": [
       "../apps/web/node_modules/@types",
-      "../node_modules/@types"
+      "../node_modules/@types",
+      "./node_modules/@types"
     ],
     "paths": {
       "@aetheria/engine/*": ["./src/*"],

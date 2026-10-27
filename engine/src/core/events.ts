@@ -4,7 +4,7 @@ export type EventMap = object;
 
 export type EventHandler<T> = (payload: T) => void;
 
-export class EventBus<M extends EventMap = Record<string, any>> {
+export class EventBus<M extends EventMap = Record<string, unknown>> {
   private handlers = new Map<string, Set<EventHandler<never>>>();
 
   on<K extends keyof M & string>(type: K, fn: EventHandler<M[K]>): () => void {

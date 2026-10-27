@@ -115,7 +115,7 @@ export class AnimalBase {
   public getAnimalConfig(): AnimalConfig {
     return { id: this.id, species: this.species, profile: { ...this.profile }, appearance: { ...this.appearance } };
   }
-  public getAnimalState(): Record<string, any> {
+  public getAnimalState(): Record<string, unknown> {
     return {
       id: this.id,
       species: this.species,
@@ -131,15 +131,15 @@ export class AnimalBase {
       appearance: { ...this.appearance },
     };
   }
-  public setAnimalState(state: Record<string, any>): void {
-    if (state.position) this.position = { ...state.position };
+  public setAnimalState(state: Record<string, unknown>): void {
+    if (state.position) this.position = { ...(state.position as Vec3) };
     if (typeof state.isAlive === 'boolean') this.isAlive = state.isAlive;
     if (typeof state.health === 'number') this.health = state.health;
     if (typeof state.isEnabled === 'boolean') this.isEnabled = state.isEnabled;
     if (typeof state.isPaused === 'boolean') this.isPaused = state.isPaused;
   }
   public saveAnimalState(): string { return JSON.stringify(this.getAnimalState()); }
-  public restoreAnimalState(state: string | Record<string, any>): boolean {
+  public restoreAnimalState(state: string | Record<string, unknown>): boolean {
     try {
       const parsed = typeof state === 'string' ? JSON.parse(state) : state;
       this.setAnimalState(parsed);

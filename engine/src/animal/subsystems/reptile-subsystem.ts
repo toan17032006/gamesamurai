@@ -51,7 +51,7 @@ export class ReptileSubsystem {
   public anchorSnakeBody(): void { recordSubsystemAction(this, 'anchorSnakeBody', 'ReptileSubsystem'); }
   public extendSnakeBodyForward(): void { recordSubsystemAction(this, 'extendSnakeBodyForward', 'ReptileSubsystem'); }
   public contractSnakeBody(): void { recordSubsystemAction(this, 'contractSnakeBody', 'ReptileSubsystem'); }
-  public strikeAtTarget(target: any): void { recordSubsystemAction(this, 'strikeAtTarget', 'ReptileSubsystem'); }
+  public strikeAtTarget(target: unknown): void { recordSubsystemAction(this, 'strikeAtTarget', 'ReptileSubsystem'); }
   public recoilAfterStrike(): void { recordSubsystemAction(this, 'recoilAfterStrike', 'ReptileSubsystem'); }
   public coilSnakeBody(): void { this.isCoiled = true; }
   public uncoilSnakeBody(): void { this.isCoiled = false; }
@@ -63,8 +63,8 @@ export class ReptileSubsystem {
   public openReptileJaw(): void { recordSubsystemAction(this, 'openReptileJaw', 'ReptileSubsystem'); }
   public closeReptileJaw(): void { recordSubsystemAction(this, 'closeReptileJaw', 'ReptileSubsystem'); }
   public performJawGape(): void { this.openReptileJaw(); }
-  public captureReptilePrey(prey: any): void { recordSubsystemAction(this, 'captureReptilePrey', 'ReptileSubsystem'); }
-  public swallowReptilePrey(prey: any): void { recordSubsystemAction(this, 'swallowReptilePrey', 'ReptileSubsystem'); }
+  public captureReptilePrey(prey: unknown): void { recordSubsystemAction(this, 'captureReptilePrey', 'ReptileSubsystem'); }
+  public swallowReptilePrey(prey: unknown): void { recordSubsystemAction(this, 'swallowReptilePrey', 'ReptileSubsystem'); }
   public regulateBodyTemperature(): void { recordSubsystemAction(this, 'regulateBodyTemperature', 'ReptileSubsystem'); }
   public baskInSunlight(): void { this.isBasking = true; }
   public seekShade(): void { this.isBasking = false; }

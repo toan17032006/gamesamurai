@@ -1,7 +1,7 @@
 // engine/src/physics/fluid-dynamics.ts — Động lực học chất lỏng, lực nổi (Buoyancy) & sóng nước
 import * as THREE from 'three';
 import type { FluidVolume, PhysicsBody } from '../types/physics.types';
-import { bottomOffset } from './rigid-body';
+import { bottomOffset, collisionBottomOffset } from './rigid-body';
 
 export interface Ripple {
   x: number;
@@ -74,7 +74,8 @@ export class FluidSimulator {
         ) {
           const waterY = this.getWaveHeight(bx, bz, this.currentTime, vol.surfaceY);
           const bRadius = bottomOffset(body.shape);
-          const bodyBottom = by - bRadius;
+          // Đáy va chạm gồm shape.center offset (nhất quán với resolveGround).
+          const bodyBottom = by - collisionBottomOffset(body.shape);
 
           if (bodyBottom < waterY) {
             const submergedDepth = Math.min(bRadius * 2, waterY - bodyBottom);

@@ -16,6 +16,8 @@ export interface EngineLoopStats {
   entitiesCount?: number;
   physicsBodiesCount?: number;
   activeParticlesCount?: number;
+  populationAgents?: number;
+  streamedRegions?: number;
 }
 
 export interface EngineInitOptions {

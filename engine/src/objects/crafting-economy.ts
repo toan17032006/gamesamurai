@@ -21,13 +21,13 @@ export type CurrencyType =
   | 'honor_points'
   | 'tokens';
 
-export interface CraftingIngredient<TItem = any> {
+export interface CraftingIngredient<TItem = unknown> {
   itemId: string;
   count: number;
   itemData?: TItem;
 }
 
-export interface CraftingRecipe<TInput = any, TOutput = any> {
+export interface CraftingRecipe<TInput = unknown, TOutput = unknown> {
   id: string;
   name: string;
   station: StationType;
@@ -41,7 +41,7 @@ export interface CraftingRecipe<TInput = any, TOutput = any> {
   };
 }
 
-export interface MarketListing<TItem = any> {
+export interface MarketListing<TItem = unknown> {
   listingId: string;
   sellerId: string;
   item: TItem;
@@ -51,17 +51,28 @@ export interface MarketListing<TItem = any> {
   createdAt: number;
 }
 
+/** Hợp đồng tối thiểu của kho đồ dùng trong chế tạo. */
+export interface CraftingInventory {
+  hasItem?(itemId: string, count: number): boolean;
+  removeItem?(itemId: string, count: number): void;
+}
+
+/** Hợp đồng tối thiểu của kho đồ người mua trong chợ. */
+export interface MarketInventory<TItem = unknown> {
+  addItem?(item: TItem, quantity: number): void;
+}
+
 /**
  * Generic Crafting Recipe validator and executor.
  */
-export class Recipe<TInput = any, TOutput = any> {
+export class Recipe<TInput = unknown, TOutput = unknown> {
   public recipe: CraftingRecipe<TInput, TOutput>;
 
   constructor(recipe: CraftingRecipe<TInput, TOutput>) {
     this.recipe = recipe;
   }
 
-  public canCraft(inventory: any, playerLevel = 1): boolean {
+  public canCraft(inventory: CraftingInventory | null | undefined, playerLevel = 1): boolean {
     if (playerLevel < this.recipe.requiredLevel) return false;
     if (!inventory) return false;
 
@@ -73,8 +84,8 @@ export class Recipe<TInput = any, TOutput = any> {
     return true;
   }
 
-  public craft(inventory: any, playerLevel = 1): { itemId: string; count: number; itemData?: TOutput } | null {
-    if (!this.canCraft(inventory, playerLevel)) return null;
+  public craft(inventory: CraftingInventory | null | undefined, playerLevel = 1): { itemId: string; count: number; itemData?: TOutput } | null {
+    if (!this.canCraft(inventory, playerLevel) || !inventory) return null;
 
     // Consume items
     for (const input of this.recipe.inputs) {
@@ -162,7 +173,7 @@ export class CurrencyWallet {
 /**
  * Direct 2-Player or Player-to-NPC trading session.
  */
-export class TradeSession<TTrader = any, TItem = any> {
+export class TradeSession<TTrader = unknown, TItem = unknown> {
   public partyA: TTrader;
   public partyB: TTrader;
   public offerA: { items: TItem[]; gold: number } = { items: [], gold: 0 };
@@ -209,7 +220,7 @@ export class TradeSession<TTrader = any, TItem = any> {
 /**
  * Server/Client In-game Marketplace order book.
  */
-export class Marketplace<TItem = any> {
+export class Marketplace<TItem = unknown> {
   private _listings: Map<string, MarketListing<TItem>> = new Map();
 
   public listItem(
@@ -243,7 +254,7 @@ export class Marketplace<TItem = any> {
   public buyItem(
     listingId: string,
     buyerWallet: CurrencyWallet,
-    buyerInventory?: any
+    buyerInventory?: MarketInventory<TItem>
   ): boolean {
     const listing = this._listings.get(listingId);
     if (!listing) return false;

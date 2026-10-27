@@ -6,16 +6,25 @@
 
 import { HealthPool, ManaPool, EnergyPool } from './attributes.js';
 import { Inventory } from './inventory.js';
+import type { Item } from './inventory.js';
 import { SkillBar } from './skills.js';
+import type { Skill } from './skills.js';
 import { LevelSystem } from './progression.js';
 import { AgentBrain } from '../ai/agent-brain.js';
 import type { AgentBrainSummary } from '../ai/agent-brain.js';
 import type {
   AgentActionResult,
+  AgentAversion,
   AgentBrainConfig,
   AgentDecision,
   AgentLearningResult,
+  AgentNegativeLearningResult,
+  AgentNegativeSample,
+  AgentNegativeTrainingReport,
   AgentObservation,
+  AgentPreferenceLearningResult,
+  AgentPreferencePair,
+  AgentSnapshot,
   AgentStimulus,
   AgentUpdateResult,
 } from '../ai/agent-types.js';
@@ -35,7 +44,7 @@ export interface InteractionPrompt<TAction = string> {
   distance: number;
 }
 
-export interface IEntity<TState = any> {
+export interface IEntity<TState = unknown> {
   readonly id: string;
   name: string;
   transform: Transform3D;
@@ -48,7 +57,7 @@ export interface IEntity<TState = any> {
 /**
  * Core generic Entity base class with component management, transforms, tags, and lifecycle.
  */
-export class Entity<TState = Record<string, any>> implements IEntity<TState> {
+export class Entity<TState = Record<string, unknown>> implements IEntity<TState> {
   public readonly id: string;
   public name: string;
   public transform: Transform3D;
@@ -56,7 +65,7 @@ export class Entity<TState = Record<string, any>> implements IEntity<TState> {
   public lifecycle: EntityLifecycleState = 'active';
   public tags: Set<string> = new Set();
 
-  private _components: Map<string, any> = new Map();
+  private _components: Map<string, unknown> = new Map();
 
   constructor(id: string, name: string, initialState?: TState) {
     this.id = id;
@@ -112,8 +121,9 @@ export class Entity<TState = Record<string, any>> implements IEntity<TState> {
   public update(dt: number): void {
     // Override in derived classes or tick components
     for (const comp of this._components.values()) {
-      if (typeof comp?.update === 'function') {
-        comp.update(dt);
+      const component = comp as { update?: (dt: number) => void } | null;
+      if (typeof component?.update === 'function') {
+        component.update(dt);
       }
     }
   }
@@ -129,8 +139,8 @@ export class Entity<TState = Record<string, any>> implements IEntity<TState> {
  */
 export class Player<
   TStats extends Record<string, number> = Record<string, number>,
-  TInventory = Inventory<any>,
-  TSkills = SkillBar<any>
+  TInventory = Inventory<Item>,
+  TSkills = SkillBar<Skill>
 > extends Entity<{ isGrounded: boolean; isSprinting: boolean; combatState: 'idle' | 'in_combat' }> {
   public health: HealthPool;
   public mana: ManaPool;
@@ -139,6 +149,11 @@ export class Player<
   public inventory: TInventory;
   public skillBar: TSkills;
   public isPlayerControlled = true;
+
+  /** The player owns a private brain only when AI assistance/training is used. */
+  private _brain: AgentBrain | null = null;
+  private _lastBrainUpdate: AgentUpdateResult | null = null;
+  private readonly _brainConfig: AgentBrainConfig;
 
   constructor(
     id: string,
@@ -149,6 +164,7 @@ export class Player<
       maxEnergy?: number;
       inventory?: TInventory;
       skillBar?: TSkills;
+      brainConfig?: AgentBrainConfig;
     }
   ) {
     super(id, name, {
@@ -163,8 +179,138 @@ export class Player<
     this.levelSystem = new LevelSystem<TStats>();
     this.inventory = (options?.inventory ?? new Inventory(40)) as unknown as TInventory;
     this.skillBar = (options?.skillBar ?? new SkillBar(8)) as unknown as TSkills;
+    this._brainConfig = options?.brainConfig ?? {};
 
     this.addTag('player');
+  }
+
+  /**
+   * Lazily creates the player's private agent brain. Player agents can be
+   * driven manually while the brain observes, learns from outcomes and powers
+   * optional auto-play, companions, replays or spectator simulation.
+   */
+  public get brain(): AgentBrain {
+    if (!this._brain) {
+      this._brain = new AgentBrain(
+        {
+          id: this.id,
+          name: this.name,
+          archetype: 'player',
+        },
+        this._brainConfig,
+      );
+    }
+    return this._brain;
+  }
+
+  public getBrain(): AgentBrain {
+    return this.brain;
+  }
+
+  public peekBrain(): AgentBrain | null {
+    return this._brain;
+  }
+
+  public getBrainSummary(): AgentBrainSummary {
+    return this.brain.getSummary();
+  }
+
+  public peekLastBrainUpdate(): AgentUpdateResult | null {
+    return this._lastBrainUpdate;
+  }
+
+  /** Perception frame derived from the player's real runtime state. */
+  public buildAgentObservation(): AgentObservation {
+    const [x, y, z] = this.transform.position;
+    return {
+      tick: this._brain?.tickCount ?? 0,
+      position: { x, y, z },
+      health: (this.health.current / Math.max(1, this.health.max)) * 100,
+      stamina: (this.energy.current / Math.max(1, this.energy.max)) * 100,
+      threatLevel: this.state.combatState === 'in_combat' ? 0.85 : 0,
+      inventory: [],
+      environment: {
+        isGrounded: this.state.isGrounded,
+        isSprinting: this.state.isSprinting,
+        combatState: this.state.combatState,
+        mana: this.mana.current,
+        level: this.levelSystem.currentLevel,
+      },
+    };
+  }
+
+  public think(observation?: AgentObservation): AgentDecision {
+    return this.brain.decide(observation ?? this.buildAgentObservation(), { explore: true });
+  }
+
+  public learnFromReward(reward: number, actionId?: string): AgentLearningResult {
+    const decision = this.brain.getLastDecision();
+    const observation = this.buildAgentObservation();
+    const stateKey = decision?.stateKey ?? this.brain.stateKeyFor(observation);
+    return this.brain.learn({
+      stateKey,
+      actionId: actionId ?? decision?.actionId ?? 'idle',
+      reward,
+      nextStateKey: stateKey,
+      done: false,
+    });
+  }
+
+  /** Teach the player agent that an action was harmful. */
+  public learnFromNegative(sample: AgentNegativeSample): AgentNegativeLearningResult {
+    const decision = this.brain.getLastDecision();
+    const observation = this.buildAgentObservation();
+    return this.brain.learnNegative({
+      ...sample,
+      stateKey: sample.stateKey ?? decision?.stateKey ?? this.brain.stateKeyFor(observation),
+      actionId: sample.actionId || decision?.actionId || 'idle',
+    });
+  }
+
+  public trainNegativeBatch(samples: readonly AgentNegativeSample[]): AgentNegativeTrainingReport {
+    return this.brain.trainNegativeBatch(samples);
+  }
+
+  public learnPreference(pair: AgentPreferencePair): AgentPreferenceLearningResult {
+    const decision = this.brain.getLastDecision();
+    return this.brain.learnPreference({
+      ...pair,
+      stateKey: pair.stateKey ?? decision?.stateKey,
+    });
+  }
+
+  public recordAversion(stimulusId: string, strength = 0.5, reason = 'negative experience'): AgentAversion {
+    return this.brain.recordAversion(stimulusId, strength, reason);
+  }
+
+  public getAversions(): AgentAversion[] {
+    return this.brain.listAversions();
+  }
+
+  public performAgentAction(
+    actionId?: string,
+    difficulty = 0.5,
+    nextObservation?: AgentObservation,
+  ): AgentActionResult {
+    const decision = this.brain.getLastDecision();
+    return this.brain.performAction(
+      actionId ?? decision?.actionId ?? 'idle',
+      difficulty,
+      nextObservation,
+    );
+  }
+
+  public serializeAgentBrain(): AgentSnapshot {
+    return this.brain.serialize();
+  }
+
+  public restoreAgentBrain(snapshot: AgentSnapshot): boolean {
+    try {
+      this._brain = AgentBrain.fromSnapshot(snapshot);
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   public override update(dt: number): void {
@@ -172,15 +318,18 @@ export class Player<
     this.health.tick(dt, this.state.combatState === 'in_combat');
     this.mana.tick(dt);
     this.energy.tick(dt);
-    if ((this.skillBar as any)?.tick) {
-      (this.skillBar as any).tick(dt);
+    const skillBar = this.skillBar as unknown as { tick?: (delta: number) => void };
+    skillBar.tick?.(dt);
+    if (this._brain) {
+      this._lastBrainUpdate = this._brain.update(this.buildAgentObservation(), dt);
     }
   }
 
   public interactWith(target: Entity): boolean {
     if (!target) return false;
-    if (typeof (target as any).interact === 'function') {
-      return (target as any).interact(this);
+    const interactive = target as Entity & { interact?: (source: Entity) => boolean };
+    if (typeof interactive.interact === 'function') {
+      return interactive.interact(this);
     }
     return false;
   }
@@ -203,11 +352,11 @@ export class Player<
 /**
  * Generic NPC entity with dialogue tree, quest giving, and shop trading roles.
  */
-export class NPC<TDialogue = any, TRole extends string = string> extends Entity<{ isTalking: boolean }> {
+export class NPC<TDialogue = unknown, TRole extends string = string> extends Entity<{ isTalking: boolean }> {
   public role: TRole;
   public dialogueTree?: TDialogue;
   public isInteractable = true;
-  public tradeInventory?: Inventory<any>;
+  public tradeInventory?: Inventory<Item>;
 
   /** Each NPC gets a private brain the first time it is used. */
   private _brain: AgentBrain | null = null;
@@ -316,6 +465,37 @@ export class NPC<TDialogue = any, TRole extends string = string> extends Entity<
     }
   }
 
+  /** Teach this NPC that one of its actions was harmful. */
+  public learnFromNegative(sample: AgentNegativeSample): AgentNegativeLearningResult {
+    const decision = this.brain.getLastDecision();
+    const observation = this.buildAgentObservation();
+    return this.brain.learnNegative({
+      ...sample,
+      stateKey: sample.stateKey ?? decision?.stateKey ?? this.brain.stateKeyFor(observation),
+      actionId: sample.actionId || decision?.actionId || 'idle',
+    });
+  }
+
+  public trainNegativeBatch(samples: readonly AgentNegativeSample[]): AgentNegativeTrainingReport {
+    return this.brain.trainNegativeBatch(samples);
+  }
+
+  public learnPreference(pair: AgentPreferencePair): AgentPreferenceLearningResult {
+    const decision = this.brain.getLastDecision();
+    return this.brain.learnPreference({
+      ...pair,
+      stateKey: pair.stateKey ?? decision?.stateKey,
+    });
+  }
+
+  public recordAversion(stimulusId: string, strength = 0.5, reason = 'negative experience'): AgentAversion {
+    return this.brain.recordAversion(stimulusId, strength, reason);
+  }
+
+  public getAversions(): AgentAversion[] {
+    return this.brain.listAversions();
+  }
+
   public setDialogue(dialogue: TDialogue): void {
     this.dialogueTree = dialogue;
   }
@@ -327,7 +507,7 @@ export class NPC<TDialogue = any, TRole extends string = string> extends Entity<
    * — tức là "return có sẵn". Nay khoảng cách được tính từ vị trí thật của hai
    * bên, và chỉ mở hội thoại khi thực sự có người tương tác.
    */
-  public interact(interactor: Player<any, any, any>): InteractionPrompt {
+  public interact(interactor: Player): InteractionPrompt {
     const distance = interactor
       ? Math.hypot(
           interactor.transform.position[0] - this.transform.position[0],
@@ -348,7 +528,7 @@ export class NPC<TDialogue = any, TRole extends string = string> extends Entity<
 /**
  * Generic Bot / AI controlled monster, minion, or hostile agent.
  */
-export class Bot<TBehavior = any, TBlackboard = Record<string, any>> extends Entity<{
+export class Bot<TBehavior = unknown, TBlackboard = Record<string, unknown>> extends Entity<{
   aiState: 'idle' | 'patrol' | 'chase' | 'attack' | 'flee';
 }> {
   public health: HealthPool;
@@ -484,6 +664,37 @@ export class Bot<TBehavior = any, TBlackboard = Record<string, any>> extends Ent
     );
   }
 
+  /** Teach this bot/monster that an action was harmful. */
+  public learnFromNegative(sample: AgentNegativeSample): AgentNegativeLearningResult {
+    const decision = this.brain.getLastDecision();
+    const observation = this.buildAgentObservation();
+    return this.brain.learnNegative({
+      ...sample,
+      stateKey: sample.stateKey ?? decision?.stateKey ?? this.brain.stateKeyFor(observation),
+      actionId: sample.actionId || decision?.actionId || 'idle',
+    });
+  }
+
+  public trainNegativeBatch(samples: readonly AgentNegativeSample[]): AgentNegativeTrainingReport {
+    return this.brain.trainNegativeBatch(samples);
+  }
+
+  public learnPreference(pair: AgentPreferencePair): AgentPreferenceLearningResult {
+    const decision = this.brain.getLastDecision();
+    return this.brain.learnPreference({
+      ...pair,
+      stateKey: pair.stateKey ?? decision?.stateKey,
+    });
+  }
+
+  public recordAversion(stimulusId: string, strength = 0.5, reason = 'negative experience'): AgentAversion {
+    return this.brain.recordAversion(stimulusId, strength, reason);
+  }
+
+  public getAversions(): AgentAversion[] {
+    return this.brain.listAversions();
+  }
+
   public setTarget(target: Entity | null): void {
     this.targetEntity = target;
     if (target) {
@@ -543,8 +754,8 @@ export class Bot<TBehavior = any, TBlackboard = Record<string, any>> extends Ent
  * machine and the modern per-agent brain API.
  */
 export class Monster<
-  TBehavior = any,
-  TBlackboard = Record<string, any>,
+  TBehavior = unknown,
+  TBlackboard = Record<string, unknown>,
 > extends Bot<TBehavior, TBlackboard> {
   constructor(
     id: string,

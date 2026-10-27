@@ -42,6 +42,7 @@ import {
   type AgentActionResult,
   type AgentActionScore,
   type AgentArchetype,
+  type AgentAversion,
   type AgentBelief,
   type AgentBrainConfig,
   type AgentConsolidationResult,
@@ -59,11 +60,18 @@ import {
   type AgentLearningConfig,
   type AgentLearningResult,
   type AgentMemoryQuery,
+  type AgentNegativeLearningResult,
+  type AgentNegativeRecord,
+  type AgentNegativeSample,
+  type AgentNegativeStats,
+  type AgentNegativeTrainingReport,
   type AgentNeeds,
   type AgentNeedKey,
   type AgentObservation,
   type AgentPlan,
   type AgentPlanStep,
+  type AgentPreferenceLearningResult,
+  type AgentPreferencePair,
   type AgentRelationship,
   type AgentResetResult,
   type AgentSkill,
@@ -114,6 +122,8 @@ export interface AgentBrainSummary {
   skills: number;
   relationships: number;
   goals: number;
+  aversions: number;
+  negativeSamples: number;
 }
 
 function copyVec3(value: Vec3 | undefined): Vec3 | undefined {
@@ -189,6 +199,14 @@ function copyDecision(decision: AgentDecision): AgentDecision {
   return { ...decision, alternatives: decision.alternatives.map((item) => ({ ...item })) };
 }
 
+function copyAversion(aversion: AgentAversion): AgentAversion {
+  return { ...aversion };
+}
+
+function copyNegativeRecord(record: AgentNegativeRecord): AgentNegativeRecord {
+  return { ...record };
+}
+
 /**
  * Isolated AI runtime for a single bot, NPC, monster, pet or player-like agent.
  */
@@ -204,6 +222,14 @@ export class AgentBrain {
   private readonly skills = new Map<string, AgentSkill>();
   private readonly relationships = new Map<string, AgentRelationship>();
   private readonly qTable = new Map<string, Map<string, number>>();
+  private readonly aversions = new Map<string, AgentAversion>();
+  private readonly negativeHistory: AgentNegativeRecord[] = [];
+  private negativeStats: AgentNegativeStats = {
+    samples: 0,
+    totalPenalty: 0,
+    preferencePairs: 0,
+    aversionCount: 0,
+  };
   private readonly episodes: AgentEpisode[] = [];
   private readonly beliefs = new Map<string, AgentBelief>();
   private readonly goals = new Map<string, AgentGoal>();
@@ -347,6 +373,8 @@ export class AgentBrain {
       skills: this.skills.size,
       relationships: this.relationships.size,
       goals: this.goals.size,
+      aversions: this.aversions.size,
+      negativeSamples: this.negativeStats.samples,
     };
   }
 
@@ -829,7 +857,7 @@ export class AgentBrain {
     return this.skills.get(skillId)?.level ?? 0;
   }
 
-  /** Add XP to a skill and process any level-ups. */
+  /** Add XP to a skill and process level-ups. */
   public practiceSkill(skillId: string, xpGain = 10): AgentSkill {
     const skill = this.skills.get(skillId);
     if (!skill) throw new RangeError(`Unknown skill: ${skillId}`);
@@ -1162,6 +1190,257 @@ export class AgentBrain {
       meanReward: samples.length > 0 ? totalReward / samples.length : 0,
       qTableSize: this.getQTableSize(),
     };
+  }
+
+  // ==========================================================================
+  // Negative reinforcement, preferences and aversions
+  // ==========================================================================
+
+  /**
+   * Learn that an action is harmful.
+   *
+   * Negative updates use a faster asymmetric learning rate and are monotonic:
+   * a penalty never raises an action's Q-value. Supplying `stimulusId` also
+   * creates or strengthens a persistent aversion toward that stimulus.
+   */
+  public learnNegative(sample: AgentNegativeSample): AgentNegativeLearningResult {
+    const penalty = clamp(
+      Math.abs(finiteOr(sample.penalty, 0)) * clamp(finiteOr(sample.weight, 1), 0.01, 10),
+      0,
+      1000,
+    );
+    const stateKey = sample.stateKey || this.lastStateKey || this.stateKeyFor(this.currentObservation);
+    let values = this.qTable.get(stateKey);
+    if (!values) {
+      values = new Map<string, number>();
+      this.qTable.set(stateKey, values);
+    }
+
+    const oldQ = values.get(sample.actionId) ?? 0;
+    let minNext = 0;
+    if (!sample.done && sample.nextStateKey) {
+      const nextValues = this.qTable.get(sample.nextStateKey);
+      if (nextValues) {
+        for (const value of nextValues.values()) {
+          if (value < minNext) minNext = value;
+        }
+      }
+    }
+
+    const target = -penalty + this.learning.gamma * minNext;
+    const alpha = clamp(this.learning.alpha * 1.5, 0.05, 0.95);
+    let newQ = oldQ + alpha * (target - oldQ);
+    if (!Number.isFinite(newQ)) newQ = oldQ - penalty;
+    // Asymmetric negative learning: punishment may lower a value, never raise it.
+    if (penalty > 0) newQ = Math.min(oldQ, newQ);
+    newQ = clamp(newQ, -1000, 1000);
+    values.set(sample.actionId, newQ);
+
+    const reason = sample.reason?.trim() || 'negative-reinforcement';
+    let aversionStrength: number | undefined;
+    if (sample.stimulusId) {
+      const aversion = this.recordAversion(
+        sample.stimulusId,
+        clamp01(penalty / 25),
+        reason,
+      );
+      aversionStrength = aversion.strength;
+    }
+
+    this.stats.trainingSamples++;
+    this.stats.qUpdates++;
+    this.stats.rewards++;
+    this.stats.totalReward -= penalty;
+    this.stats.lastReward = -penalty;
+    this.applyNegativeImpact(penalty);
+
+    this.negativeStats.samples++;
+    this.negativeStats.totalPenalty += penalty;
+    this.negativeHistory.push({
+      stateKey,
+      actionId: sample.actionId,
+      penalty,
+      reason,
+      stimulusId: sample.stimulusId,
+      timestamp: Date.now(),
+    });
+    const historyLimit = Math.max(32, Math.floor(this.learning.memoryCapacity));
+    if (this.negativeHistory.length > historyLimit) {
+      this.negativeHistory.splice(0, this.negativeHistory.length - historyLimit);
+    }
+
+    this.pruneQTable();
+
+    return {
+      agentId: this.identity.id,
+      stateKey,
+      actionId: sample.actionId,
+      oldQ,
+      newQ,
+      target,
+      reward: -penalty,
+      alpha,
+      gamma: this.learning.gamma,
+      penalty,
+      aversionStrength,
+      reason,
+    };
+  }
+
+  /** Train a batch of negative samples and return aggregate diagnostics. */
+  public trainNegativeBatch(samples: readonly AgentNegativeSample[]): AgentNegativeTrainingReport {
+    let totalPenalty = 0;
+    let updatedActions = 0;
+    for (const sample of samples) {
+      const result = this.learnNegative(sample);
+      totalPenalty += result.penalty;
+      if (result.newQ < result.oldQ) updatedActions++;
+    }
+    return {
+      samples: samples.length,
+      totalPenalty,
+      meanPenalty: samples.length > 0 ? totalPenalty / samples.length : 0,
+      updatedActions,
+      aversionCount: this.aversions.size,
+      qTableSize: this.getQTableSize(),
+    };
+  }
+
+  /**
+   * Learn a preference between two actions, pushing the preferred action's
+   * Q-value above the dispreferred one by at least `strength`.
+   */
+  public learnPreference(pair: AgentPreferencePair): AgentPreferenceLearningResult {
+    if (pair.preferredActionId === pair.dispreferredActionId) {
+      throw new RangeError('learnPreference requires two distinct action ids');
+    }
+    const stateKey = pair.stateKey || this.lastStateKey || this.stateKeyFor(this.currentObservation);
+    let values = this.qTable.get(stateKey);
+    if (!values) {
+      values = new Map<string, number>();
+      this.qTable.set(stateKey, values);
+    }
+
+    const strength = clamp(finiteOr(pair.strength, 1), 0, 1000);
+    let preferredQ = values.get(pair.preferredActionId) ?? 0;
+    let dispreferredQ = values.get(pair.dispreferredActionId) ?? 0;
+    const initialMargin = preferredQ - dispreferredQ;
+    if (strength > 0 && initialMargin < strength) {
+      const rate = clamp(this.learning.alpha * 2, 0.05, 0.9);
+      const delta = ((strength - initialMargin) / 2) * rate;
+      preferredQ = clamp(preferredQ + delta, -1000, 1000);
+      dispreferredQ = clamp(dispreferredQ - delta, -1000, 1000);
+      values.set(pair.preferredActionId, preferredQ);
+      values.set(pair.dispreferredActionId, dispreferredQ);
+    }
+
+    this.negativeStats.preferencePairs++;
+    this.pruneQTable();
+
+    return {
+      agentId: this.identity.id,
+      stateKey,
+      preferredActionId: pair.preferredActionId,
+      dispreferredActionId: pair.dispreferredActionId,
+      preferredQ,
+      dispreferredQ,
+      margin: preferredQ - dispreferredQ,
+      strength,
+    };
+  }
+
+  /** Train several preference pairs in order. */
+  public trainPreferenceBatch(
+    pairs: readonly AgentPreferencePair[],
+  ): AgentPreferenceLearningResult[] {
+    return pairs.map((pair) => this.learnPreference(pair));
+  }
+
+  /**
+   * Record or strengthen an aversion toward a stimulus id. Repeated exposures
+   * saturate toward 1 instead of growing without bound.
+   */
+  public recordAversion(stimulusId: string, strength = 0.5, reason = 'negative experience'): AgentAversion {
+    if (!stimulusId) throw new Error('recordAversion requires a non-empty stimulusId');
+    const now = Date.now();
+    const sanitized = clamp01(finiteOr(strength, 0.5));
+    const existing = this.aversions.get(stimulusId);
+    if (existing) {
+      existing.strength = clamp01(existing.strength + sanitized * (1 - existing.strength));
+      existing.exposures++;
+      existing.lastSeenAt = now;
+      if (reason) existing.reason = reason;
+      this.negativeStats.aversionCount = this.aversions.size;
+      return copyAversion(existing);
+    }
+    const aversion: AgentAversion = {
+      stimulusId,
+      strength: sanitized,
+      reason,
+      exposures: 1,
+      firstSeenAt: now,
+      lastSeenAt: now,
+    };
+    this.aversions.set(stimulusId, aversion);
+    this.negativeStats.aversionCount = this.aversions.size;
+    return copyAversion(aversion);
+  }
+
+  public getAversion(stimulusId: string): AgentAversion | undefined {
+    const aversion = this.aversions.get(stimulusId);
+    return aversion ? copyAversion(aversion) : undefined;
+  }
+
+  /** Avoidance score in `[0, 1]`; unknown stimuli return 0. */
+  public getAvoidanceScore(stimulusId: string): number {
+    return this.aversions.get(stimulusId)?.strength ?? 0;
+  }
+
+  public listAversions(): AgentAversion[] {
+    return Array.from(this.aversions.values())
+      .sort((a, b) => b.strength - a.strength || a.stimulusId.localeCompare(b.stimulusId))
+      .map(copyAversion);
+  }
+
+  public clearAversion(stimulusId: string): boolean {
+    const removed = this.aversions.delete(stimulusId);
+    this.negativeStats.aversionCount = this.aversions.size;
+    return removed;
+  }
+
+  /** Decay all aversions (forgetting). Removes entries that reach zero. */
+  public decayAversions(rate = 0.01): number {
+    const decay = clamp(finiteOr(rate, 0), 0, 1);
+    let removed = 0;
+    for (const [id, aversion] of this.aversions.entries()) {
+      aversion.strength = clamp01(aversion.strength - decay);
+      if (aversion.strength <= 1e-4) {
+        this.aversions.delete(id);
+        removed++;
+      }
+    }
+    this.negativeStats.aversionCount = this.aversions.size;
+    return removed;
+  }
+
+  public getNegativeStats(): AgentNegativeStats {
+    return { ...this.negativeStats, aversionCount: this.aversions.size };
+  }
+
+  public getNegativeHistory(limit = 50): AgentNegativeRecord[] {
+    const count = clamp(Math.floor(finiteOr(limit, 50)), 0, this.negativeHistory.length);
+    return this.negativeHistory
+      .slice(this.negativeHistory.length - count)
+      .map(copyNegativeRecord);
+  }
+
+  private applyNegativeImpact(penalty: number): void {
+    const stressGain = clamp(penalty / 40, 0.01, 0.35);
+    const valenceLoss = clamp(penalty / 60, 0.005, 0.3);
+    const fearGain = clamp(penalty / 70, 0.01, 0.25);
+    this.emotions.stress = clamp01(this.emotions.stress + stressGain);
+    this.emotions.valence = clampSigned(this.emotions.valence - valenceLoss);
+    this.emotions.intensities.fear = clamp01(this.emotions.intensities.fear + fearGain);
   }
 
   public getQValue(stateKey: string, actionId: string): number {
@@ -1823,6 +2102,9 @@ export class AgentBrain {
       lastStateKey: this.lastStateKey,
       randomState: this.rng.getState(),
       episodeCounter: this.episodeCounter,
+      aversions: this.listAversions(),
+      negativeHistory: this.negativeHistory.map(copyNegativeRecord),
+      negativeStats: this.getNegativeStats(),
     };
 
     return {
@@ -1903,6 +2185,51 @@ export class AgentBrain {
 
     Object.assign(brain.stats, copyStats(snapshot.stats));
     brain.memory.repository.load(Array.isArray(snapshot.memoryRecords) ? snapshot.memoryRecords : []);
+
+    brain.aversions.clear();
+    for (const aversion of Array.isArray(snapshot.aversions) ? snapshot.aversions : []) {
+      if (!aversion?.stimulusId) continue;
+      brain.aversions.set(aversion.stimulusId, {
+        ...copyAversion(aversion),
+        strength: clamp01(aversion.strength),
+        reason: aversion.reason ?? 'negative experience',
+        exposures: Math.max(0, Math.floor(finiteOr(aversion.exposures, 1))),
+        firstSeenAt: finiteOr(aversion.firstSeenAt, 0),
+        lastSeenAt: finiteOr(aversion.lastSeenAt, 0),
+      });
+    }
+
+    brain.negativeHistory.length = 0;
+    const history = Array.isArray(snapshot.negativeHistory) ? snapshot.negativeHistory : [];
+    const historyLimit = Math.max(32, Math.floor(finiteOr(snapshot.learning.memoryCapacity, 256)));
+    for (const record of history.slice(-historyLimit)) {
+      if (!record?.actionId) continue;
+      brain.negativeHistory.push({
+        stateKey: record.stateKey ?? '',
+        actionId: record.actionId,
+        penalty: clamp(finiteOr(record.penalty, 0), 0, 1000),
+        reason: record.reason ?? 'negative-reinforcement',
+        stimulusId: record.stimulusId,
+        timestamp: finiteOr(record.timestamp, 0),
+      });
+    }
+
+    if (snapshot.negativeStats) {
+      brain.negativeStats = {
+        samples: Math.max(0, Math.floor(finiteOr(snapshot.negativeStats.samples, 0))),
+        totalPenalty: Math.max(0, finiteOr(snapshot.negativeStats.totalPenalty, 0)),
+        preferencePairs: Math.max(0, Math.floor(finiteOr(snapshot.negativeStats.preferencePairs, 0))),
+        aversionCount: brain.aversions.size,
+      };
+    } else {
+      brain.negativeStats = {
+        samples: brain.negativeHistory.length,
+        totalPenalty: brain.negativeHistory.reduce((sum, record) => sum + record.penalty, 0),
+        preferencePairs: 0,
+        aversionCount: brain.aversions.size,
+      };
+    }
+
     brain.tick = snapshot.tick;
     brain.epsilon = clamp01(snapshot.epsilon);
     brain.lastStateKey = snapshot.lastStateKey;
@@ -1965,6 +2292,14 @@ export class AgentBrain {
     this.qTable.clear();
     this.goals.clear();
     this.observedThreats.clear();
+    this.aversions.clear();
+    this.negativeHistory.length = 0;
+    this.negativeStats = {
+      samples: 0,
+      totalPenalty: 0,
+      preferencePairs: 0,
+      aversionCount: 0,
+    };
     this.memory.repository.clear();
     this.lastDecision = null;
     this.lastActionResult = null;

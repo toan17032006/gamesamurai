@@ -22,6 +22,13 @@ import {
   sweepCollisionShapeAgainstAABB,
   type SweepBodyHit,
 } from './spatial-bridge.js';
+import {
+  SweepAndPruneBroadphase,
+  bruteForcePairs,
+  type BroadphaseConfig,
+  type BroadphasePair,
+  type BroadphaseStats,
+} from './broadphase.js';
 
 export { GravityEngine } from './gravity-engine';
 export type { GravityConfig } from './gravity-engine';
@@ -40,10 +47,16 @@ export * from './gravity-solver.js';
 export * from './collision-algorithms.js';
 export * from './spatial-partitioning.js';
 export * from './spatial-bridge.js';
+export * from './broadphase.js';
 
 export interface PhysicsWorldOptions {
   gravity?: GravityConfig;
   ground?: GroundConfig;
+  /**
+   * Broadphase tuning. Pass `false` to use the legacy O(n²) pair loop (useful
+   * for debugging or exact differential tests).
+   */
+  broadphase?: BroadphaseConfig | false;
 }
 
 export class PhysicsWorld {
@@ -53,10 +66,30 @@ export class PhysicsWorld {
   private bodies = new Map<string, PhysicsBody>();
   private groundCfg: GroundConfig;
   private ragdolls: RagdollSolver[] = [];
+  private readonly broadphase: SweepAndPruneBroadphase | null;
+  private lastBroadphaseStats: BroadphaseStats = {
+    bodies: 0,
+    candidatePairs: 0,
+    overlapChecks: 0,
+    expired: 0,
+    staticPairsSkipped: 0,
+  };
 
   constructor(opts: PhysicsWorldOptions = {}) {
     this.gravity = new GravityEngine(opts.gravity);
     this.groundCfg = opts.ground ?? { y: 0, restitution: 0.2, friction: 0.85 };
+    this.broadphase =
+      opts.broadphase === false ? null : new SweepAndPruneBroadphase(opts.broadphase ?? {});
+  }
+
+  /** Broadphase statistics from the last `step`. */
+  get broadphaseStats(): BroadphaseStats {
+    return { ...this.lastBroadphaseStats };
+  }
+
+  /** True when the sweep-and-prune broadphase is active. */
+  get usesBroadphase(): boolean {
+    return this.broadphase !== null;
   }
 
   addBody(body: PhysicsBody): void {
@@ -113,30 +146,41 @@ export class PhysicsWorld {
     this.fluids.step(list, dt);
 
     // 3) Va chạm cặp
-    for (let i = 0; i < list.length; i++) {
-      for (let j = i + 1; j < list.length; j++) {
-        const a = list[i];
-        const b = list[j];
-        if (a.isStatic && b.isStatic) continue;
-        const hit = collideBodies(a, b);
-        if (!hit?.hit || !hit.normal) continue;
-        const depth = hit.depth;
-        if (depth <= 0) continue;
-        const nrm = new THREE.Vector3(hit.normal.x, hit.normal.y, hit.normal.z);
-        const invMassA = a.isStatic ? 0 : 1 / Math.max(1e-6, a.mass);
-        const invMassB = b.isStatic ? 0 : 1 / Math.max(1e-6, b.mass);
-        const total = invMassA + invMassB;
-        if (total <= 0) continue;
+    const pairs: BroadphasePair[] = this.broadphase
+      ? this.broadphase.computePairs(list)
+      : bruteForcePairs(list);
+    if (this.broadphase) {
+      this.lastBroadphaseStats = this.broadphase.stats;
+    } else {
+      this.lastBroadphaseStats = {
+        bodies: list.length,
+        candidatePairs: pairs.length,
+        overlapChecks: (list.length * (list.length - 1)) / 2,
+        expired: 0,
+        staticPairsSkipped: 0,
+      };
+    }
 
-        const pa = a.position;
-        const pb = b.position;
-        pa.x += nrm.x * -depth * (invMassA / total);
-        pa.y += nrm.y * -depth * (invMassA / total);
-        pa.z += nrm.z * -depth * (invMassA / total);
-        pb.x += nrm.x * depth * (invMassB / total);
-        pb.y += nrm.y * depth * (invMassB / total);
-        pb.z += nrm.z * depth * (invMassB / total);
-      }
+    for (const { a, b } of pairs) {
+      if (a.isStatic && b.isStatic) continue;
+      const hit = collideBodies(a, b);
+      if (!hit?.hit || !hit.normal) continue;
+      const depth = hit.depth;
+      if (depth <= 0) continue;
+      const nrm = new THREE.Vector3(hit.normal.x, hit.normal.y, hit.normal.z);
+      const invMassA = a.isStatic ? 0 : 1 / Math.max(1e-6, a.mass);
+      const invMassB = b.isStatic ? 0 : 1 / Math.max(1e-6, b.mass);
+      const total = invMassA + invMassB;
+      if (total <= 0) continue;
+
+      const pa = a.position;
+      const pb = b.position;
+      pa.x += nrm.x * -depth * (invMassA / total);
+      pa.y += nrm.y * -depth * (invMassA / total);
+      pa.z += nrm.z * -depth * (invMassA / total);
+      pb.x += nrm.x * depth * (invMassB / total);
+      pb.y += nrm.y * depth * (invMassB / total);
+      pb.z += nrm.z * depth * (invMassB / total);
     }
 
     // 4) Mặt đất

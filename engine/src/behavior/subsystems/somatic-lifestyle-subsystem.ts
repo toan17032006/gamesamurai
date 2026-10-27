@@ -21,11 +21,11 @@ export class SomaticLifestyleSubsystem extends BehaviorSubsystemBase {
   public simulationTicks = 0;
   public lastUpdateTime = 0;
   public resetCounter = 0;
-  public state: Record<string, any> = {};
-  public context: Record<string, any> = {};
+  public state: Record<string, unknown> = {};
+  public context: Record<string, unknown> = {};
   public emotionLevels: Map<string, number> = new Map();
-  public actionHistory: Array<{ action: string; payload?: any; urgency: number; timestamp: number }> = [];
-  public knowledgeStore: Map<string, { key: string; data: any; retention: number }> = new Map();
+  public actionHistory: Array<{ action: string; payload?: unknown; urgency: number; timestamp: number }> = [];
+  public knowledgeStore: Map<string, { key: string; data: unknown; retention: number }> = new Map();
   public eventLog: Array<{ event: string; intensity: number; cause?: string; timestamp: number }> = [];
 
   public recordEvent(event: string, intensity: number, cause?: string) {
@@ -41,14 +41,14 @@ export class SomaticLifestyleSubsystem extends BehaviorSubsystemBase {
    * [0401] detectStressTrigger
    * Phát hiện tác nhân gây căng thẳng.
    */
-  public detectStressTrigger(environment?: any, threshold = 0.4): any {
+  public detectStressTrigger(environment?: unknown, threshold = 0.4) {
     return this.applyDetection('detectStressTrigger', threshold, environment);
   }
   /**
    * [0402] estimateStressLevel
    * Ước lượng mức căng thẳng.
    */
-  public estimateStressLevel(target?: any, options?: Record<string, any>): any {
+  public estimateStressLevel(target?: unknown, options?: Record<string, unknown>) {
     const evaluation = this.evaluateEstimate('estimateStressLevel', target, options);
     return {
       query: 'estimateStressLevel',
@@ -68,126 +68,126 @@ export class SomaticLifestyleSubsystem extends BehaviorSubsystemBase {
    * [0403] activateStressResponse
    * Kích hoạt phản ứng căng thẳng.
    */
-  public activateStressResponse(context?: any, intensity = 0.5): any {
+  public activateStressResponse(context?: unknown, intensity = 0.5) {
     return this.applyOperation('activateStressResponse', intensity, context);
   }
   /**
    * [0404] updatePhysiologicalArousal
    * Cập nhật mức kích hoạt sinh lý.
    */
-  public updatePhysiologicalArousal(deltaTime = 0.016, context?: Record<string, any>): any {
+  public updatePhysiologicalArousal(deltaTime = 0.016, context?: Record<string, unknown>) {
     return this.applyUpdate('updatePhysiologicalArousal', deltaTime, context);
   }
   /**
    * [0405] increaseHeartRateUnderStress
    * Mô phỏng nhịp tim tăng khi căng thẳng.
    */
-  public increaseHeartRateUnderStress(context?: any, intensity = 0.5): any {
+  public increaseHeartRateUnderStress(context?: unknown, intensity = 0.5) {
     return this.applyOperation('increaseHeartRateUnderStress', intensity, context);
   }
   /**
    * [0406] regulateBreathingUnderStress
    * Điều chỉnh hô hấp khi căng thẳng.
    */
-  public regulateBreathingUnderStress(context?: any, intensity = 0.5): any {
+  public regulateBreathingUnderStress(context?: unknown, intensity = 0.5) {
     return this.applyOperation('regulateBreathingUnderStress', intensity, context);
   }
   /**
    * [0407] generateStressSweating
    * Mô phỏng đổ mồ hôi do căng thẳng.
    */
-  public generateStressSweating(context?: any, intensity = 0.5): any {
+  public generateStressSweating(context?: unknown, intensity = 0.5) {
     return this.applyOperation('generateStressSweating', intensity, context);
   }
   /**
    * [0408] detectStressOverload
    * Phát hiện quá tải căng thẳng.
    */
-  public detectStressOverload(environment?: any, threshold = 0.4): any {
+  public detectStressOverload(environment?: unknown, threshold = 0.4) {
     return this.applyDetection('detectStressOverload', threshold, environment);
   }
   /**
    * [0409] applyCopingStrategy
    * Áp dụng chiến lược đối phó.
    */
-  public applyCopingStrategy(actionPayload?: any, urgency = 1.0): any {
+  public applyCopingStrategy(actionPayload?: unknown, urgency = 1.0) {
     return this.applyExecution('applyCopingStrategy', actionPayload, urgency);
   }
   /**
    * [0410] useProblemFocusedCoping
    * Đối phó bằng giải quyết vấn đề.
    */
-  public useProblemFocusedCoping(context?: any, intensity = 0.5): any {
+  public useProblemFocusedCoping(context?: unknown, intensity = 0.5) {
     return this.applyOperation('useProblemFocusedCoping', intensity, context);
   }
   /**
    * [0411] useEmotionFocusedCoping
    * Đối phó bằng điều chỉnh cảm xúc.
    */
-  public useEmotionFocusedCoping(context?: any, intensity = 0.5): any {
+  public useEmotionFocusedCoping(context?: unknown, intensity = 0.5) {
     return this.applyOperation('useEmotionFocusedCoping', intensity, context);
   }
   /**
    * [0412] seekStressSupport
    * Tìm kiếm hỗ trợ khi căng thẳng.
    */
-  public seekStressSupport(targetEntity?: any, urgency = 0.6): any {
+  public seekStressSupport(targetEntity?: unknown, urgency = 0.6) {
     return this.applyMovement('seekStressSupport', targetEntity, urgency);
   }
   /**
    * [0413] takeRecoveryBreak
    * Nghỉ để hồi phục.
    */
-  public takeRecoveryBreak(context?: any, intensity = 0.5): any {
+  public takeRecoveryBreak(context?: unknown, intensity = 0.5) {
     return this.applyOperation('takeRecoveryBreak', intensity, context);
   }
   /**
    * [0414] reframeStressfulSituation
    * Tái diễn giải tình huống căng thẳng.
    */
-  public reframeStressfulSituation(context?: any, intensity = 0.5): any {
+  public reframeStressfulSituation(context?: unknown, intensity = 0.5) {
     return this.applyOperation('reframeStressfulSituation', intensity, context);
   }
   /**
    * [0415] reducePhysiologicalArousal
    * Giảm kích hoạt sinh lý.
    */
-  public reducePhysiologicalArousal(context?: any, intensity = 0.5): any {
+  public reducePhysiologicalArousal(context?: unknown, intensity = 0.5) {
     return this.applyOperation('reducePhysiologicalArousal', intensity, context);
   }
   /**
    * [0416] restoreCognitivePerformance
    * Khôi phục hiệu suất nhận thức.
    */
-  public restoreCognitivePerformance(context?: any, intensity = 0.5): any {
+  public restoreCognitivePerformance(context?: unknown, intensity = 0.5) {
     return this.applyOperation('restoreCognitivePerformance', intensity, context);
   }
   /**
    * [0417] buildStressResilience
    * Tăng khả năng phục hồi trước căng thẳng.
    */
-  public buildStressResilience(context?: any, intensity = 0.5): any {
+  public buildStressResilience(context?: unknown, intensity = 0.5) {
     return this.applyOperation('buildStressResilience', intensity, context);
   }
   /**
    * [0418] adaptToRepeatedStress
    * Thích nghi với căng thẳng lặp lại.
    */
-  public adaptToRepeatedStress(stimulus?: any, factor = 1.0): any {
+  public adaptToRepeatedStress(stimulus?: unknown, factor = 1.0) {
     return this.applyAdaptation('adaptToRepeatedStress', factor, stimulus);
   }
   /**
    * [0419] detectBurnoutRisk
    * Phát hiện nguy cơ kiệt sức.
    */
-  public detectBurnoutRisk(environment?: any, threshold = 0.4): any {
+  public detectBurnoutRisk(environment?: unknown, threshold = 0.4) {
     return this.applyDetection('detectBurnoutRisk', threshold, environment);
   }
   /**
    * [0420] recoverFromProlongedStress
    * Phục hồi sau căng thẳng kéo dài.
    */
-  public recoverFromProlongedStress(stimulus?: any, factor = 1.0): any {
+  public recoverFromProlongedStress(stimulus?: unknown, factor = 1.0) {
     return this.applyAdaptation('recoverFromProlongedStress', factor, stimulus);
   }
   // ==========================================================================
@@ -198,14 +198,14 @@ export class SomaticLifestyleSubsystem extends BehaviorSubsystemBase {
    * [0421] updateBiologicalNeeds
    * Cập nhật nhu cầu sinh học.
    */
-  public updateBiologicalNeeds(deltaTime = 0.016, context?: Record<string, any>): any {
+  public updateBiologicalNeeds(deltaTime = 0.016, context?: Record<string, unknown>) {
     return this.applyUpdate('updateBiologicalNeeds', deltaTime, context);
   }
   /**
    * [0422] estimateHungerLevel
    * Ước lượng mức đói.
    */
-  public estimateHungerLevel(target?: any, options?: Record<string, any>): any {
+  public estimateHungerLevel(target?: unknown, options?: Record<string, unknown>) {
     const evaluation = this.evaluateEstimate('estimateHungerLevel', target, options);
     return {
       query: 'estimateHungerLevel',
@@ -225,7 +225,7 @@ export class SomaticLifestyleSubsystem extends BehaviorSubsystemBase {
    * [0423] estimateThirstLevel
    * Ước lượng mức khát.
    */
-  public estimateThirstLevel(target?: any, options?: Record<string, any>): any {
+  public estimateThirstLevel(target?: unknown, options?: Record<string, unknown>) {
     const evaluation = this.evaluateEstimate('estimateThirstLevel', target, options);
     return {
       query: 'estimateThirstLevel',
@@ -245,7 +245,7 @@ export class SomaticLifestyleSubsystem extends BehaviorSubsystemBase {
    * [0424] estimateFatigueLevel
    * Ước lượng mức mệt mỏi.
    */
-  public estimateFatigueLevel(target?: any, options?: Record<string, any>): any {
+  public estimateFatigueLevel(target?: unknown, options?: Record<string, unknown>) {
     const evaluation = this.evaluateEstimate('estimateFatigueLevel', target, options);
     return {
       query: 'estimateFatigueLevel',
@@ -265,7 +265,7 @@ export class SomaticLifestyleSubsystem extends BehaviorSubsystemBase {
    * [0425] estimateSleepPressure
    * Ước lượng nhu cầu ngủ.
    */
-  public estimateSleepPressure(target?: any, options?: Record<string, any>): any {
+  public estimateSleepPressure(target?: unknown, options?: Record<string, unknown>) {
     const evaluation = this.evaluateEstimate('estimateSleepPressure', target, options);
     return {
       query: 'estimateSleepPressure',
@@ -285,7 +285,7 @@ export class SomaticLifestyleSubsystem extends BehaviorSubsystemBase {
    * [0426] estimateBodyTemperature
    * Ước lượng nhiệt độ cơ thể.
    */
-  public estimateBodyTemperature(target?: any, options?: Record<string, any>): any {
+  public estimateBodyTemperature(target?: unknown, options?: Record<string, unknown>) {
     const evaluation = this.evaluateEstimate('estimateBodyTemperature', target, options);
     return {
       query: 'estimateBodyTemperature',
@@ -305,98 +305,98 @@ export class SomaticLifestyleSubsystem extends BehaviorSubsystemBase {
    * [0427] regulateBodyTemperature
    * Điều hòa nhiệt độ cơ thể.
    */
-  public regulateBodyTemperature(context?: any, intensity = 0.5): any {
+  public regulateBodyTemperature(context?: unknown, intensity = 0.5) {
     return this.applyOperation('regulateBodyTemperature', intensity, context);
   }
   /**
    * [0428] regulateFluidBalance
    * Điều hòa cân bằng dịch.
    */
-  public regulateFluidBalance(context?: any, intensity = 0.5): any {
+  public regulateFluidBalance(context?: unknown, intensity = 0.5) {
     return this.applyOperation('regulateFluidBalance', intensity, context);
   }
   /**
    * [0429] regulateEnergyBalance
    * Điều hòa cân bằng năng lượng.
    */
-  public regulateEnergyBalance(context?: any, intensity = 0.5): any {
+  public regulateEnergyBalance(context?: unknown, intensity = 0.5) {
     return this.applyOperation('regulateEnergyBalance', intensity, context);
   }
   /**
    * [0430] triggerHungerBehavior
    * Kích hoạt hành vi tìm thức ăn.
    */
-  public triggerHungerBehavior(intensity = 0.5, cause?: string): any {
+  public triggerHungerBehavior(intensity = 0.5, cause?: string) {
     return this.applyEmotion('triggerHungerBehavior', intensity, cause);
   }
   /**
    * [0431] triggerThirstBehavior
    * Kích hoạt hành vi tìm nước.
    */
-  public triggerThirstBehavior(intensity = 0.5, cause?: string): any {
+  public triggerThirstBehavior(intensity = 0.5, cause?: string) {
     return this.applyEmotion('triggerThirstBehavior', intensity, cause);
   }
   /**
    * [0432] triggerRestBehavior
    * Kích hoạt hành vi nghỉ ngơi.
    */
-  public triggerRestBehavior(intensity = 0.5, cause?: string): any {
+  public triggerRestBehavior(intensity = 0.5, cause?: string) {
     return this.applyEmotion('triggerRestBehavior', intensity, cause);
   }
   /**
    * [0433] triggerSleepBehavior
    * Kích hoạt hành vi ngủ.
    */
-  public triggerSleepBehavior(intensity = 0.5, cause?: string): any {
+  public triggerSleepBehavior(intensity = 0.5, cause?: string) {
     return this.applyEmotion('triggerSleepBehavior', intensity, cause);
   }
   /**
    * [0434] triggerThermoregulationBehavior
    * Kích hoạt hành vi điều nhiệt.
    */
-  public triggerThermoregulationBehavior(intensity = 0.5, cause?: string): any {
+  public triggerThermoregulationBehavior(intensity = 0.5, cause?: string) {
     return this.applyEmotion('triggerThermoregulationBehavior', intensity, cause);
   }
   /**
    * [0435] seekNutritionallyUsefulFood
    * Tìm thức ăn có giá trị dinh dưỡng.
    */
-  public seekNutritionallyUsefulFood(targetEntity?: any, urgency = 0.6): any {
+  public seekNutritionallyUsefulFood(targetEntity?: unknown, urgency = 0.6) {
     return this.applyMovement('seekNutritionallyUsefulFood', targetEntity, urgency);
   }
   /**
    * [0436] avoidSpoiledFood
    * Tránh thức ăn hỏng.
    */
-  public avoidSpoiledFood(targetEntity?: any, urgency = 0.6): any {
+  public avoidSpoiledFood(targetEntity?: unknown, urgency = 0.6) {
     return this.applyMovement('avoidSpoiledFood', targetEntity, urgency);
   }
   /**
    * [0437] respondToPainSignal
    * Phản ứng với tín hiệu đau.
    */
-  public respondToPainSignal(stimulus?: any, factor = 1.0): any {
+  public respondToPainSignal(stimulus?: unknown, factor = 1.0) {
     return this.applyAdaptation('respondToPainSignal', factor, stimulus);
   }
   /**
    * [0438] respondToNausea
    * Phản ứng với cảm giác buồn nôn.
    */
-  public respondToNausea(stimulus?: any, factor = 1.0): any {
+  public respondToNausea(stimulus?: unknown, factor = 1.0) {
     return this.applyAdaptation('respondToNausea', factor, stimulus);
   }
   /**
    * [0439] recoverEnergyAfterRest
    * Phục hồi năng lượng sau nghỉ ngơi.
    */
-  public recoverEnergyAfterRest(stimulus?: any, factor = 1.0): any {
+  public recoverEnergyAfterRest(stimulus?: unknown, factor = 1.0) {
     return this.applyAdaptation('recoverEnergyAfterRest', factor, stimulus);
   }
   /**
    * [0440] maintainHomeostasis
    * Duy trì cân bằng nội môi.
    */
-  public maintainHomeostasis(context?: any, intensity = 0.5): any {
+  public maintainHomeostasis(context?: unknown, intensity = 0.5) {
     return this.applyOperation('maintainHomeostasis', intensity, context);
   }
   // ==========================================================================
@@ -407,28 +407,28 @@ export class SomaticLifestyleSubsystem extends BehaviorSubsystemBase {
    * [0441] searchForFood
    * Tìm kiếm thức ăn.
    */
-  public searchForFood(context?: any, intensity = 0.5): any {
+  public searchForFood(context?: unknown, intensity = 0.5) {
     return this.applyOperation('searchForFood', intensity, context);
   }
   /**
    * [0442] recognizeEdibleFood
    * Nhận biết thức ăn có thể ăn.
    */
-  public recognizeEdibleFood(environment?: any, threshold = 0.4): any {
+  public recognizeEdibleFood(environment?: unknown, threshold = 0.4) {
     return this.applyDetection('recognizeEdibleFood', threshold, environment);
   }
   /**
    * [0443] recognizeInedibleSubstance
    * Nhận biết vật không ăn được.
    */
-  public recognizeInedibleSubstance(environment?: any, threshold = 0.4): any {
+  public recognizeInedibleSubstance(environment?: unknown, threshold = 0.4) {
     return this.applyDetection('recognizeInedibleSubstance', threshold, environment);
   }
   /**
    * [0444] evaluateFoodSafety
    * Đánh giá độ an toàn của thức ăn.
    */
-  public evaluateFoodSafety(target?: any, options?: Record<string, any>): any {
+  public evaluateFoodSafety(target?: unknown, options?: Record<string, unknown>) {
     const evaluation = this.evaluateEstimate('evaluateFoodSafety', target, options);
     return {
       query: 'evaluateFoodSafety',
@@ -448,7 +448,7 @@ export class SomaticLifestyleSubsystem extends BehaviorSubsystemBase {
    * [0445] evaluateFoodPreference
    * Đánh giá sở thích thức ăn.
    */
-  public evaluateFoodPreference(target?: any, options?: Record<string, any>): any {
+  public evaluateFoodPreference(target?: unknown, options?: Record<string, unknown>) {
     const evaluation = this.evaluateEstimate('evaluateFoodPreference', target, options);
     return {
       query: 'evaluateFoodPreference',
@@ -468,42 +468,42 @@ export class SomaticLifestyleSubsystem extends BehaviorSubsystemBase {
    * [0446] selectFoodItem
    * Chọn món ăn.
    */
-  public selectFoodItem(candidates?: any[], criteria?: Record<string, any>): any {
+  public selectFoodItem(candidates?: unknown[], criteria?: Record<string, unknown>) {
     return this.applySelection('selectFoodItem', candidates, criteria);
   }
   /**
    * [0447] approachFoodSource
    * Tiến đến nguồn thức ăn.
    */
-  public approachFoodSource(targetEntity?: any, urgency = 0.6): any {
+  public approachFoodSource(targetEntity?: unknown, urgency = 0.6) {
     return this.applyMovement('approachFoodSource', targetEntity, urgency);
   }
   /**
    * [0448] inspectFoodBySmell
    * Kiểm tra thức ăn bằng mùi.
    */
-  public inspectFoodBySmell(context?: any, intensity = 0.5): any {
+  public inspectFoodBySmell(context?: unknown, intensity = 0.5) {
     return this.applyOperation('inspectFoodBySmell', intensity, context);
   }
   /**
    * [0449] inspectFoodByAppearance
    * Kiểm tra thức ăn bằng hình dạng.
    */
-  public inspectFoodByAppearance(context?: any, intensity = 0.5): any {
+  public inspectFoodByAppearance(context?: unknown, intensity = 0.5) {
     return this.applyOperation('inspectFoodByAppearance', intensity, context);
   }
   /**
    * [0450] prepareFoodForConsumption
    * Chuẩn bị thức ăn để ăn.
    */
-  public prepareFoodForConsumption(context?: any, intensity = 0.5): any {
+  public prepareFoodForConsumption(context?: unknown, intensity = 0.5) {
     return this.applyOperation('prepareFoodForConsumption', intensity, context);
   }
   /**
    * [0451] initiateEating
    * Bắt đầu ăn.
    */
-  public initiateEating(config?: Record<string, any>): any {
+  public initiateEating(config?: Record<string, unknown>) {
     const result = this.applyInitialization('initiateEating', config);
     // Thời lượng bữa ăn / mức độ đói / hao năng lượng suy ra từ cấu hình + trạng thái thật.
     return { ...result, ...deriveActionProfile([config, this.state], result) };
@@ -512,14 +512,14 @@ export class SomaticLifestyleSubsystem extends BehaviorSubsystemBase {
    * [0452] controlBiteSize
    * Điều chỉnh kích thước miếng ăn.
    */
-  public controlBiteSize(context?: any, intensity = 0.5): any {
+  public controlBiteSize(context?: unknown, intensity = 0.5) {
     return this.applyOperation('controlBiteSize', intensity, context);
   }
   /**
    * [0453] simulateChewing
    * Mô phỏng nhai.
    */
-  public simulateChewing(target?: any, options?: Record<string, any>): any {
+  public simulateChewing(target?: unknown, options?: Record<string, unknown>) {
     const evaluation = this.evaluateEstimate('simulateChewing', target, options);
     return {
       query: 'simulateChewing',
@@ -539,7 +539,7 @@ export class SomaticLifestyleSubsystem extends BehaviorSubsystemBase {
    * [0454] simulateSwallowing
    * Mô phỏng nuốt.
    */
-  public simulateSwallowing(target?: any, options?: Record<string, any>): any {
+  public simulateSwallowing(target?: unknown, options?: Record<string, unknown>) {
     const evaluation = this.evaluateEstimate('simulateSwallowing', target, options);
     return {
       query: 'simulateSwallowing',
@@ -559,7 +559,7 @@ export class SomaticLifestyleSubsystem extends BehaviorSubsystemBase {
    * [0455] estimateSatietyLevel
    * Ước lượng độ no.
    */
-  public estimateSatietyLevel(target?: any, options?: Record<string, any>): any {
+  public estimateSatietyLevel(target?: unknown, options?: Record<string, unknown>) {
     const evaluation = this.evaluateEstimate('estimateSatietyLevel', target, options);
     return {
       query: 'estimateSatietyLevel',
@@ -579,35 +579,35 @@ export class SomaticLifestyleSubsystem extends BehaviorSubsystemBase {
    * [0456] stopEatingWhenSatisfied
    * Dừng ăn khi no.
    */
-  public stopEatingWhenSatisfied(context?: any, intensity = 0.5): any {
+  public stopEatingWhenSatisfied(context?: unknown, intensity = 0.5) {
     return this.applyOperation('stopEatingWhenSatisfied', intensity, context);
   }
   /**
    * [0457] shareFoodWithOthers
    * Chia sẻ thức ăn.
    */
-  public shareFoodWithOthers(context?: any, intensity = 0.5): any {
+  public shareFoodWithOthers(context?: unknown, intensity = 0.5) {
     return this.applyOperation('shareFoodWithOthers', intensity, context);
   }
   /**
    * [0458] protectFoodResource
    * Bảo vệ nguồn thức ăn.
    */
-  public protectFoodResource(context?: any, intensity = 0.5): any {
+  public protectFoodResource(context?: unknown, intensity = 0.5) {
     return this.applyOperation('protectFoodResource', intensity, context);
   }
   /**
    * [0459] rememberFoodPreference
    * Ghi nhớ sở thích thức ăn.
    */
-  public rememberFoodPreference(experienceData?: any, retention = 0.9): any {
+  public rememberFoodPreference(experienceData?: unknown, retention = 0.9) {
     return this.applyMemory('rememberFoodPreference', experienceData, retention);
   }
   /**
    * [0460] adaptDietToAvailability
    * Điều chỉnh chế độ ăn theo nguồn cung.
    */
-  public adaptDietToAvailability(stimulus?: any, factor = 1.0): any {
+  public adaptDietToAvailability(stimulus?: unknown, factor = 1.0) {
     return this.applyAdaptation('adaptDietToAvailability', factor, stimulus);
   }
   // ==========================================================================
@@ -618,14 +618,14 @@ export class SomaticLifestyleSubsystem extends BehaviorSubsystemBase {
    * [0461] updateCircadianRhythm
    * Cập nhật nhịp sinh học.
    */
-  public updateCircadianRhythm(deltaTime = 0.016, context?: Record<string, any>): any {
+  public updateCircadianRhythm(deltaTime = 0.016, context?: Record<string, unknown>) {
     return this.applyUpdate('updateCircadianRhythm', deltaTime, context);
   }
   /**
    * [0462] estimateSleepiness
    * Ước lượng mức buồn ngủ.
    */
-  public estimateSleepiness(target?: any, options?: Record<string, any>): any {
+  public estimateSleepiness(target?: unknown, options?: Record<string, unknown>) {
     const evaluation = this.evaluateEstimate('estimateSleepiness', target, options);
     return {
       query: 'estimateSleepiness',
@@ -645,21 +645,21 @@ export class SomaticLifestyleSubsystem extends BehaviorSubsystemBase {
    * [0463] selectSleepLocation
    * Chọn nơi ngủ.
    */
-  public selectSleepLocation(candidates?: any[], criteria?: Record<string, any>): any {
+  public selectSleepLocation(candidates?: unknown[], criteria?: Record<string, unknown>) {
     return this.applySelection('selectSleepLocation', candidates, criteria);
   }
   /**
    * [0464] prepareForSleep
    * Chuẩn bị ngủ.
    */
-  public prepareForSleep(context?: any, intensity = 0.5): any {
+  public prepareForSleep(context?: unknown, intensity = 0.5) {
     return this.applyOperation('prepareForSleep', intensity, context);
   }
   /**
    * [0465] initiateSleep
    * Bắt đầu ngủ.
    */
-  public initiateSleep(config?: Record<string, any>): any {
+  public initiateSleep(config?: Record<string, unknown>) {
     const result = this.applyInitialization('initiateSleep', config);
     // Thời lượng ngủ / mức độ buồn ngủ / hao năng lượng suy ra từ cấu hình + trạng thái thật.
     return { ...result, ...deriveActionProfile([config, this.state], result) };
@@ -668,14 +668,14 @@ export class SomaticLifestyleSubsystem extends BehaviorSubsystemBase {
    * [0466] transitionSleepStage
    * Chuyển giai đoạn ngủ.
    */
-  public transitionSleepStage(context?: any, intensity = 0.5): any {
+  public transitionSleepStage(context?: unknown, intensity = 0.5) {
     return this.applyOperation('transitionSleepStage', intensity, context);
   }
   /**
    * [0467] simulateDeepSleep
    * Mô phỏng giấc ngủ sâu.
    */
-  public simulateDeepSleep(target?: any, options?: Record<string, any>): any {
+  public simulateDeepSleep(target?: unknown, options?: Record<string, unknown>) {
     const evaluation = this.evaluateEstimate('simulateDeepSleep', target, options);
     return {
       query: 'simulateDeepSleep',
@@ -695,7 +695,7 @@ export class SomaticLifestyleSubsystem extends BehaviorSubsystemBase {
    * [0468] simulateRapidEyeMovementSleep
    * Mô phỏng giấc ngủ REM.
    */
-  public simulateRapidEyeMovementSleep(target?: any, options?: Record<string, any>): any {
+  public simulateRapidEyeMovementSleep(target?: unknown, options?: Record<string, unknown>) {
     const evaluation = this.evaluateEstimate('simulateRapidEyeMovementSleep', target, options);
     return {
       query: 'simulateRapidEyeMovementSleep',
@@ -715,7 +715,7 @@ export class SomaticLifestyleSubsystem extends BehaviorSubsystemBase {
    * [0469] simulateDreamActivity
    * Mô phỏng hoạt động mơ.
    */
-  public simulateDreamActivity(target?: any, options?: Record<string, any>): any {
+  public simulateDreamActivity(target?: unknown, options?: Record<string, unknown>) {
     const evaluation = this.evaluateEstimate('simulateDreamActivity', target, options);
     return {
       query: 'simulateDreamActivity',
@@ -735,21 +735,21 @@ export class SomaticLifestyleSubsystem extends BehaviorSubsystemBase {
    * [0470] respondToSleepDisturbance
    * Phản ứng khi giấc ngủ bị gián đoạn.
    */
-  public respondToSleepDisturbance(stimulus?: any, factor = 1.0): any {
+  public respondToSleepDisturbance(stimulus?: unknown, factor = 1.0) {
     return this.applyAdaptation('respondToSleepDisturbance', factor, stimulus);
   }
   /**
    * [0471] wakeFromSleep
    * Thức dậy.
    */
-  public wakeFromSleep(context?: any, intensity = 0.5): any {
+  public wakeFromSleep(context?: unknown, intensity = 0.5) {
     return this.applyOperation('wakeFromSleep', intensity, context);
   }
   /**
    * [0472] estimateSleepQuality
    * Ước lượng chất lượng ngủ.
    */
-  public estimateSleepQuality(target?: any, options?: Record<string, any>): any {
+  public estimateSleepQuality(target?: unknown, options?: Record<string, unknown>) {
     const evaluation = this.evaluateEstimate('estimateSleepQuality', target, options);
     return {
       query: 'estimateSleepQuality',
@@ -769,56 +769,56 @@ export class SomaticLifestyleSubsystem extends BehaviorSubsystemBase {
    * [0473] recoverFromSleepDebt
    * Phục hồi thiếu ngủ.
    */
-  public recoverFromSleepDebt(stimulus?: any, factor = 1.0): any {
+  public recoverFromSleepDebt(stimulus?: unknown, factor = 1.0) {
     return this.applyAdaptation('recoverFromSleepDebt', factor, stimulus);
   }
   /**
    * [0474] takeShortNap
    * Ngủ trưa ngắn.
    */
-  public takeShortNap(context?: any, intensity = 0.5): any {
+  public takeShortNap(context?: unknown, intensity = 0.5) {
     return this.applyOperation('takeShortNap', intensity, context);
   }
   /**
    * [0475] adaptSleepSchedule
    * Điều chỉnh lịch ngủ.
    */
-  public adaptSleepSchedule(stimulus?: any, factor = 1.0): any {
+  public adaptSleepSchedule(stimulus?: unknown, factor = 1.0) {
     return this.applyAdaptation('adaptSleepSchedule', factor, stimulus);
   }
   /**
    * [0476] seekQuietRestingPlace
    * Tìm nơi nghỉ yên tĩnh.
    */
-  public seekQuietRestingPlace(targetEntity?: any, urgency = 0.6): any {
+  public seekQuietRestingPlace(targetEntity?: unknown, urgency = 0.6) {
     return this.applyMovement('seekQuietRestingPlace', targetEntity, urgency);
   }
   /**
    * [0477] chooseComfortableSleepingPosture
    * Chọn tư thế ngủ thoải mái.
    */
-  public chooseComfortableSleepingPosture(candidates?: any[], criteria?: Record<string, any>): any {
+  public chooseComfortableSleepingPosture(candidates?: unknown[], criteria?: Record<string, unknown>) {
     return this.applySelection('chooseComfortableSleepingPosture', candidates, criteria);
   }
   /**
    * [0478] respondToNighttimeNoise
    * Phản ứng với tiếng động ban đêm.
    */
-  public respondToNighttimeNoise(stimulus?: any, factor = 1.0): any {
+  public respondToNighttimeNoise(stimulus?: unknown, factor = 1.0) {
     return this.applyAdaptation('respondToNighttimeNoise', factor, stimulus);
   }
   /**
    * [0479] adjustActivityToDaylight
    * Điều chỉnh hoạt động theo ánh sáng ban ngày.
    */
-  public adjustActivityToDaylight(stimulus?: any, factor = 1.0): any {
+  public adjustActivityToDaylight(stimulus?: unknown, factor = 1.0) {
     return this.applyAdaptation('adjustActivityToDaylight', factor, stimulus);
   }
   /**
    * [0480] synchronizeSleepWithEnvironment
    * Đồng bộ giấc ngủ với môi trường.
    */
-  public synchronizeSleepWithEnvironment(peerOrTarget?: any, blendWeight = 0.5): any {
+  public synchronizeSleepWithEnvironment(peerOrTarget?: unknown, blendWeight = 0.5) {
     return this.applyCoordination('synchronizeSleepWithEnvironment', peerOrTarget, blendWeight);
   }
   // ==========================================================================
@@ -829,7 +829,7 @@ export class SomaticLifestyleSubsystem extends BehaviorSubsystemBase {
    * [0481] initiateLocomotion
    * Bắt đầu di chuyển.
    */
-  public initiateLocomotion(config?: Record<string, any>): any {
+  public initiateLocomotion(config?: Record<string, unknown>) {
     const result = this.applyInitialization('initiateLocomotion', config);
     // Thời lượng / tốc độ chủ động / hao năng lượng suy ra từ cấu hình + trạng thái thật.
     return { ...result, ...deriveActionProfile([config, this.state], result) };
@@ -838,21 +838,21 @@ export class SomaticLifestyleSubsystem extends BehaviorSubsystemBase {
    * [0482] selectWalkingDirection
    * Chọn hướng đi bộ.
    */
-  public selectWalkingDirection(candidates?: any[], criteria?: Record<string, any>): any {
+  public selectWalkingDirection(candidates?: unknown[], criteria?: Record<string, unknown>) {
     return this.applySelection('selectWalkingDirection', candidates, criteria);
   }
   /**
    * [0483] adjustWalkingSpeed
    * Điều chỉnh tốc độ đi bộ.
    */
-  public adjustWalkingSpeed(stimulus?: any, factor = 1.0): any {
+  public adjustWalkingSpeed(stimulus?: unknown, factor = 1.0) {
     return this.applyAdaptation('adjustWalkingSpeed', factor, stimulus);
   }
   /**
    * [0484] simulateNaturalWalking
    * Mô phỏng dáng đi tự nhiên.
    */
-  public simulateNaturalWalking(target?: any, options?: Record<string, any>): any {
+  public simulateNaturalWalking(target?: unknown, options?: Record<string, unknown>) {
     const evaluation = this.evaluateEstimate('simulateNaturalWalking', target, options);
     return {
       query: 'simulateNaturalWalking',
@@ -872,7 +872,7 @@ export class SomaticLifestyleSubsystem extends BehaviorSubsystemBase {
    * [0485] simulateRunning
    * Mô phỏng chạy.
    */
-  public simulateRunning(target?: any, options?: Record<string, any>): any {
+  public simulateRunning(target?: unknown, options?: Record<string, unknown>) {
     const evaluation = this.evaluateEstimate('simulateRunning', target, options);
     return {
       query: 'simulateRunning',
@@ -892,7 +892,7 @@ export class SomaticLifestyleSubsystem extends BehaviorSubsystemBase {
    * [0486] simulateJumping
    * Mô phỏng nhảy.
    */
-  public simulateJumping(target?: any, options?: Record<string, any>): any {
+  public simulateJumping(target?: unknown, options?: Record<string, unknown>) {
     const evaluation = this.evaluateEstimate('simulateJumping', target, options);
     return {
       query: 'simulateJumping',
@@ -912,7 +912,7 @@ export class SomaticLifestyleSubsystem extends BehaviorSubsystemBase {
    * [0487] simulateCrouching
    * Mô phỏng cúi thấp.
    */
-  public simulateCrouching(target?: any, options?: Record<string, any>): any {
+  public simulateCrouching(target?: unknown, options?: Record<string, unknown>) {
     const evaluation = this.evaluateEstimate('simulateCrouching', target, options);
     return {
       query: 'simulateCrouching',
@@ -932,7 +932,7 @@ export class SomaticLifestyleSubsystem extends BehaviorSubsystemBase {
    * [0488] simulateKneeling
    * Mô phỏng quỳ.
    */
-  public simulateKneeling(target?: any, options?: Record<string, any>): any {
+  public simulateKneeling(target?: unknown, options?: Record<string, unknown>) {
     const evaluation = this.evaluateEstimate('simulateKneeling', target, options);
     return {
       query: 'simulateKneeling',
@@ -952,7 +952,7 @@ export class SomaticLifestyleSubsystem extends BehaviorSubsystemBase {
    * [0489] simulateCrawling
    * Mô phỏng bò.
    */
-  public simulateCrawling(target?: any, options?: Record<string, any>): any {
+  public simulateCrawling(target?: unknown, options?: Record<string, unknown>) {
     const evaluation = this.evaluateEstimate('simulateCrawling', target, options);
     return {
       query: 'simulateCrawling',
@@ -972,77 +972,77 @@ export class SomaticLifestyleSubsystem extends BehaviorSubsystemBase {
    * [0490] maintainPosturalBalance
    * Duy trì thăng bằng.
    */
-  public maintainPosturalBalance(context?: any, intensity = 0.5): any {
+  public maintainPosturalBalance(context?: unknown, intensity = 0.5) {
     return this.applyOperation('maintainPosturalBalance', intensity, context);
   }
   /**
    * [0491] recoverFromLossOfBalance
    * Lấy lại thăng bằng.
    */
-  public recoverFromLossOfBalance(stimulus?: any, factor = 1.0): any {
+  public recoverFromLossOfBalance(stimulus?: unknown, factor = 1.0) {
     return this.applyAdaptation('recoverFromLossOfBalance', factor, stimulus);
   }
   /**
    * [0492] avoidWalkingObstacle
    * Tránh vật cản khi đi.
    */
-  public avoidWalkingObstacle(targetEntity?: any, urgency = 0.6): any {
+  public avoidWalkingObstacle(targetEntity?: unknown, urgency = 0.6) {
     return this.applyMovement('avoidWalkingObstacle', targetEntity, urgency);
   }
   /**
    * [0493] navigateAroundPerson
    * Di chuyển tránh người khác.
    */
-  public navigateAroundPerson(context?: any, intensity = 0.5): any {
+  public navigateAroundPerson(context?: unknown, intensity = 0.5) {
     return this.applyOperation('navigateAroundPerson', intensity, context);
   }
   /**
    * [0494] coordinateHandEyeMovement
    * Phối hợp tay và mắt.
    */
-  public coordinateHandEyeMovement(peerOrTarget?: any, blendWeight = 0.5): any {
+  public coordinateHandEyeMovement(peerOrTarget?: unknown, blendWeight = 0.5) {
     return this.applyCoordination('coordinateHandEyeMovement', peerOrTarget, blendWeight);
   }
   /**
    * [0495] reachForObject
    * Với lấy đồ vật.
    */
-  public reachForObject(context?: any, intensity = 0.5): any {
+  public reachForObject(context?: unknown, intensity = 0.5) {
     return this.applyOperation('reachForObject', intensity, context);
   }
   /**
    * [0496] graspObject
    * Nắm vật thể.
    */
-  public graspObject(context?: any, intensity = 0.5): any {
+  public graspObject(context?: unknown, intensity = 0.5) {
     return this.applyOperation('graspObject', intensity, context);
   }
   /**
    * [0497] releaseObject
    * Thả vật thể.
    */
-  public releaseObject(context?: any, intensity = 0.5): any {
+  public releaseObject(context?: unknown, intensity = 0.5) {
     return this.applyOperation('releaseObject', intensity, context);
   }
   /**
    * [0498] adjustGripStrength
    * Điều chỉnh lực nắm.
    */
-  public adjustGripStrength(stimulus?: any, factor = 1.0): any {
+  public adjustGripStrength(stimulus?: unknown, factor = 1.0) {
     return this.applyAdaptation('adjustGripStrength', factor, stimulus);
   }
   /**
    * [0499] coordinateWholeBodyMovement
    * Phối hợp chuyển động toàn thân.
    */
-  public coordinateWholeBodyMovement(peerOrTarget?: any, blendWeight = 0.5): any {
+  public coordinateWholeBodyMovement(peerOrTarget?: unknown, blendWeight = 0.5) {
     return this.applyCoordination('coordinateWholeBodyMovement', peerOrTarget, blendWeight);
   }
   /**
    * [0500] adaptMovementToTerrain
    * Điều chỉnh vận động theo địa hình.
    */
-  public adaptMovementToTerrain(stimulus?: any, factor = 1.0): any {
+  public adaptMovementToTerrain(stimulus?: unknown, factor = 1.0) {
     return this.applyAdaptation('adaptMovementToTerrain', factor, stimulus);
   }
   // ==========================================================================
@@ -1053,140 +1053,140 @@ export class SomaticLifestyleSubsystem extends BehaviorSubsystemBase {
    * [0501] inspectNearbyObject
    * Quan sát vật thể gần đó.
    */
-  public inspectNearbyObject(context?: any, intensity = 0.5): any {
+  public inspectNearbyObject(context?: unknown, intensity = 0.5) {
     return this.applyOperation('inspectNearbyObject', intensity, context);
   }
   /**
    * [0502] approachInteractiveObject
    * Tiến đến vật thể có thể tương tác.
    */
-  public approachInteractiveObject(targetEntity?: any, urgency = 0.6): any {
+  public approachInteractiveObject(targetEntity?: unknown, urgency = 0.6) {
     return this.applyMovement('approachInteractiveObject', targetEntity, urgency);
   }
   /**
    * [0503] touchObject
    * Chạm vào vật thể.
    */
-  public touchObject(context?: any, intensity = 0.5): any {
+  public touchObject(context?: unknown, intensity = 0.5) {
     return this.applyOperation('touchObject', intensity, context);
   }
   /**
    * [0504] pickUpObject
    * Nhặt vật thể.
    */
-  public pickUpObject(context?: any, intensity = 0.5): any {
+  public pickUpObject(context?: unknown, intensity = 0.5) {
     return this.applyOperation('pickUpObject', intensity, context);
   }
   /**
    * [0505] putDownObject
    * Đặt vật thể xuống.
    */
-  public putDownObject(context?: any, intensity = 0.5): any {
+  public putDownObject(context?: unknown, intensity = 0.5) {
     return this.applyOperation('putDownObject', intensity, context);
   }
   /**
    * [0506] carryObject
    * Mang vật thể.
    */
-  public carryObject(context?: any, intensity = 0.5): any {
+  public carryObject(context?: unknown, intensity = 0.5) {
     return this.applyOperation('carryObject', intensity, context);
   }
   /**
    * [0507] pushObject
    * Đẩy vật thể.
    */
-  public pushObject(context?: any, intensity = 0.5): any {
+  public pushObject(context?: unknown, intensity = 0.5) {
     return this.applyOperation('pushObject', intensity, context);
   }
   /**
    * [0508] pullObject
    * Kéo vật thể.
    */
-  public pullObject(context?: any, intensity = 0.5): any {
+  public pullObject(context?: unknown, intensity = 0.5) {
     return this.applyOperation('pullObject', intensity, context);
   }
   /**
    * [0509] openContainer
    * Mở vật chứa.
    */
-  public openContainer(context?: any, intensity = 0.5): any {
+  public openContainer(context?: unknown, intensity = 0.5) {
     return this.applyOperation('openContainer', intensity, context);
   }
   /**
    * [0510] closeContainer
    * Đóng vật chứa.
    */
-  public closeContainer(context?: any, intensity = 0.5): any {
+  public closeContainer(context?: unknown, intensity = 0.5) {
     return this.applyOperation('closeContainer', intensity, context);
   }
   /**
    * [0511] operateSimpleTool
    * Sử dụng công cụ đơn giản.
    */
-  public operateSimpleTool(context?: any, intensity = 0.5): any {
+  public operateSimpleTool(context?: unknown, intensity = 0.5) {
     return this.applyOperation('operateSimpleTool', intensity, context);
   }
   /**
    * [0512] inspectObjectDamage
    * Kiểm tra hư hại vật thể.
    */
-  public inspectObjectDamage(context?: any, intensity = 0.5): any {
+  public inspectObjectDamage(context?: unknown, intensity = 0.5) {
     return this.applyOperation('inspectObjectDamage', intensity, context);
   }
   /**
    * [0513] repairSimpleObject
    * Sửa vật thể đơn giản.
    */
-  public repairSimpleObject(context?: any, intensity = 0.5): any {
+  public repairSimpleObject(context?: unknown, intensity = 0.5) {
     return this.applyOperation('repairSimpleObject', intensity, context);
   }
   /**
    * [0514] searchForLostObject
    * Tìm vật bị thất lạc.
    */
-  public searchForLostObject(context?: any, intensity = 0.5): any {
+  public searchForLostObject(context?: unknown, intensity = 0.5) {
     return this.applyOperation('searchForLostObject', intensity, context);
   }
   /**
    * [0515] storeObjectInLocation
    * Cất vật vào vị trí.
    */
-  public storeObjectInLocation(experienceData?: any, retention = 0.9): any {
+  public storeObjectInLocation(experienceData?: unknown, retention = 0.9) {
     return this.applyMemory('storeObjectInLocation', experienceData, retention);
   }
   /**
    * [0516] retrieveStoredObject
    * Lấy vật đã cất.
    */
-  public retrieveStoredObject(context?: any, intensity = 0.5): any {
+  public retrieveStoredObject(context?: unknown, intensity = 0.5) {
     return this.applyOperation('retrieveStoredObject', intensity, context);
   }
   /**
    * [0517] organizePersonalBelongings
    * Sắp xếp đồ dùng cá nhân.
    */
-  public organizePersonalBelongings(context?: any, intensity = 0.5): any {
+  public organizePersonalBelongings(context?: unknown, intensity = 0.5) {
     return this.applyOperation('organizePersonalBelongings', intensity, context);
   }
   /**
    * [0518] cleanNearbyArea
    * Dọn khu vực gần đó.
    */
-  public cleanNearbyArea(context?: any, intensity = 0.5): any {
+  public cleanNearbyArea(context?: unknown, intensity = 0.5) {
     return this.applyOperation('cleanNearbyArea', intensity, context);
   }
   /**
    * [0519] adaptObjectUseToContext
    * Điều chỉnh cách dùng vật theo bối cảnh.
    */
-  public adaptObjectUseToContext(stimulus?: any, factor = 1.0): any {
+  public adaptObjectUseToContext(stimulus?: unknown, factor = 1.0) {
     return this.applyAdaptation('adaptObjectUseToContext', factor, stimulus);
   }
   /**
    * [0520] learnObjectAffordances
    * Học các khả năng tương tác của vật thể.
    */
-  public learnObjectAffordances(experienceData?: any, retention = 0.9): any {
+  public learnObjectAffordances(experienceData?: unknown, retention = 0.9) {
     return this.applyMemory('learnObjectAffordances', experienceData, retention);
   }
   // ==========================================================================
@@ -1197,140 +1197,140 @@ export class SomaticLifestyleSubsystem extends BehaviorSubsystemBase {
    * [0521] initializeDevelopmentStage
    * Khởi tạo giai đoạn phát triển.
    */
-  public initializeDevelopmentStage(config?: Record<string, any>): any {
+  public initializeDevelopmentStage(config?: Record<string, unknown>) {
     return this.applyInitialization('initializeDevelopmentStage', config);
   }
   /**
    * [0522] updatePhysicalGrowth
    * Cập nhật tăng trưởng thể chất.
    */
-  public updatePhysicalGrowth(deltaTime = 0.016, context?: Record<string, any>): any {
+  public updatePhysicalGrowth(deltaTime = 0.016, context?: Record<string, unknown>) {
     return this.applyUpdate('updatePhysicalGrowth', deltaTime, context);
   }
   /**
    * [0523] updateCognitiveDevelopment
    * Cập nhật phát triển nhận thức.
    */
-  public updateCognitiveDevelopment(deltaTime = 0.016, context?: Record<string, any>): any {
+  public updateCognitiveDevelopment(deltaTime = 0.016, context?: Record<string, unknown>) {
     return this.applyUpdate('updateCognitiveDevelopment', deltaTime, context);
   }
   /**
    * [0524] updateEmotionalMaturity
    * Cập nhật trưởng thành cảm xúc.
    */
-  public updateEmotionalMaturity(deltaTime = 0.016, context?: Record<string, any>): any {
+  public updateEmotionalMaturity(deltaTime = 0.016, context?: Record<string, unknown>) {
     return this.applyUpdate('updateEmotionalMaturity', deltaTime, context);
   }
   /**
    * [0525] learnDevelopmentalSkill
    * Học kỹ năng theo giai đoạn.
    */
-  public learnDevelopmentalSkill(experienceData?: any, retention = 0.9): any {
+  public learnDevelopmentalSkill(experienceData?: unknown, retention = 0.9) {
     return this.applyMemory('learnDevelopmentalSkill', experienceData, retention);
   }
   /**
    * [0526] developMotorCoordination
    * Phát triển phối hợp vận động.
    */
-  public developMotorCoordination(intensity = 0.5, cause?: string): any {
+  public developMotorCoordination(intensity = 0.5, cause?: string) {
     return this.applyEmotion('developMotorCoordination', intensity, cause);
   }
   /**
    * [0527] developLanguageAbility
    * Phát triển năng lực ngôn ngữ.
    */
-  public developLanguageAbility(intensity = 0.5, cause?: string): any {
+  public developLanguageAbility(intensity = 0.5, cause?: string) {
     return this.applyEmotion('developLanguageAbility', intensity, cause);
   }
   /**
    * [0528] developSocialUnderstanding
    * Phát triển hiểu biết xã hội.
    */
-  public developSocialUnderstanding(intensity = 0.5, cause?: string): any {
+  public developSocialUnderstanding(intensity = 0.5, cause?: string) {
     return this.applyEmotion('developSocialUnderstanding', intensity, cause);
   }
   /**
    * [0529] developSelfRegulation
    * Phát triển tự điều chỉnh.
    */
-  public developSelfRegulation(intensity = 0.5, cause?: string): any {
+  public developSelfRegulation(intensity = 0.5, cause?: string) {
     return this.applyEmotion('developSelfRegulation', intensity, cause);
   }
   /**
    * [0530] adaptToPubertyChanges
    * Thích nghi thay đổi tuổi dậy thì.
    */
-  public adaptToPubertyChanges(stimulus?: any, factor = 1.0): any {
+  public adaptToPubertyChanges(stimulus?: unknown, factor = 1.0) {
     return this.applyAdaptation('adaptToPubertyChanges', factor, stimulus);
   }
   /**
    * [0531] updateAdultBehaviorPatterns
    * Cập nhật mẫu hành vi người trưởng thành.
    */
-  public updateAdultBehaviorPatterns(deltaTime = 0.016, context?: Record<string, any>): any {
+  public updateAdultBehaviorPatterns(deltaTime = 0.016, context?: Record<string, unknown>) {
     return this.applyUpdate('updateAdultBehaviorPatterns', deltaTime, context);
   }
   /**
    * [0532] adaptToAging
    * Thích nghi với lão hóa.
    */
-  public adaptToAging(stimulus?: any, factor = 1.0): any {
+  public adaptToAging(stimulus?: unknown, factor = 1.0) {
     return this.applyAdaptation('adaptToAging', factor, stimulus);
   }
   /**
    * [0533] updateSensorySensitivity
    * Cập nhật độ nhạy giác quan.
    */
-  public updateSensorySensitivity(deltaTime = 0.016, context?: Record<string, any>): any {
+  public updateSensorySensitivity(deltaTime = 0.016, context?: Record<string, unknown>) {
     return this.applyUpdate('updateSensorySensitivity', deltaTime, context);
   }
   /**
    * [0534] updateMobilityCapacity
    * Cập nhật năng lực vận động.
    */
-  public updateMobilityCapacity(deltaTime = 0.016, context?: Record<string, any>): any {
+  public updateMobilityCapacity(deltaTime = 0.016, context?: Record<string, unknown>) {
     return this.applyUpdate('updateMobilityCapacity', deltaTime, context);
   }
   /**
    * [0535] preserveLearnedSkills
    * Duy trì kỹ năng đã học.
    */
-  public preserveLearnedSkills(context?: any, intensity = 0.5): any {
+  public preserveLearnedSkills(context?: unknown, intensity = 0.5) {
     return this.applyOperation('preserveLearnedSkills', intensity, context);
   }
   /**
    * [0536] adaptToCognitiveDecline
    * Thích nghi với suy giảm nhận thức.
    */
-  public adaptToCognitiveDecline(stimulus?: any, factor = 1.0): any {
+  public adaptToCognitiveDecline(stimulus?: unknown, factor = 1.0) {
     return this.applyAdaptation('adaptToCognitiveDecline', factor, stimulus);
   }
   /**
    * [0537] seekIntergenerationalSupport
    * Tìm kiếm hỗ trợ giữa các thế hệ.
    */
-  public seekIntergenerationalSupport(targetEntity?: any, urgency = 0.6): any {
+  public seekIntergenerationalSupport(targetEntity?: unknown, urgency = 0.6) {
     return this.applyMovement('seekIntergenerationalSupport', targetEntity, urgency);
   }
   /**
    * [0538] mentorYoungerIndividual
    * Hướng dẫn người trẻ hơn.
    */
-  public mentorYoungerIndividual(context?: any, intensity = 0.5): any {
+  public mentorYoungerIndividual(context?: unknown, intensity = 0.5) {
     return this.applyOperation('mentorYoungerIndividual', intensity, context);
   }
   /**
    * [0539] transferCulturalKnowledge
    * Truyền đạt kiến thức văn hóa.
    */
-  public transferCulturalKnowledge(context?: any, intensity = 0.5): any {
+  public transferCulturalKnowledge(context?: unknown, intensity = 0.5) {
     return this.applyOperation('transferCulturalKnowledge', intensity, context);
   }
   /**
    * [0540] updateLifespanState
    * Cập nhật trạng thái vòng đời.
    */
-  public updateLifespanState(deltaTime = 0.016, context?: Record<string, any>): any {
+  public updateLifespanState(deltaTime = 0.016, context?: Record<string, unknown>) {
     return this.applyUpdate('updateLifespanState', deltaTime, context);
   }
   // ==========================================================================
@@ -1341,140 +1341,140 @@ export class SomaticLifestyleSubsystem extends BehaviorSubsystemBase {
    * [0541] recognizeFamilyMember
    * Nhận diện thành viên gia đình.
    */
-  public recognizeFamilyMember(environment?: any, threshold = 0.4): any {
+  public recognizeFamilyMember(environment?: unknown, threshold = 0.4) {
     return this.applyDetection('recognizeFamilyMember', threshold, environment);
   }
   /**
    * [0542] maintainFamilyBond
    * Duy trì gắn kết gia đình.
    */
-  public maintainFamilyBond(context?: any, intensity = 0.5): any {
+  public maintainFamilyBond(context?: unknown, intensity = 0.5) {
     return this.applyOperation('maintainFamilyBond', intensity, context);
   }
   /**
    * [0543] seekCaregiver
    * Tìm người chăm sóc.
    */
-  public seekCaregiver(targetEntity?: any, urgency = 0.6): any {
+  public seekCaregiver(targetEntity?: unknown, urgency = 0.6) {
     return this.applyMovement('seekCaregiver', targetEntity, urgency);
   }
   /**
    * [0544] respondToCaregiverPresence
    * Phản ứng khi người chăm sóc xuất hiện.
    */
-  public respondToCaregiverPresence(stimulus?: any, factor = 1.0): any {
+  public respondToCaregiverPresence(stimulus?: unknown, factor = 1.0) {
     return this.applyAdaptation('respondToCaregiverPresence', factor, stimulus);
   }
   /**
    * [0545] provideCareToDependent
    * Chăm sóc người phụ thuộc.
    */
-  public provideCareToDependent(context?: any, intensity = 0.5): any {
+  public provideCareToDependent(context?: unknown, intensity = 0.5) {
     return this.applyOperation('provideCareToDependent', intensity, context);
   }
   /**
    * [0546] monitorDependentSafety
    * Theo dõi an toàn người phụ thuộc.
    */
-  public monitorDependentSafety(context?: any, intensity = 0.5): any {
+  public monitorDependentSafety(context?: unknown, intensity = 0.5) {
     return this.applyOperation('monitorDependentSafety', intensity, context);
   }
   /**
    * [0547] comfortDistressedChild
    * An ủi trẻ đang buồn.
    */
-  public comfortDistressedChild(context?: any, intensity = 0.5): any {
+  public comfortDistressedChild(context?: unknown, intensity = 0.5) {
     return this.applyOperation('comfortDistressedChild', intensity, context);
   }
   /**
    * [0548] teachBasicSkill
    * Dạy kỹ năng cơ bản.
    */
-  public teachBasicSkill(context?: any, intensity = 0.5): any {
+  public teachBasicSkill(context?: unknown, intensity = 0.5) {
     return this.applyOperation('teachBasicSkill', intensity, context);
   }
   /**
    * [0549] demonstrateExpectedBehavior
    * Làm mẫu hành vi mong đợi.
    */
-  public demonstrateExpectedBehavior(context?: any, intensity = 0.5): any {
+  public demonstrateExpectedBehavior(context?: unknown, intensity = 0.5) {
     return this.applyOperation('demonstrateExpectedBehavior', intensity, context);
   }
   /**
    * [0550] reinforceHelpfulBehavior
    * Củng cố hành vi có ích.
    */
-  public reinforceHelpfulBehavior(context?: any, intensity = 0.5): any {
+  public reinforceHelpfulBehavior(context?: unknown, intensity = 0.5) {
     return this.applyOperation('reinforceHelpfulBehavior', intensity, context);
   }
   /**
    * [0551] setFamilyBoundary
    * Thiết lập giới hạn trong gia đình.
    */
-  public setFamilyBoundary(context?: any, intensity = 0.5): any {
+  public setFamilyBoundary(context?: unknown, intensity = 0.5) {
     return this.applyOperation('setFamilyBoundary', intensity, context);
   }
   /**
    * [0552] respondToFamilyDisagreement
    * Phản ứng với bất đồng gia đình.
    */
-  public respondToFamilyDisagreement(stimulus?: any, factor = 1.0): any {
+  public respondToFamilyDisagreement(stimulus?: unknown, factor = 1.0) {
     return this.applyAdaptation('respondToFamilyDisagreement', factor, stimulus);
   }
   /**
    * [0553] mediateFamilyConflict
    * Hòa giải xung đột gia đình.
    */
-  public mediateFamilyConflict(context?: any, intensity = 0.5): any {
+  public mediateFamilyConflict(context?: unknown, intensity = 0.5) {
     return this.applyOperation('mediateFamilyConflict', intensity, context);
   }
   /**
    * [0554] coordinateHouseholdTask
    * Phối hợp công việc gia đình.
    */
-  public coordinateHouseholdTask(peerOrTarget?: any, blendWeight = 0.5): any {
+  public coordinateHouseholdTask(peerOrTarget?: unknown, blendWeight = 0.5) {
     return this.applyCoordination('coordinateHouseholdTask', peerOrTarget, blendWeight);
   }
   /**
    * [0555] shareCaregivingDuty
    * Chia sẻ trách nhiệm chăm sóc.
    */
-  public shareCaregivingDuty(context?: any, intensity = 0.5): any {
+  public shareCaregivingDuty(context?: unknown, intensity = 0.5) {
     return this.applyOperation('shareCaregivingDuty', intensity, context);
   }
   /**
    * [0556] expressFamilyAffection
    * Thể hiện tình cảm gia đình.
    */
-  public expressFamilyAffection(message?: any, intensity = 0.7): any {
+  public expressFamilyAffection(message?: unknown, intensity = 0.7) {
     return this.applyExpression('expressFamilyAffection', message, intensity);
   }
   /**
    * [0557] respondToFamilySeparation
    * Phản ứng khi gia đình xa cách.
    */
-  public respondToFamilySeparation(stimulus?: any, factor = 1.0): any {
+  public respondToFamilySeparation(stimulus?: unknown, factor = 1.0) {
     return this.applyAdaptation('respondToFamilySeparation', factor, stimulus);
   }
   /**
    * [0558] reuniteWithFamilyMember
    * Đoàn tụ với thành viên gia đình.
    */
-  public reuniteWithFamilyMember(context?: any, intensity = 0.5): any {
+  public reuniteWithFamilyMember(context?: unknown, intensity = 0.5) {
     return this.applyOperation('reuniteWithFamilyMember', intensity, context);
   }
   /**
    * [0559] preserveFamilyTradition
    * Duy trì truyền thống gia đình.
    */
-  public preserveFamilyTradition(context?: any, intensity = 0.5): any {
+  public preserveFamilyTradition(context?: unknown, intensity = 0.5) {
     return this.applyOperation('preserveFamilyTradition', intensity, context);
   }
   /**
    * [0560] adaptToFamilyStructureChange
    * Thích nghi với thay đổi cấu trúc gia đình.
    */
-  public adaptToFamilyStructureChange(stimulus?: any, factor = 1.0): any {
+  public adaptToFamilyStructureChange(stimulus?: unknown, factor = 1.0) {
     return this.applyAdaptation('adaptToFamilyStructureChange', factor, stimulus);
   }
   // ==========================================================================
@@ -1485,14 +1485,14 @@ export class SomaticLifestyleSubsystem extends BehaviorSubsystemBase {
    * [0561] detectCrowdDensity
    * Nhận biết mật độ đám đông.
    */
-  public detectCrowdDensity(environment?: any, threshold = 0.4): any {
+  public detectCrowdDensity(environment?: unknown, threshold = 0.4) {
     return this.applyDetection('detectCrowdDensity', threshold, environment);
   }
   /**
    * [0562] estimateCrowdMovement
    * Ước lượng chuyển động đám đông.
    */
-  public estimateCrowdMovement(target?: any, options?: Record<string, any>): any {
+  public estimateCrowdMovement(target?: unknown, options?: Record<string, unknown>) {
     const evaluation = this.evaluateEstimate('estimateCrowdMovement', target, options);
     return {
       query: 'estimateCrowdMovement',
@@ -1512,126 +1512,126 @@ export class SomaticLifestyleSubsystem extends BehaviorSubsystemBase {
    * [0563] navigateThroughCrowd
    * Di chuyển qua đám đông.
    */
-  public navigateThroughCrowd(context?: any, intensity = 0.5): any {
+  public navigateThroughCrowd(context?: unknown, intensity = 0.5) {
     return this.applyOperation('navigateThroughCrowd', intensity, context);
   }
   /**
    * [0564] maintainPersonalSpaceInCrowd
    * Duy trì không gian cá nhân.
    */
-  public maintainPersonalSpaceInCrowd(context?: any, intensity = 0.5): any {
+  public maintainPersonalSpaceInCrowd(context?: unknown, intensity = 0.5) {
     return this.applyOperation('maintainPersonalSpaceInCrowd', intensity, context);
   }
   /**
    * [0565] followPedestrianFlow
    * Đi theo luồng người đi bộ.
    */
-  public followPedestrianFlow(context?: any, intensity = 0.5): any {
+  public followPedestrianFlow(context?: unknown, intensity = 0.5) {
     return this.applyOperation('followPedestrianFlow', intensity, context);
   }
   /**
    * [0566] avoidCrowdCollision
    * Tránh va chạm trong đám đông.
    */
-  public avoidCrowdCollision(targetEntity?: any, urgency = 0.6): any {
+  public avoidCrowdCollision(targetEntity?: unknown, urgency = 0.6) {
     return this.applyMovement('avoidCrowdCollision', targetEntity, urgency);
   }
   /**
    * [0567] respondToCrowdExcitement
    * Phản ứng với sự phấn khích tập thể.
    */
-  public respondToCrowdExcitement(stimulus?: any, factor = 1.0): any {
+  public respondToCrowdExcitement(stimulus?: unknown, factor = 1.0) {
     return this.applyAdaptation('respondToCrowdExcitement', factor, stimulus);
   }
   /**
    * [0568] respondToCrowdFear
    * Phản ứng với nỗi sợ tập thể.
    */
-  public respondToCrowdFear(stimulus?: any, factor = 1.0): any {
+  public respondToCrowdFear(stimulus?: unknown, factor = 1.0) {
     return this.applyAdaptation('respondToCrowdFear', factor, stimulus);
   }
   /**
    * [0569] detectCrowdPanic
    * Phát hiện hoảng loạn đám đông.
    */
-  public detectCrowdPanic(environment?: any, threshold = 0.4): any {
+  public detectCrowdPanic(environment?: unknown, threshold = 0.4) {
     return this.applyDetection('detectCrowdPanic', threshold, environment);
   }
   /**
    * [0570] seekCrowdExit
    * Tìm lối ra khỏi đám đông.
    */
-  public seekCrowdExit(targetEntity?: any, urgency = 0.6): any {
+  public seekCrowdExit(targetEntity?: unknown, urgency = 0.6) {
     return this.applyMovement('seekCrowdExit', targetEntity, urgency);
   }
   /**
    * [0571] followPublicQueue
    * Tuân theo hàng chờ.
    */
-  public followPublicQueue(context?: any, intensity = 0.5): any {
+  public followPublicQueue(context?: unknown, intensity = 0.5) {
     return this.applyOperation('followPublicQueue', intensity, context);
   }
   /**
    * [0572] maintainQueuePosition
    * Giữ vị trí trong hàng.
    */
-  public maintainQueuePosition(context?: any, intensity = 0.5): any {
+  public maintainQueuePosition(context?: unknown, intensity = 0.5) {
     return this.applyOperation('maintainQueuePosition', intensity, context);
   }
   /**
    * [0573] yieldToOtherPedestrian
    * Nhường đường cho người khác.
    */
-  public yieldToOtherPedestrian(context?: any, intensity = 0.5): any {
+  public yieldToOtherPedestrian(context?: unknown, intensity = 0.5) {
     return this.applyOperation('yieldToOtherPedestrian', intensity, context);
   }
   /**
    * [0574] requestPublicAssistance
    * Yêu cầu trợ giúp nơi công cộng.
    */
-  public requestPublicAssistance(context?: any, intensity = 0.5): any {
+  public requestPublicAssistance(context?: unknown, intensity = 0.5) {
     return this.applyOperation('requestPublicAssistance', intensity, context);
   }
   /**
    * [0575] respondToPublicAnnouncement
    * Phản ứng với thông báo công cộng.
    */
-  public respondToPublicAnnouncement(stimulus?: any, factor = 1.0): any {
+  public respondToPublicAnnouncement(stimulus?: unknown, factor = 1.0) {
     return this.applyAdaptation('respondToPublicAnnouncement', factor, stimulus);
   }
   /**
    * [0576] recognizePublicSignage
    * Nhận biết biển báo công cộng.
    */
-  public recognizePublicSignage(environment?: any, threshold = 0.4): any {
+  public recognizePublicSignage(environment?: unknown, threshold = 0.4) {
     return this.applyDetection('recognizePublicSignage', threshold, environment);
   }
   /**
    * [0577] adaptBehaviorToPublicSetting
    * Điều chỉnh hành vi nơi công cộng.
    */
-  public adaptBehaviorToPublicSetting(stimulus?: any, factor = 1.0): any {
+  public adaptBehaviorToPublicSetting(stimulus?: unknown, factor = 1.0) {
     return this.applyAdaptation('adaptBehaviorToPublicSetting', factor, stimulus);
   }
   /**
    * [0578] detectSuspiciousSituation
    * Nhận biết tình huống đáng ngờ.
    */
-  public detectSuspiciousSituation(environment?: any, threshold = 0.4): any {
+  public detectSuspiciousSituation(environment?: unknown, threshold = 0.4) {
     return this.applyDetection('detectSuspiciousSituation', threshold, environment);
   }
   /**
    * [0579] offerHelpToStranger
    * Giúp đỡ người lạ.
    */
-  public offerHelpToStranger(context?: any, intensity = 0.5): any {
+  public offerHelpToStranger(context?: unknown, intensity = 0.5) {
     return this.applyOperation('offerHelpToStranger', intensity, context);
   }
   /**
    * [0580] recoverAfterCrowdDisturbance
    * Phục hồi sau sự cố đám đông.
    */
-  public recoverAfterCrowdDisturbance(stimulus?: any, factor = 1.0): any {
+  public recoverAfterCrowdDisturbance(stimulus?: unknown, factor = 1.0) {
     return this.applyAdaptation('recoverAfterCrowdDisturbance', factor, stimulus);
   }
   // ==========================================================================
@@ -1642,126 +1642,126 @@ export class SomaticLifestyleSubsystem extends BehaviorSubsystemBase {
    * [0581] detectUnexpectedEvent
    * Phát hiện sự kiện bất ngờ.
    */
-  public detectUnexpectedEvent(environment?: any, threshold = 0.4): any {
+  public detectUnexpectedEvent(environment?: unknown, threshold = 0.4) {
     return this.applyDetection('detectUnexpectedEvent', threshold, environment);
   }
   /**
    * [0582] triggerStartleResponse
    * Kích hoạt phản xạ giật mình.
    */
-  public triggerStartleResponse(intensity = 0.5, cause?: string): any {
+  public triggerStartleResponse(intensity = 0.5, cause?: string) {
     return this.applyEmotion('triggerStartleResponse', intensity, cause);
   }
   /**
    * [0583] orientTowardUnexpectedSound
    * Quay về phía âm thanh bất ngờ.
    */
-  public orientTowardUnexpectedSound(context?: any, intensity = 0.5): any {
+  public orientTowardUnexpectedSound(context?: unknown, intensity = 0.5) {
     return this.applyOperation('orientTowardUnexpectedSound', intensity, context);
   }
   /**
    * [0584] orientTowardSuddenMovement
    * Quay về phía chuyển động đột ngột.
    */
-  public orientTowardSuddenMovement(context?: any, intensity = 0.5): any {
+  public orientTowardSuddenMovement(context?: unknown, intensity = 0.5) {
     return this.applyOperation('orientTowardSuddenMovement', intensity, context);
   }
   /**
    * [0585] pauseCurrentAction
    * Tạm dừng hành động hiện tại.
    */
-  public pauseCurrentAction(context?: any, intensity = 0.5): any {
+  public pauseCurrentAction(context?: unknown, intensity = 0.5) {
     return this.applyOperation('pauseCurrentAction', intensity, context);
   }
   /**
    * [0586] reassessCurrentSituation
    * Đánh giá lại tình hình.
    */
-  public reassessCurrentSituation(context?: any, intensity = 0.5): any {
+  public reassessCurrentSituation(context?: unknown, intensity = 0.5) {
     return this.applyOperation('reassessCurrentSituation', intensity, context);
   }
   /**
    * [0587] identifyEventSource
    * Xác định nguồn sự kiện.
    */
-  public identifyEventSource(environment?: any, threshold = 0.4): any {
+  public identifyEventSource(environment?: unknown, threshold = 0.4) {
     return this.applyDetection('identifyEventSource', threshold, environment);
   }
   /**
    * [0588] classifyEventUrgency
    * Phân loại mức khẩn cấp.
    */
-  public classifyEventUrgency(context?: any, intensity = 0.5): any {
+  public classifyEventUrgency(context?: unknown, intensity = 0.5) {
     return this.applyOperation('classifyEventUrgency', intensity, context);
   }
   /**
    * [0589] selectImmediateResponse
    * Chọn phản ứng tức thời.
    */
-  public selectImmediateResponse(candidates?: any[], criteria?: Record<string, any>): any {
+  public selectImmediateResponse(candidates?: unknown[], criteria?: Record<string, unknown>) {
     return this.applySelection('selectImmediateResponse', candidates, criteria);
   }
   /**
    * [0590] avoidSuddenHazard
    * Tránh nguy hiểm bất ngờ.
    */
-  public avoidSuddenHazard(targetEntity?: any, urgency = 0.6): any {
+  public avoidSuddenHazard(targetEntity?: unknown, urgency = 0.6) {
     return this.applyMovement('avoidSuddenHazard', targetEntity, urgency);
   }
   /**
    * [0591] seekInformationAfterSurprise
    * Tìm thông tin sau khi ngạc nhiên.
    */
-  public seekInformationAfterSurprise(targetEntity?: any, urgency = 0.6): any {
+  public seekInformationAfterSurprise(targetEntity?: unknown, urgency = 0.6) {
     return this.applyMovement('seekInformationAfterSurprise', targetEntity, urgency);
   }
   /**
    * [0592] expressSurprise
    * Biểu đạt sự ngạc nhiên.
    */
-  public expressSurprise(message?: any, intensity = 0.7): any {
+  public expressSurprise(message?: unknown, intensity = 0.7) {
     return this.applyExpression('expressSurprise', message, intensity);
   }
   /**
    * [0593] recoverFromStartle
    * Phục hồi sau giật mình.
    */
-  public recoverFromStartle(stimulus?: any, factor = 1.0): any {
+  public recoverFromStartle(stimulus?: unknown, factor = 1.0) {
     return this.applyAdaptation('recoverFromStartle', factor, stimulus);
   }
   /**
    * [0594] adaptPlanAfterInterruption
    * Điều chỉnh kế hoạch sau gián đoạn.
    */
-  public adaptPlanAfterInterruption(stimulus?: any, factor = 1.0): any {
+  public adaptPlanAfterInterruption(stimulus?: unknown, factor = 1.0) {
     return this.applyAdaptation('adaptPlanAfterInterruption', factor, stimulus);
   }
   /**
    * [0595] respondToUnexpectedTouch
    * Phản ứng với tiếp xúc bất ngờ.
    */
-  public respondToUnexpectedTouch(stimulus?: any, factor = 1.0): any {
+  public respondToUnexpectedTouch(stimulus?: unknown, factor = 1.0) {
     return this.applyAdaptation('respondToUnexpectedTouch', factor, stimulus);
   }
   /**
    * [0596] respondToSuddenLightChange
    * Phản ứng với thay đổi ánh sáng đột ngột.
    */
-  public respondToSuddenLightChange(stimulus?: any, factor = 1.0): any {
+  public respondToSuddenLightChange(stimulus?: unknown, factor = 1.0) {
     return this.applyAdaptation('respondToSuddenLightChange', factor, stimulus);
   }
   /**
    * [0597] respondToSuddenTemperatureChange
    * Phản ứng với thay đổi nhiệt độ đột ngột.
    */
-  public respondToSuddenTemperatureChange(stimulus?: any, factor = 1.0): any {
+  public respondToSuddenTemperatureChange(stimulus?: unknown, factor = 1.0) {
     return this.applyAdaptation('respondToSuddenTemperatureChange', factor, stimulus);
   }
   /**
    * [0598] evaluateFalseAlarm
    * Đánh giá báo động giả.
    */
-  public evaluateFalseAlarm(target?: any, options?: Record<string, any>): any {
+  public evaluateFalseAlarm(target?: unknown, options?: Record<string, unknown>) {
     const evaluation = this.evaluateEstimate('evaluateFalseAlarm', target, options);
     return {
       query: 'evaluateFalseAlarm',
@@ -1781,14 +1781,14 @@ export class SomaticLifestyleSubsystem extends BehaviorSubsystemBase {
    * [0599] updateExpectationAfterSurprise
    * Cập nhật kỳ vọng sau bất ngờ.
    */
-  public updateExpectationAfterSurprise(deltaTime = 0.016, context?: Record<string, any>): any {
+  public updateExpectationAfterSurprise(deltaTime = 0.016, context?: Record<string, unknown>) {
     return this.applyUpdate('updateExpectationAfterSurprise', deltaTime, context);
   }
   /**
    * [0600] resumeNormalActivity
    * Tiếp tục hoạt động bình thường.
    */
-  public resumeNormalActivity(context?: any, intensity = 0.5): any {
+  public resumeNormalActivity(context?: unknown, intensity = 0.5) {
     return this.applyOperation('resumeNormalActivity', intensity, context);
   }
 }

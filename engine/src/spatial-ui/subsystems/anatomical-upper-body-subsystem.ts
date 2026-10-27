@@ -71,6 +71,7 @@ import {
   rotateAroundAxis,
   rotationBetweenVectors,
   lookAtQuaternion,
+  asRecord,
   boundingBox,
   namedResult,
   measurement,
@@ -191,18 +192,19 @@ function rotateVector(q: QuatD, v: Vec3D): Vec3D {
 }
 
 /** Tìm node theo tên trong cây `children` / danh sách `bones`. */
-function findNamedNode(root: unknown, names: string[]): any {
+function findNamedNode(root: unknown, names: string[]) {
   const wanted = names.map((n) => n.toLowerCase());
-  const visit = (node: any, depth: number): any => {
+  const visit = (node: unknown, depth: number): unknown => {
     if (!node || typeof node !== 'object' || depth > 8) return undefined;
-    const name = typeof node.name === 'string' ? node.name.toLowerCase() : '';
+    const record = asRecord(node);
+    const name = typeof record.name === 'string' ? record.name.toLowerCase() : '';
     if (name && wanted.some((w) => name === w || name.includes(w))) return node;
-    const children = Array.isArray(node.children) ? node.children : [];
+    const children = Array.isArray(record.children) ? record.children : [];
     for (const child of children) {
       const found = visit(child, depth + 1);
       if (found) return found;
     }
-    const bones = Array.isArray(node.bones) ? node.bones : [];
+    const bones = Array.isArray(record.bones) ? record.bones : [];
     for (const bone of bones) {
       const found = visit(bone, depth + 1);
       if (found) return found;
@@ -265,7 +267,7 @@ export class AnatomicalUpperBodySubsystem {
   }
 
   /** Vị trí mốc theo quy ước neo: `entity.position` + offset giải phẫu. */
-  private landmarkPosition(name: string, entity?: any, offset?: Vec3D): Vec3D {
+  private landmarkPosition(name: string, entity?: unknown, offset?: Vec3D): Vec3D {
     const base = entityPosition(entity);
     const anat = this.landmarkOffset(name);
     return {
@@ -373,13 +375,13 @@ export class AnatomicalUpperBodySubsystem {
    * Khoảng cách giữa hai mốc: nếu người gọi truyền rõ hai điểm thì dùng chúng,
    * ngược lại tính theo khung cơ thể (khoảng cách giải phẫu thật).
    */
-  private landmarkDistance(a: any, b: any, nameA: string, nameB: string): number {
+  private landmarkDistance(a: unknown, b: unknown, nameA: string, nameB: string): number {
     if (isPointLike(a) && isPointLike(b)) return distance3D(asPoint(a), asPoint(b));
     return distance3D(this.framePosition(nameA), this.framePosition(nameB));
   }
 
   /** Quaternion của khớp/xương: ưu tiên entity, sau đó tìm trong cây bone. */
-  private orientationOf(entity: any, boneNames: string[], options?: any): QuatD {
+  private orientationOf(entity: unknown, boneNames: string[], options?: unknown): QuatD {
     const direct = readQuaternion(entity);
     if (direct) return direct;
     const fromOptions = findNamedNode(options, boneNames);
@@ -396,13 +398,13 @@ export class AnatomicalUpperBodySubsystem {
   }
 
   /** Góc Euler của entity (0 khi entity không có xoay). */
-  private eulerOf(entity: any): { x: number; y: number; z: number } {
+  private eulerOf(entity: unknown): { x: number; y: number; z: number } {
     const q = readQuaternion(entity);
     return q ? quaternionToEuler(q) : { x: 0, y: 0, z: 0 };
   }
 
   /** Trục của entity sau khi áp dụng xoay (giữ nguyên khi không có xoay). */
-  private axisOf(entity: any, axis: Vec3D): Vec3D {
+  private axisOf(entity: unknown, axis: Vec3D): Vec3D {
     const q = readQuaternion(entity);
     return q ? normalize(rotateVector(q, axis)) : axis;
   }
@@ -412,7 +414,7 @@ export class AnatomicalUpperBodySubsystem {
   // -------------------------------------------------------------------------
 
   /** Các đối số thực sự được truyền vào (bỏ qua `undefined`/`null`). */
-  private sourcesOf(a?: any, b?: any, options?: any): any[] {
+  private sourcesOf(a?: unknown, b?: unknown, options?: unknown): unknown[] {
     return [a, b, options].filter((source) => source !== undefined && source !== null);
   }
 
@@ -423,7 +425,7 @@ export class AnatomicalUpperBodySubsystem {
    * (danh sách xương không có quan hệ cha–con) chỉ cho offset cục bộ nên bị
    * bỏ qua khi đã có cây lồng.
    */
-  private boneContext(sources: any[]): BoneContext | null {
+  private boneContext(sources: unknown[]): BoneContext | null {
     let best: BoneDesc | undefined;
     let bestCount = 0;
     for (const source of sources) {
@@ -455,7 +457,7 @@ export class AnatomicalUpperBodySubsystem {
   }
 
   /** Đối số giống entity (có `position` trước, rồi tới `quaternion`/`rotation`). */
-  private entityOf(sources: any[]): any {
+  private entityOf(sources: unknown[]) {
     for (const source of sources) {
       if (!source || typeof source !== 'object') continue;
       const record = source as Record<string, unknown>;
@@ -470,7 +472,7 @@ export class AnatomicalUpperBodySubsystem {
   }
 
   /** Điểm thô (Vec3D) truyền vào — loại trừ entity/options. */
-  private rawPoint(value: any): Vec3D | undefined {
+  private rawPoint(value: unknown): Vec3D | undefined {
     if (!value || typeof value !== 'object' || Array.isArray(value)) return undefined;
     const record = value as Record<string, unknown>;
     if (record.position || record.quaternion || record.rotation) return undefined;
@@ -490,7 +492,7 @@ export class AnatomicalUpperBodySubsystem {
     boneNames: readonly string[],
     point: Vec3D | undefined,
     landmark: string,
-    entity: any,
+    entity: unknown,
   ): Vec3D {
     const fromBone = this.boneWorldPosition(context, boneNames);
     if (fromBone) return fromBone;
@@ -504,7 +506,7 @@ export class AnatomicalUpperBodySubsystem {
    * Mặt phẳng điện đi qua vị trí entity, pháp tuyến là trục ngang của cơ thể
    * (trục X trong khung cơ thể, xoay theo quaternion của entity).
    */
-  private mirrorAcrossSagittal(point: Vec3D, entity: any): Vec3D {
+  private mirrorAcrossSagittal(point: Vec3D, entity: unknown): Vec3D {
     const normal = this.bodyRightAxis(entity);
     const origin = entityPosition(entity);
     const offset = dot(subtract(point, origin), normal);
@@ -512,7 +514,7 @@ export class AnatomicalUpperBodySubsystem {
   }
 
   /** Trục ngang của cơ thể trong không gian (xoay theo quaternion của entity). */
-  private bodyRightAxis(entity: any): Vec3D {
+  private bodyRightAxis(entity: unknown): Vec3D {
     const q = readQuaternion(entity);
     if (!q) return { x: RIGHT3.x, y: RIGHT3.y, z: RIGHT3.z };
     return normalize(rotateVector(q, RIGHT3));
@@ -522,7 +524,7 @@ export class AnatomicalUpperBodySubsystem {
    * Pháp tuyến lòng bàn tay: vuông góc với hướng ngón tay và trục ngang của
    * cơ thể.
    */
-  private palmNormalOf(wrist: Vec3D, hand: Vec3D, entity: any): Vec3D {
+  private palmNormalOf(wrist: Vec3D, hand: Vec3D, entity: unknown): Vec3D {
     const forward = normalize(subtract(hand, wrist));
     if (magnitude(forward) === 0) return { x: FORWARD3.x, y: FORWARD3.y, z: FORWARD3.z };
     const normal = normalize(cross(forward, this.bodyRightAxis(entity)));
@@ -530,7 +532,7 @@ export class AnatomicalUpperBodySubsystem {
   }
 
   /** Đọc số đầu tiên hợp lệ trong danh sách tên trường. */
-  private numberField(source: any, keys: string[]): number {
+  private numberField(source: unknown, keys: string[]): number {
     if (!source || typeof source !== 'object') return 0;
     const v = source as Record<string, unknown>;
     for (const key of keys) {
@@ -541,32 +543,33 @@ export class AnatomicalUpperBodySubsystem {
   }
 
   /** Vận tốc của entity (zero nếu entity không khai báo). */
-  private velocityOf(entity: any): Vec3D {
-    const v = entity?.velocity;
+  private velocityOf(entity: unknown): Vec3D {
+    const v = asRecord(entity).velocity;
     return v && typeof v === 'object' ? toVec3(v) : { x: 0, y: 0, z: 0 };
   }
 
   /** Gia tốc của entity (zero nếu entity không khai báo). */
-  private accelerationOf(entity: any): Vec3D {
-    const a = entity?.acceleration;
+  private accelerationOf(entity: unknown): Vec3D {
+    const record = asRecord(entity);
+    const a = record.acceleration;
     if (a && typeof a === 'object') return toVec3(a);
-    const prev = entity?.previousVelocity;
-    if (prev && typeof prev === 'object' && entity?.velocity && typeof entity.velocity === 'object') {
+    const prev = record.previousVelocity;
+    if (prev && typeof prev === 'object' && record.velocity && typeof record.velocity === 'object') {
       const dt = 1 / 60;
-      return scale(subtract(toVec3(entity.velocity), toVec3(prev)), 1 / dt);
+      return scale(subtract(toVec3(record.velocity), toVec3(prev)), 1 / dt);
     }
     return { x: 0, y: 0, z: 0 };
   }
 
   /** Vận tốc góc của entity (zero nếu entity không khai báo). */
-  private angularVelocityOf(entity: any): Vec3D {
-    const v = entity?.angularVelocity;
+  private angularVelocityOf(entity: unknown): Vec3D {
+    const v = asRecord(entity).angularVelocity;
     return v && typeof v === 'object' ? toVec3(v) : { x: 0, y: 0, z: 0 };
   }
 
   /** Gia tốc góc của entity (zero nếu entity không khai báo). */
-  private angularAccelerationOf(entity: any): Vec3D {
-    const a = entity?.angularAcceleration;
+  private angularAccelerationOf(entity: unknown): Vec3D {
+    const a = asRecord(entity).angularAcceleration;
     return a && typeof a === 'object' ? toVec3(a) : { x: 0, y: 0, z: 0 };
   }
 
@@ -602,7 +605,7 @@ export class AnatomicalUpperBodySubsystem {
   /**
    * Xoay một điểm của khung cơ thể theo quaternion của entity (quanh tâm).
    */
-  private frameRotated(entity: any, point: Vec3D, center: Vec3D): Vec3D {
+  private frameRotated(entity: unknown, point: Vec3D, center: Vec3D): Vec3D {
     const q = readQuaternion(entity);
     if (!q) return point;
     return add(center, rotateVector(q, subtract(point, center)));
@@ -633,25 +636,25 @@ export class AnatomicalUpperBodySubsystem {
   }
 
   /** Pháp tuyến lòng bàn tay sau khi áp dụng xoay của entity. */
-  private palmNormal(entity?: any): Vec3D {
+  private palmNormal(entity?: unknown): Vec3D {
     const q = readQuaternion(entity);
     return q ? normalize(rotateVector(q, this.palmNormalFrame())) : this.palmNormalFrame();
   }
 
   /** Hướng ngón tay sau khi áp dụng xoay của entity. */
-  private palmForward(entity?: any): Vec3D {
+  private palmForward(entity?: unknown): Vec3D {
     const q = readQuaternion(entity);
     return q ? normalize(rotateVector(q, this.palmForwardFrame())) : this.palmForwardFrame();
   }
 
   /** Trục trên của bàn tay sau khi áp dụng xoay của entity. */
-  private palmUp(entity?: any): Vec3D {
+  private palmUp(entity?: unknown): Vec3D {
     const q = readQuaternion(entity);
     return q ? normalize(rotateVector(q, this.palmUpFrame())) : this.palmUpFrame();
   }
 
   /** Trục bên phải của bàn tay (vuông góc với forward và up). */
-  private palmRight(entity?: any): Vec3D {
+  private palmRight(entity?: unknown): Vec3D {
     const right = normalize(cross(this.palmUp(entity), this.palmForward(entity)));
     return magnitude(right) > 0 ? right : RIGHT3;
   }
@@ -663,7 +666,7 @@ export class AnatomicalUpperBodySubsystem {
    * vector của quaternion lên trục; góc nhận được là góc xoay thuần quanh
    * trục đó (dương theo quy ước bàn tay phải).
    */
-  private twistAboutAxis(entity: any, axis: Vec3D): number {
+  private twistAboutAxis(entity: unknown, axis: Vec3D): number {
     const q = readQuaternion(entity);
     if (!q) return 0;
     const n = normalize(axis);
@@ -686,7 +689,7 @@ export class AnatomicalUpperBodySubsystem {
    * Ưu tiên đường đi khai báo trong entity (`trajectory`/`path`/`points`/
    * `waypoints`); nếu không có thì quỹ đạo là đoạn thẳng `start → end`.
    */
-  private trajectoryPoints(entity: any, start: Vec3D, end: Vec3D): Vec3D[] {
+  private trajectoryPoints(entity: unknown, start: Vec3D, end: Vec3D): Vec3D[] {
     const source = (entity ?? {}) as Record<string, unknown>;
     const candidates = [source.trajectory, source.path, source.points, source.waypoints];
     for (const candidate of candidates) {
@@ -710,7 +713,7 @@ export class AnatomicalUpperBodySubsystem {
    * Đọc từ `entity.fingerAngles` / `entity.fingers` / `entity.jointAngles` khi
    * có; nếu không khai báo thì mọi ngón đều ở tư thế thẳng (0 rad).
    */
-  private fingerAngles(entity?: any): Record<string, { flexion: number; extension: number; abduction: number; curl: number }> {
+  private fingerAngles(entity?: unknown): Record<string, { flexion: number; extension: number; abduction: number; curl: number }> {
     const source = (entity ?? {}) as Record<string, unknown>;
     const explicit = (source.fingerAngles ?? source.fingers ?? source.jointAngles) as
       | Record<string, unknown>
@@ -739,7 +742,7 @@ export class AnatomicalUpperBodySubsystem {
   // -------------------------------------------------------------------------
 
   /** Đọc số tuỳ chọn — trả `fallback` khi không có giá trị hữu hạn. */
-  private optNumber(options: any, fallback: number, ...keys: string[]): number {
+  private optNumber(options: unknown, fallback: number, ...keys: string[]): number {
     if (!options || typeof options !== 'object') return fallback;
     const record = options as Record<string, unknown>;
     for (const key of keys) {
@@ -750,7 +753,7 @@ export class AnatomicalUpperBodySubsystem {
   }
 
   /** Đọc cờ boolean tuỳ chọn. */
-  private optBoolean(options: any, fallback: boolean, ...keys: string[]): boolean {
+  private optBoolean(options: unknown, fallback: boolean, ...keys: string[]): boolean {
     if (!options || typeof options !== 'object') return fallback;
     const record = options as Record<string, unknown>;
     for (const key of keys) {
@@ -761,7 +764,7 @@ export class AnatomicalUpperBodySubsystem {
   }
 
   /** Đọc chuỗi tuỳ chọn (không phân biệt hoa thường, cắt khoảng trắng). */
-  private optString(options: any, fallback: string, ...keys: string[]): string {
+  private optString(options: unknown, fallback: string, ...keys: string[]): string {
     if (!options || typeof options !== 'object') return fallback;
     const record = options as Record<string, unknown>;
     for (const key of keys) {
@@ -772,7 +775,7 @@ export class AnatomicalUpperBodySubsystem {
   }
 
   /** Đọc đối tượng tuỳ chọn — dùng để chỉ định nguồn dữ liệu khác. */
-  private optObject(options: any, ...keys: string[]): any {
+  private optObject(options: unknown, ...keys: string[]) {
     if (!options || typeof options !== 'object') return undefined;
     const record = options as Record<string, unknown>;
     for (const key of keys) {
@@ -783,7 +786,7 @@ export class AnatomicalUpperBodySubsystem {
   }
 
   /** Đọc vector tuỳ chọn (mốc/điểm tham chiếu). */
-  private optVector(options: any, ...keys: string[]): Vec3D | undefined {
+  private optVector(options: unknown, ...keys: string[]): Vec3D | undefined {
     const found = this.optObject(options, ...keys);
     if (!found) return undefined;
     const record = found as Record<string, unknown>;
@@ -807,7 +810,7 @@ export class AnatomicalUpperBodySubsystem {
    * Đơn vị dạng `cm^-1`/`mm^-1` được hiểu là nghịch đảo của đơn vị độ dài
    * tương ứng.
    */
-  private unitFactor(options: any, fallbackUnit: string): { unit: string; factor: number } {
+  private unitFactor(options: unknown, fallbackUnit: string): { unit: string; factor: number } {
     const requested = this.optString(options, fallbackUnit, 'unit');
     const inverse = requested.endsWith('^-1');
     const base = inverse ? requested.slice(0, -3) : requested;
@@ -825,7 +828,7 @@ export class AnatomicalUpperBodySubsystem {
   }
 
   /** Hệ số quy đổi đơn vị góc theo `options.unit` (`rad` | `deg`). */
-  private angleUnitFactor(options: any): { unit: string; factor: number } {
+  private angleUnitFactor(options: unknown): { unit: string; factor: number } {
     const requested = this.optString(options, 'rad', 'unit');
     if (requested === 'deg' || requested === 'degree' || requested === 'degrees') {
       return { unit: 'deg', factor: 180 / Math.PI };
@@ -839,19 +842,19 @@ export class AnatomicalUpperBodySubsystem {
    * `fallback` là bên mặc định của chính method đó; người gọi có thể đổi bên
    * bằng `options.side`.
    */
-  private sideOf(options: any, fallback: 'left' | 'right' = 'left'): 'left' | 'right' {
+  private sideOf(options: unknown, fallback: 'left' | 'right' = 'left'): 'left' | 'right' {
     return this.optString(options, fallback, 'side', 'hand') === 'right' ? 'right' : 'left';
   }
 
   /** Nguồn dữ liệu thay thế: `options.entity` (nếu có) → tham số entity. */
-  private sourceEntity(entity: any, options: any): any {
+  private sourceEntity(entity: unknown, options: unknown) {
     return this.optObject(options, 'entity', 'source') ?? entity;
   }
 
   /**
    * Quaternion của khung tham chiếu (undefined khi tham chiếu không có xoay).
    */
-  private referenceQuaternion(reference: any): QuatD | undefined {
+  private referenceQuaternion(reference: unknown): QuatD | undefined {
     return readQuaternion(reference);
   }
 
@@ -860,14 +863,14 @@ export class AnatomicalUpperBodySubsystem {
    *
    * Tham chiếu không có xoay ⇒ hướng giữ nguyên (hành vi mặc định không đổi).
    */
-  private intoFrame(direction: Vec3D, reference: any): Vec3D {
+  private intoFrame(direction: Vec3D, reference: unknown): Vec3D {
     const q = this.referenceQuaternion(reference);
     if (!q) return direction;
     return rotateVector(invertQuaternion(q), direction);
   }
 
   /** Trục cục bộ (`localAxis`) biểu diễn trong khung tham chiếu `reference`. */
-  private referenceAxis(reference: any, localAxis: Vec3D): Vec3D {
+  private referenceAxis(reference: unknown, localAxis: Vec3D): Vec3D {
     const q = this.referenceQuaternion(reference);
     if (!q) return localAxis;
     return normalize(rotateVector(q, localAxis));
@@ -878,7 +881,7 @@ export class AnatomicalUpperBodySubsystem {
    *
    * Không có khung tham chiếu ⇒ trả góc Euler tuyệt đối (như trước).
    */
-  private eulerRelativeTo(a: any, reference: any): { x: number; y: number; z: number } {
+  private eulerRelativeTo(a: unknown, reference: unknown): { x: number; y: number; z: number } {
     const qb = this.referenceQuaternion(reference);
     if (!qb) return this.eulerOf(a);
     const qa = this.referenceQuaternion(a) ?? { x: 0, y: 0, z: 0, w: 1 };
@@ -886,13 +889,13 @@ export class AnatomicalUpperBodySubsystem {
   }
 
   /** Chiều dài khai báo trên entity (ví dụ `neckLength`, `upperArmRadius`). */
-  private declaredLength(entity: any, ...keys: string[]): number {
+  private declaredLength(entity: unknown, ...keys: string[]): number {
     const value = this.numberField(entity, keys);
     return value > 0 ? value : 0;
   }
 
   /** Chiều dài của một xương trong cây xương (thuộc tính `length` của node). */
-  private boneLengthOf(source: any, names: readonly string[]): number | undefined {
+  private boneLengthOf(source: unknown, names: readonly string[]): number | undefined {
     const skeleton = buildSkeleton(source);
     if (!skeleton) return undefined;
     const wanted = names.map((name) => name.toLowerCase());
@@ -919,7 +922,7 @@ export class AnatomicalUpperBodySubsystem {
   }
 
   /** Bề rộng vai đo được từ hai xương vai trong cây xương. */
-  private shoulderSpanOf(source: any): number | undefined {
+  private shoulderSpanOf(source: unknown): number | undefined {
     const context = this.boneContext(this.sourcesOf(source));
     if (!context) return undefined;
     const left = this.boneWorldPosition(context, LEFT_SHOULDER_BONE_NAMES);
@@ -929,7 +932,7 @@ export class AnatomicalUpperBodySubsystem {
   }
 
   /** Độ cao vai so với gốc cơ thể (xương gốc của cây). */
-  private shoulderHeightOf(source: any): number | undefined {
+  private shoulderHeightOf(source: unknown): number | undefined {
     const context = this.boneContext(this.sourcesOf(source));
     if (!context) return undefined;
     const shoulder =
@@ -952,7 +955,7 @@ export class AnatomicalUpperBodySubsystem {
   }
 
   /** Mức nhắm mắt khai báo trên một nguồn dữ liệu (undefined nếu không có). */
-  private blinkAmountOf(source: any): number | undefined {
+  private blinkAmountOf(source: unknown): number | undefined {
     if (!source || typeof source !== 'object') return undefined;
     const record = source as Record<string, unknown>;
     for (const key of ['blink', 'blinkAmount', 'eyelid', 'eyeClose']) {
@@ -964,7 +967,7 @@ export class AnatomicalUpperBodySubsystem {
 
   /** Chiều dài đo được giữa hai xương trong cây xương. */
   private boneSegmentLength(
-    source: any,
+    source: unknown,
     fromNames: readonly string[],
     toNames: readonly string[],
   ): number | undefined {
@@ -977,7 +980,7 @@ export class AnatomicalUpperBodySubsystem {
   }
 
   /** Chiều dài cánh tay trên đo được từ xương vai–khuỷu. */
-  private upperArmLengthOf(source: any): number | undefined {
+  private upperArmLengthOf(source: unknown): number | undefined {
     return this.boneSegmentLength(
       source,
       ['shoulder_l', 'shoulder_r', 'humerus', 'upperarm'],
@@ -986,7 +989,7 @@ export class AnatomicalUpperBodySubsystem {
   }
 
   /** Chiều dài cánh tay dưới đo được từ xương khuỷu–cổ tay. */
-  private forearmLengthOf(source: any): number | undefined {
+  private forearmLengthOf(source: unknown): number | undefined {
     return this.boneSegmentLength(
       source,
       ['elbow_l', 'elbow_r', 'elbow'],
@@ -995,7 +998,7 @@ export class AnatomicalUpperBodySubsystem {
   }
 
   /** Tổng chiều dài chuỗi khớp cánh tay đo được từ cây xương. */
-  private armChainLengthOf(source: any): number | undefined {
+  private armChainLengthOf(source: unknown): number | undefined {
     const context = this.boneContext(this.sourcesOf(source));
     if (!context) return undefined;
     const shoulder = this.boneWorldPosition(context, SHOULDER_BONE_NAMES);
@@ -1014,7 +1017,7 @@ export class AnatomicalUpperBodySubsystem {
    * Ưu tiên xương thật; nếu không có thì dùng khung giải phẫu tĩnh xoay theo
    * quaternion của `a` (hành vi mặc định).
    */
-  private elbowAxes(a: any, b: any): { dir1: Vec3D; dir2: Vec3D } {
+  private elbowAxes(a: unknown, b: unknown): { dir1: Vec3D; dir2: Vec3D } {
     const context = this.boneContext(this.sourcesOf(a, b));
     const shoulderBone = this.boneWorldPosition(context, SHOULDER_BONE_NAMES);
     const elbowBone = this.boneWorldPosition(context, ELBOW_BONE_NAMES);
@@ -1037,7 +1040,7 @@ export class AnatomicalUpperBodySubsystem {
   }
 
   /** Quaternion của một xương trong cây xương (theo tên). */
-  private boneQuaternionOf(source: any, names: readonly string[]): QuatD | undefined {
+  private boneQuaternionOf(source: unknown, names: readonly string[]): QuatD | undefined {
     const skeleton = buildSkeleton(source);
     if (!skeleton) return undefined;
     const wanted = names.map((name) => name.toLowerCase());
@@ -1051,7 +1054,7 @@ export class AnatomicalUpperBodySubsystem {
   }
 
   /** Độ sải bàn tay đo được giữa xương ngón cái và ngón áp út. */
-  private handSpanOf(source: any): number | undefined {
+  private handSpanOf(source: unknown): number | undefined {
     const context = this.boneContext(this.sourcesOf(source));
     if (!context) return undefined;
     const thumb = this.boneWorldPosition(context, ['thumb']);
@@ -1061,14 +1064,14 @@ export class AnatomicalUpperBodySubsystem {
   }
 
   /** Hướng cánh tay dưới trong khung giải phẫu (xoay theo quaternion của `a`). */
-  private forearmFrameDirection(a: any): Vec3D {
+  private forearmFrameDirection(a: unknown): Vec3D {
     const elbow = this.framePosition('getLeftElbowPosition');
     const center = this.framePosition('getLeftForearmCenter');
     return normalize(subtract(this.frameRotated(a, center, elbow), elbow));
   }
 
   /** Vị trí môi dưới từ nguồn tham chiếu (điểm thô hoặc xương hàm). */
-  private lowerLipPosition(source: any): Vec3D | undefined {
+  private lowerLipPosition(source: unknown): Vec3D | undefined {
     const point = this.rawPoint(source);
     if (point) return point;
     const context = this.boneContext(this.sourcesOf(source));
@@ -1083,63 +1086,63 @@ export class AnatomicalUpperBodySubsystem {
    * [0151] getHeadPosition
    * Lấy tọa độ đầu (neo = vị trí entity, offset giải phẫu của tâm đầu).
    */
-  public getHeadPosition(entity?: any, offset?: Vec3D): any {
+  public getHeadPosition(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getHeadPosition', entity, offset);
   }
   /**
    * [0152] getHeadCenter
    * Lấy tâm đầu.
    */
-  public getHeadCenter(entity?: any, offset?: Vec3D): any {
+  public getHeadCenter(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getHeadCenter', entity, offset);
   }
   /**
    * [0153] getHeadTopPosition
    * Lấy tọa độ đỉnh đầu.
    */
-  public getHeadTopPosition(entity?: any, offset?: Vec3D): any {
+  public getHeadTopPosition(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getHeadTopPosition', entity, offset);
   }
   /**
    * [0154] getHeadBottomPosition
    * Lấy tọa độ đáy đầu.
    */
-  public getHeadBottomPosition(entity?: any, offset?: Vec3D): any {
+  public getHeadBottomPosition(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getHeadBottomPosition', entity, offset);
   }
   /**
    * [0155] getHeadFrontPosition
    * Lấy tọa độ phía trước đầu.
    */
-  public getHeadFrontPosition(entity?: any, offset?: Vec3D): any {
+  public getHeadFrontPosition(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getHeadFrontPosition', entity, offset);
   }
   /**
    * [0156] getHeadBackPosition
    * Lấy tọa độ phía sau đầu.
    */
-  public getHeadBackPosition(entity?: any, offset?: Vec3D): any {
+  public getHeadBackPosition(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getHeadBackPosition', entity, offset);
   }
   /**
    * [0157] getHeadLeftPosition
    * Lấy tọa độ bên trái đầu.
    */
-  public getHeadLeftPosition(entity?: any, offset?: Vec3D): any {
+  public getHeadLeftPosition(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getHeadLeftPosition', entity, offset);
   }
   /**
    * [0158] getHeadRightPosition
    * Lấy tọa độ bên phải đầu.
    */
-  public getHeadRightPosition(entity?: any, offset?: Vec3D): any {
+  public getHeadRightPosition(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getHeadRightPosition', entity, offset);
   }
   /**
    * [0159] getHeadForwardVector
    * Hướng phía trước của đầu (theo quaternion của entity, mặc định +Z).
    */
-  public getHeadForwardVector(a?: any, b?: any): any {
+  public getHeadForwardVector(a?: unknown, b?: unknown) {
     // `b` là khung tham chiếu: hướng được biểu diễn trong khung của `b`.
     const forward = normalize(entityForward(a));
     return directionResult('getHeadForwardVector', this.intoFrame(forward, b));
@@ -1148,7 +1151,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0160] getHeadUpVector
    * Hướng phía trên của đầu (theo quaternion của entity, mặc định +Y).
    */
-  public getHeadUpVector(a?: any, b?: any): any {
+  public getHeadUpVector(a?: unknown, b?: unknown) {
     const up = this.axisOf(a, UP3);
     return directionResult('getHeadUpVector', this.intoFrame(up, b));
   }
@@ -1156,7 +1159,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0161] getHeadRightVector
    * Hướng bên phải của đầu (theo quaternion của entity, mặc định +X).
    */
-  public getHeadRightVector(a?: any, b?: any): any {
+  public getHeadRightVector(a?: unknown, b?: unknown) {
     const right = this.axisOf(a, RIGHT3);
     return directionResult('getHeadRightVector', this.intoFrame(right, b));
   }
@@ -1164,7 +1167,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0162] calculateHeadCenterOffset
    * Độ lệch của tâm đầu so với neo (vị trí) của entity.
    */
-  public calculateHeadCenterOffset(a?: any, b?: any, options?: any): any {
+  public calculateHeadCenterOffset(a?: unknown, b?: unknown, options?: unknown) {
     // `a` = neo (entity), `b` = nguồn đầu (cây xương có xương hộp sọ),
     // `options` = scale / unit / invert.
     const sources = this.sourcesOf(a, b, options);
@@ -1187,7 +1190,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0163] calculateHeadBoundingBox
    * Tính hộp bao đầu (kích thước theo BODY_BOX_SIZES.head nếu không truyền).
    */
-  public calculateHeadBoundingBox(entity?: any, size?: Vec3D): any {
+  public calculateHeadBoundingBox(entity?: unknown, size?: Vec3D) {
     const box = boundingBox(entityPosition(entity), this.boxSize('head', size));
     return boundsResult('calculateHeadBoundingBox', box);
   }
@@ -1195,7 +1198,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0164] calculateHeadBoundingSphere
    * Tính hình cầu bao đầu (bán kính = nửa đường chéo hộp đầu nếu không truyền).
    */
-  public calculateHeadBoundingSphere(entity?: any, radius = 1.0): any {
+  public calculateHeadBoundingSphere(entity?: unknown, radius = 1.0) {
     // `arguments.length` cho biết người gọi có truyền bán kính hay không —
     // giá trị mặc định 1.0 chỉ là dự phòng, không phải bán kính giải phẫu.
     const given = arguments.length >= 2 && Number.isFinite(radius);
@@ -1212,7 +1215,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0165] calculateHeadOrientation
    * Tính hướng quay đầu (quaternion của entity hoặc xương đầu, mặc định đơn vị).
    */
-  public calculateHeadOrientation(entityOrAngle?: any, options?: any): any {
+  public calculateHeadOrientation(entityOrAngle?: unknown, options?: unknown) {
     const q = this.orientationOf(entityOrAngle, ['head', 'skull', 'neck'], options);
     return orientationResult('calculateHeadOrientation', q);
   }
@@ -1220,7 +1223,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0166] calculateHeadLookDirection
    * Hướng nhìn của đầu: về điểm ngắm nếu có, ngược lại theo quaternion.
    */
-  public calculateHeadLookDirection(a?: any, b?: any): any {
+  public calculateHeadLookDirection(a?: unknown, b?: unknown) {
     if (isPointLike(b)) {
       const dir = normalize(subtract(asPoint(b), entityPosition(a)));
       if (magnitude(dir) > 0) return directionResult('calculateHeadLookDirection', dir);
@@ -1231,7 +1234,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0167] calculateHeadAimDirection
    * Hướng ngắm của đầu (về mục tiêu nếu có, ngược lại hướng nhìn).
    */
-  public calculateHeadAimDirection(a?: any, b?: any): any {
+  public calculateHeadAimDirection(a?: unknown, b?: unknown) {
     const target = isPointLike(b) ? asPoint(b) : undefined;
     if (target) {
       const dir = normalize(subtract(target, entityPosition(a)));
@@ -1243,7 +1246,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0168] calculateHeadTilt
    * Độ nghiêng chung của đầu (góc nghiêng + xoay, bỏ qua phần xoay quanh trục Y).
    */
-  public calculateHeadTilt(a?: any, b?: any): any {
+  public calculateHeadTilt(a?: unknown, b?: unknown) {
     const e = this.eulerOf(a ?? b);
     const tilt = Math.hypot(e.x, e.z);
     return measurement('calculateHeadTilt', tilt, 'rad');
@@ -1252,7 +1255,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0169] calculateHeadYaw
    * Góc quay ngang của đầu (xoay quanh trục Y).
    */
-  public calculateHeadYaw(a?: any, b?: any): any {
+  public calculateHeadYaw(a?: unknown, b?: unknown) {
     const e = this.eulerOf(a ?? b);
     return measurement('calculateHeadYaw', e.y, 'rad');
   }
@@ -1260,7 +1263,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0170] calculateHeadPitch
    * Góc cúi ngẩng của đầu (xoay quanh trục X).
    */
-  public calculateHeadPitch(a?: any, b?: any): any {
+  public calculateHeadPitch(a?: unknown, b?: unknown) {
     const e = this.eulerOf(a ?? b);
     return measurement('calculateHeadPitch', e.x, 'rad');
   }
@@ -1268,7 +1271,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0171] calculateHeadRoll
    * Góc nghiêng sang bên của đầu (xoay quanh trục Z).
    */
-  public calculateHeadRoll(a?: any, b?: any): any {
+  public calculateHeadRoll(a?: unknown, b?: unknown) {
     const e = this.eulerOf(a ?? b);
     return measurement('calculateHeadRoll', e.z, 'rad');
   }
@@ -1276,140 +1279,140 @@ export class AnatomicalUpperBodySubsystem {
    * [0172] getFaceCenter
    * Lấy tâm khuôn mặt.
    */
-  public getFaceCenter(entity?: any, offset?: Vec3D): any {
+  public getFaceCenter(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getFaceCenter', entity, offset);
   }
   /**
    * [0173] getForeheadPosition
    * Lấy tọa độ trán.
    */
-  public getForeheadPosition(entity?: any, offset?: Vec3D): any {
+  public getForeheadPosition(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getForeheadPosition', entity, offset);
   }
   /**
    * [0174] getChinPosition
    * Lấy tọa độ cằm.
    */
-  public getChinPosition(entity?: any, offset?: Vec3D): any {
+  public getChinPosition(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getChinPosition', entity, offset);
   }
   /**
    * [0175] getJawPosition
    * Lấy tọa độ hàm.
    */
-  public getJawPosition(entity?: any, offset?: Vec3D): any {
+  public getJawPosition(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getJawPosition', entity, offset);
   }
   /**
    * [0176] getLeftEyePosition
    * Lấy tọa độ mắt trái.
    */
-  public getLeftEyePosition(entity?: any, offset?: Vec3D): any {
+  public getLeftEyePosition(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getLeftEyePosition', entity, offset);
   }
   /**
    * [0177] getRightEyePosition
    * Lấy tọa độ mắt phải.
    */
-  public getRightEyePosition(entity?: any, offset?: Vec3D): any {
+  public getRightEyePosition(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getRightEyePosition', entity, offset);
   }
   /**
    * [0178] getLeftPupilPosition
    * Lấy tọa độ đồng tử trái.
    */
-  public getLeftPupilPosition(entity?: any, offset?: Vec3D): any {
+  public getLeftPupilPosition(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getLeftPupilPosition', entity, offset);
   }
   /**
    * [0179] getRightPupilPosition
    * Lấy tọa độ đồng tử phải.
    */
-  public getRightPupilPosition(entity?: any, offset?: Vec3D): any {
+  public getRightPupilPosition(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getRightPupilPosition', entity, offset);
   }
   /**
    * [0180] getNosePosition
    * Lấy tọa độ mũi.
    */
-  public getNosePosition(entity?: any, offset?: Vec3D): any {
+  public getNosePosition(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getNosePosition', entity, offset);
   }
   /**
    * [0181] getNoseTipPosition
    * Lấy tọa độ chóp mũi.
    */
-  public getNoseTipPosition(entity?: any, offset?: Vec3D): any {
+  public getNoseTipPosition(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getNoseTipPosition', entity, offset);
   }
   /**
    * [0182] getMouthCenter
    * Lấy tâm miệng.
    */
-  public getMouthCenter(entity?: any, offset?: Vec3D): any {
+  public getMouthCenter(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getMouthCenter', entity, offset);
   }
   /**
    * [0183] getUpperLipPosition
    * Lấy tọa độ môi trên.
    */
-  public getUpperLipPosition(entity?: any, offset?: Vec3D): any {
+  public getUpperLipPosition(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getUpperLipPosition', entity, offset);
   }
   /**
    * [0184] getLowerLipPosition
    * Lấy tọa độ môi dưới.
    */
-  public getLowerLipPosition(entity?: any, offset?: Vec3D): any {
+  public getLowerLipPosition(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getLowerLipPosition', entity, offset);
   }
   /**
    * [0185] getLeftEarPosition
    * Lấy tọa độ tai trái.
    */
-  public getLeftEarPosition(entity?: any, offset?: Vec3D): any {
+  public getLeftEarPosition(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getLeftEarPosition', entity, offset);
   }
   /**
    * [0186] getRightEarPosition
    * Lấy tọa độ tai phải.
    */
-  public getRightEarPosition(entity?: any, offset?: Vec3D): any {
+  public getRightEarPosition(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getRightEarPosition', entity, offset);
   }
   /**
    * [0187] getLeftEyebrowPosition
    * Lấy tọa độ lông mày trái.
    */
-  public getLeftEyebrowPosition(entity?: any, offset?: Vec3D): any {
+  public getLeftEyebrowPosition(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getLeftEyebrowPosition', entity, offset);
   }
   /**
    * [0188] getRightEyebrowPosition
    * Lấy tọa độ lông mày phải.
    */
-  public getRightEyebrowPosition(entity?: any, offset?: Vec3D): any {
+  public getRightEyebrowPosition(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getRightEyebrowPosition', entity, offset);
   }
   /**
    * [0189] getLeftCheekPosition
    * Lấy tọa độ má trái.
    */
-  public getLeftCheekPosition(entity?: any, offset?: Vec3D): any {
+  public getLeftCheekPosition(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getLeftCheekPosition', entity, offset);
   }
   /**
    * [0190] getRightCheekPosition
    * Lấy tọa độ má phải.
    */
-  public getRightCheekPosition(entity?: any, offset?: Vec3D): any {
+  public getRightCheekPosition(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getRightCheekPosition', entity, offset);
   }
   /**
    * [0191] calculateEyeDistance
    * Khoảng cách giữa hai mắt (mặc định theo BODY_DIMENSIONS.eyeSeparation).
    */
-  public calculateEyeDistance(a?: any, b?: any): any {
+  public calculateEyeDistance(a?: unknown, b?: unknown) {
     const value = this.landmarkDistance(a, b, 'getLeftEyePosition', 'getRightEyePosition');
     return measurement('calculateEyeDistance', value, 'm');
   }
@@ -1417,7 +1420,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0192] calculateEyeGazeDirection
    * Hướng nhìn của mắt (về điểm ngắm nếu có, ngược lại theo hướng nhìn đầu).
    */
-  public calculateEyeGazeDirection(a?: any, b?: any): any {
+  public calculateEyeGazeDirection(a?: unknown, b?: unknown) {
     const eye = isPointLike(a) ? asPoint(a) : this.framePosition('getLeftEyePosition');
     if (isPointLike(b)) {
       const dir = normalize(subtract(asPoint(b), eye));
@@ -1429,7 +1432,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0193] calculatePupilOffset
    * Độ lệch của đồng tử so với tâm mắt (mỗi bên).
    */
-  public calculatePupilOffset(a?: any, b?: any, options?: any): any {
+  public calculatePupilOffset(a?: unknown, b?: unknown, options?: unknown) {
     const anchor = entityPosition(a);
     const leftEye = add(anchor, HEAD_LANDMARKS.getLeftEyePosition);
     const rightEye = add(anchor, HEAD_LANDMARKS.getRightEyePosition);
@@ -1463,7 +1466,7 @@ export class AnatomicalUpperBodySubsystem {
    * Hướng quay khuôn mặt (quaternion của entity, nếu không thì dựng từ pháp
    * tuyến mặt — trong tư thế chuẩn pháp tuyến là +Z nên quaternion đơn vị).
    */
-  public calculateFaceOrientation(entityOrAngle?: any, options?: any): any {
+  public calculateFaceOrientation(entityOrAngle?: unknown, options?: unknown) {
     const q = this.orientationOf(entityOrAngle, ['face', 'head', 'skull'], options);
     if (q.w !== 1 || q.x !== 0 || q.y !== 0 || q.z !== 0) {
       return orientationResult('calculateFaceOrientation', q);
@@ -1480,7 +1483,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0195] calculateFaceNormal
    * Pháp tuyến khuôn mặt (cross của trục ngang và trục dọc của các mốc mặt).
    */
-  public calculateFaceNormal(a?: any, b?: any): any {
+  public calculateFaceNormal(a?: unknown, b?: unknown) {
     // `a` = entity đầu (xoay pháp tuyến mặt theo quaternion của entity),
     // `b` = khung tham chiếu để biểu diễn pháp tuyến.
     const q = readQuaternion(a);
@@ -1491,7 +1494,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0196] calculateFaceSymmetry
    * Độ đối xứng khuôn mặt (1 = hoàn hảo), tính từ các cặp mốc trái/phải.
    */
-  public calculateFaceSymmetry(a?: any, b?: any, options?: any): any {
+  public calculateFaceSymmetry(a?: unknown, b?: unknown, options?: unknown) {
     const anchor = entityPosition(a);
     const pairs: Array<[Vec3D, Vec3D]> = [
       [
@@ -1536,7 +1539,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0197] calculateMouthOpening
    * Độ mở miệng (khe hở dọc giữa môi trên và môi dưới).
    */
-  public calculateMouthOpening(a?: any, b?: any, options?: any): any {
+  public calculateMouthOpening(a?: unknown, b?: unknown, options?: unknown) {
     const anchor = entityPosition(a);
     const upper = add(anchor, HEAD_LANDMARKS.getUpperLipPosition);
     // `b` là nguồn của môi dưới (hàm): điểm thô hoặc cây xương có xương hàm.
@@ -1557,7 +1560,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0198] calculateJawOpeningAngle
    * Góc mở hàm (góc cúi của khớp hàm so với đầu).
    */
-  public calculateJawOpeningAngle(a?: any, b?: any): any {
+  public calculateJawOpeningAngle(a?: unknown, b?: unknown) {
     const q = this.orientationOf(a, ['jaw', 'mandible', 'lowerjaw'], b);
     const e = quaternionToEuler(q);
     const value = Math.abs(e.x);
@@ -1567,7 +1570,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0199] calculateBlinkAmount
    * Mức độ nhắm mắt (0 = mắt mở, 1 = mắt nhắm kín).
    */
-  public calculateBlinkAmount(a?: any, b?: any, options?: any): any {
+  public calculateBlinkAmount(a?: unknown, b?: unknown, options?: unknown) {
     // `b` là nguồn dữ liệu thay thế (ví dụ entity cha chứa trạng thái mi mắt).
     const raw = this.blinkAmountOf(a) ?? this.blinkAmountOf(b) ?? 0;
     const scaled = raw * this.optNumber(options, 1, 'scale');
@@ -1582,7 +1585,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0200] calculateFacialLandmarkDistance
    * Khoảng cách giữa hai mốc khuôn mặt (mặc định: chóp mũi → cằm).
    */
-  public calculateFacialLandmarkDistance(a?: any, b?: any): any {
+  public calculateFacialLandmarkDistance(a?: unknown, b?: unknown) {
     if (isPointLike(a) && isPointLike(b)) {
       return measurement('calculateFacialLandmarkDistance', distance3D(asPoint(a), asPoint(b)), 'm');
     }
@@ -1600,35 +1603,35 @@ export class AnatomicalUpperBodySubsystem {
    * [0201] getNeckPosition
    * Lấy tọa độ cổ.
    */
-  public getNeckPosition(entity?: any, offset?: Vec3D): any {
+  public getNeckPosition(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getNeckPosition', entity, offset);
   }
   /**
    * [0202] getNeckCenter
    * Lấy tâm cổ.
    */
-  public getNeckCenter(entity?: any, offset?: Vec3D): any {
+  public getNeckCenter(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getNeckCenter', entity, offset);
   }
   /**
    * [0203] getNeckBasePosition
    * Lấy tọa độ gốc cổ.
    */
-  public getNeckBasePosition(entity?: any, offset?: Vec3D): any {
+  public getNeckBasePosition(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getNeckBasePosition', entity, offset);
   }
   /**
    * [0204] getNeckTopPosition
    * Lấy tọa độ đỉnh cổ.
    */
-  public getNeckTopPosition(entity?: any, offset?: Vec3D): any {
+  public getNeckTopPosition(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getNeckTopPosition', entity, offset);
   }
   /**
    * [0205] getNeckForwardVector
    * Hướng phía trước của cổ.
    */
-  public getNeckForwardVector(a?: any, b?: any): any {
+  public getNeckForwardVector(a?: unknown, b?: unknown) {
     const forward = normalize(entityForward(a));
     return directionResult('getNeckForwardVector', this.intoFrame(forward, b));
   }
@@ -1636,7 +1639,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0206] getNeckUpVector
    * Hướng phía trên của cổ.
    */
-  public getNeckUpVector(a?: any, b?: any): any {
+  public getNeckUpVector(a?: unknown, b?: unknown) {
     const up = this.axisOf(a, UP3);
     return directionResult('getNeckUpVector', this.intoFrame(up, b));
   }
@@ -1644,7 +1647,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0207] calculateNeckLength
    * Chiều dài cổ (BODY_DIMENSIONS.neckLength).
    */
-  public calculateNeckLength(entity?: any, options?: any): any {
+  public calculateNeckLength(entity?: unknown, options?: unknown) {
     // `entity` là nguồn chiều dài cổ: khai báo trên entity hoặc trong cây xương.
     const source = this.sourceEntity(entity, options);
     const declared = this.declaredLength(source, 'neckLength', 'neck_length');
@@ -1658,7 +1661,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0208] calculateNeckOrientation
    * Hướng quay cổ (quaternion của xương cổ, mặc định đơn vị).
    */
-  public calculateNeckOrientation(entityOrAngle?: any, options?: any): any {
+  public calculateNeckOrientation(entityOrAngle?: unknown, options?: unknown) {
     const q = this.orientationOf(entityOrAngle, ['neck', 'neckbone'], options);
     return orientationResult('calculateNeckOrientation', q);
   }
@@ -1666,7 +1669,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0209] calculateNeckBendAngle
    * Góc gập cổ (cúi ngẩng của khớp cổ).
    */
-  public calculateNeckBendAngle(a?: any, b?: any): any {
+  public calculateNeckBendAngle(a?: unknown, b?: unknown) {
     // `b` là cơ thể tham chiếu: góc gập đo tương đối với khung của `b`.
     const e = this.eulerRelativeTo(a, b);
     return measurement('calculateNeckBendAngle', Math.abs(e.x), 'rad');
@@ -1675,7 +1678,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0210] calculateNeckTwistAngle
    * Góc xoay cổ (xoay quanh trục dọc của cổ).
    */
-  public calculateNeckTwistAngle(a?: any, b?: any): any {
+  public calculateNeckTwistAngle(a?: unknown, b?: unknown) {
     const e = this.eulerRelativeTo(a, b);
     return measurement('calculateNeckTwistAngle', Math.abs(e.y), 'rad');
   }
@@ -1683,7 +1686,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0211] calculateNeckCurvature
    * Độ cong của cổ (độ cong của cung tròn = góc gập / chiều dài cổ).
    */
-  public calculateNeckCurvature(entity?: any, options?: any): any {
+  public calculateNeckCurvature(entity?: unknown, options?: unknown) {
     const e = this.eulerOf(entity);
     const bend = Math.abs(e.x);
     const curvature = BODY_DIMENSIONS.neckLength > 0 ? bend / BODY_DIMENSIONS.neckLength : 0;
@@ -1695,7 +1698,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0212] calculateNeckToHeadDistance
    * Khoảng cách từ gốc cổ tới tâm đầu.
    */
-  public calculateNeckToHeadDistance(a?: any, b?: any): any {
+  public calculateNeckToHeadDistance(a?: unknown, b?: unknown) {
     const value = this.landmarkDistance(a, b, 'getNeckBasePosition', 'getHeadCenter');
     return measurement('calculateNeckToHeadDistance', value, 'm');
   }
@@ -1703,7 +1706,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0213] calculateNeckToShoulderDistance
    * Khoảng cách từ gốc cổ tới tâm hai vai.
    */
-  public calculateNeckToShoulderDistance(a?: any, b?: any): any {
+  public calculateNeckToShoulderDistance(a?: unknown, b?: unknown) {
     const value = this.landmarkDistance(a, b, 'getNeckBasePosition', 'getShoulderCenter');
     return measurement('calculateNeckToShoulderDistance', value, 'm');
   }
@@ -1711,7 +1714,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0214] calculateNeckBoundingBox
    * Tính hộp bao cổ (kích thước theo BODY_BOX_SIZES.neck nếu không truyền).
    */
-  public calculateNeckBoundingBox(entity?: any, size?: Vec3D): any {
+  public calculateNeckBoundingBox(entity?: unknown, size?: Vec3D) {
     const box = boundingBox(entityPosition(entity), this.boxSize('neck', size));
     return boundsResult('calculateNeckBoundingBox', box);
   }
@@ -1719,7 +1722,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0215] calculateNeckJointRotation
    * Góc quay khớp cổ (xoay tương đối của cổ so với đầu).
    */
-  public calculateNeckJointRotation(entityOrAngle?: any, options?: any): any {
+  public calculateNeckJointRotation(entityOrAngle?: unknown, options?: unknown) {
     const neck = this.orientationOf(entityOrAngle, ['neck', 'neckbone'], options);
     const head = this.orientationOf(entityOrAngle, ['head', 'skull'], options);
     const relative = multiplyQuaternions(neck, invertQuaternion(head));
@@ -1729,70 +1732,70 @@ export class AnatomicalUpperBodySubsystem {
    * [0216] getLeftShoulderPosition
    * Lấy tọa độ vai trái.
    */
-  public getLeftShoulderPosition(entity?: any, offset?: Vec3D): any {
+  public getLeftShoulderPosition(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getLeftShoulderPosition', entity, offset);
   }
   /**
    * [0217] getRightShoulderPosition
    * Lấy tọa độ vai phải.
    */
-  public getRightShoulderPosition(entity?: any, offset?: Vec3D): any {
+  public getRightShoulderPosition(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getRightShoulderPosition', entity, offset);
   }
   /**
    * [0218] getShoulderCenter
    * Lấy tâm hai vai.
    */
-  public getShoulderCenter(entity?: any, offset?: Vec3D): any {
+  public getShoulderCenter(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getShoulderCenter', entity, offset);
   }
   /**
    * [0219] getLeftShoulderTip
    * Lấy tọa độ đầu ngoài vai trái.
    */
-  public getLeftShoulderTip(entity?: any, offset?: Vec3D): any {
+  public getLeftShoulderTip(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getLeftShoulderTip', entity, offset);
   }
   /**
    * [0220] getRightShoulderTip
    * Lấy tọa độ đầu ngoài vai phải.
    */
-  public getRightShoulderTip(entity?: any, offset?: Vec3D): any {
+  public getRightShoulderTip(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getRightShoulderTip', entity, offset);
   }
   /**
    * [0221] getLeftClaviclePosition
    * Lấy tọa độ xương đòn trái.
    */
-  public getLeftClaviclePosition(entity?: any, offset?: Vec3D): any {
+  public getLeftClaviclePosition(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getLeftClaviclePosition', entity, offset);
   }
   /**
    * [0222] getRightClaviclePosition
    * Lấy tọa độ xương đòn phải.
    */
-  public getRightClaviclePosition(entity?: any, offset?: Vec3D): any {
+  public getRightClaviclePosition(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getRightClaviclePosition', entity, offset);
   }
   /**
    * [0223] getLeftScapulaPosition
    * Lấy tọa độ xương bả vai trái.
    */
-  public getLeftScapulaPosition(entity?: any, offset?: Vec3D): any {
+  public getLeftScapulaPosition(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getLeftScapulaPosition', entity, offset);
   }
   /**
    * [0224] getRightScapulaPosition
    * Lấy tọa độ xương bả vai phải.
    */
-  public getRightScapulaPosition(entity?: any, offset?: Vec3D): any {
+  public getRightScapulaPosition(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getRightScapulaPosition', entity, offset);
   }
   /**
    * [0225] calculateShoulderWidth
    * Chiều rộng vai (BODY_DIMENSIONS.shoulderWidth).
    */
-  public calculateShoulderWidth(entity?: any, options?: any): any {
+  public calculateShoulderWidth(entity?: unknown, options?: unknown) {
     // `entity` là nguồn bề rộng vai: đo từ hai xương vai hoặc khai báo trên entity.
     const source = this.sourceEntity(entity, options);
     const measured = this.shoulderSpanOf(source);
@@ -1806,7 +1809,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0226] calculateShoulderHeight
    * Độ cao vai so với gốc cơ thể (BODY_DIMENSIONS.shoulderHeight).
    */
-  public calculateShoulderHeight(entity?: any, options?: any): any {
+  public calculateShoulderHeight(entity?: unknown, options?: unknown) {
     // `entity` là nguồn độ cao vai: đo từ cây xương (vai so với gốc) hoặc khai báo.
     const source = this.sourceEntity(entity, options);
     const measured = this.shoulderHeightOf(source);
@@ -1820,7 +1823,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0227] calculateShoulderSlope
    * Độ dốc của đường vai (atan2 chênh cao / bề rộng vai).
    */
-  public calculateShoulderSlope(a?: any, b?: any, options?: any): any {
+  public calculateShoulderSlope(a?: unknown, b?: unknown, options?: unknown) {
     const sources = this.sourcesOf(a, b, options);
     const context = this.boneContext(sources);
     const entity = this.entityOf(sources);
@@ -1845,7 +1848,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0228] calculateShoulderSymmetry
    * Độ đối xứng của hai vai (1 = hoàn hảo).
    */
-  public calculateShoulderSymmetry(a?: any, b?: any, options?: any): any {
+  public calculateShoulderSymmetry(a?: unknown, b?: unknown, options?: unknown) {
     // `a` = nguồn vai trái, `b` = nguồn vai phải (xương thật hoặc điểm thô).
     const context = this.boneContext(this.sourcesOf(a, b, options));
     const left =
@@ -1865,7 +1868,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0229] calculateShoulderDistanceToHead
    * Khoảng cách từ tâm hai vai tới tâm đầu.
    */
-  public calculateShoulderDistanceToHead(a?: any, b?: any): any {
+  public calculateShoulderDistanceToHead(a?: unknown, b?: unknown) {
     const value = this.landmarkDistance(a, b, 'getShoulderCenter', 'getHeadCenter');
     return measurement('calculateShoulderDistanceToHead', value, 'm');
   }
@@ -1873,7 +1876,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0230] calculateShoulderDistanceToHip
    * Khoảng cách từ tâm hai vai tới tâm hông (chiều cao thân).
    */
-  public calculateShoulderDistanceToHip(a?: any, b?: any): any {
+  public calculateShoulderDistanceToHip(a?: unknown, b?: unknown) {
     const value = this.landmarkDistance(a, b, 'getShoulderCenter', 'getHipCenter');
     return measurement('calculateShoulderDistanceToHip', value, 'm');
   }
@@ -1887,7 +1890,7 @@ export class AnatomicalUpperBodySubsystem {
    * 2. Hai điểm thô do người gọi truyền vào (vai trái, vai phải).
    * 3. Offset giải phẫu tĩnh (neo tại `entity.position`).
    */
-  public calculateShoulderToShoulderVector(a?: any, b?: any): any {
+  public calculateShoulderToShoulderVector(a?: unknown, b?: unknown) {
     const sources = this.sourcesOf(a, b);
     const context = this.boneContext(sources);
     const entity = this.entityOf(sources);
@@ -1915,7 +1918,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0232] calculateShoulderForwardDirection
    * Hướng phía trước của vùng vai.
    */
-  public calculateShoulderForwardDirection(a?: any, b?: any): any {
+  public calculateShoulderForwardDirection(a?: unknown, b?: unknown) {
     const forward = normalize(entityForward(a));
     return directionResult('calculateShoulderForwardDirection', this.intoFrame(forward, b));
   }
@@ -1923,7 +1926,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0233] calculateShoulderUpDirection
    * Hướng phía trên của vùng vai.
    */
-  public calculateShoulderUpDirection(a?: any, b?: any): any {
+  public calculateShoulderUpDirection(a?: unknown, b?: unknown) {
     const up = this.axisOf(a, UP3);
     return directionResult('calculateShoulderUpDirection', this.intoFrame(up, b));
   }
@@ -1931,7 +1934,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0234] calculateShoulderJointAngle
    * Góc khớp vai: góc giữa hướng cánh tay và trục cánh tay ở tư thế chuẩn.
    */
-  public calculateShoulderJointAngle(a?: any, b?: any): any {
+  public calculateShoulderJointAngle(a?: unknown, b?: unknown) {
     // `b` là cơ thể tham chiếu: góc khớp đo với trục cánh tay của `b`.
     const dir = this.axisOf(a, REST_ARM_AXIS);
     const reference = this.axisOf(b, REST_ARM_AXIS);
@@ -1942,7 +1945,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0235] calculateShoulderAbduction
    * Góc dạng vai (đưa cánh tay ra ngoài, thành phần ngang).
    */
-  public calculateShoulderAbduction(a?: any, b?: any): any {
+  public calculateShoulderAbduction(a?: unknown, b?: unknown) {
     // `b` là khung tham chiếu: thành phần ngang đo theo trục ngang của `b`.
     const dir = this.axisOf(a, REST_ARM_AXIS);
     const right = this.referenceAxis(b, RIGHT3);
@@ -1954,7 +1957,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0236] calculateShoulderAdduction
    * Góc khép vai (đưa cánh tay vào trong, thành phần ngang).
    */
-  public calculateShoulderAdduction(a?: any, b?: any): any {
+  public calculateShoulderAdduction(a?: unknown, b?: unknown) {
     // `b` là khung tham chiếu: khép vai là thành phần ngang đưa cánh tay về
     // phía đường giữa (trục ngang âm của khung tham chiếu).
     const dir = this.axisOf(a, REST_ARM_AXIS);
@@ -1970,7 +1973,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0237] calculateShoulderFlexion
    * Góc gập vai (đưa cánh tay về phía trước, thành phần chiều sâu).
    */
-  public calculateShoulderFlexion(a?: any, b?: any): any {
+  public calculateShoulderFlexion(a?: unknown, b?: unknown) {
     const dir = this.axisOf(a, REST_ARM_AXIS);
     const forward = this.referenceAxis(b, FORWARD3);
     const down = this.referenceAxis(b, REST_ARM_AXIS);
@@ -1981,7 +1984,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0238] calculateShoulderExtension
    * Góc duỗi vai (đưa cánh tay về phía sau, thành phần chiều sâu âm).
    */
-  public calculateShoulderExtension(a?: any, b?: any): any {
+  public calculateShoulderExtension(a?: unknown, b?: unknown) {
     const dir = this.axisOf(a, REST_ARM_AXIS);
     const forward = this.referenceAxis(b, FORWARD3);
     const down = this.referenceAxis(b, REST_ARM_AXIS);
@@ -1992,7 +1995,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0239] calculateShoulderInternalRotation
    * Góc xoay trong của vai (xoay quanh trục cánh tay).
    */
-  public calculateShoulderInternalRotation(entityOrAngle?: any, options?: any): any {
+  public calculateShoulderInternalRotation(entityOrAngle?: unknown, options?: unknown) {
     const shoulder = this.orientationOf(entityOrAngle, ['shoulder', 'upperarm', 'humerus'], options);
     const e = quaternionToEuler(shoulder);
     const axis = this.axisOf(entityOrAngle, REST_ARM_AXIS);
@@ -2005,7 +2008,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0240] calculateShoulderExternalRotation
    * Góc xoay ngoài của vai (phần xoay còn lại sau xoay trong).
    */
-  public calculateShoulderExternalRotation(entityOrAngle?: any, options?: any): any {
+  public calculateShoulderExternalRotation(entityOrAngle?: unknown, options?: unknown) {
     const shoulder = this.orientationOf(entityOrAngle, ['shoulder', 'upperarm', 'humerus'], options);
     const e = quaternionToEuler(shoulder);
     const axis = this.axisOf(entityOrAngle, REST_ARM_AXIS);
@@ -2019,7 +2022,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0241] calculateShoulderBoundingBox
    * Tính hộp bao vùng vai (kích thước theo BODY_BOX_SIZES.shoulder nếu không truyền).
    */
-  public calculateShoulderBoundingBox(entity?: any, size?: Vec3D): any {
+  public calculateShoulderBoundingBox(entity?: unknown, size?: Vec3D) {
     const box = boundingBox(entityPosition(entity), this.boxSize('shoulder', size));
     return boundsResult('calculateShoulderBoundingBox', box);
   }
@@ -2027,7 +2030,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0242] calculateShoulderCenterOfMass
    * Tâm khối lượng vùng vai (0,4·L tính từ đầu gần của xương đòn).
    */
-  public calculateShoulderCenterOfMass(entity?: any, options?: any): any {
+  public calculateShoulderCenterOfMass(entity?: unknown, options?: unknown) {
     // `entity` là nguồn chiều dài xương đòn (tâm khối lượng ở 0,4·L từ đầu gần).
     const source = this.sourceEntity(entity, options);
     const measured = this.boneLengthOf(source, ['clavicle']);
@@ -2043,7 +2046,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0243] calculateClavicleLength
    * Chiều dài xương đòn (BODY_DIMENSIONS.clavicleLength).
    */
-  public calculateClavicleLength(entity?: any, options?: any): any {
+  public calculateClavicleLength(entity?: unknown, options?: unknown) {
     const source = this.sourceEntity(entity, options);
     const measured = this.boneLengthOf(source, ['clavicle']);
     const declared = this.declaredLength(source, 'clavicleLength', 'clavicle_length');
@@ -2056,7 +2059,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0244] calculateScapulaOrientation
    * Hướng quay xương bả vai (quaternion của xương bả vai, mặc định đơn vị).
    */
-  public calculateScapulaOrientation(entityOrAngle?: any, options?: any): any {
+  public calculateScapulaOrientation(entityOrAngle?: unknown, options?: unknown) {
     const q = this.orientationOf(entityOrAngle, ['scapula', 'shoulderblade'], options);
     return orientationResult('calculateScapulaOrientation', q);
   }
@@ -2064,7 +2067,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0245] calculateShoulderToElbowDistance
    * Khoảng cách vai tới khuỷu (chiều dài cánh tay trên).
    */
-  public calculateShoulderToElbowDistance(a?: any, b?: any): any {
+  public calculateShoulderToElbowDistance(a?: unknown, b?: unknown) {
     const value = this.landmarkDistance(a, b, 'getLeftUpperArmPosition', 'getLeftElbowPosition');
     return measurement('calculateShoulderToElbowDistance', value, 'm');
   }
@@ -2072,7 +2075,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0246] calculateShoulderToWristDistance
    * Khoảng cách vai tới cổ tay.
    */
-  public calculateShoulderToWristDistance(a?: any, b?: any): any {
+  public calculateShoulderToWristDistance(a?: unknown, b?: unknown) {
     const value = this.landmarkDistance(a, b, 'getLeftUpperArmPosition', 'getLeftWristPosition');
     return measurement('calculateShoulderToWristDistance', value, 'm');
   }
@@ -2080,7 +2083,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0247] calculateShoulderToHandDistance
    * Khoảng cách vai tới bàn tay.
    */
-  public calculateShoulderToHandDistance(a?: any, b?: any): any {
+  public calculateShoulderToHandDistance(a?: unknown, b?: unknown) {
     const value = this.landmarkDistance(a, b, 'getLeftUpperArmPosition', 'getLeftHandPosition');
     return measurement('calculateShoulderToHandDistance', value, 'm');
   }
@@ -2088,7 +2091,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0248] calculateShoulderMotionVector
    * Vector chuyển động của vai (vận tốc nếu có, ngược lại hướng từ a tới b).
    */
-  public calculateShoulderMotionVector(a?: any, b?: any): any {
+  public calculateShoulderMotionVector(a?: unknown, b?: unknown) {
     if (isPointLike(a) && isPointLike(b)) {
       const dir = normalize(subtract(asPoint(b), asPoint(a)));
       if (magnitude(dir) > 0) return directionResult('calculateShoulderMotionVector', dir);
@@ -2103,14 +2106,14 @@ export class AnatomicalUpperBodySubsystem {
    * [0249] calculateShoulderVelocity
    * Vận tốc của vai (đọc entity.velocity, mặc định zero).
    */
-  public calculateShoulderVelocity(entity?: any, dt = 0.016): any {
+  public calculateShoulderVelocity(entity?: unknown, dt = 0.016) {
     return directionResult('calculateShoulderVelocity', this.velocityOf(entity), { dt });
   }
   /**
    * [0250] calculateShoulderAcceleration
    * Gia tốc của vai (đọc entity.acceleration, mặc định zero).
    */
-  public calculateShoulderAcceleration(entity?: any, dt = 0.016): any {
+  public calculateShoulderAcceleration(entity?: unknown, dt = 0.016) {
     return directionResult('calculateShoulderAcceleration', this.accelerationOf(entity), { dt });
   }
 
@@ -2122,35 +2125,35 @@ export class AnatomicalUpperBodySubsystem {
    * [0251] getLeftUpperArmPosition
    * Lấy tọa độ cánh tay trên trái.
    */
-  public getLeftUpperArmPosition(entity?: any, offset?: Vec3D): any {
+  public getLeftUpperArmPosition(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getLeftUpperArmPosition', entity, offset);
   }
   /**
    * [0252] getRightUpperArmPosition
    * Lấy tọa độ cánh tay trên phải.
    */
-  public getRightUpperArmPosition(entity?: any, offset?: Vec3D): any {
+  public getRightUpperArmPosition(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getRightUpperArmPosition', entity, offset);
   }
   /**
    * [0253] getLeftUpperArmCenter
    * Lấy tâm cánh tay trên trái.
    */
-  public getLeftUpperArmCenter(entity?: any, offset?: Vec3D): any {
+  public getLeftUpperArmCenter(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getLeftUpperArmCenter', entity, offset);
   }
   /**
    * [0254] getRightUpperArmCenter
    * Lấy tâm cánh tay trên phải.
    */
-  public getRightUpperArmCenter(entity?: any, offset?: Vec3D): any {
+  public getRightUpperArmCenter(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getRightUpperArmCenter', entity, offset);
   }
   /**
    * [0255] getLeftUpperArmStart
    * Điểm đầu (khớp vai) và điểm cuối (khớp khuỷu) của cánh tay trên trái.
    */
-  public getLeftUpperArmStart(a?: any, b?: any, options?: any): any {
+  public getLeftUpperArmStart(a?: unknown, b?: unknown, options?: unknown) {
     const sources = this.sourcesOf(a, b, options);
     const context = this.boneContext(sources);
     const entity = this.entityOf(sources);
@@ -2166,7 +2169,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0256] getRightUpperArmStart
    * Điểm đầu (khớp vai) và điểm cuối (khớp khuỷu) của cánh tay trên phải.
    */
-  public getRightUpperArmStart(a?: any, b?: any, options?: any): any {
+  public getRightUpperArmStart(a?: unknown, b?: unknown, options?: unknown) {
     const sources = this.sourcesOf(a, b, options);
     const context = this.boneContext(sources);
     const entity = this.entityOf(sources);
@@ -2182,7 +2185,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0257] getLeftUpperArmEnd
    * Điểm cuối (khớp khuỷu) của cánh tay trên trái.
    */
-  public getLeftUpperArmEnd(a?: any, b?: any, options?: any): any {
+  public getLeftUpperArmEnd(a?: unknown, b?: unknown, options?: unknown) {
     const sources = this.sourcesOf(a, b, options);
     const context = this.boneContext(sources);
     const entity = this.entityOf(sources);
@@ -2198,7 +2201,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0258] getRightUpperArmEnd
    * Điểm cuối (khớp khuỷu) của cánh tay trên phải.
    */
-  public getRightUpperArmEnd(a?: any, b?: any, options?: any): any {
+  public getRightUpperArmEnd(a?: unknown, b?: unknown, options?: unknown) {
     const sources = this.sourcesOf(a, b, options);
     const context = this.boneContext(sources);
     const entity = this.entityOf(sources);
@@ -2214,7 +2217,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0259] calculateUpperArmLength
    * Chiều dài cánh tay trên (BODY_DIMENSIONS.upperArmLength).
    */
-  public calculateUpperArmLength(entity?: any, options?: any): any {
+  public calculateUpperArmLength(entity?: unknown, options?: unknown) {
     // `entity` là nguồn chiều dài cánh tay trên: đo từ xương vai–khuỷu
     // hoặc khai báo trên entity.
     const source = this.sourceEntity(entity, options);
@@ -2229,7 +2232,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0260] calculateUpperArmDirection
    * Hướng của cánh tay trên (từ vai xuống khuỷu, theo xoay của entity).
    */
-  public calculateUpperArmDirection(a?: any, b?: any): any {
+  public calculateUpperArmDirection(a?: unknown, b?: unknown) {
     // `a` = nguồn cánh tay (xương thật), `b` = khung tham chiếu.
     const context = this.boneContext(this.sourcesOf(a));
     const shoulder = this.boneWorldPosition(context, [
@@ -2247,7 +2250,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0261] calculateUpperArmOrientation
    * Hướng quay cánh tay trên (quaternion của xương cánh tay, mặc định đơn vị).
    */
-  public calculateUpperArmOrientation(entityOrAngle?: any, options?: any): any {
+  public calculateUpperArmOrientation(entityOrAngle?: unknown, options?: unknown) {
     const q = this.orientationOf(entityOrAngle, ['upperarm', 'humerus', 'arm'], options);
     return orientationResult('calculateUpperArmOrientation', q);
   }
@@ -2255,7 +2258,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0262] calculateUpperArmAngle
    * Góc nghiêng của cánh tay trên so với mặt phẳng ngang.
    */
-  public calculateUpperArmAngle(a?: any, b?: any): any {
+  public calculateUpperArmAngle(a?: unknown, b?: unknown) {
     // `b` là khung tham chiếu: góc nghiêng đo theo trục "trên" của `b`.
     const dir = this.axisOf(a, REST_ARM_AXIS);
     const up = this.referenceAxis(b, UP3);
@@ -2266,21 +2269,21 @@ export class AnatomicalUpperBodySubsystem {
    * [0263] calculateUpperArmVelocity
    * Vận tốc cánh tay trên (đọc entity.velocity, mặc định zero).
    */
-  public calculateUpperArmVelocity(entity?: any, dt = 0.016): any {
+  public calculateUpperArmVelocity(entity?: unknown, dt = 0.016) {
     return directionResult('calculateUpperArmVelocity', this.velocityOf(entity), { dt });
   }
   /**
    * [0264] calculateUpperArmAcceleration
    * Gia tốc cánh tay trên (đọc entity.acceleration, mặc định zero).
    */
-  public calculateUpperArmAcceleration(entity?: any, dt = 0.016): any {
+  public calculateUpperArmAcceleration(entity?: unknown, dt = 0.016) {
     return directionResult('calculateUpperArmAcceleration', this.accelerationOf(entity), { dt });
   }
   /**
    * [0265] calculateUpperArmBoundingBox
    * Hộp bao cánh tay trên (kích thước theo BODY_BOX_SIZES.upperArm nếu không truyền).
    */
-  public calculateUpperArmBoundingBox(entity?: any, size?: Vec3D): any {
+  public calculateUpperArmBoundingBox(entity?: unknown, size?: Vec3D) {
     const box = boundingBox(entityPosition(entity), this.boxSize('upperArm', size));
     return boundsResult('calculateUpperArmBoundingBox', box);
   }
@@ -2288,7 +2291,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0266] calculateUpperArmRadius
    * Bán kính cánh tay trên (BODY_DIMENSIONS.upperArmRadius).
    */
-  public calculateUpperArmRadius(entity?: any, options?: any): any {
+  public calculateUpperArmRadius(entity?: unknown, options?: unknown) {
     // `entity` là nguồn bán kính cánh tay trên (khai báo trên entity).
     const source = this.sourceEntity(entity, options);
     const declared = this.declaredLength(source, 'upperArmRadius', 'upper_arm_radius');
@@ -2301,7 +2304,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0267] calculateUpperArmVolume
    * Thể tích cánh tay trên (π·r²·L).
    */
-  public calculateUpperArmVolume(entity?: any, options?: any): any {
+  public calculateUpperArmVolume(entity?: unknown, options?: unknown) {
     // `entity` là nguồn kích thướt cánh tay (bán kính + chiều dài).
     const source = this.sourceEntity(entity, options);
     const declaredRadius = this.declaredLength(source, 'upperArmRadius', 'upper_arm_radius');
@@ -2316,7 +2319,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0268] calculateUpperArmSurfaceArea
    * Diện tích bề mặt cánh tay trên (2πrL + 2πr²).
    */
-  public calculateUpperArmSurfaceArea(entity?: any, options?: any): any {
+  public calculateUpperArmSurfaceArea(entity?: unknown, options?: unknown) {
     const source = this.sourceEntity(entity, options);
     const declaredRadius = this.declaredLength(source, 'upperArmRadius', 'upper_arm_radius');
     const r = declaredRadius > 0 ? declaredRadius : BODY_DIMENSIONS.upperArmRadius;
@@ -2331,7 +2334,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0269] calculateUpperArmCenterOfMass
    * Tâm khối lượng cánh tay trên (0,4·L tính từ đầu gần).
    */
-  public calculateUpperArmCenterOfMass(entity?: any, options?: any): any {
+  public calculateUpperArmCenterOfMass(entity?: unknown, options?: unknown) {
     // `entity` là nguồn chiều dài cánh tay (tâm khối lượng ở 0,4·L từ đầu gần).
     const source = this.sourceEntity(entity, options);
     const l = this.upperArmLengthOf(source) ?? BODY_DIMENSIONS.upperArmLength;
@@ -2345,7 +2348,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0270] calculateUpperArmToTorsoDistance
    * Khoảng cách từ tâm cánh tay trên tới tâm thân.
    */
-  public calculateUpperArmToTorsoDistance(a?: any, b?: any): any {
+  public calculateUpperArmToTorsoDistance(a?: unknown, b?: unknown) {
     // `a` = nguồn cánh tay, `b` = nguồn thân (xương thật hoặc entity).
     const armContext = this.boneContext(this.sourcesOf(a));
     const torsoContext = this.boneContext(this.sourcesOf(b));
@@ -2372,49 +2375,49 @@ export class AnatomicalUpperBodySubsystem {
    * [0271] getLeftElbowPosition
    * Lấy tọa độ khuỷu trái.
    */
-  public getLeftElbowPosition(entity?: any, offset?: Vec3D): any {
+  public getLeftElbowPosition(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getLeftElbowPosition', entity, offset);
   }
   /**
    * [0272] getRightElbowPosition
    * Lấy tọa độ khuỷu phải.
    */
-  public getRightElbowPosition(entity?: any, offset?: Vec3D): any {
+  public getRightElbowPosition(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getRightElbowPosition', entity, offset);
   }
   /**
    * [0273] getLeftElbowCenter
    * Lấy tâm khuỷu trái.
    */
-  public getLeftElbowCenter(entity?: any, offset?: Vec3D): any {
+  public getLeftElbowCenter(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getLeftElbowCenter', entity, offset);
   }
   /**
    * [0274] getRightElbowCenter
    * Lấy tâm khuỷu phải.
    */
-  public getRightElbowCenter(entity?: any, offset?: Vec3D): any {
+  public getRightElbowCenter(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getRightElbowCenter', entity, offset);
   }
   /**
    * [0275] getLeftElbowTip
    * Lấy tọa độ đầu ngoài khuỷu trái.
    */
-  public getLeftElbowTip(entity?: any, offset?: Vec3D): any {
+  public getLeftElbowTip(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getLeftElbowTip', entity, offset);
   }
   /**
    * [0276] getRightElbowTip
    * Lấy tọa độ đầu ngoài khuỷu phải.
    */
-  public getRightElbowTip(entity?: any, offset?: Vec3D): any {
+  public getRightElbowTip(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getRightElbowTip', entity, offset);
   }
   /**
    * [0277] calculateElbowToShoulderDistance
    * Khoảng cách khuỷu tới vai.
    */
-  public calculateElbowToShoulderDistance(a?: any, b?: any): any {
+  public calculateElbowToShoulderDistance(a?: unknown, b?: unknown) {
     const value = this.landmarkDistance(a, b, 'getLeftElbowPosition', 'getLeftUpperArmPosition');
     return measurement('calculateElbowToShoulderDistance', value, 'm');
   }
@@ -2422,7 +2425,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0278] calculateElbowToWristDistance
    * Khoảng cách khuỷu tới cổ tay (chiều dài cánh tay dưới).
    */
-  public calculateElbowToWristDistance(a?: any, b?: any): any {
+  public calculateElbowToWristDistance(a?: unknown, b?: unknown) {
     const value = this.landmarkDistance(a, b, 'getLeftElbowPosition', 'getLeftWristPosition');
     return measurement('calculateElbowToWristDistance', value, 'm');
   }
@@ -2430,7 +2433,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0279] calculateElbowToHandDistance
    * Khoảng cách khuỷu tới bàn tay.
    */
-  public calculateElbowToHandDistance(a?: any, b?: any): any {
+  public calculateElbowToHandDistance(a?: unknown, b?: unknown) {
     const value = this.landmarkDistance(a, b, 'getLeftElbowPosition', 'getLeftHandPosition');
     return measurement('calculateElbowToHandDistance', value, 'm');
   }
@@ -2438,7 +2441,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0280] calculateElbowBendAngle
    * Góc gập của khuỷu (0 = cánh tay thẳng, tính từ vị trí thẳng của xương).
    */
-  public calculateElbowBendAngle(a?: any, b?: any): any {
+  public calculateElbowBendAngle(a?: unknown, b?: unknown) {
     // `b` là nguồn xương của khuỷu (dùng FK khi có cây xương).
     const { dir1, dir2 } = this.elbowAxes(a, b);
     const interior = Math.acos(clamp(dot(dir1, dir2), -1, 1));
@@ -2448,7 +2451,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0281] calculateElbowExtensionAngle
    * Góc duỗi của khuỷu (góc giữa hai xương; π = cánh tay thẳng hoàn toàn).
    */
-  public calculateElbowExtensionAngle(a?: any, b?: any): any {
+  public calculateElbowExtensionAngle(a?: unknown, b?: unknown) {
     const { dir1, dir2 } = this.elbowAxes(a, b);
     const interior = Math.acos(clamp(dot(dir1, dir2), -1, 1));
     return measurement('calculateElbowExtensionAngle', interior, 'rad');
@@ -2457,7 +2460,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0282] calculateElbowFlexionAngle
    * Góc gập của khuỷu đo từ vị trí duỗi thẳng (bằng góc bậc của bản lề).
    */
-  public calculateElbowFlexionAngle(a?: any, b?: any): any {
+  public calculateElbowFlexionAngle(a?: unknown, b?: unknown) {
     const { dir1, dir2 } = this.elbowAxes(a, b);
     const interior = Math.acos(clamp(dot(dir1, dir2), -1, 1));
     return measurement('calculateElbowFlexionAngle', Math.PI - interior, 'rad');
@@ -2466,7 +2469,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0283] calculateElbowTwistAngle
    * Góc xoay của cổ tay tay quanh trục cánh tay dưới.
    */
-  public calculateElbowTwistAngle(a?: any, b?: any): any {
+  public calculateElbowTwistAngle(a?: unknown, b?: unknown) {
     // `b` là cơ thể tham chiếu: góc xoay đo tương đối với khung của `b`.
     const e = this.eulerRelativeTo(a, b);
     return measurement('calculateElbowTwistAngle', Math.abs(e.z), 'rad');
@@ -2475,7 +2478,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0284] calculateElbowJointAxis
    * Trục bản lề của khuỷu (cross của hướng cánh tay trên và cánh tay dưới).
    */
-  public calculateElbowJointAxis(a?: any, b?: any, options?: any): any {
+  public calculateElbowJointAxis(a?: unknown, b?: unknown, options?: unknown) {
     // `b` = nguồn xương của khuỷu, `options.invert` = đảo chiều trục bản lề.
     const { dir1, dir2 } = this.elbowAxes(a, b);
     const axis = cross(dir1, dir2);
@@ -2496,7 +2499,7 @@ export class AnatomicalUpperBodySubsystem {
    * tuyến phản ánh đúng góc gập của khuỷu; nếu không, dùng điểm thô truyền
    * vào rồi tới offset giải phẫu tĩnh.
    */
-  public calculateElbowJointNormal(a?: any, b?: any): any {
+  public calculateElbowJointNormal(a?: unknown, b?: unknown) {
     const sources = this.sourcesOf(a, b);
     const context = this.boneContext(sources);
     const entity = this.entityOf(sources);
@@ -2535,21 +2538,21 @@ export class AnatomicalUpperBodySubsystem {
    * [0286] calculateElbowVelocity
    * Vận tốc khuỷu (đọc entity.velocity, mặc định zero).
    */
-  public calculateElbowVelocity(entity?: any, dt = 0.016): any {
+  public calculateElbowVelocity(entity?: unknown, dt = 0.016) {
     return directionResult('calculateElbowVelocity', this.velocityOf(entity), { dt });
   }
   /**
    * [0287] calculateElbowAcceleration
    * Gia tốc khuỷu (đọc entity.acceleration, mặc định zero).
    */
-  public calculateElbowAcceleration(entity?: any, dt = 0.016): any {
+  public calculateElbowAcceleration(entity?: unknown, dt = 0.016) {
     return directionResult('calculateElbowAcceleration', this.accelerationOf(entity), { dt });
   }
   /**
    * [0288] calculateElbowBoundingBox
    * Hộp bao khuỷu (kích thước theo BODY_BOX_SIZES.elbow nếu không truyền).
    */
-  public calculateElbowBoundingBox(entity?: any, size?: Vec3D): any {
+  public calculateElbowBoundingBox(entity?: unknown, size?: Vec3D) {
     const box = boundingBox(entityPosition(entity), this.boxSize('elbow', size));
     return boundsResult('calculateElbowBoundingBox', box);
   }
@@ -2557,7 +2560,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0289] calculateElbowBoundingSphere
    * Hình cầu bao khuỷu (bán kính = nửa đường chéo hộp khuỷu nếu không truyền).
    */
-  public calculateElbowBoundingSphere(entity?: any, radius = 1.0): any {
+  public calculateElbowBoundingSphere(entity?: unknown, radius = 1.0) {
     const given = arguments.length >= 2 && Number.isFinite(radius);
     const r = given ? Math.max(0, radius) : halfDiagonal(BODY_BOX_SIZES.elbow);
     return {
@@ -2572,7 +2575,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0290] calculateElbowSymmetry
    * Độ đối xứng của hai khuỷu (1 = hoàn hảo).
    */
-  public calculateElbowSymmetry(a?: any, b?: any, options?: any): any {
+  public calculateElbowSymmetry(a?: unknown, b?: unknown, options?: unknown) {
     // `a` = nguồn khuỷu trái, `b` = nguồn khuỷu phải.
     const context = this.boneContext(this.sourcesOf(a, b, options));
     const left =
@@ -2592,7 +2595,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0291] calculateArmReachDistance
    * Khoảng cách với tới được từ vai tới bàn tay.
    */
-  public calculateArmReachDistance(a?: any, b?: any): any {
+  public calculateArmReachDistance(a?: unknown, b?: unknown) {
     const value = this.landmarkDistance(a, b, 'getLeftUpperArmPosition', 'getLeftHandPosition');
     return measurement('calculateArmReachDistance', value, 'm');
   }
@@ -2603,7 +2606,7 @@ export class AnatomicalUpperBodySubsystem {
    * Dùng vị trí xương thật (vai + bàn tay) khi entity có cây xương, nếu không
    * thì dùng điểm thô truyền vào rồi tới offset giải phẫu tĩnh.
    */
-  public calculateArmReachDirection(a?: any, b?: any): any {
+  public calculateArmReachDirection(a?: unknown, b?: unknown) {
     const sources = this.sourcesOf(a, b);
     const context = this.boneContext(sources);
     const entity = this.entityOf(sources);
@@ -2636,7 +2639,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0293] calculateArmReachEnvelope
    * Vùng với tới được của cánh tay (hình cầu quanh khớp vai).
    */
-  public calculateArmReachEnvelope(a?: any, b?: any, options?: any): any {
+  public calculateArmReachEnvelope(a?: unknown, b?: unknown, options?: unknown) {
     // `options` = scale (nhân bán kính) + unit (đơn vị của cả vùng với tới).
     const base = this.landmarkDistance(a, b, 'getLeftUpperArmPosition', 'getLeftHandPosition');
     const { unit, factor } = this.unitFactor(options, 'm');
@@ -2654,7 +2657,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0294] calculateArmSweepAngle
    * Góc quét của cánh tay (góc giữa hướng hiện tại và hướng đích).
    */
-  public calculateArmSweepAngle(a?: any, b?: any): any {
+  public calculateArmSweepAngle(a?: unknown, b?: unknown) {
     // `a` = nguồn cánh tay (xương thật), `b` = điểm đích.
     const context = this.boneContext(this.sourcesOf(a));
     const shoulder = this.segmentPosition(
@@ -2677,7 +2680,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0295] calculateArmSwingAmplitude
    * Biên độ đung đưa của cánh tay (góc lệch cực đại so với tư thế chuẩn).
    */
-  public calculateArmSwingAmplitude(entity?: any, options?: any): any {
+  public calculateArmSwingAmplitude(entity?: unknown, options?: unknown) {
     const dir = this.axisOf(entity, REST_ARM_AXIS);
     const value = Math.acos(clamp(dot(dir, REST_ARM_AXIS), -1, 1));
     const { unit, factor } = this.angleUnitFactor(options);
@@ -2688,7 +2691,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0296] calculateArmPoseError
    * Sai lệch tư thế cánh tay so với tư thế đích (vị trí + hướng).
    */
-  public calculateArmPoseError(a?: any, b?: any, options?: any): any {
+  public calculateArmPoseError(a?: unknown, b?: unknown, options?: unknown) {
     const positionError = isPointLike(a) && isPointLike(b)
       ? distance3D(asPoint(a), asPoint(b))
       : 0;
@@ -2716,7 +2719,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0297] calculateArmSegmentAlignment
    * Mức độ thẳng của chuỗi cánh tay (vai → khuỷu → cổ tay → bàn tay).
    */
-  public calculateArmSegmentAlignment(a?: any, b?: any, options?: any): any {
+  public calculateArmSegmentAlignment(a?: unknown, b?: unknown, options?: unknown) {
     // `a`/`b` = nguồn cánh tay (xương thật).
     const context = this.boneContext(this.sourcesOf(a, b, options));
     const shoulder =
@@ -2748,7 +2751,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0298] calculateArmJointChainLength
    * Tổng chiều dài chuỗi khớp cánh tay (vai → khuỷu → cổ tay → lòng bàn tay).
    */
-  public calculateArmJointChainLength(entity?: any, options?: any): any {
+  public calculateArmJointChainLength(entity?: unknown, options?: unknown) {
     // `entity` là nguồn chuỗi khớp: đo vai → khuỷu → cổ tay → lòng bàn tay.
     const source = this.sourceEntity(entity, options);
     const measured = this.armChainLengthOf(source);
@@ -2765,7 +2768,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0299] calculateArmEndEffectorPosition
    * Vị trí điểm cuối hiệu ứng (bàn tay) và điểm chạm ngón tay.
    */
-  public calculateArmEndEffectorPosition(a?: any, b?: any, options?: any): any {
+  public calculateArmEndEffectorPosition(a?: unknown, b?: unknown, options?: unknown) {
     // `b` = nguồn bàn tay (xương thật), `options.scale` = độ dài ngón tay.
     const context = this.boneContext(this.sourcesOf(a, b));
     const hand = this.segmentPosition(
@@ -2787,7 +2790,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0300] calculateArmInverseKinematics
    * Giải bài toán động học ngược hai khớp (vai + khuỷu) tới vị trí đích.
    */
-  public calculateArmInverseKinematics(a?: any, b?: any, options?: any): any {
+  public calculateArmInverseKinematics(a?: unknown, b?: unknown, options?: unknown) {
     // `a` = nguồn cánh tay (xương thật), `options.scale` = tỉ lệ độ dài xương.
     const context = this.boneContext(this.sourcesOf(a));
     const shoulder = this.segmentPosition(
@@ -2821,35 +2824,35 @@ export class AnatomicalUpperBodySubsystem {
    * [0301] getLeftForearmPosition
    * Lấy tọa độ cánh tay dưới trái.
    */
-  public getLeftForearmPosition(entity?: any, offset?: Vec3D): any {
+  public getLeftForearmPosition(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getLeftForearmPosition', entity, offset);
   }
   /**
    * [0302] getRightForearmPosition
    * Lấy tọa độ cánh tay dưới phải.
    */
-  public getRightForearmPosition(entity?: any, offset?: Vec3D): any {
+  public getRightForearmPosition(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getRightForearmPosition', entity, offset);
   }
   /**
    * [0303] getLeftForearmCenter
    * Lấy tâm cánh tay dưới trái.
    */
-  public getLeftForearmCenter(entity?: any, offset?: Vec3D): any {
+  public getLeftForearmCenter(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getLeftForearmCenter', entity, offset);
   }
   /**
    * [0304] getRightForearmCenter
    * Lấy tâm cánh tay dưới phải.
    */
-  public getRightForearmCenter(entity?: any, offset?: Vec3D): any {
+  public getRightForearmCenter(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getRightForearmCenter', entity, offset);
   }
   /**
    * [0305] getLeftForearmStart
    * Điểm đầu (khuỷu) và điểm cuối (cổ tay) của cánh tay dưới trái.
    */
-  public getLeftForearmStart(a?: any, b?: any, options?: any): any {
+  public getLeftForearmStart(a?: unknown, b?: unknown, options?: unknown) {
     // `a` = nguồn khuỷu, `b` = nguồn cổ tay, `options.side` = bên cần đo.
     const side = this.sideOf(options, 'left');
     const context = this.boneContext(this.sourcesOf(a, b, options));
@@ -2877,7 +2880,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0306] getRightForearmStart
    * Điểm đầu (khuỷu) và điểm cuối (cổ tay) của cánh tay dưới phải.
    */
-  public getRightForearmStart(a?: any, b?: any, options?: any): any {
+  public getRightForearmStart(a?: unknown, b?: unknown, options?: unknown) {
     const side = this.sideOf(options, 'right');
     const context = this.boneContext(this.sourcesOf(a, b, options));
     const start = this.segmentPosition(
@@ -2904,7 +2907,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0307] getLeftForearmEnd
    * Điểm cuối (cổ tay) của cánh tay dưới trái.
    */
-  public getLeftForearmEnd(a?: any, b?: any, options?: any): any {
+  public getLeftForearmEnd(a?: unknown, b?: unknown, options?: unknown) {
     const side = this.sideOf(options, 'left');
     const context = this.boneContext(this.sourcesOf(a, b, options));
     const end = this.segmentPosition(
@@ -2931,7 +2934,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0308] getRightForearmEnd
    * Điểm cuối (cổ tay) của cánh tay dưới phải.
    */
-  public getRightForearmEnd(a?: any, b?: any, options?: any): any {
+  public getRightForearmEnd(a?: unknown, b?: unknown, options?: unknown) {
     const side = this.sideOf(options, 'right');
     const context = this.boneContext(this.sourcesOf(a, b, options));
     const end = this.segmentPosition(
@@ -2958,7 +2961,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0309] calculateForearmLength
    * Chiều dài cánh tay dưới (BODY_DIMENSIONS.forearmLength).
    */
-  public calculateForearmLength(entity?: any, options?: any): any {
+  public calculateForearmLength(entity?: unknown, options?: unknown) {
     // `entity` là nguồn chiều dài cánh tay dưới: đo từ xương khuỷu–cổ tay.
     const source = this.sourceEntity(entity, options);
     const measured = this.forearmLengthOf(source);
@@ -2972,7 +2975,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0310] calculateForearmDirection
    * Hướng của cánh tay dưới (từ khuỷu xuống cổ tay).
    */
-  public calculateForearmDirection(a?: any, b?: any): any {
+  public calculateForearmDirection(a?: unknown, b?: unknown) {
     // `a` = nguồn cánh tay dưới (xương thật), `b` = khung tham chiếu.
     const context = this.boneContext(this.sourcesOf(a));
     const elbow = this.boneWorldPosition(context, ['elbow_l', 'elbow_r', 'elbow']);
@@ -2985,7 +2988,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0311] calculateForearmOrientation
    * Hướng quay cánh tay dưới (quaternion của xương, mặc định đơn vị).
    */
-  public calculateForearmOrientation(entityOrAngle?: any, options?: any): any {
+  public calculateForearmOrientation(entityOrAngle?: unknown, options?: unknown) {
     const q = this.orientationOf(entityOrAngle, ['forearm', 'radius', 'ulna'], options);
     return orientationResult('calculateForearmOrientation', q);
   }
@@ -2993,7 +2996,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0312] calculateForearmAngle
    * Góc nghiêng của cánh tay dưới so với mặt phẳng ngang.
    */
-  public calculateForearmAngle(a?: any, b?: any): any {
+  public calculateForearmAngle(a?: unknown, b?: unknown) {
     // `b` là khung tham chiếu: góc nghiêng đo theo trục "trên" của `b`.
     const elbow = this.framePosition('getLeftElbowPosition');
     const wrist = this.framePosition('getLeftWristPosition');
@@ -3006,21 +3009,21 @@ export class AnatomicalUpperBodySubsystem {
    * [0313] calculateForearmVelocity
    * Vận tốc cánh tay dưới (đọc entity.velocity, mặc định zero).
    */
-  public calculateForearmVelocity(entity?: any, dt = 0.016): any {
+  public calculateForearmVelocity(entity?: unknown, dt = 0.016) {
     return directionResult('calculateForearmVelocity', this.velocityOf(entity), { dt });
   }
   /**
    * [0314] calculateForearmAcceleration
    * Gia tốc cánh tay dưới (đọc entity.acceleration, mặc định zero).
    */
-  public calculateForearmAcceleration(entity?: any, dt = 0.016): any {
+  public calculateForearmAcceleration(entity?: unknown, dt = 0.016) {
     return directionResult('calculateForearmAcceleration', this.accelerationOf(entity), { dt });
   }
   /**
    * [0315] calculateForearmBoundingBox
    * Hộp bao cánh tay dưới (kích thước theo BODY_BOX_SIZES.forearm nếu không truyền).
    */
-  public calculateForearmBoundingBox(entity?: any, size?: Vec3D): any {
+  public calculateForearmBoundingBox(entity?: unknown, size?: Vec3D) {
     const box = boundingBox(entityPosition(entity), this.boxSize('forearm', size));
     return boundsResult('calculateForearmBoundingBox', box);
   }
@@ -3028,7 +3031,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0316] calculateForearmRadius
    * Bán kính cánh tay dưới (BODY_DIMENSIONS.forearmRadius).
    */
-  public calculateForearmRadius(entity?: any, options?: any): any {
+  public calculateForearmRadius(entity?: unknown, options?: unknown) {
     const source = this.sourceEntity(entity, options);
     const declared = this.declaredLength(source, 'forearmRadius', 'forearm_radius');
     const meters = declared > 0 ? declared : BODY_DIMENSIONS.forearmRadius;
@@ -3040,7 +3043,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0317] calculateForearmVolume
    * Thể tích cánh tay dưới (π·r²·L).
    */
-  public calculateForearmVolume(entity?: any, options?: any): any {
+  public calculateForearmVolume(entity?: unknown, options?: unknown) {
     const source = this.sourceEntity(entity, options);
     const declaredRadius = this.declaredLength(source, 'forearmRadius', 'forearm_radius');
     const r = declaredRadius > 0 ? declaredRadius : BODY_DIMENSIONS.forearmRadius;
@@ -3054,7 +3057,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0318] calculateForearmSurfaceArea
    * Diện tích bề mặt cánh tay dưới (2πrL + 2πr²).
    */
-  public calculateForearmSurfaceArea(entity?: any, options?: any): any {
+  public calculateForearmSurfaceArea(entity?: unknown, options?: unknown) {
     const source = this.sourceEntity(entity, options);
     const declaredRadius = this.declaredLength(source, 'forearmRadius', 'forearm_radius');
     const r = declaredRadius > 0 ? declaredRadius : BODY_DIMENSIONS.forearmRadius;
@@ -3069,7 +3072,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0319] calculateForearmCenterOfMass
    * Tâm khối lượng cánh tay dưới (0,4·L tính từ đầu gần).
    */
-  public calculateForearmCenterOfMass(entity?: any, options?: any): any {
+  public calculateForearmCenterOfMass(entity?: unknown, options?: unknown) {
     // `entity` là nguồn chiều dài cánh tay dưới (tâm khối lượng ở 0,4·L).
     const source = this.sourceEntity(entity, options);
     const l = this.forearmLengthOf(source) ?? BODY_DIMENSIONS.forearmLength;
@@ -3083,7 +3086,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0320] calculateForearmTwist
    * Độ xoay dọc của cánh tay dưới quanh trục của nó.
    */
-  public calculateForearmTwist(a?: any, b?: any): any {
+  public calculateForearmTwist(a?: unknown, b?: unknown) {
     // `b` là khung tham chiếu: trục xoay lấy theo trục cánh tay của `b`.
     const twist = this.twistAboutAxis(a, this.referenceAxis(b, REST_ARM_AXIS));
     return measurement('calculateForearmTwist', twist, 'rad');
@@ -3092,77 +3095,77 @@ export class AnatomicalUpperBodySubsystem {
    * [0321] getLeftWristPosition
    * Lấy tọa độ cổ tay trái.
    */
-  public getLeftWristPosition(entity?: any, offset?: Vec3D): any {
+  public getLeftWristPosition(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getLeftWristPosition', entity, offset);
   }
   /**
    * [0322] getRightWristPosition
    * Lấy tọa độ cổ tay phải.
    */
-  public getRightWristPosition(entity?: any, offset?: Vec3D): any {
+  public getRightWristPosition(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getRightWristPosition', entity, offset);
   }
   /**
    * [0323] getLeftWristCenter
    * Lấy tâm cổ tay trái.
    */
-  public getLeftWristCenter(entity?: any, offset?: Vec3D): any {
+  public getLeftWristCenter(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getLeftWristCenter', entity, offset);
   }
   /**
    * [0324] getRightWristCenter
    * Lấy tâm cổ tay phải.
    */
-  public getRightWristCenter(entity?: any, offset?: Vec3D): any {
+  public getRightWristCenter(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getRightWristCenter', entity, offset);
   }
   /**
    * [0325] getLeftWristJointPosition
    * Lấy tọa độ khớp cổ tay trái.
    */
-  public getLeftWristJointPosition(entity?: any, offset?: Vec3D): any {
+  public getLeftWristJointPosition(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getLeftWristJointPosition', entity, offset);
   }
   /**
    * [0326] getRightWristJointPosition
    * Lấy tọa độ khớp cổ tay phải.
    */
-  public getRightWristJointPosition(entity?: any, offset?: Vec3D): any {
+  public getRightWristJointPosition(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getRightWristJointPosition', entity, offset);
   }
   /**
    * [0327] getLeftWristFrontPosition
    * Lấy tọa độ mặt trước cổ tay trái.
    */
-  public getLeftWristFrontPosition(entity?: any, offset?: Vec3D): any {
+  public getLeftWristFrontPosition(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getLeftWristFrontPosition', entity, offset);
   }
   /**
    * [0328] getRightWristFrontPosition
    * Lấy tọa độ mặt trước cổ tay phải.
    */
-  public getRightWristFrontPosition(entity?: any, offset?: Vec3D): any {
+  public getRightWristFrontPosition(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getRightWristFrontPosition', entity, offset);
   }
   /**
    * [0329] getLeftWristBackPosition
    * Lấy tọa độ mặt sau cổ tay trái.
    */
-  public getLeftWristBackPosition(entity?: any, offset?: Vec3D): any {
+  public getLeftWristBackPosition(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getLeftWristBackPosition', entity, offset);
   }
   /**
    * [0330] getRightWristBackPosition
    * Lấy tọa độ mặt sau cổ tay phải.
    */
-  public getRightWristBackPosition(entity?: any, offset?: Vec3D): any {
+  public getRightWristBackPosition(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getRightWristBackPosition', entity, offset);
   }
   /**
    * [0331] calculateWristToElbowDistance
    * Khoảng cách cổ tay tới khuỷu.
    */
-  public calculateWristToElbowDistance(a?: any, b?: any): any {
+  public calculateWristToElbowDistance(a?: unknown, b?: unknown) {
     const value = this.landmarkDistance(a, b, 'getLeftWristPosition', 'getLeftElbowPosition');
     return measurement('calculateWristToElbowDistance', value, 'm');
   }
@@ -3170,7 +3173,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0332] calculateWristToPalmDistance
    * Khoảng cách cổ tay tới tâm lòng bàn tay (nửa chiều dài bàn tay).
    */
-  public calculateWristToPalmDistance(a?: any, b?: any): any {
+  public calculateWristToPalmDistance(a?: unknown, b?: unknown) {
     const value = this.landmarkDistance(a, b, 'getLeftWristPosition', 'getPalmCenter');
     return measurement('calculateWristToPalmDistance', value, 'm');
   }
@@ -3178,7 +3181,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0333] calculateWristWidth
    * Chiều rộng cổ tay (BODY_DIMENSIONS.wristWidth).
    */
-  public calculateWristWidth(entity?: any, options?: any): any {
+  public calculateWristWidth(entity?: unknown, options?: unknown) {
     const source = this.sourceEntity(entity, options);
     const declared = this.declaredLength(source, 'wristWidth', 'wrist_width');
     const meters = declared > 0 ? declared : BODY_DIMENSIONS.wristWidth;
@@ -3190,7 +3193,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0334] calculateWristThickness
    * Độ dày cổ tay (BODY_DIMENSIONS.wristThickness).
    */
-  public calculateWristThickness(a?: any, b?: any, options?: any): any {
+  public calculateWristThickness(a?: unknown, b?: unknown, options?: unknown) {
     // `a` = entity định hướng khung cổ tay, `b` = tâm cổ tay (điểm thô).
     const pivot = this.rawPoint(b) ?? this.framePosition('getLeftWristPosition');
     const front = this.frameRotated(a, this.framePosition('getLeftWristFrontPosition'), pivot);
@@ -3209,7 +3212,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0335] calculateWristFlexion
    * Góc gập cổ tay (thành phần cúi về phía trước của khớp cổ tay).
    */
-  public calculateWristFlexion(a?: any, b?: any): any {
+  public calculateWristFlexion(a?: unknown, b?: unknown) {
     // `b` là cơ thể tham chiếu: góc đo tương đối với khung của `b`.
     const e = this.eulerRelativeTo(a, b);
     return measurement('calculateWristFlexion', Math.max(0, e.x), 'rad');
@@ -3218,7 +3221,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0336] calculateWristExtension
    * Góc duỗi cổ tay (thành phần ngược lại với gập).
    */
-  public calculateWristExtension(a?: any, b?: any): any {
+  public calculateWristExtension(a?: unknown, b?: unknown) {
     const e = this.eulerRelativeTo(a, b);
     return measurement('calculateWristExtension', Math.max(0, -e.x), 'rad');
   }
@@ -3226,7 +3229,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0337] calculateWristAbduction
    * Góc nghiêng cổ tay ra ngoài (thành phần xoay).
    */
-  public calculateWristAbduction(a?: any, b?: any): any {
+  public calculateWristAbduction(a?: unknown, b?: unknown) {
     const e = this.eulerRelativeTo(a, b);
     return measurement('calculateWristAbduction', Math.max(0, e.z), 'rad');
   }
@@ -3234,7 +3237,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0338] calculateWristAdduction
    * Góc nghiêng cổ tay vào trong (thành phần xoay ngược lại).
    */
-  public calculateWristAdduction(a?: any, b?: any): any {
+  public calculateWristAdduction(a?: unknown, b?: unknown) {
     const e = this.eulerRelativeTo(a, b);
     return measurement('calculateWristAdduction', Math.max(0, -e.z), 'rad');
   }
@@ -3242,7 +3245,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0339] calculateWristPronation
    * Góc sấp cổ tay (xoay cánh tay theo chiều ngược).
    */
-  public calculateWristPronation(a?: any, b?: any): any {
+  public calculateWristPronation(a?: unknown, b?: unknown) {
     const twist = this.twistAboutAxis(a, this.referenceAxis(b, REST_ARM_AXIS));
     return measurement('calculateWristPronation', Math.max(0, -twist), 'rad');
   }
@@ -3250,7 +3253,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0340] calculateWristSupination
    * Góc ngửa cổ tay (xoay cánh tay theo chiều thuận).
    */
-  public calculateWristSupination(a?: any, b?: any): any {
+  public calculateWristSupination(a?: unknown, b?: unknown) {
     const twist = this.twistAboutAxis(a, this.referenceAxis(b, REST_ARM_AXIS));
     return measurement('calculateWristSupination', Math.max(0, twist), 'rad');
   }
@@ -3261,7 +3264,7 @@ export class AnatomicalUpperBodySubsystem {
    * Trục cánh tay dưới và pháp tuyến lòng bàn tay đều lấy từ xương thật
    * (khuỷu – cổ tay – bàn tay) khi entity có cây xương.
    */
-  public calculateWristJointAxis(a?: any, b?: any, options?: any): any {
+  public calculateWristJointAxis(a?: unknown, b?: unknown, options?: unknown) {
     const sources = this.sourcesOf(a, b, options);
     const context = this.boneContext(sources);
     const entity = this.entityOf(sources);
@@ -3305,7 +3308,7 @@ export class AnatomicalUpperBodySubsystem {
    * Dùng cùng nguồn dữ liệu với `calculateWristJointAxis`: xương thật
    * (khuỷu – cổ tay – bàn tay) → điểm thô truyền vào → offset giải phẫu tĩnh.
    */
-  public calculateWristJointNormal(a?: any, b?: any): any {
+  public calculateWristJointNormal(a?: unknown, b?: unknown) {
     const sources = this.sourcesOf(a, b);
     const context = this.boneContext(sources);
     const entity = this.entityOf(sources);
@@ -3345,21 +3348,21 @@ export class AnatomicalUpperBodySubsystem {
    * [0343] calculateWristVelocity
    * Vận tốc cổ tay (đọc entity.velocity, mặc định zero).
    */
-  public calculateWristVelocity(entity?: any, dt = 0.016): any {
+  public calculateWristVelocity(entity?: unknown, dt = 0.016) {
     return directionResult('calculateWristVelocity', this.velocityOf(entity), { dt });
   }
   /**
    * [0344] calculateWristAcceleration
    * Gia tốc cổ tay (đọc entity.acceleration, mặc định zero).
    */
-  public calculateWristAcceleration(entity?: any, dt = 0.016): any {
+  public calculateWristAcceleration(entity?: unknown, dt = 0.016) {
     return directionResult('calculateWristAcceleration', this.accelerationOf(entity), { dt });
   }
   /**
    * [0345] calculateWristBoundingBox
    * Hộp bao cổ tay (kích thước theo BODY_BOX_SIZES.wrist nếu không truyền).
    */
-  public calculateWristBoundingBox(entity?: any, size?: Vec3D): any {
+  public calculateWristBoundingBox(entity?: unknown, size?: Vec3D) {
     const box = boundingBox(entityPosition(entity), this.boxSize('wrist', size));
     return boundsResult('calculateWristBoundingBox', box);
   }
@@ -3367,7 +3370,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0346] calculateWristBoundingSphere
    * Hình cầu bao cổ tay (bán kính = nửa đường chéo hộp cổ tay nếu không truyền).
    */
-  public calculateWristBoundingSphere(entity?: any, radius = 1.0): any {
+  public calculateWristBoundingSphere(entity?: unknown, radius = 1.0) {
     const given = arguments.length >= 2 && Number.isFinite(radius);
     const r = given ? Math.max(0, radius) : halfDiagonal(BODY_BOX_SIZES.wrist);
     return {
@@ -3382,7 +3385,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0347] calculateWristTrajectory
    * Quỹ đạo cổ tay (đoạn khuỷu → cổ tay nếu entity không có đường đi).
    */
-  public calculateWristTrajectory(a?: any, b?: any, options?: any): any {
+  public calculateWristTrajectory(a?: unknown, b?: unknown, options?: unknown) {
     // `b` = điểm cuối của quỹ đạo, `options` = scale + unit cho chiều dài.
     const start = this.framePosition('getLeftElbowPosition');
     const end = this.rawPoint(b) ?? this.framePosition('getLeftWristPosition');
@@ -3400,7 +3403,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0348] calculateWristMotionSmoothness
    * Độ mượt chuyển động cổ tay (1 = rất mượt, 0 = giật mạnh).
    */
-  public calculateWristMotionSmoothness(a?: any, b?: any, options?: any): any {
+  public calculateWristMotionSmoothness(a?: unknown, b?: unknown, options?: unknown) {
     // `b` = vị trí cổ tay ở bước trước, `options.dt` = bước thời gian.
     const dt = this.optNumber(options, 1 / 60, 'dt', 'timeStep', 'delta');
     const step = dt > 0 ? dt : 1 / 60;
@@ -3427,7 +3430,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0349] calculateWristPoseError
    * Sai lệch tư thế cổ tay so với tư thế đích.
    */
-  public calculateWristPoseError(a?: any, b?: any, options?: any): any {
+  public calculateWristPoseError(a?: unknown, b?: unknown, options?: unknown) {
     const positionError = isPointLike(a) && isPointLike(b)
       ? distance3D(asPoint(a), asPoint(b))
       : 0;
@@ -3455,7 +3458,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0350] calculateWristTargetOffset
    * Độ lệch của cổ tay so với mục tiêu.
    */
-  public calculateWristTargetOffset(a?: any, b?: any, options?: any): any {
+  public calculateWristTargetOffset(a?: unknown, b?: unknown, options?: unknown) {
     const current = isPointLike(a) ? asPoint(a) : this.framePosition('getLeftWristPosition');
     const target = isPointLike(b) ? asPoint(b) : current;
     const raw = subtract(target, current);
@@ -3478,84 +3481,84 @@ export class AnatomicalUpperBodySubsystem {
    * [0351] getLeftHandPosition
    * Lấy tọa độ bàn tay trái.
    */
-  public getLeftHandPosition(entity?: any, offset?: Vec3D): any {
+  public getLeftHandPosition(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getLeftHandPosition', entity, offset);
   }
   /**
    * [0352] getRightHandPosition
    * Lấy tọa độ bàn tay phải.
    */
-  public getRightHandPosition(entity?: any, offset?: Vec3D): any {
+  public getRightHandPosition(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getRightHandPosition', entity, offset);
   }
   /**
    * [0353] getLeftHandCenter
    * Lấy tâm bàn tay trái.
    */
-  public getLeftHandCenter(entity?: any, offset?: Vec3D): any {
+  public getLeftHandCenter(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getLeftHandCenter', entity, offset);
   }
   /**
    * [0354] getRightHandCenter
    * Lấy tâm bàn tay phải.
    */
-  public getRightHandCenter(entity?: any, offset?: Vec3D): any {
+  public getRightHandCenter(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getRightHandCenter', entity, offset);
   }
   /**
    * [0355] getPalmCenter
    * Lấy tâm lòng bàn tay.
    */
-  public getPalmCenter(entity?: any, offset?: Vec3D): any {
+  public getPalmCenter(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getPalmCenter', entity, offset);
   }
   /**
    * [0356] getPalmBasePosition
    * Lấy tọa độ gốc lòng bàn tay.
    */
-  public getPalmBasePosition(entity?: any, offset?: Vec3D): any {
+  public getPalmBasePosition(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getPalmBasePosition', entity, offset);
   }
   /**
    * [0357] getPalmTopPosition
    * Lấy tọa độ đầu lòng bàn tay.
    */
-  public getPalmTopPosition(entity?: any, offset?: Vec3D): any {
+  public getPalmTopPosition(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getPalmTopPosition', entity, offset);
   }
   /**
    * [0358] getPalmLeftEdge
    * Lấy tọa độ mép trái lòng bàn tay.
    */
-  public getPalmLeftEdge(entity?: any, offset?: Vec3D): any {
+  public getPalmLeftEdge(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getPalmLeftEdge', entity, offset);
   }
   /**
    * [0359] getPalmRightEdge
    * Lấy tọa độ mép phải lòng bàn tay.
    */
-  public getPalmRightEdge(entity?: any, offset?: Vec3D): any {
+  public getPalmRightEdge(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getPalmRightEdge', entity, offset);
   }
   /**
    * [0360] getPalmFrontPosition
    * Lấy tọa độ mặt trước lòng bàn tay.
    */
-  public getPalmFrontPosition(entity?: any, offset?: Vec3D): any {
+  public getPalmFrontPosition(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getPalmFrontPosition', entity, offset);
   }
   /**
    * [0361] getPalmBackPosition
    * Lấy tọa độ mặt sau lòng bàn tay.
    */
-  public getPalmBackPosition(entity?: any, offset?: Vec3D): any {
+  public getPalmBackPosition(entity?: unknown, offset?: Vec3D) {
     return this.landmarkPosition('getPalmBackPosition', entity, offset);
   }
   /**
    * [0362] getPalmNormal
    * Pháp tuyến mặt phẳng lòng bàn tay.
    */
-  public getPalmNormal(a?: any, b?: any): any {
+  public getPalmNormal(a?: unknown, b?: unknown) {
     // `b` là khung tham chiếu: pháp tuyến được biểu diễn trong khung của `b`.
     return directionResult('getPalmNormal', this.intoFrame(this.palmNormal(a), b));
   }
@@ -3563,28 +3566,28 @@ export class AnatomicalUpperBodySubsystem {
    * [0363] getPalmForwardVector
    * Hướng phía trước của lòng bàn tay (hướng các ngón tay).
    */
-  public getPalmForwardVector(a?: any, b?: any): any {
+  public getPalmForwardVector(a?: unknown, b?: unknown) {
     return directionResult('getPalmForwardVector', this.intoFrame(this.palmForward(a), b));
   }
   /**
    * [0364] getPalmUpVector
    * Hướng phía trên của lòng bàn tay.
    */
-  public getPalmUpVector(a?: any, b?: any): any {
+  public getPalmUpVector(a?: unknown, b?: unknown) {
     return directionResult('getPalmUpVector', this.intoFrame(this.palmUp(a), b));
   }
   /**
    * [0365] getPalmRightVector
    * Hướng bên phải của lòng bàn tay.
    */
-  public getPalmRightVector(a?: any, b?: any): any {
+  public getPalmRightVector(a?: unknown, b?: unknown) {
     return directionResult('getPalmRightVector', this.intoFrame(this.palmRight(a), b));
   }
   /**
    * [0366] calculatePalmWidth
    * Chiều rộng lòng bàn tay (BODY_DIMENSIONS.palmWidth).
    */
-  public calculatePalmWidth(entity?: any, options?: any): any {
+  public calculatePalmWidth(entity?: unknown, options?: unknown) {
     const source = this.sourceEntity(entity, options);
     const declared = this.declaredLength(source, 'palmWidth', 'palm_width');
     const meters = declared > 0 ? declared : BODY_DIMENSIONS.palmWidth;
@@ -3596,7 +3599,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0367] calculatePalmLength
    * Chiều dài lòng bàn tay (BODY_DIMENSIONS.palmLength).
    */
-  public calculatePalmLength(entity?: any, options?: any): any {
+  public calculatePalmLength(entity?: unknown, options?: unknown) {
     // `entity` là nguồn chiều dài lòng bàn tay: đo cổ tay → bàn tay.
     const source = this.sourceEntity(entity, options);
     const measured = this.boneSegmentLength(source, WRIST_BONE_NAMES, HAND_BONE_NAMES);
@@ -3610,7 +3613,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0368] calculatePalmThickness
    * Độ dày lòng bàn tay (BODY_DIMENSIONS.palmThickness).
    */
-  public calculatePalmThickness(a?: any, b?: any, options?: any): any {
+  public calculatePalmThickness(a?: unknown, b?: unknown, options?: unknown) {
     // `a` = entity định hướng khung lòng bàn tay, `b` = tâm lòng bàn tay.
     const pivot = this.rawPoint(b) ?? this.framePosition('getPalmCenter');
     const front = this.frameRotated(a, this.framePosition('getPalmFrontPosition'), pivot);
@@ -3628,7 +3631,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0369] calculatePalmArea
    * Diện tích mặt lòng bàn tay (rộng × dài).
    */
-  public calculatePalmArea(entity?: any, options?: any): any {
+  public calculatePalmArea(entity?: unknown, options?: unknown) {
     const source = this.sourceEntity(entity, options);
     const declaredWidth = this.declaredLength(source, 'palmWidth', 'palm_width');
     const declaredLength = this.declaredLength(source, 'palmLength', 'palm_length');
@@ -3643,7 +3646,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0370] calculatePalmVolume
    * Thể tích lòng bàn tay (rộng × dài × dày).
    */
-  public calculatePalmVolume(entity?: any, options?: any): any {
+  public calculatePalmVolume(entity?: unknown, options?: unknown) {
     const source = this.sourceEntity(entity, options);
     const declaredWidth = this.declaredLength(source, 'palmWidth', 'palm_width');
     const declaredLength = this.declaredLength(source, 'palmLength', 'palm_length');
@@ -3660,7 +3663,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0371] calculatePalmOrientation
    * Hướng quay lòng bàn tay (quaternion của xương bàn tay, mặc định đơn vị).
    */
-  public calculatePalmOrientation(entityOrAngle?: any, options?: any): any {
+  public calculatePalmOrientation(entityOrAngle?: unknown, options?: unknown) {
     const q = this.orientationOf(entityOrAngle, ['palm', 'hand', 'wrist'], options);
     return orientationResult('calculatePalmOrientation', q);
   }
@@ -3668,7 +3671,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0372] calculatePalmRotation
    * Góc quay lòng bàn tay so với cánh tay dưới.
    */
-  public calculatePalmRotation(entityOrAngle?: any, options?: any): any {
+  public calculatePalmRotation(entityOrAngle?: unknown, options?: unknown) {
     const palm = this.orientationOf(entityOrAngle, ['palm', 'hand'], options);
     const forearm = this.orientationOf(entityOrAngle, ['forearm', 'radius'], options);
     const relative = multiplyQuaternions(palm, invertQuaternion(forearm));
@@ -3678,7 +3681,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0373] calculatePalmTilt
    * Độ nghiêng của lòng bàn tay so với hướng phía trước.
    */
-  public calculatePalmTilt(a?: any, b?: any): any {
+  public calculatePalmTilt(a?: unknown, b?: unknown) {
     // `b` là khung tham chiếu: góc nghiêng đo với mặt phẳng ngang của `b`.
     const normal = this.palmNormal(a);
     const forward = this.referenceAxis(b, FORWARD3);
@@ -3689,7 +3692,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0374] calculatePalmCurvature
    * Độ cong dọc của lòng bàn tay (góc nghiêng / chiều dài bàn tay).
    */
-  public calculatePalmCurvature(entity?: any, options?: any): any {
+  public calculatePalmCurvature(entity?: unknown, options?: unknown) {
     const tilt = Math.acos(clamp(dot(this.palmNormal(entity), FORWARD3), -1, 1));
     const curvature = BODY_DIMENSIONS.palmLength > 0 ? tilt / BODY_DIMENSIONS.palmLength : 0;
     const { unit, factor } = this.unitFactor(options, '1/m');
@@ -3700,7 +3703,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0375] calculatePalmCenterOfMass
    * Tâm khối lượng lòng bàn tay (0,4·L tính từ gốc bàn tay).
    */
-  public calculatePalmCenterOfMass(entity?: any, options?: any): any {
+  public calculatePalmCenterOfMass(entity?: unknown, options?: unknown) {
     // `entity` là nguồn chiều dài lòng bàn tay (tâm khối lượng ở 0,4·L).
     const source = this.sourceEntity(entity, options);
     const measured = this.boneSegmentLength(source, WRIST_BONE_NAMES, HAND_BONE_NAMES);
@@ -3716,7 +3719,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0376] calculatePalmBoundingBox
    * Hộp bao lòng bàn tay (kích thước theo BODY_BOX_SIZES.palm nếu không truyền).
    */
-  public calculatePalmBoundingBox(entity?: any, size?: Vec3D): any {
+  public calculatePalmBoundingBox(entity?: unknown, size?: Vec3D) {
     const box = boundingBox(entityPosition(entity), this.boxSize('palm', size));
     return boundsResult('calculatePalmBoundingBox', box);
   }
@@ -3724,7 +3727,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0377] calculatePalmBoundingSphere
    * Hình cầu bao lòng bàn tay (bán kính = nửa đường chéo hộp lòng bàn tay).
    */
-  public calculatePalmBoundingSphere(entity?: any, radius = 1.0): any {
+  public calculatePalmBoundingSphere(entity?: unknown, radius = 1.0) {
     const given = arguments.length >= 2 && Number.isFinite(radius);
     const r = given ? Math.max(0, radius) : halfDiagonal(BODY_BOX_SIZES.palm);
     return {
@@ -3739,7 +3742,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0378] calculatePalmSymmetry
    * Độ đối xứng của hai lòng bàn tay (1 = hoàn hảo).
    */
-  public calculatePalmSymmetry(a?: any, b?: any, options?: any): any {
+  public calculatePalmSymmetry(a?: unknown, b?: unknown, options?: unknown) {
     // `a` = lòng bàn tay trái, `b` = lòng bàn tay phải (điểm thô).
     const left = this.rawPoint(a) ?? this.palmFrame('getPalmCenter');
     const right = this.rawPoint(b) ?? { x: -left.x, y: left.y, z: left.z };
@@ -3752,7 +3755,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0379] calculatePalmToWristDistance
    * Khoảng cách lòng bàn tay tới cổ tay.
    */
-  public calculatePalmToWristDistance(a?: any, b?: any): any {
+  public calculatePalmToWristDistance(a?: unknown, b?: unknown) {
     const value = this.landmarkDistance(a, b, 'getPalmCenter', 'getLeftWristPosition');
     return measurement('calculatePalmToWristDistance', value, 'm');
   }
@@ -3760,7 +3763,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0380] calculatePalmToFingerBaseDistance
    * Khoảng cách lòng bàn tay tới gốc ngón tay.
    */
-  public calculatePalmToFingerBaseDistance(a?: any, b?: any): any {
+  public calculatePalmToFingerBaseDistance(a?: unknown, b?: unknown) {
     const value = this.landmarkDistance(a, b, 'getPalmCenter', 'getPalmTopPosition');
     return measurement('calculatePalmToFingerBaseDistance', value, 'm');
   }
@@ -3768,7 +3771,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0381] calculateHandSpan
    * Độ sải bàn tay (BODY_DIMENSIONS.handSpan).
    */
-  public calculateHandSpan(entity?: any, options?: any): any {
+  public calculateHandSpan(entity?: unknown, options?: unknown) {
     // `entity` là nguồn độ sải bàn tay: đo ngón cái → ngón út hoặc khai báo.
     const source = this.sourceEntity(entity, options);
     const measured = this.handSpanOf(source);
@@ -3782,7 +3785,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0382] calculateHandWidth
    * Chiều rộng bàn tay (BODY_DIMENSIONS.handWidth).
    */
-  public calculateHandWidth(entity?: any, options?: any): any {
+  public calculateHandWidth(entity?: unknown, options?: unknown) {
     const source = this.sourceEntity(entity, options);
     const declared = this.declaredLength(source, 'handWidth', 'hand_width');
     const meters = declared > 0 ? declared : BODY_DIMENSIONS.handWidth;
@@ -3794,7 +3797,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0383] calculateHandLength
    * Chiều dài bàn tay (BODY_DIMENSIONS.handLength).
    */
-  public calculateHandLength(entity?: any, options?: any): any {
+  public calculateHandLength(entity?: unknown, options?: unknown) {
     // `entity` là nguồn chiều dài bàn tay: đo cổ tay → bàn tay hoặc khai báo.
     const source = this.sourceEntity(entity, options);
     const measured = this.boneSegmentLength(source, WRIST_BONE_NAMES, HAND_BONE_NAMES);
@@ -3808,7 +3811,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0384] calculateHandThickness
    * Độ dày bàn tay (bằng độ dày lòng bàn tay).
    */
-  public calculateHandThickness(a?: any, b?: any, options?: any): any {
+  public calculateHandThickness(a?: unknown, b?: unknown, options?: unknown) {
     // `a` = entity định hướng khung bàn tay, `b` = tâm lòng bàn tay.
     const pivot = this.rawPoint(b) ?? this.framePosition('getPalmCenter');
     const front = this.frameRotated(a, this.framePosition('getPalmFrontPosition'), pivot);
@@ -3826,7 +3829,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0385] calculateHandOrientation
    * Hướng quay bàn tay (quaternion của xương bàn tay, mặc định đơn vị).
    */
-  public calculateHandOrientation(entityOrAngle?: any, options?: any): any {
+  public calculateHandOrientation(entityOrAngle?: unknown, options?: unknown) {
     const q = this.orientationOf(entityOrAngle, ['hand', 'palm', 'wrist'], options);
     return orientationResult('calculateHandOrientation', q);
   }
@@ -3834,49 +3837,49 @@ export class AnatomicalUpperBodySubsystem {
    * [0386] calculateHandForwardDirection
    * Hướng phía trước của bàn tay (hướng các ngón tay).
    */
-  public calculateHandForwardDirection(a?: any, b?: any): any {
+  public calculateHandForwardDirection(a?: unknown, b?: unknown) {
     return directionResult('calculateHandForwardDirection', this.intoFrame(this.palmForward(a), b));
   }
   /**
    * [0387] calculateHandUpDirection
    * Hướng phía trên của bàn tay.
    */
-  public calculateHandUpDirection(a?: any, b?: any): any {
+  public calculateHandUpDirection(a?: unknown, b?: unknown) {
     return directionResult('calculateHandUpDirection', this.intoFrame(this.palmUp(a), b));
   }
   /**
    * [0388] calculateHandRightDirection
    * Hướng bên phải của bàn tay.
    */
-  public calculateHandRightDirection(a?: any, b?: any): any {
+  public calculateHandRightDirection(a?: unknown, b?: unknown) {
     return directionResult('calculateHandRightDirection', this.intoFrame(this.palmRight(a), b));
   }
   /**
    * [0389] calculateHandVelocity
    * Vận tốc bàn tay (đọc entity.velocity, mặc định zero).
    */
-  public calculateHandVelocity(entity?: any, dt = 0.016): any {
+  public calculateHandVelocity(entity?: unknown, dt = 0.016) {
     return directionResult('calculateHandVelocity', this.velocityOf(entity), { dt });
   }
   /**
    * [0390] calculateHandAcceleration
    * Gia tốc bàn tay (đọc entity.acceleration, mặc định zero).
    */
-  public calculateHandAcceleration(entity?: any, dt = 0.016): any {
+  public calculateHandAcceleration(entity?: unknown, dt = 0.016) {
     return directionResult('calculateHandAcceleration', this.accelerationOf(entity), { dt });
   }
   /**
    * [0391] calculateHandAngularVelocity
    * Vận tốc góc của bàn tay (đọc entity.angularVelocity, mặc định zero).
    */
-  public calculateHandAngularVelocity(entity?: any, dt = 0.016): any {
+  public calculateHandAngularVelocity(entity?: unknown, dt = 0.016) {
     return directionResult('calculateHandAngularVelocity', this.angularVelocityOf(entity), { dt });
   }
   /**
    * [0392] calculateHandAngularAcceleration
    * Gia tốc góc của bàn tay (đọc entity.angularAcceleration, mặc định zero).
    */
-  public calculateHandAngularAcceleration(entity?: any, dt = 0.016): any {
+  public calculateHandAngularAcceleration(entity?: unknown, dt = 0.016) {
     return directionResult(
       'calculateHandAngularAcceleration',
       this.angularAccelerationOf(entity),
@@ -3887,7 +3890,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0393] calculateHandTrajectory
    * Quỹ đạo bàn tay (đoạn cổ tay → bàn tay nếu entity không có đường đi).
    */
-  public calculateHandTrajectory(a?: any, b?: any, options?: any): any {
+  public calculateHandTrajectory(a?: unknown, b?: unknown, options?: unknown) {
     // `b` = điểm cuối của quỹ đạo, `options` = scale + unit cho chiều dài.
     const start = this.framePosition('getLeftWristPosition');
     const end = this.rawPoint(b) ?? this.framePosition('getLeftHandPosition');
@@ -3905,7 +3908,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0394] calculateHandMotionDirection
    * Hướng chuyển động của bàn tay.
    */
-  public calculateHandMotionDirection(a?: any, b?: any): any {
+  public calculateHandMotionDirection(a?: unknown, b?: unknown) {
     if (isPointLike(a) && isPointLike(b)) {
       const dir = normalize(subtract(asPoint(b), asPoint(a)));
       if (magnitude(dir) > 0) return directionResult('calculateHandMotionDirection', dir);
@@ -3920,7 +3923,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0395] calculateHandMotionDistance
    * Quãng đường bàn tay đã di chuyển.
    */
-  public calculateHandMotionDistance(a?: any, b?: any): any {
+  public calculateHandMotionDistance(a?: unknown, b?: unknown) {
     if (isPointLike(a) && isPointLike(b)) {
       return measurement('calculateHandMotionDistance', distance3D(asPoint(a), asPoint(b)), 'm');
     }
@@ -3931,7 +3934,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0396] calculateHandPose
    * Tư thế bàn tay (vị trí + hướng + pháp tuyến lòng bàn tay).
    */
-  public calculateHandPose(a?: any, b?: any, options?: any): any {
+  public calculateHandPose(a?: unknown, b?: unknown, options?: unknown) {
     // `b` là nguồn xương bàn tay (đọc quaternion xương khi có cây xương).
     const position = isPointLike(a) ? asPoint(a) : this.framePosition('getLeftHandPosition');
     const boneOrientation = this.boneQuaternionOf(b ?? options, ['hand', 'palm']);
@@ -3948,7 +3951,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0397] calculateHandPoseDifference
    * Chênh lệch giữa hai tư thế bàn tay.
    */
-  public calculateHandPoseDifference(a?: any, b?: any, options?: any): any {
+  public calculateHandPoseDifference(a?: unknown, b?: unknown, options?: unknown) {
     const pa = isPointLike(a) ? asPoint(a) : this.framePosition('getLeftHandPosition');
     const pb = isPointLike(b) ? asPoint(b) : pa;
     const raw = subtract(pb, pa);
@@ -3971,7 +3974,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0398] calculateHandPoseSimilarity
    * Mức độ tương đồng giữa hai tư thế bàn tay (1 = giống hệt).
    */
-  public calculateHandPoseSimilarity(a?: any, b?: any, options?: any): any {
+  public calculateHandPoseSimilarity(a?: unknown, b?: unknown, options?: unknown) {
     const pa = isPointLike(a) ? asPoint(a) : this.framePosition('getLeftHandPosition');
     const pb = isPointLike(b) ? asPoint(b) : pa;
     // `options.reference` = chiều dài chuẩn hoá, `options.invert` = đảo ý nghĩa.
@@ -3991,7 +3994,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0399] calculateHandJointAngles
    * Các góc khớp của bàn tay (theo từng ngón tay, tính bằng radian).
    */
-  public calculateHandJointAngles(a?: any, b?: any): any {
+  public calculateHandJointAngles(a?: unknown, b?: unknown) {
     // `b` là nguồn thay thế cho góc ngón tay (dùng khi `a` không có).
     const fromA = this.fingerAngles(a);
     const fromB = this.fingerAngles(b);
@@ -4005,7 +4008,7 @@ export class AnatomicalUpperBodySubsystem {
    * [0400] calculateHandInverseKinematics
    * Động học ngược bàn tay: góc gập ngón cần thiết để chạm mục tiêu.
    */
-  public calculateHandInverseKinematics(a?: any, b?: any, options?: any): any {
+  public calculateHandInverseKinematics(a?: unknown, b?: unknown, options?: unknown) {
     const wrist = this.framePosition('getLeftWristPosition');
     const target = isPointLike(b) ? asPoint(b) : this.framePosition('getLeftPalmTopPosition');
     const reach = distance3D(wrist, target);

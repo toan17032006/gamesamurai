@@ -16,7 +16,7 @@ export interface ExperienceGrant<TSource = string> {
   bonusMultiplier?: number;
 }
 
-export interface LevelMilestone<TReward = any> {
+export interface LevelMilestone<TReward = unknown> {
   level: number;
   reward: TReward;
   unlockTitle?: string;
@@ -31,7 +31,7 @@ export interface ClassSpecialization<TClass = string> {
   unlockedSkillIds: string[];
 }
 
-export interface AchievementDefinition<TCondition = any> {
+export interface AchievementDefinition<TCondition = unknown> {
   id: string;
   title: string;
   description: string;
@@ -41,7 +41,7 @@ export interface AchievementDefinition<TCondition = any> {
   isSecret?: boolean;
 }
 
-export interface PlayerTitle<TReq = any> {
+export interface PlayerTitle<TReq = unknown> {
   id: string;
   title: string;
   statBonus?: Record<string, number>;
@@ -217,7 +217,7 @@ export class ClassProgression<TClass extends string = string> {
 /**
  * Achievement tracking system.
  */
-export class AchievementSystem<TCondition = any> {
+export class AchievementSystem<TCondition = unknown> {
   private _achievements: Map<string, AchievementDefinition<TCondition>> = new Map();
   private _progress: Map<string, number> = new Map();
   private _unlocked: Set<string> = new Set();

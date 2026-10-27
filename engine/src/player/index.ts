@@ -48,10 +48,10 @@ export function lateUpdatePlayer(deltaTime: number, p?: RealisticHumanPlayer): v
 export function fixedUpdatePlayer(fixedDeltaTime: number, p?: RealisticHumanPlayer): void { resolvePlayer(p).fixedUpdatePlayer(fixedDeltaTime); }
 export function setPlayerConfig(config: Partial<HumanPlayerConfig>, p?: RealisticHumanPlayer): void { resolvePlayer(p).setPlayerConfig(config); }
 export function getPlayerConfig(p?: RealisticHumanPlayer): HumanPlayerConfig { return resolvePlayer(p).getPlayerConfig(); }
-export function getPlayerState(p?: RealisticHumanPlayer): Record<string, any> { return resolvePlayer(p).getPlayerState(); }
-export function setPlayerState(state: Record<string, any>, p?: RealisticHumanPlayer): void { resolvePlayer(p).setPlayerState(state); }
+export function getPlayerState(p?: RealisticHumanPlayer): Record<string, unknown> { return resolvePlayer(p).getPlayerState(); }
+export function setPlayerState(state: Record<string, unknown>, p?: RealisticHumanPlayer): void { resolvePlayer(p).setPlayerState(state); }
 export function savePlayerState(p?: RealisticHumanPlayer): string { return resolvePlayer(p).savePlayerState(); }
-export function restorePlayerState(state: string | Record<string, any>, p?: RealisticHumanPlayer): boolean { return resolvePlayer(p).restorePlayerState(state); }
+export function restorePlayerState(state: string | Record<string, unknown>, p?: RealisticHumanPlayer): boolean { return resolvePlayer(p).restorePlayerState(state); }
 export function pausePlayer(p?: RealisticHumanPlayer): void { resolvePlayer(p).pausePlayer(); }
 export function resumePlayer(p?: RealisticHumanPlayer): void { resolvePlayer(p).resumePlayer(); }
 export function enablePlayer(p?: RealisticHumanPlayer): void { resolvePlayer(p).enablePlayer(); }
@@ -263,26 +263,26 @@ export function blendFingerAnimations(hand: 'left' | 'right', targetPose: HandFi
 // 181–200. Cầm, nắm, chạm và thao tác bằng tay
 // ============================================================================
 
-export function gripObject(object: any, hand?: 'left' | 'right', p?: RealisticHumanPlayer): boolean { return resolvePlayer(p).gripObject(object, hand); }
-export function releaseObject(object?: any, hand?: 'left' | 'right', p?: RealisticHumanPlayer): any { return resolvePlayer(p).releaseObject(object, hand); }
-export function pickUpObject(object: any, p?: RealisticHumanPlayer): boolean { return resolvePlayer(p).pickUpObject(object); }
-export function putDownObject(object?: any, p?: RealisticHumanPlayer): any { return resolvePlayer(p).putDownObject(object); }
-export function holdObject(object: any, p?: RealisticHumanPlayer): void { resolvePlayer(p).holdObject(object); }
-export function transferObjectBetweenHands(object?: any, p?: RealisticHumanPlayer): boolean { return resolvePlayer(p).transferObjectBetweenHands(object); }
-export function rotateObjectInHand(object: any, rotation: Quat4, p?: RealisticHumanPlayer): void { resolvePlayer(p).rotateObjectInHand(object, rotation); }
-export function inspectObject(object: any, p?: RealisticHumanPlayer): void { resolvePlayer(p).inspectObject(object); }
-export function pointAtObject(object: any, p?: RealisticHumanPlayer): void { resolvePlayer(p).pointAtObject(object); }
-export function touchObject(object: any, p?: RealisticHumanPlayer): void { resolvePlayer(p).touchObject(object); }
-export function pressObject(object: any, p?: RealisticHumanPlayer): void { resolvePlayer(p).pressObject(object); }
-export function pullObjectWithHand(object: any, p?: RealisticHumanPlayer): void { resolvePlayer(p).pullObjectWithHand(object); }
-export function pushObjectWithHand(object: any, p?: RealisticHumanPlayer): void { resolvePlayer(p).pushObjectWithHand(object); }
-export function turnDoorHandle(handle: any, p?: RealisticHumanPlayer): void { resolvePlayer(p).turnDoorHandle(handle); }
-export function openDoorWithHand(door: any, p?: RealisticHumanPlayer): void { resolvePlayer(p).openDoorWithHand(door); }
-export function closeDoorWithHand(door: any, p?: RealisticHumanPlayer): void { resolvePlayer(p).closeDoorWithHand(door); }
+export function gripObject(object: unknown, hand?: 'left' | 'right', p?: RealisticHumanPlayer): boolean { return resolvePlayer(p).gripObject(object, hand); }
+export function releaseObject(object?: unknown, hand?: 'left' | 'right', p?: RealisticHumanPlayer) { return resolvePlayer(p).releaseObject(object, hand); }
+export function pickUpObject(object: unknown, p?: RealisticHumanPlayer): boolean { return resolvePlayer(p).pickUpObject(object); }
+export function putDownObject(object?: unknown, p?: RealisticHumanPlayer) { return resolvePlayer(p).putDownObject(object); }
+export function holdObject(object: unknown, p?: RealisticHumanPlayer): void { resolvePlayer(p).holdObject(object); }
+export function transferObjectBetweenHands(object?: unknown, p?: RealisticHumanPlayer): boolean { return resolvePlayer(p).transferObjectBetweenHands(object); }
+export function rotateObjectInHand(object: unknown, rotation: Quat4, p?: RealisticHumanPlayer): void { resolvePlayer(p).rotateObjectInHand(object, rotation); }
+export function inspectObject(object: unknown, p?: RealisticHumanPlayer): void { resolvePlayer(p).inspectObject(object); }
+export function pointAtObject(object: unknown, p?: RealisticHumanPlayer): void { resolvePlayer(p).pointAtObject(object); }
+export function touchObject(object: unknown, p?: RealisticHumanPlayer): void { resolvePlayer(p).touchObject(object); }
+export function pressObject(object: unknown, p?: RealisticHumanPlayer): void { resolvePlayer(p).pressObject(object); }
+export function pullObjectWithHand(object: unknown, p?: RealisticHumanPlayer): void { resolvePlayer(p).pullObjectWithHand(object); }
+export function pushObjectWithHand(object: unknown, p?: RealisticHumanPlayer): void { resolvePlayer(p).pushObjectWithHand(object); }
+export function turnDoorHandle(handle: unknown, p?: RealisticHumanPlayer): void { resolvePlayer(p).turnDoorHandle(handle); }
+export function openDoorWithHand(door: unknown, p?: RealisticHumanPlayer): void { resolvePlayer(p).openDoorWithHand(door); }
+export function closeDoorWithHand(door: unknown, p?: RealisticHumanPlayer): void { resolvePlayer(p).closeDoorWithHand(door); }
 export function pressKeyboardKey(key: string, p?: RealisticHumanPlayer): void { resolvePlayer(p).pressKeyboardKey(key); }
 export function tapTouchscreen(position: Vec3, p?: RealisticHumanPlayer): void { resolvePlayer(p).tapTouchscreen(position); }
-export function operateMouse(mouse: any, p?: RealisticHumanPlayer): void { resolvePlayer(p).operateMouse(mouse); }
-export function adjustGripPressure(object: any, pressure: number, p?: RealisticHumanPlayer): void { resolvePlayer(p).adjustGripPressure(object, pressure); }
+export function operateMouse(mouse: unknown, p?: RealisticHumanPlayer): void { resolvePlayer(p).operateMouse(mouse); }
+export function adjustGripPressure(object: unknown, pressure: number, p?: RealisticHumanPlayer): void { resolvePlayer(p).adjustGripPressure(object, pressure); }
 
 // ============================================================================
 // 201–220. Chân, đầu gối, cổ chân và ngón chân
@@ -315,8 +315,8 @@ export function updateLegWeightDistribution(p?: RealisticHumanPlayer): void { re
 
 export function standUp(p?: RealisticHumanPlayer): void { resolvePlayer(p).standUp(); }
 export function sitDown(p?: RealisticHumanPlayer): void { resolvePlayer(p).sitDown(); }
-export function sitOnChair(chair?: any, p?: RealisticHumanPlayer): void { resolvePlayer(p).sitOnChair(chair); }
-export function standFromChair(chair?: any, p?: RealisticHumanPlayer): void { resolvePlayer(p).standFromChair(chair); }
+export function sitOnChair(chair?: unknown, p?: RealisticHumanPlayer): void { resolvePlayer(p).sitOnChair(chair); }
+export function standFromChair(chair?: unknown, p?: RealisticHumanPlayer): void { resolvePlayer(p).standFromChair(chair); }
 export function sitOnGround(p?: RealisticHumanPlayer): void { resolvePlayer(p).sitOnGround(); }
 export function standFromGround(p?: RealisticHumanPlayer): void { resolvePlayer(p).standFromGround(); }
 export function kneelDown(p?: RealisticHumanPlayer): void { resolvePlayer(p).kneelDown(); }
@@ -404,7 +404,7 @@ export function yawn(p?: RealisticHumanPlayer): void { resolvePlayer(p).yawn(); 
 export function gasp(p?: RealisticHumanPlayer): void { resolvePlayer(p).gasp(); }
 export function sigh(p?: RealisticHumanPlayer): void { resolvePlayer(p).sigh(); }
 export function speak(p?: RealisticHumanPlayer): void { resolvePlayer(p).speak(); }
-export function updateLipSync(audioData?: any, p?: RealisticHumanPlayer): void { resolvePlayer(p).updateLipSync(audioData); }
+export function updateLipSync(audioData?: unknown, p?: RealisticHumanPlayer): void { resolvePlayer(p).updateLipSync(audioData); }
 export function pronounceViseme(viseme: VisemeType, p?: RealisticHumanPlayer): void { resolvePlayer(p).pronounceViseme(viseme); }
 export function expressEmotion(emotion: string, intensity?: number, p?: RealisticHumanPlayer): void { resolvePlayer(p).expressEmotion(emotion, intensity); }
 export function transitionEmotion(fromEmotion: string, toEmotion: string, duration?: number, p?: RealisticHumanPlayer): void { resolvePlayer(p).transitionEmotion(fromEmotion, toEmotion, duration); }
@@ -438,49 +438,49 @@ export function performIdleFidget(p?: RealisticHumanPlayer): void { resolvePlaye
 // 321–340. Ăn uống, uống nước và thao tác với đồ vật
 // ============================================================================
 
-export function pickUpFood(food: any, p?: RealisticHumanPlayer): void { resolvePlayer(p).pickUpFood(food); }
-export function bringFoodToMouth(food: any, p?: RealisticHumanPlayer): void { resolvePlayer(p).bringFoodToMouth(food); }
-export function takeBite(food: any, p?: RealisticHumanPlayer): void { resolvePlayer(p).takeBite(food); }
+export function pickUpFood(food: unknown, p?: RealisticHumanPlayer): void { resolvePlayer(p).pickUpFood(food); }
+export function bringFoodToMouth(food: unknown, p?: RealisticHumanPlayer): void { resolvePlayer(p).bringFoodToMouth(food); }
+export function takeBite(food: unknown, p?: RealisticHumanPlayer): void { resolvePlayer(p).takeBite(food); }
 export function chewFood(p?: RealisticHumanPlayer): void { resolvePlayer(p).chewFood(); }
 export function swallowFood(p?: RealisticHumanPlayer): void { resolvePlayer(p).swallowFood(); }
-export function putDownFood(food?: any, p?: RealisticHumanPlayer): void { resolvePlayer(p).putDownFood(food); }
-export function pickUpCup(cup: any, p?: RealisticHumanPlayer): void { resolvePlayer(p).pickUpCup(cup); }
-export function liftCupToMouth(cup: any, p?: RealisticHumanPlayer): void { resolvePlayer(p).liftCupToMouth(cup); }
-export function drinkFromCup(cup: any, p?: RealisticHumanPlayer): void { resolvePlayer(p).drinkFromCup(cup); }
-export function tiltCupWhileDrinking(cup: any, angle?: number, p?: RealisticHumanPlayer): void { resolvePlayer(p).tiltCupWhileDrinking(cup, angle); }
-export function lowerCup(cup: any, p?: RealisticHumanPlayer): void { resolvePlayer(p).lowerCup(cup); }
+export function putDownFood(food?: unknown, p?: RealisticHumanPlayer): void { resolvePlayer(p).putDownFood(food); }
+export function pickUpCup(cup: unknown, p?: RealisticHumanPlayer): void { resolvePlayer(p).pickUpCup(cup); }
+export function liftCupToMouth(cup: unknown, p?: RealisticHumanPlayer): void { resolvePlayer(p).liftCupToMouth(cup); }
+export function drinkFromCup(cup: unknown, p?: RealisticHumanPlayer): void { resolvePlayer(p).drinkFromCup(cup); }
+export function tiltCupWhileDrinking(cup: unknown, angle?: number, p?: RealisticHumanPlayer): void { resolvePlayer(p).tiltCupWhileDrinking(cup, angle); }
+export function lowerCup(cup: unknown, p?: RealisticHumanPlayer): void { resolvePlayer(p).lowerCup(cup); }
 export function wipeMouth(p?: RealisticHumanPlayer): void { resolvePlayer(p).wipeMouth(); }
-export function holdSpoon(spoon: any, p?: RealisticHumanPlayer): void { resolvePlayer(p).holdSpoon(spoon); }
-export function scoopFood(spoon: any, p?: RealisticHumanPlayer): void { resolvePlayer(p).scoopFood(spoon); }
-export function useFork(fork: any, p?: RealisticHumanPlayer): void { resolvePlayer(p).useFork(fork); }
-export function cutFoodWithKnife(food: any, p?: RealisticHumanPlayer): void { resolvePlayer(p).cutFoodWithKnife(food); }
-export function pourLiquid(container: any, target: any, p?: RealisticHumanPlayer): void { resolvePlayer(p).pourLiquid(container, target); }
-export function openBottle(bottle: any, p?: RealisticHumanPlayer): void { resolvePlayer(p).openBottle(bottle); }
-export function closeBottle(bottle: any, p?: RealisticHumanPlayer): void { resolvePlayer(p).closeBottle(bottle); }
+export function holdSpoon(spoon: unknown, p?: RealisticHumanPlayer): void { resolvePlayer(p).holdSpoon(spoon); }
+export function scoopFood(spoon: unknown, p?: RealisticHumanPlayer): void { resolvePlayer(p).scoopFood(spoon); }
+export function useFork(fork: unknown, p?: RealisticHumanPlayer): void { resolvePlayer(p).useFork(fork); }
+export function cutFoodWithKnife(food: unknown, p?: RealisticHumanPlayer): void { resolvePlayer(p).cutFoodWithKnife(food); }
+export function pourLiquid(container: unknown, target: unknown, p?: RealisticHumanPlayer): void { resolvePlayer(p).pourLiquid(container, target); }
+export function openBottle(bottle: unknown, p?: RealisticHumanPlayer): void { resolvePlayer(p).openBottle(bottle); }
+export function closeBottle(bottle: unknown, p?: RealisticHumanPlayer): void { resolvePlayer(p).closeBottle(bottle); }
 export function washHands(p?: RealisticHumanPlayer): void { resolvePlayer(p).washHands(); }
 
 // ============================================================================
 // 341–360. Tương tác môi trường và hành động phức hợp
 // ============================================================================
 
-export function detectNearbyObjects(radius?: number, p?: RealisticHumanPlayer): any[] { return resolvePlayer(p).detectNearbyObjects(radius); }
-export function detectObstacles(p?: RealisticHumanPlayer): any[] { return resolvePlayer(p).detectObstacles(); }
+export function detectNearbyObjects(radius?: number, p?: RealisticHumanPlayer): unknown[] { return resolvePlayer(p).detectNearbyObjects(radius); }
+export function detectObstacles(p?: RealisticHumanPlayer): unknown[] { return resolvePlayer(p).detectObstacles(); }
 export function detectGroundSurface(p?: RealisticHumanPlayer): string { return resolvePlayer(p).detectGroundSurface(); }
-export function detectInteractableObjects(p?: RealisticHumanPlayer): any[] { return resolvePlayer(p).detectInteractableObjects(); }
+export function detectInteractableObjects(p?: RealisticHumanPlayer): unknown[] { return resolvePlayer(p).detectInteractableObjects(); }
 export function calculateDistanceToTarget(target: Vec3, p?: RealisticHumanPlayer): number { return resolvePlayer(p).calculateDistanceToTarget(target); }
-export function avoidObstacle(obstacle: any, p?: RealisticHumanPlayer): void { resolvePlayer(p).avoidObstacle(obstacle); }
+export function avoidObstacle(obstacle: unknown, p?: RealisticHumanPlayer): void { resolvePlayer(p).avoidObstacle(obstacle); }
 export function findPathToTarget(target: Vec3, p?: RealisticHumanPlayer): Vec3[] { return resolvePlayer(p).findPathToTarget(target); }
-export function openWindow(window: any, p?: RealisticHumanPlayer): void { resolvePlayer(p).openWindow(window); }
-export function closeWindow(window: any, p?: RealisticHumanPlayer): void { resolvePlayer(p).closeWindow(window); }
-export function turnLightOn(light: any, p?: RealisticHumanPlayer): void { resolvePlayer(p).turnLightOn(light); }
-export function turnLightOff(light: any, p?: RealisticHumanPlayer): void { resolvePlayer(p).turnLightOff(light); }
-export function pullDrawer(drawer: any, p?: RealisticHumanPlayer): void { resolvePlayer(p).pullDrawer(drawer); }
-export function pushDrawer(drawer: any, p?: RealisticHumanPlayer): void { resolvePlayer(p).pushDrawer(drawer); }
-export function pickUpBag(bag: any, p?: RealisticHumanPlayer): void { resolvePlayer(p).pickUpBag(bag); }
-export function putOnBackpack(backpack: any, p?: RealisticHumanPlayer): void { resolvePlayer(p).putOnBackpack(backpack); }
-export function removeBackpack(backpack: any, p?: RealisticHumanPlayer): void { resolvePlayer(p).removeBackpack(backpack); }
-export function unlockDoor(door: any, key: any, p?: RealisticHumanPlayer): void { resolvePlayer(p).unlockDoor(door, key); }
-export function lockDoor(door: any, key: any, p?: RealisticHumanPlayer): void { resolvePlayer(p).lockDoor(door, key); }
+export function openWindow(window: unknown, p?: RealisticHumanPlayer): void { resolvePlayer(p).openWindow(window); }
+export function closeWindow(window: unknown, p?: RealisticHumanPlayer): void { resolvePlayer(p).closeWindow(window); }
+export function turnLightOn(light: unknown, p?: RealisticHumanPlayer): void { resolvePlayer(p).turnLightOn(light); }
+export function turnLightOff(light: unknown, p?: RealisticHumanPlayer): void { resolvePlayer(p).turnLightOff(light); }
+export function pullDrawer(drawer: unknown, p?: RealisticHumanPlayer): void { resolvePlayer(p).pullDrawer(drawer); }
+export function pushDrawer(drawer: unknown, p?: RealisticHumanPlayer): void { resolvePlayer(p).pushDrawer(drawer); }
+export function pickUpBag(bag: unknown, p?: RealisticHumanPlayer): void { resolvePlayer(p).pickUpBag(bag); }
+export function putOnBackpack(backpack: unknown, p?: RealisticHumanPlayer): void { resolvePlayer(p).putOnBackpack(backpack); }
+export function removeBackpack(backpack: unknown, p?: RealisticHumanPlayer): void { resolvePlayer(p).removeBackpack(backpack); }
+export function unlockDoor(door: unknown, key: unknown, p?: RealisticHumanPlayer): void { resolvePlayer(p).unlockDoor(door, key); }
+export function lockDoor(door: unknown, key: unknown, p?: RealisticHumanPlayer): void { resolvePlayer(p).lockDoor(door, key); }
 export function climbStairs(p?: RealisticHumanPlayer): void { resolvePlayer(p).climbStairs(); }
 export function descendStairs(p?: RealisticHumanPlayer): void { resolvePlayer(p).descendStairs(); }
 
@@ -489,7 +489,7 @@ export function descendStairs(p?: RealisticHumanPlayer): void { resolvePlayer(p)
 // ============================================================================
 
 export function initializePhysics(p?: RealisticHumanPlayer): void { resolvePlayer(p).initializePhysics(); }
-export function createPlayerCollider(p?: RealisticHumanPlayer): any { return resolvePlayer(p).createPlayerCollider(); }
+export function createPlayerCollider(p?: RealisticHumanPlayer) { return resolvePlayer(p).createPlayerCollider(); }
 export function applyGravity(deltaTime: number, p?: RealisticHumanPlayer): void { resolvePlayer(p).applyGravity(deltaTime); }
 export function applyForce(force: Vec3, p?: RealisticHumanPlayer): void { resolvePlayer(p).applyForce(force); }
 export function applyImpulse(impulse: Vec3, p?: RealisticHumanPlayer): void { resolvePlayer(p).applyImpulse(impulse); }
@@ -521,7 +521,7 @@ export function blendAnimations(p?: RealisticHumanPlayer): void { resolvePlayer(
 export function updateAnimationMixer(deltaTime: number, p?: RealisticHumanPlayer): void { resolvePlayer(p).updateAnimationMixer(deltaTime); }
 export function setAnimationSpeed(speed: number, p?: RealisticHumanPlayer): void { resolvePlayer(p).setAnimationSpeed(speed); }
 export function updateRootMotion(p?: RealisticHumanPlayer): Vec3 { return resolvePlayer(p).updateRootMotion(); }
-export function attachCamera(camera: any, p?: RealisticHumanPlayer): void { resolvePlayer(p).attachCamera(camera); }
+export function attachCamera(camera: unknown, p?: RealisticHumanPlayer): void { resolvePlayer(p).attachCamera(camera); }
 export function updateCameraFollow(deltaTime: number, p?: RealisticHumanPlayer): void { resolvePlayer(p).updateCameraFollow(deltaTime); }
 export function applyCameraSmoothing(p?: RealisticHumanPlayer): void { resolvePlayer(p).applyCameraSmoothing(); }
 export function playFootstepSound(p?: RealisticHumanPlayer): void { resolvePlayer(p).playFootstepSound(); }

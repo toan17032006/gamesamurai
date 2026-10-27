@@ -1,0 +1,46 @@
+__pycache__/
+*.pyc
+aetheria.db
+aetheria.db-shm
+aetheria.db-wal
+samurai.db
+samurai.db-shm
+samurai.db-wal
+data/aetheria.db
+data/aetheria.db-shm
+data/aetheria.db-wal
+node_modules/
+.next/
+out/
+.DS_Store
+*.png
+
+.dev-saves.json
+next-env.d.ts
+*.tsbuildinfo
+assets/extracted/
+.decl-tmp
+
+
+# Tài nguyên game (Assets) dung lượng lớn không push lên GitHub
+# 1. Các tệp texture lớn vượt ngưỡng khuyến nghị/cảnh báo 50MB của GitHub
+assets/environment/HighLandsFantasyBuildings/**/TextureMaps/*_normal.png
+assets/environment/HighLandsFantasyBuildings/Walls/WallMid/TextureMaps/T_WallMid_normal.png
+assets/environment/HighLandsFantasyBuildings/MiscProps/TextureMaps/T_Props_normal.png
+assets/environment/HighLandsFantasyBuildings/Windmill/TextureMaps/T_Windmill_normal.png
+assets/environment/HighLandsFantasyBuildings/Barracks/TextureMaps/T_Barracks_normal.png
+assets/environment/HighLandsFantasyBuildings/TownCenter/TextureMaps/T_TownCenter_normal.png
+assets/environment/HighLandsFantasyBuildings/Hut/TextureMaps/T_Hut_normal.png
+assets/environment/HighLandsFantasyBuildings/WatchTower/TextureMaps/T_WatchTower_normal.png
+assets/environment/HighLandsFantasyBuildings/Walls/Tower/TextureMaps/T_Tower_normal.png
+
+# 2. Tệp nguồn 3D và âm thanh/tài liệu thô dung lượng lớn (.wav, .blend, .pdf)
+*.blend
+*.blend1
+*.wav
+*.pdf
+
+# Thư mục nháp kiểm chứng cục bộ (log dev, probe tạm)
+.wb-tmp/
+
+engine

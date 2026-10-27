@@ -9,6 +9,7 @@ export * from './inventory.js';
 export * from './skills.js';
 export * from './progression.js';
 export * from './entities.js';
+export * from './contracts.js';
 export * from './world-objects.js';
 export * from './status-effects.js';
 export * from './skins-cosmetics.js';

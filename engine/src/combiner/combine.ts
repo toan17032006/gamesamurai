@@ -291,7 +291,7 @@ const SPATIAL_KEYWORDS = /bound|socket|attach|grip|aim|look|target|track|search|
  * Derive the spatial/physics/analytics metadata attached to every combiner.
  *
  * This is what reconnects the existing animation catalogue to the bounds,
- * transform and physics systems without changing any public combiner name.
+ * transform and physics systems without changing public combiner names.
  */
 function metadataFor(name: string, group: CombinerGroup, kind: CombinatorSpec['kind']): CombinerMetadata {
   const physicsByKeyword = PHYSICS_KEYWORDS.test(name);

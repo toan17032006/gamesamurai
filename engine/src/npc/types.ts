@@ -36,7 +36,7 @@ export interface MemoryQuery {
   tags?: string[];
   sortBy?: 'timestamp' | 'confidence' | 'weight';
   sortOrder?: 'asc' | 'desc';
-  filter?: (record: NPCRecord<any>) => boolean;
+  filter?: (record: NPCRecord<unknown>) => boolean;
 }
 
 /** Result of schema validation */
@@ -49,7 +49,7 @@ export interface ValidationResult {
 }
 
 /** Schema specification for generic validation */
-export interface ValidationSchema<T = any> {
+export interface ValidationSchema<T = unknown> {
   requiredFields?: Array<keyof T | string>;
   numericRanges?: Partial<Record<keyof T | string, { min?: number; max?: number }>>;
   allowedValues?: Partial<Record<keyof T | string, unknown[]>>;

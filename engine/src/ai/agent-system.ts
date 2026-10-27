@@ -15,7 +15,12 @@ import type {
   AgentBrainConfig,
   AgentDecision,
   AgentIdentityInput,
+  AgentNegativeLearningResult,
+  AgentNegativeSample,
+  AgentNegativeTrainingReport,
   AgentObservation,
+  AgentPreferenceLearningResult,
+  AgentPreferencePair,
   AgentSnapshot,
   AgentTrainingReport,
   AgentTrainingSample,
@@ -29,6 +34,10 @@ export interface AgentManagerStats {
   totalBeliefs: number;
   totalQEntries: number;
   totalReward: number;
+  negativeSamples: number;
+  totalPenalty: number;
+  totalAversions: number;
+  preferencePairs: number;
   archetypes: Record<AgentArchetype, number>;
 }
 
@@ -185,6 +194,53 @@ export class AgentManager {
     return reports;
   }
 
+  /** Train one agent with negative reinforcement samples. */
+  public trainNegative(
+    id: string,
+    samples: readonly AgentNegativeSample[],
+  ): AgentNegativeTrainingReport {
+    return this.requireAgent(id).trainNegativeBatch(samples);
+  }
+
+  /** Train several agents with negative samples. */
+  public trainNegativeAll(
+    samplesByAgent: Record<string, readonly AgentNegativeSample[]>,
+  ): Map<string, AgentNegativeTrainingReport> {
+    const reports = new Map<string, AgentNegativeTrainingReport>();
+    for (const [id, samples] of Object.entries(samplesByAgent)) {
+      const agent = this.agents.get(id);
+      if (!agent) continue;
+      reports.set(id, agent.trainNegativeBatch(samples));
+    }
+    return reports;
+  }
+
+  /** Teach one agent a single action preference pair. */
+  public trainPreference(
+    id: string,
+    pair: AgentPreferencePair,
+  ): AgentPreferenceLearningResult {
+    return this.requireAgent(id).learnPreference(pair);
+  }
+
+  /** Teach several agents preference pairs in one call. */
+  public trainPreferences(
+    pairsByAgent: Record<string, readonly AgentPreferencePair[]>,
+  ): Map<string, AgentPreferenceLearningResult[]> {
+    const reports = new Map<string, AgentPreferenceLearningResult[]>();
+    for (const [id, pairs] of Object.entries(pairsByAgent)) {
+      const agent = this.agents.get(id);
+      if (!agent) continue;
+      reports.set(id, agent.trainPreferenceBatch(pairs));
+    }
+    return reports;
+  }
+
+  /** Apply a negative sample directly to an existing agent. */
+  public learnNegative(id: string, sample: AgentNegativeSample): AgentNegativeLearningResult {
+    return this.requireAgent(id).learnNegative(sample);
+  }
+
   /** Serialize every agent, including its private memory repository. */
   public serializeAll(): AgentSnapshot[] {
     return this.listAgents().map((agent) => agent.serialize());
@@ -241,6 +297,10 @@ export class AgentManager {
     let totalBeliefs = 0;
     let totalQEntries = 0;
     let totalReward = 0;
+    let negativeSamples = 0;
+    let totalPenalty = 0;
+    let totalAversions = 0;
+    let preferencePairs = 0;
 
     for (const agent of this.agents.values()) {
       archetypes[agent.archetype]++;
@@ -248,6 +308,11 @@ export class AgentManager {
       totalBeliefs += agent.getBeliefCount();
       totalQEntries += agent.getQTableSize();
       totalReward += agent.getStats().totalReward;
+      const negative = agent.getNegativeStats();
+      negativeSamples += negative.samples;
+      totalPenalty += negative.totalPenalty;
+      totalAversions += negative.aversionCount;
+      preferencePairs += negative.preferencePairs;
     }
 
     return {
@@ -256,6 +321,10 @@ export class AgentManager {
       totalBeliefs,
       totalQEntries,
       totalReward,
+      negativeSamples,
+      totalPenalty,
+      totalAversions,
+      preferencePairs,
       archetypes,
     };
   }

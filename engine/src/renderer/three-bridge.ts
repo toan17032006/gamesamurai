@@ -9,9 +9,11 @@ import * as THREE from 'three';
 import type {
   GeometryBuffers,
   VertexBufferDescriptor,
+  VertexAttributeDescriptor,
   IndexBufferDescriptor,
   TransformNode,
-  Vector3D
+  Vector3D,
+  Matrix4x4
 } from '../types/geometry.types.js';
 import type { SpatialBoundsReport } from '../types/spatial.types.js';
 import type { PhysicsBody } from '../types/physics.types.js';
@@ -55,12 +57,12 @@ export class ThreeBridge {
       geom.computeBoundingSphere();
 
       return engineOk(geom, { vertexCount: vertexBuf.vertexCount });
-    } catch (err: any) {
+    } catch (err: unknown) {
       return engineErr({
         code: 'GEOMETRY_CONVERSION_ERROR',
-        message: `Failed to convert engine geometry to Three.js: ${err.message}`,
+        message: `Failed to convert engine geometry to Three.js: ${err instanceof Error ? err.message : String(err)}`,
         subsystem: 'ThreeBridge',
-        stack: err.stack
+        stack: err instanceof Error ? err.stack : undefined
       });
     }
   }
@@ -83,7 +85,7 @@ export class ThreeBridge {
     const vertexCount = posAttr.count;
     const posArray = new Float32Array(posAttr.array);
 
-    const attributes: Record<string, any> = {
+    const attributes: Record<string, VertexAttributeDescriptor> = {
       position: {
         semantic: 'position',
         name: 'position',
@@ -167,8 +169,8 @@ export class ThreeBridge {
       position: { x: obj.position.x, y: obj.position.y, z: obj.position.z },
       rotation: { x: obj.quaternion.x, y: obj.quaternion.y, z: obj.quaternion.z, w: obj.quaternion.w },
       scale: { x: obj.scale.x, y: obj.scale.y, z: obj.scale.z },
-      localMatrix: { elements: obj.matrix.toArray() as any },
-      worldMatrix: { elements: obj.matrixWorld.toArray() as any },
+      localMatrix: { elements: obj.matrix.toArray() as Matrix4x4['elements'] },
+      worldMatrix: { elements: obj.matrixWorld.toArray() as Matrix4x4['elements'] },
       layerMask: obj.layers.mask,
       flags: {
         visible: obj.visible,

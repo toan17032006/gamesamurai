@@ -131,12 +131,12 @@ export function applyPivotResult(
   try {
     const result = applyPivot(obj, spec);
     return engineOk(result, { mode: spec.mode });
-  } catch (err: any) {
+  } catch (err: unknown) {
     return engineErr({
       code: 'PIVOT_APPLY_FAILED',
-      message: `Failed to apply pivot: ${err.message}`,
+      message: `Failed to apply pivot: ${err instanceof Error ? err.message : String(err)}`,
       subsystem: 'PivotAdjuster',
-      stack: err.stack
+      stack: err instanceof Error ? err.stack : undefined
     });
   }
 }

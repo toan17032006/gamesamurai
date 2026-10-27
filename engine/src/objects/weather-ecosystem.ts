@@ -20,7 +20,7 @@ export interface WindVector {
   gustFactor: number;
 }
 
-export interface BiomeZoneConfig<TSpawn = any> {
+export interface BiomeZoneConfig<TSpawn = unknown> {
   id: string;
   name: string;
   temperature: number; // Celsius
@@ -83,7 +83,7 @@ export class WeatherZone<TIntensity = number> {
 /**
  * Biome Descriptor describing environmental conditions and spawn tables.
  */
-export class BiomeDescriptor<TSpawn = any> {
+export class BiomeDescriptor<TSpawn = unknown> {
   public config: BiomeZoneConfig<TSpawn>;
 
   constructor(config: BiomeZoneConfig<TSpawn>) {

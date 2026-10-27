@@ -166,7 +166,7 @@ export class WorldLifecycleSubsystem {
   }
 
   // 021–040. Quản lý vật thể trong thế giới
-  public createWorldObject<T = any>(type: string): WorldObject<T> {
+  public createWorldObject<T = unknown>(type: string): WorldObject<T> {
     const id = `obj_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
     const obj: WorldObject<T> = {
       id,
@@ -207,7 +207,7 @@ export class WorldLifecycleSubsystem {
     if (obj) obj.position = { ...position };
   }
 
-  public setObjectRotation(object: WorldObject | string, rotation: any): void {
+  public setObjectRotation(object: WorldObject | string, rotation: WorldObject['rotation']): void {
     const obj = typeof object === 'string' ? this.objects.get(object) : object;
     if (obj) obj.rotation = { ...rotation };
   }
@@ -219,7 +219,7 @@ export class WorldLifecycleSubsystem {
     }
   }
 
-  public setObjectTransform(object: WorldObject | string, transform: { position?: Vec3; rotation?: any; scale?: Vec3 }): void {
+  public setObjectTransform(object: WorldObject | string, transform: { position?: Vec3; rotation?: WorldObject['rotation']; scale?: Vec3 }): void {
     const obj = typeof object === 'string' ? this.objects.get(object) : object;
     if (obj) {
       if (transform.position) obj.position = { ...transform.position };
@@ -228,7 +228,7 @@ export class WorldLifecycleSubsystem {
     }
   }
 
-  public getObjectTransform(object: WorldObject | string): { position: Vec3; rotation: any; scale: Vec3 } {
+  public getObjectTransform(object: WorldObject | string): { position: Vec3; rotation: WorldObject['rotation']; scale: Vec3 } {
     const obj = typeof object === 'string' ? this.objects.get(object) : object;
     return obj ? { position: { ...obj.position }, rotation: { ...obj.rotation }, scale: { ...obj.scale } } : { position: { x: 0, y: 0, z: 0 }, rotation: { x: 0, y: 0, z: 0, w: 1 }, scale: { x: 1, y: 1, z: 1 } };
   }
@@ -257,7 +257,7 @@ export class WorldLifecycleSubsystem {
   }
 
   /** Dựng ma trận 4×4 (row-major) từ vị trí, xoay quaternion và tỉ lệ. */
-  private composeMatrix(position: Vec3, rotation: any, scale: Vec3): number[] {
+  private composeMatrix(position: Vec3, rotation: WorldObject['rotation'], scale: Vec3): number[] {
     const qx = Number(rotation?.x ?? 0);
     const qy = Number(rotation?.y ?? 0);
     const qz = Number(rotation?.z ?? 0);
@@ -366,8 +366,8 @@ export class WorldLifecycleSubsystem {
     return JSON.stringify(obj ?? {});
   }
 
-  public deserializeWorldObject(data: string | any): WorldObject {
-    const parsed = typeof data === 'string' ? JSON.parse(data) : data;
+  public deserializeWorldObject(data: string | WorldObject): WorldObject {
+    const parsed = (typeof data === 'string' ? JSON.parse(data) : data) as WorldObject;
     this.objects.set(parsed.id, parsed);
     return parsed;
   }
