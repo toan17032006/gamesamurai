@@ -43,4 +43,7 @@ assets/environment/HighLandsFantasyBuildings/Walls/Tower/TextureMaps/T_Tower_nor
 # Thư mục nháp kiểm chứng cục bộ (log dev, probe tạm)
 .wb-tmp/
 
-engine
+assets
+scripts
+tests
+node_modules
